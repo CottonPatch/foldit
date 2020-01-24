@@ -1,0 +1,1703 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Foldit:Script xmlns:Foldit="http://fold.it/scriptlog">
+<Foldit:Head>
+<Foldit:ScriptName>Tvdl enhanced DRW 3.0.2</Foldit:ScriptName>
+<Foldit:ScriptDesc>Small bugfix and implemented a suggestion, tx Loc</Foldit:ScriptDesc>
+<Foldit:MacroID>49233</Foldit:MacroID>
+<Foldit:MacroRevisionID>203349</Foldit:MacroRevisionID>
+<Foldit:ParentID>0</Foldit:ParentID>
+<Foldit:ParentRevisionID>0</Foldit:ParentRevisionID>
+</Foldit:Head>
+<Foldit:ScriptOutput>
+Computing puzzle properties
+Mutables found
+Design puzzle
+Puzzle is a symmetry puzzle or has bonuses
+Computing Active Subscores
+Active subscore: Clashing
+Active subscore: Pairwise
+Active subscore: Packing
+Active subscore: Hiding
+Active subscore: Bonding
+Active subscore: Ideality
+Active subscore: Backbone
+Active subscore: Sidechain
+Active subscore: Reference
+Setting default mutate options
+Active slot 4 is total
+Active slot 5 is loctotal
+Active slot 6 is Clashing
+Active slot 7 is Pairwise
+Active slot 8 is Packing
+Active slot 9 is Hiding
+Active slot 10 is Bonding
+Active slot 11 is Ideality
+Active slot 12 is Backbone
+Active slot 13 is Sidechain
+Mutate options are now:
+Mutates after qStab, after Fuzing.
+Mutate area is Rebuild part and surroundings
+Tvdl enhanced DRW 3.0.2 Based on rav4pl DRW 3.4
+Length of rebuild: 2 to 4
+rebuild area: 1-40
+Nr of rebuild each try: 15
+Convert everything to loops
+Clear retry blockings if gain raises above 40 pts
+Initial shake after rebuild with CI=0.31
+Nr of full cycles: 40
+Main cycle nr 	1
+Searching worst scoring parts of len 2
+20-21 26-27 25-26 5-6 
+Deeprebuild started at score: 12231.38
+DR 1.2.1 20-21 15 times. Wait... Current score: 12231.38
+Gained another 0.59 pts.
+Slotlist:  4=5=11  6  7=8=10=13  9  12
+Stabilized score: 12231.97 from slot 4(total)
+Stabilized score: 12212.48 from slot 6(Clashing)
+Stabilized score: 12225.807 from slot 7(Pairwise)
+Stabilized score: 12207.096 from slot 9(Hiding)
+Stabilized score: 12229.048 from slot 12(Backbone)
+Fuzing best position.
+Gained another 0.451 pts.
+Gain from slots 	 4=5=11(RB4)
+DR 1.2.2 26-27 15 times. Wait... Current score: 12232.422
+Slotlist:  4=8  5=13  6=9  7  10  11  12
+Stabilized score: 12231.527 from slot 4(total)
+Stabilized score: 12230.372 from slot 5(loctotal)
+Stabilized score: 12226.919 from slot 6(Clashing)
+Stabilized score: 12227.63 from slot 7(Pairwise)
+Stabilized score: 12189.098 from slot 10(Bonding)
+Stabilized score: 12224.077 from slot 11(Ideality)
+Stabilized score: 12230.026 from slot 12(Backbone)
+Fuzing best position.
+Gained another 0.475 pts.
+Gained another 0.444 pts.
+Gain from slots 	 4=8(RB3)
+DR 1.2.3 25-26 15 times. Wait... Current score: 12233.341
+Slotlist:  4=5=11=12  6  7  8  9  10  13
+Stabilized score: 12224.893 from slot 4(total)
+Stabilized score: 12067.35 from slot 6(Clashing)
+Stabilized score: 12227.245 from slot 7(Pairwise)
+Stabilized score: 9830.647 from slot 8(Packing)
+Gained another 1.94 pts.
+Stabilized score: 12235.281 from slot 9(Hiding)
+Stabilized score: 12204.858 from slot 10(Bonding)
+Stabilized score: 12224.084 from slot 13(Sidechain)
+Fuzing best position.
+Gained another 1.124 pts.
+Gain from slots 	 9(RB3)
+DR 1.2.4 5-6 15 times. Wait... Current score: 12236.406
+Slotlist:  4=5=7  6  8  9  10  11=12  13
+Stabilized score: 12232.531 from slot 4(total)
+Stabilized score: 12225.145 from slot 6(Clashing)
+Stabilized score: 12222.367 from slot 8(Packing)
+Stabilized score: 11895.764 from slot 9(Hiding)
+Stabilized score: 12217.164 from slot 10(Bonding)
+Stabilized score: 12228.198 from slot 11(Ideality)
+Stabilized score: 12224.518 from slot 13(Sidechain)
+Fuzing best position.
+Deeprebuild gain: 5.025
+Searching worst scoring parts of len 3
+25-27 26-28 20-22 24-26 
+Deeprebuild started at score: 12236.406
+DR 1.3.1 25-27 15 times. Wait... Current score: 12236.406
+Slotlist:  4=5=11  6=12  7=10  8  9=13
+Stabilized score: 12225.283 from slot 4(total)
+Stabilized score: 12223.473 from slot 6(Clashing)
+Stabilized score: 12234.641 from slot 7(Pairwise)
+Gained another 0.918 pts.
+Stabilized score: 12237.324 from slot 8(Packing)
+Stabilized score: 12222.425 from slot 9(Hiding)
+Fuzing best position.
+Gained another 0.232 pts.
+Gain from slots 	 8(RB14)
+DR 1.3.2 26-28 15 times. Wait... Current score: 12237.557
+Slotlist:  4=5=7=11  6=12  8=10  9  13
+Stabilized score: 12235.856 from slot 4(total)
+Stabilized score: 12234.213 from slot 6(Clashing)
+Stabilized score: 8968.746 from slot 8(Packing)
+Stabilized score: 12233.068 from slot 9(Hiding)
+Stabilized score: 11752.411 from slot 13(Sidechain)
+Fuzing best position.
+DR 1.3.3 20-22 15 times. Wait... Current score: 12237.557
+Slotlist:  4=5=9=12  6=7  8  10  11  13
+Stabilized score: 12074.134 from slot 4(total)
+Stabilized score: 11867.833 from slot 6(Clashing)
+Stabilized score: 11742.405 from slot 8(Packing)
+Stabilized score: 11894.849 from slot 10(Bonding)
+Stabilized score: 11892.765 from slot 11(Ideality)
+Stabilized score: 12075.254 from slot 13(Sidechain)
+DR 1.3.4 24-26 15 times. Wait... Current score: 12237.557
+Slotlist:  4=10=11=12  5  6  7  8  9  13
+Stabilized score: 12232.602 from slot 4(total)
+Stabilized score: 12221.391 from slot 5(loctotal)
+Stabilized score: 11833.114 from slot 6(Clashing)
+Stabilized score: 11839.522 from slot 7(Pairwise)
+Stabilized score: 4678.097 from slot 8(Packing)
+Stabilized score: 12010.117 from slot 9(Hiding)
+Stabilized score: 11814.785 from slot 13(Sidechain)
+Fuzing best position.
+Gained another 3.354 pts.
+Gained another 0.292 pts.
+Gain from slots 	 4=10=11=12(RB13)
+Deeprebuild gain: 4.798
+Searching worst scoring parts of len 4
+26-29 24-27 25-28 37-40 
+Deeprebuild started at score: 12241.204
+DR 1.4.1 26-29 15 times. Wait... Current score: 12241.204
+Slotlist:  4=5=6=10  7  8  9  11=12  13
+Stabilized score: 12171.22 from slot 4(total)
+Stabilized score: 12166.429 from slot 7(Pairwise)
+Stabilized score: 9781.479 from slot 8(Packing)
+Stabilized score: 11206.369 from slot 9(Hiding)
+Stabilized score: 11106.904 from slot 11(Ideality)
+Stabilized score: 10538.961 from slot 13(Sidechain)
+DR 1.4.2 24-27 15 times. Wait... Current score: 12241.204
+Slotlist:  4=5=6=11  7  8  9=12  10  13
+Gained another 4.553 pts.
+Stabilized score: 12245.757 from slot 4(total)
+Stabilized score: 12055.75 from slot 7(Pairwise)
+Stabilized score: 6341.259 from slot 8(Packing)
+Stabilized score: 12214.062 from slot 9(Hiding)
+Stabilized score: 12241.4 from slot 10(Bonding)
+Stabilized score: 11489.319 from slot 13(Sidechain)
+Fuzing best position.
+Gained another 1.669 pts.
+Gain from slots 	 4=5=6=11(RB11)
+DR 1.4.3 25-28 15 times. Wait... Current score: 12247.427
+Slotlist:  4=5=6=11=12  7  8  9  10  13
+Stabilized score: 12235.825 from slot 4(total)
+Stabilized score: 8157.593 from slot 7(Pairwise)
+Stabilized score: 6465.677 from slot 8(Packing)
+Stabilized score: 11371.054 from slot 9(Hiding)
+Stabilized score: 11685.144 from slot 10(Bonding)
+Stabilized score: 11092.282 from slot 13(Sidechain)
+Fuzing best position.
+DR 1.4.4 37-40 15 times. Wait... Current score: 12247.427
+Slotlist:  4=5=10  6=13  7  8  9=11  12
+Stabilized score: 12085.249 from slot 4(total)
+Stabilized score: 12152.084 from slot 6(Clashing)
+Stabilized score: 11997.185 from slot 7(Pairwise)
+Stabilized score: 10276.049 from slot 8(Packing)
+Stabilized score: 11916.431 from slot 9(Hiding)
+Stabilized score: 11752.064 from slot 12(Backbone)
+Deeprebuild gain: 6.223
+Main cycle nr 	2
+Searching worst scoring parts of len 2
+Skipping
+5-6 20-21 25-26 26-27 
+Number of skips: 4
+37-38 39-40 6-7 36-37 27-28 
+Deeprebuild started at score: 12247.427
+DR 2.2.1 37-38 15 times. Wait... Current score: 12247.427
+Slotlist:  4=5  6  7=12  8  9  10  11  13
+Gained another 2.29 pts.
+Stabilized score: 12249.717 from slot 4(total)
+Stabilized score: 12245.428 from slot 6(Clashing)
+Stabilized score: 12245.545 from slot 7(Pairwise)
+Stabilized score: 12215.834 from slot 8(Packing)
+Stabilized score: 12243.312 from slot 9(Hiding)
+Stabilized score: 12237.964 from slot 10(Bonding)
+Stabilized score: 12242.614 from slot 11(Ideality)
+Stabilized score: 12247.336 from slot 13(Sidechain)
+Fuzing best position.
+Gain from slots 	 4=5(RB12)
+DR 2.2.2 39-40 15 times. Wait... Current score: 12249.717
+Slotlist:  4=5=7=10  6  8  9  11  12  13
+Stabilized score: 12247.598 from slot 4(total)
+Stabilized score: 12086.936 from slot 6(Clashing)
+Stabilized score: 12180.082 from slot 8(Packing)
+Stabilized score: 12023.459 from slot 9(Hiding)
+Stabilized score: 12039.923 from slot 11(Ideality)
+Stabilized score: 12158.098 from slot 12(Backbone)
+Stabilized score: 12217.234 from slot 13(Sidechain)
+Fuzing best position.
+DR 2.2.3 6-7 15 times. Wait... Current score: 12249.717
+Slotlist:  4=5=6=10  7  8=13  9  11  12
+Stabilized score: 12242.098 from slot 4(total)
+Stabilized score: 11936.785 from slot 7(Pairwise)
+Stabilized score: 12167.861 from slot 8(Packing)
+Stabilized score: 12217.036 from slot 9(Hiding)
+Stabilized score: 12235.39 from slot 11(Ideality)
+Stabilized score: 12229.355 from slot 12(Backbone)
+Fuzing best position.
+DR 2.2.4 36-37 15 times. Wait... Current score: 12249.717
+Gained another 2.22 pts.
+Gained another 1.254 pts.
+Slotlist:  4=5=12  6  7=10  8  9  11  13
+Gained another 1.402 pts.
+Stabilized score: 12254.594 from slot 4(total)
+Stabilized score: 12252.656 from slot 6(Clashing)
+Gained another 2.157 pts.
+Stabilized score: 12256.752 from slot 7(Pairwise)
+Stabilized score: 12212.537 from slot 8(Packing)
+Stabilized score: 12245.57 from slot 9(Hiding)
+Stabilized score: 12254.073 from slot 11(Ideality)
+Stabilized score: 12232.515 from slot 13(Sidechain)
+Fuzing best position.
+Gain from slots 	 7=10(RB5)
+DR 2.2.5 27-28 15 times. Wait... Current score: 12256.752
+Slotlist:  4=5=7=11=12=13  6=10  8  9
+Stabilized score: 12254.781 from slot 4(total)
+Stabilized score: 12253.507 from slot 6(Clashing)
+Stabilized score: 12254.01 from slot 8(Packing)
+Stabilized score: 11796.168 from slot 9(Hiding)
+Fuzing best position.
+Gained another 0.312 pts.
+Gained another 0.443 pts.
+Gain from slots 	 4=5=7=11=12=13(RB1)
+Deeprebuild gain: 10.082
+Searching worst scoring parts of len 3
+Skipping
+20-22 24-26 25-27 26-28 
+Number of skips: 4
+19-21 5-7 38-40 27-29 4-6 
+Deeprebuild started at score: 12257.509
+DR 2.3.1 19-21 15 times. Wait... Current score: 12257.509
+Slotlist:  4=5=12  6=13  7  8  9  10  11
+Stabilized score: 12179.594 from slot 4(total)
+Stabilized score: 12170.588 from slot 6(Clashing)
+Stabilized score: 11104.927 from slot 7(Pairwise)
+Stabilized score: 11830.107 from slot 8(Packing)
+Stabilized score: 12132.973 from slot 9(Hiding)
+Stabilized score: 11994.461 from slot 10(Bonding)
+Stabilized score: 12126.475 from slot 11(Ideality)
+DR 2.3.2 5-7 15 times. Wait... Current score: 12257.509
+Slotlist:  4=5=11=12  6  7=8  9  10  13
+Stabilized score: 11987.506 from slot 4(total)
+Stabilized score: 12116.247 from slot 6(Clashing)
+Stabilized score: 11883.142 from slot 7(Pairwise)
+Stabilized score: 12140.353 from slot 9(Hiding)
+Gained another 5.909 pts.
+Stabilized score: 12263.418 from slot 10(Bonding)
+Stabilized score: 11681.782 from slot 13(Sidechain)
+Fuzing best position.
+Gained another 0.401 pts.
+Gained another 0.467 pts.
+Gain from slots 	 10(RB14)
+DR 2.3.3 38-40 15 times. Wait... Current score: 12264.287
+Slotlist:  4=5=12  6  7=13  8  9  10  11
+Stabilized score: 12177.677 from slot 4(total)
+Stabilized score: 12051.232 from slot 6(Clashing)
+Stabilized score: 12028.967 from slot 7(Pairwise)
+Stabilized score: 11979.52 from slot 8(Packing)
+Stabilized score: 11912.255 from slot 9(Hiding)
+Stabilized score: 12071.595 from slot 10(Bonding)
+Stabilized score: 11836.836 from slot 11(Ideality)
+DR 2.3.4 27-29 15 times. Wait... Current score: 12264.287
+Slotlist:  4=5=6=7=11=12  8  9  10=13
+Stabilized score: 12162.697 from slot 4(total)
+Stabilized score: 7784.589 from slot 8(Packing)
+Stabilized score: 10998.161 from slot 9(Hiding)
+Stabilized score: 12177.407 from slot 10(Bonding)
+DR 2.3.5 4-6 15 times. Wait... Current score: 12264.287
+Slotlist:  4=5=6=11=12  7  8=13  9  10
+Stabilized score: 12056.732 from slot 4(total)
+Stabilized score: 12007.889 from slot 7(Pairwise)
+Stabilized score: 12132.28 from slot 8(Packing)
+Stabilized score: 11744.094 from slot 9(Hiding)
+Stabilized score: 12018.529 from slot 10(Bonding)
+Deeprebuild gain: 6.777
+Searching worst scoring parts of len 4
+Skipping
+24-27 25-28 26-29 37-40 
+Number of skips: 4
+20-23 23-26 4-7 19-22 5-8 
+Deeprebuild started at score: 12264.287
+DR 2.4.1 20-23 15 times. Wait... Current score: 12264.287
+Slotlist:  4=5=6=12=13  7  8  9  10  11
+Stabilized score: 12120.676 from slot 4(total)
+Stabilized score: 10292.384 from slot 7(Pairwise)
+Stabilized score: 11992.219 from slot 8(Packing)
+Stabilized score: 11727.312 from slot 9(Hiding)
+Stabilized score: 11594.025 from slot 10(Bonding)
+Stabilized score: 12126.716 from slot 11(Ideality)
+DR 2.4.2 23-26 15 times. Wait... Current score: 12264.287
+Slotlist:  4=5=11=12  6  7=10  8  9  13
+Stabilized score: 12199.891 from slot 4(total)
+Stabilized score: 11714.171 from slot 6(Clashing)
+Stabilized score: 12241.13 from slot 7(Pairwise)
+Stabilized score: 9132.773 from slot 8(Packing)
+Stabilized score: 11517.347 from slot 9(Hiding)
+Stabilized score: 11709.846 from slot 13(Sidechain)
+Fuzing best position.
+DR 2.4.3 4-7 15 times. Wait... Current score: 12264.287
+Slotlist:  4  5=12  6  7=10  8  9=11  13
+Stabilized score: 11811.343 from slot 4(total)
+Stabilized score: 12054.793 from slot 5(loctotal)
+Stabilized score: 12020.22 from slot 6(Clashing)
+Stabilized score: 11741.68 from slot 7(Pairwise)
+Stabilized score: 11948.505 from slot 8(Packing)
+Stabilized score: 12096.664 from slot 9(Hiding)
+Stabilized score: 12044.903 from slot 13(Sidechain)
+DR 2.4.4 19-22 15 times. Wait... Current score: 12264.287
+Slotlist:  4=5=6=9  7=10  8  11  12  13
+Stabilized score: 12173.377 from slot 4(total)
+Stabilized score: 12034.513 from slot 7(Pairwise)
+Stabilized score: 10760.445 from slot 8(Packing)
+Stabilized score: 11873.643 from slot 11(Ideality)
+Stabilized score: 12172.05 from slot 12(Backbone)
+Stabilized score: 11811.4 from slot 13(Sidechain)
+DR 2.4.5 5-8 15 times. Wait... Current score: 12264.287
+Slotlist:  4=5=12  6  7=10  8  9  11  13
+Stabilized score: 11935.004 from slot 4(total)
+Stabilized score: 11378.952 from slot 6(Clashing)
+Stabilized score: 11915.15 from slot 7(Pairwise)
+Stabilized score: 9903.992 from slot 8(Packing)
+Stabilized score: 11761.689 from slot 9(Hiding)
+Stabilized score: 12262.524 from slot 11(Ideality)
+Stabilized score: 11990.603 from slot 13(Sidechain)
+Fuzing best position.
+Gained another 0.362 pts.
+Gained another 1.566 pts.
+Gain from slots 	 11(RB8)
+Deeprebuild gain: 1.929
+Main cycle nr 	3
+Searching worst scoring parts of len 2
+Skipping
+5-6 6-7 20-21 25-26 26-27 27-28 36-37 
+37-38 39-40 
+Number of skips: 9
+19-20 21-22 1-2 28-29 11-12 2-3 
+Deeprebuild started at score: 12266.216
+DR 3.2.1 19-20 15 times. Wait... Current score: 12266.216
+Gained another 2.542 pts.
+Gained another 0.602 pts.
+Slotlist:  4=5=7  6=11  8=12  9  10  13
+Stabilized score: 12269.361 from slot 4(total)
+Stabilized score: 12267.269 from slot 6(Clashing)
+Stabilized score: 12268.494 from slot 8(Packing)
+Stabilized score: 12260.554 from slot 9(Hiding)
+Stabilized score: 12268.456 from slot 10(Bonding)
+Stabilized score: 12268.532 from slot 13(Sidechain)
+Fuzing best position.
+Gained another 1.262 pts.
+Gained another 0.69 pts.
+Gain from slots 	 4=5=7(RB3)
+DR 3.2.2 21-22 15 times. Wait... Current score: 12271.314
+Slotlist:  4=5=11=12  6  7=13  8  9  10
+Stabilized score: 12264.529 from slot 4(total)
+Stabilized score: 11955.482 from slot 6(Clashing)
+Stabilized score: 12231.171 from slot 7(Pairwise)
+Stabilized score: 12253.66 from slot 8(Packing)
+Stabilized score: 11373.124 from slot 9(Hiding)
+Stabilized score: 12229.131 from slot 10(Bonding)
+Fuzing best position.
+DR 3.2.3 1-2 15 times. Wait... Current score: 12271.314
+Slotlist:  4=5  6=9=13  7  8  10=11  12
+Stabilized score: 12211.751 from slot 4(total)
+Stabilized score: 12122.613 from slot 6(Clashing)
+Stabilized score: 12179.972 from slot 7(Pairwise)
+Stabilized score: 12157.747 from slot 8(Packing)
+Stabilized score: 12205.944 from slot 10(Bonding)
+Stabilized score: 12188.971 from slot 12(Backbone)
+DR 3.2.4 28-29 15 times. Wait... Current score: 12271.314
+Slotlist:  4=5=7=10=11=13  6=12  8  9
+Stabilized score: 12267.095 from slot 4(total)
+Stabilized score: 12263.788 from slot 6(Clashing)
+Stabilized score: 10463.862 from slot 8(Packing)
+Stabilized score: 11166.639 from slot 9(Hiding)
+Fuzing best position.
+DR 3.2.5 11-12 15 times. Wait... Current score: 12271.314
+Gained another 0.663 pts.
+Slotlist:  4=5=11  6=12  7=10  8  9  13
+Stabilized score: 12271.977 from slot 4(total)
+Gained another 0.052 pts.
+Stabilized score: 12272.03 from slot 6(Clashing)
+Stabilized score: 12253.09 from slot 7(Pairwise)
+Stabilized score: 12254.134 from slot 8(Packing)
+Stabilized score: 12264.66 from slot 9(Hiding)
+Stabilized score: 12257.82 from slot 13(Sidechain)
+Fuzing best position.
+Gained another 0.953 pts.
+Gained another 0.399 pts.
+Gain from slots 	 6=12(RB15)
+DR 3.2.6 2-3 15 times. Wait... Current score: 12273.383
+Gained another 0.808 pts.
+Gained another 0.23 pts.
+Slotlist:  4=11  5  6=12  7=10  8  9=13
+Gained another 0.802 pts.
+Stabilized score: 12275.225 from slot 4(total)
+Stabilized score: 12275.086 from slot 5(loctotal)
+Stabilized score: 12274.471 from slot 6(Clashing)
+Stabilized score: 12254.629 from slot 7(Pairwise)
+Stabilized score: 11999.695 from slot 8(Packing)
+Stabilized score: 12134.185 from slot 9(Hiding)
+Fuzing best position.
+Gained another 0.402 pts.
+Gain from slots 	 4=11(RB3)
+Deeprebuild gain: 9.411
+Searching worst scoring parts of len 3
+25-27 26-28 24-26 20-22 19-21 5-7 
+Deeprebuild started at score: 12275.627
+DR 3.3.1 25-27 15 times. Wait... Current score: 12275.627
+Slotlist:  4=8=10  5=11=12  6  7  9=13
+Stabilized score: 12270.653 from slot 4(total)
+Stabilized score: 12263.405 from slot 5(loctotal)
+Stabilized score: 11962.711 from slot 6(Clashing)
+Stabilized score: 12243.88 from slot 7(Pairwise)
+Stabilized score: 9414.906 from slot 9(Hiding)
+Fuzing best position.
+DR 3.3.2 26-28 15 times. Wait... Current score: 12275.627
+Slotlist:  4  5=10=12  6  7  8  9  11  13
+Stabilized score: 12253.975 from slot 4(total)
+Stabilized score: 12241.757 from slot 5(loctotal)
+Stabilized score: 12057.392 from slot 6(Clashing)
+Stabilized score: 12262.234 from slot 7(Pairwise)
+Stabilized score: 5794.887 from slot 8(Packing)
+Stabilized score: 11271.571 from slot 9(Hiding)
+Stabilized score: 11772.725 from slot 11(Ideality)
+Stabilized score: 11768.391 from slot 13(Sidechain)
+Fuzing best position.
+DR 3.3.3 24-26 15 times. Wait... Current score: 12275.627
+Slotlist:  4=5=7=10=11=12  6  8  9  13
+Stabilized score: 12264.299 from slot 4(total)
+Stabilized score: 11867.337 from slot 6(Clashing)
+Stabilized score: 9516.223 from slot 8(Packing)
+Stabilized score: 12048.005 from slot 9(Hiding)
+Stabilized score: 12273.045 from slot 13(Sidechain)
+Fuzing best position.
+DR 3.3.4 20-22 15 times. Wait... Current score: 12275.627
+Slotlist:  4=5=12  6=10  7=11  8  9  13
+Stabilized score: 12113.571 from slot 4(total)
+Stabilized score: 11919.278 from slot 6(Clashing)
+Stabilized score: 11911.094 from slot 7(Pairwise)
+Stabilized score: 11592.363 from slot 8(Packing)
+Stabilized score: 10063.8 from slot 9(Hiding)
+Gained another 1.06 pts.
+Stabilized score: 12276.688 from slot 13(Sidechain)
+Fuzing best position.
+Gained another 4.545 pts.
+Gain from slots 	 13(RB9)
+DR 3.3.5 19-21 15 times. Wait... Current score: 12281.234
+Slotlist:  4=5  6=9  7=10  8  11=12  13
+Stabilized score: 12182.018 from slot 4(total)
+Stabilized score: 12191.226 from slot 6(Clashing)
+Stabilized score: 12248.999 from slot 7(Pairwise)
+Stabilized score: 6760.276 from slot 8(Packing)
+Stabilized score: 12036.546 from slot 11(Ideality)
+Stabilized score: 10982.68 from slot 13(Sidechain)
+DR 3.3.6 5-7 15 times. Wait... Current score: 12281.234
+Slotlist:  4=5=11=12  6=9  7=10  8  13
+Stabilized score: 12015.249 from slot 4(total)
+Stabilized score: 12121.413 from slot 6(Clashing)
+Stabilized score: 11853.276 from slot 7(Pairwise)
+Stabilized score: 11925.95 from slot 8(Packing)
+Stabilized score: 11881.466 from slot 13(Sidechain)
+Deeprebuild gain: 5.606
+Searching worst scoring parts of len 4
+24-27 26-29 25-28 37-40 23-26 20-23 
+Deeprebuild started at score: 12281.234
+DR 3.4.1 24-27 15 times. Wait... Current score: 12281.234
+Slotlist:  4=5=6  7=8  9=11  10=12  13
+Stabilized score: 12247.807 from slot 4(total)
+Stabilized score: 2378.21 from slot 7(Pairwise)
+Stabilized score: 11903.924 from slot 9(Hiding)
+Stabilized score: 9892.408 from slot 10(Bonding)
+Stabilized score: 2361.414 from slot 13(Sidechain)
+Fuzing best position.
+DR 3.4.2 26-29 15 times. Wait... Current score: 12281.234
+Slotlist:  4=5=6=7=11=12  8  9  10  13
+Stabilized score: 12183.066 from slot 4(total)
+Stabilized score: 11031.844 from slot 8(Packing)
+Stabilized score: 10451.746 from slot 9(Hiding)
+Stabilized score: 11669.241 from slot 10(Bonding)
+Stabilized score: 12058.078 from slot 13(Sidechain)
+DR 3.4.3 25-28 15 times. Wait... Current score: 12281.234
+Slotlist:  4  5=6=11=12  7=10  8  9  13
+Stabilized score: 12272.702 from slot 4(total)
+Stabilized score: 12274.709 from slot 5(loctotal)
+Stabilized score: 9959.463 from slot 7(Pairwise)
+Stabilized score: 7153.091 from slot 8(Packing)
+Stabilized score: 11472.182 from slot 9(Hiding)
+Stabilized score: 9906.453 from slot 13(Sidechain)
+Fuzing best position.
+DR 3.4.4 37-40 15 times. Wait... Current score: 12281.234
+Slotlist:  4=5=7=12  6  8=11  9  10  13
+Stabilized score: 12055.298 from slot 4(total)
+Stabilized score: 12070.353 from slot 6(Clashing)
+Stabilized score: 11928.399 from slot 8(Packing)
+Stabilized score: 12048.958 from slot 9(Hiding)
+Stabilized score: 12111 from slot 10(Bonding)
+Stabilized score: 11998.742 from slot 13(Sidechain)
+DR 3.4.5 23-26 15 times. Wait... Current score: 12281.234
+Slotlist:  4=5=6=12  7  8  9=11  10  13
+Stabilized score: 12174.139 from slot 4(total)
+Stabilized score: 11413.233 from slot 7(Pairwise)
+Stabilized score: 11244.985 from slot 8(Packing)
+Stabilized score: 11794.782 from slot 9(Hiding)
+Stabilized score: 9771.742 from slot 10(Bonding)
+Stabilized score: 11993.028 from slot 13(Sidechain)
+DR 3.4.6 20-23 15 times. Wait... Current score: 12281.234
+Slotlist:  4=5=6=10=11=12  7  8  9  13
+Stabilized score: 11924.457 from slot 4(total)
+Stabilized score: 11007.066 from slot 7(Pairwise)
+Stabilized score: 10993.607 from slot 8(Packing)
+Stabilized score: 11751.542 from slot 9(Hiding)
+Stabilized score: 11938.352 from slot 13(Sidechain)
+Deeprebuild gain: 0
+Main cycle nr 	4
+Searching worst scoring parts of len 2
+Skipping
+2-3 
+Number of skips: 1
+26-27 20-21 25-26 5-6 37-38 39-40 6-7 
+Deeprebuild started at score: 12281.234
+DR 4.2.1 26-27 15 times. Wait... Current score: 12281.234
+Slotlist:  4=5=12  6=13  7=8  9=10  11
+Stabilized score: 12279.336 from slot 4(total)
+Stabilized score: 12273.146 from slot 6(Clashing)
+Stabilized score: 12272.544 from slot 7(Pairwise)
+Stabilized score: 12224.957 from slot 9(Hiding)
+Stabilized score: 12278.678 from slot 11(Ideality)
+Fuzing best position.
+DR 4.2.2 20-21 15 times. Wait... Current score: 12281.234
+Slotlist:  4=5=12  6  7=10=13  8  9  11
+Stabilized score: 12278.295 from slot 4(total)
+Stabilized score: 12238.887 from slot 6(Clashing)
+Stabilized score: 12262.205 from slot 7(Pairwise)
+Stabilized score: 12183.732 from slot 8(Packing)
+Stabilized score: 12149.758 from slot 9(Hiding)
+Stabilized score: 12275.226 from slot 11(Ideality)
+Fuzing best position.
+DR 4.2.3 25-26 15 times. Wait... Current score: 12281.234
+Gained another 0.257 pts.
+Slotlist:  4=5=12=13  6  7=10  8  9  11
+Stabilized score: 12281.491 from slot 4(total)
+Stabilized score: 12095.01 from slot 6(Clashing)
+Stabilized score: 11941.993 from slot 7(Pairwise)
+Stabilized score: 10157.92 from slot 8(Packing)
+Stabilized score: 12267.406 from slot 9(Hiding)
+Stabilized score: 12275.574 from slot 11(Ideality)
+Fuzing best position.
+Gained another 0.757 pts.
+Gain from slots 	 4=5=12=13(RB4)
+DR 4.2.4 5-6 15 times. Wait... Current score: 12282.248
+Slotlist:  4=5=11=12  6  7=10  8  9  13
+Stabilized score: 12269.951 from slot 4(total)
+Stabilized score: 12269.243 from slot 6(Clashing)
+Stabilized score: 12259.78 from slot 7(Pairwise)
+Stabilized score: 12247.75 from slot 8(Packing)
+Stabilized score: 12271.955 from slot 9(Hiding)
+Stabilized score: 12266.987 from slot 13(Sidechain)
+Fuzing best position.
+DR 4.2.5 37-38 15 times. Wait... Current score: 12282.248
+Slotlist:  4=5  6  7=9=12=13  8  10  11
+Gained another 0.993 pts.
+Stabilized score: 12283.242 from slot 4(total)
+Stabilized score: 12267.586 from slot 6(Clashing)
+Stabilized score: 12280.819 from slot 7(Pairwise)
+Stabilized score: 12280.958 from slot 8(Packing)
+Stabilized score: 12250.574 from slot 10(Bonding)
+Stabilized score: 12277.367 from slot 11(Ideality)
+Fuzing best position.
+Gain from slots 	 4=5(RB15)
+DR 4.2.6 39-40 15 times. Wait... Current score: 12283.242
+Slotlist:  4=5=7=11  6=9  8=10  12  13
+Stabilized score: 12062.166 from slot 4(total)
+Stabilized score: 12021.934 from slot 6(Clashing)
+Stabilized score: 12051.259 from slot 8(Packing)
+Stabilized score: 12090.981 from slot 12(Backbone)
+Stabilized score: 12176.979 from slot 13(Sidechain)
+DR 4.2.7 6-7 15 times. Wait... Current score: 12283.242
+Slotlist:  4=5=6  7=10  8  9  11  12  13
+Stabilized score: 12270.666 from slot 4(total)
+Stabilized score: 12272.393 from slot 7(Pairwise)
+Stabilized score: 12249.4 from slot 8(Packing)
+Stabilized score: 12264.039 from slot 9(Hiding)
+Stabilized score: 12270.075 from slot 11(Ideality)
+Stabilized score: 12266.138 from slot 12(Backbone)
+Stabilized score: 12268.521 from slot 13(Sidechain)
+Fuzing best position.
+Deeprebuild gain: 2.008
+Searching worst scoring parts of len 3
+Skipping
+5-7 19-21 20-22 24-26 25-27 26-28 
+Number of skips: 6
+38-40 27-29 4-6 36-38 37-39 6-8 35-37 
+Deeprebuild started at score: 12283.242
+DR 4.3.1 38-40 15 times. Wait... Current score: 12283.242
+Slotlist:  4  5=6=9  7  8  10  11  12  13
+Stabilized score: 12207.226 from slot 4(total)
+Stabilized score: 12063.065 from slot 5(loctotal)
+Stabilized score: 11883.493 from slot 7(Pairwise)
+Stabilized score: 11875.657 from slot 8(Packing)
+Stabilized score: 12177.768 from slot 10(Bonding)
+Stabilized score: 12207.593 from slot 11(Ideality)
+Stabilized score: 12048.19 from slot 12(Backbone)
+Stabilized score: 12106.22 from slot 13(Sidechain)
+DR 4.3.2 27-29 15 times. Wait... Current score: 12283.242
+Slotlist:  4=6=7=10  5=11  8  9  12  13
+Stabilized score: 11778.697 from slot 4(total)
+Stabilized score: 11645.053 from slot 5(loctotal)
+Stabilized score: 8255.078 from slot 8(Packing)
+Stabilized score: 11496.056 from slot 9(Hiding)
+Stabilized score: 11544.768 from slot 12(Backbone)
+Stabilized score: 7077.702 from slot 13(Sidechain)
+DR 4.3.3 4-6 15 times. Wait... Current score: 12283.242
+Slotlist:  4=5=6=7=11=12=13  8  9  10
+Stabilized score: 12229.544 from slot 4(total)
+Stabilized score: 12074.866 from slot 8(Packing)
+Stabilized score: 11759.768 from slot 9(Hiding)
+Stabilized score: 12009.182 from slot 10(Bonding)
+DR 4.3.4 36-38 15 times. Wait... Current score: 12283.242
+Slotlist:  4=5=13  6  7=10  8  9  11=12
+Stabilized score: 12280.273 from slot 4(total)
+Stabilized score: 12278.404 from slot 6(Clashing)
+Stabilized score: 12262.394 from slot 7(Pairwise)
+Stabilized score: 5431.051 from slot 8(Packing)
+Stabilized score: 12160.972 from slot 9(Hiding)
+Stabilized score: 12270.133 from slot 11(Ideality)
+Fuzing best position.
+DR 4.3.5 37-39 15 times. Wait... Current score: 12283.242
+Slotlist:  4=6=11=12  5=13  7  8  9  10
+Stabilized score: 12276.407 from slot 4(total)
+Stabilized score: 12280.281 from slot 5(loctotal)
+Stabilized score: 12252.521 from slot 7(Pairwise)
+Stabilized score: 12268.738 from slot 8(Packing)
+Stabilized score: 11779.971 from slot 9(Hiding)
+Stabilized score: 12268.142 from slot 10(Bonding)
+Fuzing best position.
+DR 4.3.6 6-8 15 times. Wait... Current score: 12283.242
+Slotlist:  4=5  6=9  7=13  8  10  11=12
+Stabilized score: 12151.05 from slot 4(total)
+Stabilized score: 12159.24 from slot 6(Clashing)
+Stabilized score: 11740.443 from slot 7(Pairwise)
+Stabilized score: 11923.807 from slot 8(Packing)
+Stabilized score: 11725.419 from slot 10(Bonding)
+Stabilized score: 11682.061 from slot 11(Ideality)
+DR 4.3.7 35-37 15 times. Wait... Current score: 12283.242
+Slotlist:  4=5=10  6=7  8  9  11  12  13
+Stabilized score: 12269.272 from slot 4(total)
+Stabilized score: 12269.363 from slot 6(Clashing)
+Stabilized score: 11857.389 from slot 8(Packing)
+Stabilized score: 12122.324 from slot 9(Hiding)
+Stabilized score: 12125.236 from slot 11(Ideality)
+Stabilized score: 12273.309 from slot 12(Backbone)
+Stabilized score: 5431.74 from slot 13(Sidechain)
+Fuzing best position.
+Deeprebuild gain: 0
+Searching worst scoring parts of len 4
+Skipping
+20-23 23-26 24-27 25-28 26-29 37-40 
+Number of skips: 6
+4-7 5-8 19-22 27-30 36-39 2-5 35-38 
+Deeprebuild started at score: 12283.242
+DR 4.4.1 4-7 15 times. Wait... Current score: 12283.242
+Slotlist:  4=5=6  7=10  8  9  11=13  12
+Stabilized score: 12099.546 from slot 4(total)
+Stabilized score: 11676.612 from slot 7(Pairwise)
+Stabilized score: 11963.473 from slot 8(Packing)
+Stabilized score: 11991.801 from slot 9(Hiding)
+Stabilized score: 12238.165 from slot 11(Ideality)
+Stabilized score: 11955.258 from slot 12(Backbone)
+DR 4.4.2 5-8 15 times. Wait... Current score: 12283.242
+Slotlist:  4=5=6  7  8  9  10  11  12  13
+Stabilized score: 12030.445 from slot 4(total)
+Stabilized score: 10129.997 from slot 7(Pairwise)
+Stabilized score: 11710.375 from slot 8(Packing)
+Stabilized score: 11971.8 from slot 9(Hiding)
+Stabilized score: 11855.982 from slot 10(Bonding)
+Stabilized score: 11894.94 from slot 11(Ideality)
+Stabilized score: 12019.376 from slot 12(Backbone)
+Stabilized score: 9950.393 from slot 13(Sidechain)
+DR 4.4.3 19-22 15 times. Wait... Current score: 12283.242
+Slotlist:  4=10  5=9  6  7  8  11=12  13
+Stabilized score: 11908.131 from slot 4(total)
+Stabilized score: 11914.632 from slot 5(loctotal)
+Stabilized score: 11886.525 from slot 6(Clashing)
+Stabilized score: 11330.009 from slot 7(Pairwise)
+Stabilized score: 6576.121 from slot 8(Packing)
+Stabilized score: 11809.116 from slot 11(Ideality)
+Stabilized score: 10926.947 from slot 13(Sidechain)
+DR 4.4.4 27-30 15 times. Wait... Current score: 12283.242
+Slotlist:  4=5=6=7=12  8  9  10  11  13
+Stabilized score: 12264.804 from slot 4(total)
+Stabilized score: 5650.323 from slot 8(Packing)
+Stabilized score: 10820.757 from slot 9(Hiding)
+Stabilized score: 11834.153 from slot 10(Bonding)
+Stabilized score: 11135.389 from slot 11(Ideality)
+Stabilized score: 3684.193 from slot 13(Sidechain)
+Fuzing best position.
+DR 4.4.5 36-39 15 times. Wait... Current score: 12283.242
+Slotlist:  4=5  6  7=10=11=12  8=13  9
+Stabilized score: 12153.127 from slot 4(total)
+Stabilized score: 12115.664 from slot 6(Clashing)
+Stabilized score: 12218.194 from slot 7(Pairwise)
+Stabilized score: 12271.779 from slot 8(Packing)
+Stabilized score: 11836.572 from slot 9(Hiding)
+Fuzing best position.
+DR 4.4.6 2-5 15 times. Wait... Current score: 12283.242
+Slotlist:  4=5=6=10  7=8  9  11=12  13
+Stabilized score: 12096.501 from slot 4(total)
+Stabilized score: 11865.241 from slot 7(Pairwise)
+Stabilized score: 11097.848 from slot 9(Hiding)
+Stabilized score: 11813.31 from slot 11(Ideality)
+Stabilized score: 11953.734 from slot 13(Sidechain)
+DR 4.4.7 35-38 15 times. Wait... Current score: 12283.242
+Slotlist:  4=13  5=11=12  6=7  8  9  10
+Stabilized score: 12257.815 from slot 4(total)
+Stabilized score: 12261.324 from slot 5(loctotal)
+Stabilized score: 11933.876 from slot 6(Clashing)
+Stabilized score: 4913.388 from slot 8(Packing)
+Stabilized score: 12134.202 from slot 9(Hiding)
+Stabilized score: 11835.225 from slot 10(Bonding)
+Fuzing best position.
+Deeprebuild gain: 0
+Main cycle nr 	5
+Searching worst scoring parts of len 2
+Skipping
+2-3 5-6 6-7 20-21 25-26 26-27 37-38 
+39-40 
+Number of skips: 8
+36-37 21-22 27-28 19-20 24-25 11-12 28-29 
+1-2 
+Deeprebuild started at score: 12283.242
+DR 5.2.1 36-37 15 times. Wait... Current score: 12283.242
+Slotlist:  4=5=6=12  7  8  9  10  11  13
+Stabilized score: 12278.716 from slot 4(total)
+Stabilized score: 12264.622 from slot 7(Pairwise)
+Stabilized score: 11572.135 from slot 8(Packing)
+Stabilized score: 12268.154 from slot 9(Hiding)
+Stabilized score: 12280.444 from slot 10(Bonding)
+Stabilized score: 12279.478 from slot 11(Ideality)
+Stabilized score: 12279.393 from slot 13(Sidechain)
+Fuzing best position.
+DR 5.2.2 21-22 15 times. Wait... Current score: 12283.242
+Slotlist:  4=5=9=11=12  6  7=13  8  10
+Stabilized score: 12269.832 from slot 4(total)
+Stabilized score: 11936.677 from slot 6(Clashing)
+Stabilized score: 12215.908 from slot 7(Pairwise)
+Stabilized score: 12243.359 from slot 8(Packing)
+Stabilized score: 12246.963 from slot 10(Bonding)
+Fuzing best position.
+DR 5.2.3 27-28 15 times. Wait... Current score: 12283.242
+Gained another 0.229 pts.
+Slotlist:  4=6=10  5=12  7  8  9  11  13
+Stabilized score: 12283.471 from slot 4(total)
+Stabilized score: 12282.717 from slot 5(loctotal)
+Stabilized score: 12274.933 from slot 7(Pairwise)
+Stabilized score: 12235.095 from slot 8(Packing)
+Stabilized score: 11822.714 from slot 9(Hiding)
+Stabilized score: 12280.249 from slot 11(Ideality)
+Stabilized score: 12283.171 from slot 13(Sidechain)
+Fuzing best position.
+Gain from slots 	 4=6=10(RB7)
+DR 5.2.4 19-20 15 times. Wait... Current score: 12283.471
+Slotlist:  4  5  6=7=9=13  8=12  10  11
+Stabilized score: 12282.637 from slot 4(total)
+Stabilized score: 12282.531 from slot 5(loctotal)
+Stabilized score: 12281.278 from slot 6(Clashing)
+Stabilized score: 12266.661 from slot 8(Packing)
+Stabilized score: 12277.128 from slot 10(Bonding)
+Stabilized score: 12280.135 from slot 11(Ideality)
+Fuzing best position.
+DR 5.2.5 24-25 15 times. Wait... Current score: 12283.471
+Slotlist:  4=5=6=12  7=8=10  9=11  13
+Stabilized score: 12256.128 from slot 4(total)
+Stabilized score: 12276.321 from slot 7(Pairwise)
+Stabilized score: 12179.764 from slot 9(Hiding)
+Stabilized score: 12196.503 from slot 13(Sidechain)
+Fuzing best position.
+DR 5.2.6 11-12 15 times. Wait... Current score: 12283.471
+Slotlist:  4=5=12  6  7  8  9=11  10  13
+Stabilized score: 12282.586 from slot 4(total)
+Stabilized score: 12282.221 from slot 6(Clashing)
+Stabilized score: 12272.949 from slot 7(Pairwise)
+Stabilized score: 12267.065 from slot 8(Packing)
+Stabilized score: 12281.276 from slot 9(Hiding)
+Stabilized score: 12273.694 from slot 10(Bonding)
+Stabilized score: 12280.598 from slot 13(Sidechain)
+Fuzing best position.
+DR 5.2.7 28-29 15 times. Wait... Current score: 12283.471
+Slotlist:  4=5=6=12  7=10=11=13  8=9
+Stabilized score: 12280.535 from slot 4(total)
+Stabilized score: 12279.043 from slot 7(Pairwise)
+Stabilized score: 11594.879 from slot 8(Packing)
+Fuzing best position.
+DR 5.2.8 1-2 15 times. Wait... Current score: 12283.471
+Slotlist:  4=5=10  6=9  7=12  8  11  13
+Stabilized score: 12280.285 from slot 4(total)
+Stabilized score: 12138.483 from slot 6(Clashing)
+Stabilized score: 12200.213 from slot 7(Pairwise)
+Stabilized score: 12147.615 from slot 8(Packing)
+Stabilized score: 12177.038 from slot 11(Ideality)
+Stabilized score: 12130.243 from slot 13(Sidechain)
+Fuzing best position.
+Deeprebuild gain: 0.229
+Searching worst scoring parts of len 3
+Skipping
+4-6 5-7 6-8 19-21 20-22 24-26 25-27 
+26-28 27-29 35-37 36-38 37-39 38-40 
+Number of skips: 13
+21-23 23-25 2-4 28-30 1-3 3-5 29-31 
+7-9 
+Deeprebuild started at score: 12283.471
+DR 5.3.1 21-23 15 times. Wait... Current score: 12283.471
+Slotlist:  4=5=7=11=12  6=13  8  9  10
+Stabilized score: 12263.232 from slot 4(total)
+Stabilized score: 11952.789 from slot 6(Clashing)
+Stabilized score: 11669.624 from slot 8(Packing)
+Stabilized score: 11868.202 from slot 9(Hiding)
+Stabilized score: 11958.983 from slot 10(Bonding)
+Fuzing best position.
+DR 5.3.2 23-25 15 times. Wait... Current score: 12283.471
+Slotlist:  4=5=12  6=13  7  8=9  10  11
+Stabilized score: 11926.214 from slot 4(total)
+Stabilized score: 11825.28 from slot 6(Clashing)
+Stabilized score: 12230.877 from slot 7(Pairwise)
+Stabilized score: 12056.372 from slot 8(Packing)
+Stabilized score: 12179.277 from slot 10(Bonding)
+Stabilized score: 11683.363 from slot 11(Ideality)
+DR 5.3.3 2-4 15 times. Wait... Current score: 12283.471
+Slotlist:  4=10=11=12  5  6=9  7=8  13
+Stabilized score: 12274.936 from slot 4(total)
+Stabilized score: 12196.803 from slot 5(loctotal)
+Stabilized score: 12088.864 from slot 6(Clashing)
+Stabilized score: 11980.411 from slot 7(Pairwise)
+Stabilized score: 12087.633 from slot 13(Sidechain)
+Fuzing best position.
+DR 5.3.4 28-30 15 times. Wait... Current score: 12283.471
+Slotlist:  4=5=6=7=10=11=12  8  9  13
+Stabilized score: 12279.292 from slot 4(total)
+Stabilized score: 11232.029 from slot 8(Packing)
+Stabilized score: 11132.403 from slot 9(Hiding)
+Stabilized score: 12248.017 from slot 13(Sidechain)
+Fuzing best position.
+DR 5.3.5 1-3 15 times. Wait... Current score: 12283.471
+Slotlist:  4=5=6=12  7  8  9  10=11  13
+Stabilized score: 12199.04 from slot 4(total)
+Stabilized score: 12069.716 from slot 7(Pairwise)
+Stabilized score: 11763.352 from slot 8(Packing)
+Stabilized score: 12051.845 from slot 9(Hiding)
+Stabilized score: 12280.904 from slot 10(Bonding)
+Stabilized score: 12264.326 from slot 13(Sidechain)
+Fuzing best position.
+Gained another 29.76 pts.
+Gained another 2.547 pts.
+Gained another 1.512 pts.
+Gained another 4.821 pts.
+Gain from slots 	 10=11(RB15)
+DR 5.3.6 3-5 15 times. Wait... Current score: 12322.113
+Slotlist:  4=5=7=11=12  6=9  8  10  13
+Gained another 123.951 pts.
+Stabilized score: 12446.064 from slot 4(total)
+Gained another 4.251 pts.
+Stabilized score: 12450.315 from slot 6(Clashing)
+Stabilized score: 11885.122 from slot 8(Packing)
+Stabilized score: 12061.177 from slot 10(Bonding)
+Stabilized score: 11796.774 from slot 13(Sidechain)
+Fuzing best position.
+Gained another 7.431 pts.
+Gained another 0.926 pts.
+Gained another 0.274 pts.
+Gained another 0.823 pts.
+Gain from slots 	 6=9(RB9)
+Deeprebuild gain: 176.3
+Searching worst scoring parts of len 4
+26-29 24-27 25-28 2-5 3-6 23-26 20-23 
+4-7 
+Deeprebuild started at score: 12459.771
+DR 5.4.1 26-29 15 times. Wait... Current score: 12459.771
+Slotlist:  4=5=11  6=10  7=12  8  9  13
+Stabilized score: 11962.151 from slot 4(total)
+Stabilized score: 11793.88 from slot 6(Clashing)
+Stabilized score: 12385.79 from slot 7(Pairwise)
+Stabilized score: 11101.248 from slot 8(Packing)
+Stabilized score: 11759.03 from slot 9(Hiding)
+Stabilized score: 6046.427 from slot 13(Sidechain)
+DR 5.4.2 24-27 15 times. Wait... Current score: 12459.771
+Slotlist:  4=5=6=13  7  8  9=11=12  10
+Stabilized score: 12191.139 from slot 4(total)
+Stabilized score: 12416.768 from slot 7(Pairwise)
+Stabilized score: 7170.23 from slot 8(Packing)
+Stabilized score: 12406.108 from slot 9(Hiding)
+Stabilized score: 11877.458 from slot 10(Bonding)
+DR 5.4.3 25-28 15 times. Wait... Current score: 12459.771
+Slotlist:  4=5=6=12  7=10  8  9=11  13
+Stabilized score: 12459.521 from slot 4(total)
+Stabilized score: 12341.306 from slot 7(Pairwise)
+Stabilized score: 9538.454 from slot 8(Packing)
+Stabilized score: 12450.065 from slot 9(Hiding)
+Stabilized score: 6947.654 from slot 13(Sidechain)
+Fuzing best position.
+Gained another 0.191 pts.
+Gained another 0.065 pts.
+Gain from slots 	 4=5=6=12(RB14)
+DR 5.4.4 2-5 15 times. Wait... Current score: 12460.028
+Slotlist:  4=5=6=7  8=10  9  11=12  13
+Gained another 4.5 pts.
+Stabilized score: 12464.528 from slot 4(total)
+Stabilized score: 9079.569 from slot 8(Packing)
+Stabilized score: 12153.881 from slot 9(Hiding)
+Stabilized score: 11809.699 from slot 11(Ideality)
+Stabilized score: 12201.487 from slot 13(Sidechain)
+Fuzing best position.
+Gained another 2.46 pts.
+Gained another 1.035 pts.
+Gained another 0.643 pts.
+Gain from slots 	 4=5=6=7(RB2)
+DR 5.4.5 3-6 15 times. Wait... Current score: 12468.668
+Slotlist:  4=5=6=9  7  8  10  11  12=13
+Stabilized score: 12385.18 from slot 4(total)
+Stabilized score: 12044.622 from slot 7(Pairwise)
+Stabilized score: 10556.584 from slot 8(Packing)
+Stabilized score: 12361.431 from slot 10(Bonding)
+Stabilized score: 12123.916 from slot 11(Ideality)
+Stabilized score: 12376.472 from slot 12(Backbone)
+DR 5.4.6 23-26 15 times. Wait... Current score: 12468.668
+Slotlist:  4=5=6  7  8  9  10  11=12  13
+Stabilized score: 12084.696 from slot 4(total)
+Stabilized score: 12432.766 from slot 7(Pairwise)
+Stabilized score: 10629.225 from slot 8(Packing)
+Stabilized score: 10490.09 from slot 9(Hiding)
+Stabilized score: 12342.194 from slot 10(Bonding)
+Stabilized score: 12049.996 from slot 11(Ideality)
+Stabilized score: 12181.109 from slot 13(Sidechain)
+Fuzing best position.
+Gained another 7.338 pts.
+Gained another 3.117 pts.
+Gained another 1.05 pts.
+Gain from slots 	 7(RB13)
+DR 5.4.7 20-23 15 times. Wait... Current score: 12480.174
+Slotlist:  4=5=6  7=10  8  9  11  12  13
+Stabilized score: 12083.592 from slot 4(total)
+Stabilized score: 12000.328 from slot 7(Pairwise)
+Stabilized score: 10577.905 from slot 8(Packing)
+Stabilized score: 11560.94 from slot 9(Hiding)
+Stabilized score: 10752.378 from slot 11(Ideality)
+Stabilized score: 11941.585 from slot 12(Backbone)
+Stabilized score: 10983.85 from slot 13(Sidechain)
+DR 5.4.8 4-7 15 times. Wait... Current score: 12480.174
+Slotlist:  4  5  6=9  7=10  8  11=12  13
+Stabilized score: 12252.111 from slot 4(total)
+Stabilized score: 12092.415 from slot 5(loctotal)
+Stabilized score: 12251.474 from slot 6(Clashing)
+Stabilized score: 12118.197 from slot 7(Pairwise)
+Stabilized score: 11678.613 from slot 8(Packing)
+Stabilized score: 12082.939 from slot 11(Ideality)
+Stabilized score: 12143.873 from slot 13(Sidechain)
+Deeprebuild gain: 20.402
+Main cycle nr 	6
+Searching worst scoring parts of len 2
+26-27 25-26 20-21 2-3 5-6 3-4 24-25 
+27-28 6-7 
+Deeprebuild started at score: 12480.174
+DR 6.2.1 26-27 15 times. Wait... Current score: 12480.174
+Gained another 2.02 pts.
+Gained another 0.948 pts.
+Gained another 0.189 pts.
+Gained another 0.255 pts.
+Slotlist:  4=12  5=11  6=9  7=8  10  13
+Stabilized score: 12483.589 from slot 4(total)
+Stabilized score: 12481.201 from slot 5(loctotal)
+Stabilized score: 12478.143 from slot 6(Clashing)
+Stabilized score: 12482.278 from slot 7(Pairwise)
+Stabilized score: 12476.008 from slot 10(Bonding)
+Stabilized score: 12482.195 from slot 13(Sidechain)
+Fuzing best position.
+Gained another 0.766 pts.
+Gain from slots 	 4=12(RB9)
+DR 6.2.2 25-26 15 times. Wait... Current score: 12484.355
+Slotlist:  4=5=6=11=12  7=10  8=9  13
+Stabilized score: 12478.867 from slot 4(total)
+Stabilized score: 12470.178 from slot 7(Pairwise)
+Stabilized score: 12482.07 from slot 8(Packing)
+Stabilized score: 12482.349 from slot 13(Sidechain)
+Fuzing best position.
+DR 6.2.3 20-21 15 times. Wait... Current score: 12484.355
+Slotlist:  4=5=11  6=12  7  8=9  10=13
+Stabilized score: 12481.537 from slot 4(total)
+Stabilized score: 12468.259 from slot 6(Clashing)
+Stabilized score: 12431.782 from slot 7(Pairwise)
+Stabilized score: 12272.813 from slot 8(Packing)
+Stabilized score: 12466.517 from slot 10(Bonding)
+Fuzing best position.
+DR 6.2.4 2-3 15 times. Wait... Current score: 12484.355
+Slotlist:  4=5=10=12=13  6=11  7  8  9
+Stabilized score: 12472.427 from slot 4(total)
+Stabilized score: 12476.158 from slot 6(Clashing)
+Stabilized score: 12290.89 from slot 7(Pairwise)
+Stabilized score: 12299.008 from slot 8(Packing)
+Stabilized score: 12459.997 from slot 9(Hiding)
+Fuzing best position.
+DR 6.2.5 5-6 15 times. Wait... Current score: 12484.355
+Slotlist:  4=5=11=13  6  7=8  9  10  12
+Stabilized score: 12478.894 from slot 4(total)
+Stabilized score: 12359.747 from slot 6(Clashing)
+Stabilized score: 12431.572 from slot 7(Pairwise)
+Stabilized score: 12457.029 from slot 9(Hiding)
+Stabilized score: 12457.481 from slot 10(Bonding)
+Stabilized score: 12431.914 from slot 12(Backbone)
+Fuzing best position.
+DR 6.2.6 3-4 15 times. Wait... Current score: 12484.355
+Gained another 2.68 pts.
+Slotlist:  4=5=6=12  7  8  9  10  11  13
+Stabilized score: 12487.036 from slot 4(total)
+Stabilized score: 12486.068 from slot 7(Pairwise)
+Stabilized score: 12116.926 from slot 8(Packing)
+Stabilized score: 12452.265 from slot 9(Hiding)
+Stabilized score: 12482.998 from slot 10(Bonding)
+Stabilized score: 12484.587 from slot 11(Ideality)
+Stabilized score: 12483.597 from slot 13(Sidechain)
+Fuzing best position.
+Gained another 0.704 pts.
+Gained another 0.229 pts.
+Gained another 0.599 pts.
+Gain from slots 	 4=5=6=12(RB3)
+DR 6.2.7 24-25 15 times. Wait... Current score: 12488.569
+Slotlist:  4=5=6=12  7  8=10  9  11=13
+Stabilized score: 12437.012 from slot 4(total)
+Stabilized score: 12434.536 from slot 7(Pairwise)
+Stabilized score: 12470.051 from slot 8(Packing)
+Stabilized score: 12418.328 from slot 9(Hiding)
+Stabilized score: 12435.979 from slot 11(Ideality)
+Fuzing best position.
+DR 6.2.8 27-28 15 times. Wait... Current score: 12488.569
+Slotlist:  4=5=6=10=11=13  7=12  8  9
+Stabilized score: 12480.921 from slot 4(total)
+Stabilized score: 12469.607 from slot 7(Pairwise)
+Stabilized score: 12463.945 from slot 8(Packing)
+Stabilized score: 12045.353 from slot 9(Hiding)
+Fuzing best position.
+DR 6.2.9 6-7 15 times. Wait... Current score: 12488.569
+Slotlist:  4=5=11  6  7  8  9=12  10  13
+Stabilized score: 12475.411 from slot 4(total)
+Stabilized score: 11638.596 from slot 6(Clashing)
+Stabilized score: 11830.022 from slot 7(Pairwise)
+Stabilized score: 12229.963 from slot 8(Packing)
+Stabilized score: 12454.016 from slot 9(Hiding)
+Stabilized score: 12470.328 from slot 10(Bonding)
+Stabilized score: 11769.051 from slot 13(Sidechain)
+Fuzing best position.
+Deeprebuild gain: 8.394
+Searching worst scoring parts of len 3
+25-27 24-26 26-28 27-29 5-7 3-5 2-4 
+19-21 4-6 
+Deeprebuild started at score: 12488.569
+DR 6.3.1 25-27 15 times. Wait... Current score: 12488.569
+Slotlist:  4=5=11=12=13  6  7=10  8  9
+Stabilized score: 12478.822 from slot 4(total)
+Stabilized score: 12125.228 from slot 6(Clashing)
+Stabilized score: 12483.846 from slot 7(Pairwise)
+Stabilized score: 10141.845 from slot 8(Packing)
+Stabilized score: 12479.089 from slot 9(Hiding)
+Fuzing best position.
+DR 6.3.2 24-26 15 times. Wait... Current score: 12488.569
+Slotlist:  4=5=11  6=7  8  9  10  12  13
+Stabilized score: 12470.776 from slot 4(total)
+Stabilized score: 12209.006 from slot 6(Clashing)
+Stabilized score: 9815.55 from slot 8(Packing)
+Stabilized score: 12355.45 from slot 9(Hiding)
+Stabilized score: 12267.623 from slot 10(Bonding)
+Stabilized score: 12439.608 from slot 12(Backbone)
+Stabilized score: 9348.996 from slot 13(Sidechain)
+Fuzing best position.
+DR 6.3.3 26-28 15 times. Wait... Current score: 12488.569
+Slotlist:  4  5=6=9=13  7  8=10  11  12
+Stabilized score: 12465.416 from slot 4(total)
+Stabilized score: 12040.106 from slot 5(loctotal)
+Stabilized score: 9961.11 from slot 7(Pairwise)
+Stabilized score: 7144.628 from slot 8(Packing)
+Stabilized score: 12034.635 from slot 11(Ideality)
+Stabilized score: 12004.83 from slot 12(Backbone)
+Fuzing best position.
+DR 6.3.4 27-29 15 times. Wait... Current score: 12488.569
+Slotlist:  4=5=6=7=11=12  8  9  10  13
+Stabilized score: 12404.682 from slot 4(total)
+Stabilized score: 11129.1 from slot 8(Packing)
+Stabilized score: 10397.182 from slot 9(Hiding)
+Stabilized score: 12422.339 from slot 10(Bonding)
+Stabilized score: 9211.792 from slot 13(Sidechain)
+DR 6.3.5 5-7 15 times. Wait... Current score: 12488.569
+Slotlist:  4=5=11=12  6=9  7=10  8  13
+Stabilized score: 12480.546 from slot 4(total)
+Stabilized score: 12158.639 from slot 6(Clashing)
+Stabilized score: 12176.241 from slot 7(Pairwise)
+Stabilized score: 11078.928 from slot 8(Packing)
+Stabilized score: 12164.737 from slot 13(Sidechain)
+Fuzing best position.
+DR 6.3.6 3-5 15 times. Wait... Current score: 12488.569
+Slotlist:  4=5=6=7=12  8  9=13  10=11
+Stabilized score: 12479.899 from slot 4(total)
+Stabilized score: 11899.396 from slot 8(Packing)
+Stabilized score: 12481.134 from slot 9(Hiding)
+Stabilized score: 12466.105 from slot 10(Bonding)
+Fuzing best position.
+DR 6.3.7 2-4 15 times. Wait... Current score: 12488.569
+Slotlist:  4=5=6=10=11=12  7  8  9  13
+Stabilized score: 12486.396 from slot 4(total)
+Stabilized score: 9313.75 from slot 7(Pairwise)
+Stabilized score: 11886.567 from slot 8(Packing)
+Stabilized score: 12369.357 from slot 9(Hiding)
+Stabilized score: 11933.358 from slot 13(Sidechain)
+Fuzing best position.
+DR 6.3.8 19-21 15 times. Wait... Current score: 12488.569
+Slotlist:  4=5=10=12  6  7  8  9  11  13
+Stabilized score: 12462.126 from slot 4(total)
+Stabilized score: 12162.648 from slot 6(Clashing)
+Stabilized score: 12276.849 from slot 7(Pairwise)
+Stabilized score: 11999.223 from slot 8(Packing)
+Stabilized score: 12228.425 from slot 9(Hiding)
+Stabilized score: 12292.311 from slot 11(Ideality)
+Stabilized score: 12264.042 from slot 13(Sidechain)
+Fuzing best position.
+DR 6.3.9 4-6 15 times. Wait... Current score: 12488.569
+Slotlist:  4=5=6=7=10=11=12  8  9  13
+Stabilized score: 12139.257 from slot 4(total)
+Stabilized score: 12459.631 from slot 8(Packing)
+Stabilized score: 12180.176 from slot 9(Hiding)
+Stabilized score: 12337.523 from slot 13(Sidechain)
+Fuzing best position.
+Deeprebuild gain: 0
+Searching worst scoring parts of len 4
+Skipping
+2-5 3-6 4-7 20-23 23-26 24-27 25-28 
+26-29 
+Number of skips: 8
+27-30 5-8 19-22 21-24 1-4 22-25 36-39 
+35-38 6-9 
+Deeprebuild started at score: 12488.569
+DR 6.4.1 27-30 15 times. Wait... Current score: 12488.569
+Slotlist:  4=5=7=10=11=12  6  8  9  13
+Stabilized score: 12460.603 from slot 4(total)
+Stabilized score: 12474.001 from slot 6(Clashing)
+Stabilized score: 11133.124 from slot 8(Packing)
+Stabilized score: 10489.379 from slot 9(Hiding)
+Stabilized score: 10552.608 from slot 13(Sidechain)
+Fuzing best position.
+DR 6.4.2 5-8 15 times. Wait... Current score: 12488.569
+Slotlist:  4=5=11=12  6  7=10  8  9  13
+Stabilized score: 12308.358 from slot 4(total)
+Stabilized score: 12141.181 from slot 6(Clashing)
+Stabilized score: 12243.347 from slot 7(Pairwise)
+Stabilized score: 11998.38 from slot 8(Packing)
+Stabilized score: 12282.823 from slot 9(Hiding)
+Stabilized score: 12301.427 from slot 13(Sidechain)
+DR 6.4.3 19-22 15 times. Wait... Current score: 12488.569
+Slotlist:  4=5=6=12  7=13  8  9  10  11
+Stabilized score: 11990.733 from slot 4(total)
+Stabilized score: 12123.306 from slot 7(Pairwise)
+Stabilized score: 11647.006 from slot 8(Packing)
+Stabilized score: 11876.442 from slot 9(Hiding)
+Stabilized score: 11922.957 from slot 10(Bonding)
+Stabilized score: 11858.541 from slot 11(Ideality)
+DR 6.4.4 21-24 15 times. Wait... Current score: 12488.569
+Slotlist:  4=5=13  6  7=10  8  9  11  12
+Stabilized score: 12192.234 from slot 4(total)
+Stabilized score: 11956.037 from slot 6(Clashing)
+Stabilized score: 12487.869 from slot 7(Pairwise)
+Stabilized score: 11211.537 from slot 8(Packing)
+Stabilized score: 12117.66 from slot 9(Hiding)
+Stabilized score: 11263.986 from slot 11(Ideality)
+Stabilized score: 10812.592 from slot 12(Backbone)
+Fuzing best position.
+Gained another 4.713 pts.
+Gained another 4.118 pts.
+Gained another 2.282 pts.
+Gain from slots 	 7=10(RB1)
+DR 6.4.5 1-4 15 times. Wait... Current score: 12499.682
+Slotlist:  4=5=6=10=11  7  8  9=13  12
+Stabilized score: 12166.479 from slot 4(total)
+Stabilized score: 10987.527 from slot 7(Pairwise)
+Stabilized score: 10331.621 from slot 8(Packing)
+Stabilized score: 11989.857 from slot 9(Hiding)
+Stabilized score: 10750.44 from slot 12(Backbone)
+DR 6.4.6 22-25 15 times. Wait... Current score: 12499.682
+Slotlist:  4=5=6  7=10  8  9  11=12  13
+Stabilized score: 12199.045 from slot 4(total)
+Stabilized score: 12465.158 from slot 7(Pairwise)
+Stabilized score: 9721.645 from slot 8(Packing)
+Stabilized score: 12121.463 from slot 9(Hiding)
+Stabilized score: 12235.696 from slot 11(Ideality)
+Stabilized score: 12349.804 from slot 13(Sidechain)
+Fuzing best position.
+DR 6.4.7 36-39 15 times. Wait... Current score: 12499.682
+Slotlist:  4=5=6=12  7=10  8=13  9  11
+Stabilized score: 12378.689 from slot 4(total)
+Stabilized score: 12295.9 from slot 7(Pairwise)
+Stabilized score: 8236.722 from slot 8(Packing)
+Stabilized score: 11130.406 from slot 9(Hiding)
+Stabilized score: 12395.087 from slot 11(Ideality)
+DR 6.4.8 35-38 15 times. Wait... Current score: 12499.682
+Slotlist:  4=5=6=11=13  7  8  9  10  12
+Stabilized score: 12497.685 from slot 4(total)
+Stabilized score: 12459.199 from slot 7(Pairwise)
+Stabilized score: 11036.874 from slot 8(Packing)
+Stabilized score: 12417.59 from slot 9(Hiding)
+Stabilized score: 12342.798 from slot 10(Bonding)
+Stabilized score: 12490.426 from slot 12(Backbone)
+Fuzing best position.
+DR 6.4.9 6-9 15 times. Wait... Current score: 12499.682
+Slotlist:  4=6  5=9=13  7=8=10  11=12
+Stabilized score: 11817.05 from slot 4(total)
+Stabilized score: 10070.401 from slot 5(loctotal)
+Stabilized score: 11754.112 from slot 7(Pairwise)
+Stabilized score: 11850.328 from slot 11(Ideality)
+Deeprebuild gain: 11.113
+Main cycle nr 	7
+Searching worst scoring parts of len 2
+Skipping
+2-3 3-4 5-6 6-7 20-21 24-25 25-26 
+26-27 27-28 
+Number of skips: 9
+28-29 19-20 4-5 29-30 11-12 36-37 37-38 
+23-24 21-22 35-36 
+Deeprebuild started at score: 12499.682
+DR 7.2.1 28-29 15 times. Wait... Current score: 12499.682
+Slotlist:  4=5=12  6=11=13  7=10  8  9
+Stabilized score: 12497.202 from slot 4(total)
+Stabilized score: 12494.735 from slot 6(Clashing)
+Stabilized score: 12474.352 from slot 7(Pairwise)
+Stabilized score: 11743.817 from slot 8(Packing)
+Stabilized score: 12063.344 from slot 9(Hiding)
+Fuzing best position.
+DR 7.2.2 19-20 15 times. Wait... Current score: 12499.682
+Gained another 0.956 pts.
+Slotlist:  4=5=10=13  6=8=9  7  11  12
+Gained another 2.244 pts.
+Stabilized score: 12502.883 from slot 4(total)
+Stabilized score: 12457.397 from slot 6(Clashing)
+Stabilized score: 12491.201 from slot 7(Pairwise)
+Stabilized score: 12493.421 from slot 11(Ideality)
+Stabilized score: 12498.229 from slot 12(Backbone)
+Fuzing best position.
+Gained another 1.368 pts.
+Gained another 0.154 pts.
+Gain from slots 	 4=5=10=13(RB2)
+DR 7.2.3 4-5 15 times. Wait... Current score: 12504.406
+Slotlist:  4=5=6=11  7=10  8=12  9  13
+Stabilized score: 12490.257 from slot 4(total)
+Stabilized score: 12495.105 from slot 7(Pairwise)
+Stabilized score: 12485.497 from slot 8(Packing)
+Stabilized score: 12483.113 from slot 9(Hiding)
+Stabilized score: 12491.36 from slot 13(Sidechain)
+Fuzing best position.
+DR 7.2.4 29-30 15 times. Wait... Current score: 12504.406
+Gained another 0.734 pts.
+Slotlist:  4=5=10=11=13  6  7=8  9  12
+Stabilized score: 12505.14 from slot 4(total)
+Stabilized score: 12483.995 from slot 6(Clashing)
+Stabilized score: 12503.397 from slot 7(Pairwise)
+Stabilized score: 12440.061 from slot 9(Hiding)
+Stabilized score: 12501.554 from slot 12(Backbone)
+Fuzing best position.
+Gained another 0.764 pts.
+Gain from slots 	 4=5=10=11=13(RB4)
+DR 7.2.5 11-12 15 times. Wait... Current score: 12505.905
+Slotlist:  4=5=6=12  7  8  9  10=13  11
+Stabilized score: 12505.753 from slot 4(total)
+Stabilized score: 12491.572 from slot 7(Pairwise)
+Stabilized score: 12495.768 from slot 8(Packing)
+Stabilized score: 12504.692 from slot 9(Hiding)
+Stabilized score: 12497.461 from slot 10(Bonding)
+Stabilized score: 12502.081 from slot 11(Ideality)
+Fuzing best position.
+DR 7.2.6 36-37 15 times. Wait... Current score: 12505.905
+Gained another 1.917 pts.
+Gained another 0.648 pts.
+Slotlist:  4=5=10  6=12  7  8  9  11  13
+Stabilized score: 12508.471 from slot 4(total)
+Stabilized score: 12502.379 from slot 6(Clashing)
+Stabilized score: 12495.644 from slot 7(Pairwise)
+Stabilized score: 12468.125 from slot 8(Packing)
+Stabilized score: 12491.553 from slot 9(Hiding)
+Stabilized score: 12500.504 from slot 11(Ideality)
+Stabilized score: 12500.832 from slot 13(Sidechain)
+Fuzing best position.
+Gained another 1.587 pts.
+Gained another 0.186 pts.
+Gain from slots 	 4=5=10(RB14)
+DR 7.2.7 37-38 15 times. Wait... Current score: 12510.244
+Slotlist:  4=5=13  6=10  7  8  9  11  12
+Stabilized score: 12509.237 from slot 4(total)
+Stabilized score: 12482.36 from slot 6(Clashing)
+Stabilized score: 12495.499 from slot 7(Pairwise)
+Stabilized score: 12491.499 from slot 8(Packing)
+Stabilized score: 12507.992 from slot 9(Hiding)
+Stabilized score: 12504.933 from slot 11(Ideality)
+Stabilized score: 12505.04 from slot 12(Backbone)
+Fuzing best position.
+Gained another 2.544 pts.
+Gain from slots 	 4=5=13(RB5)
+DR 7.2.8 23-24 15 times. Wait... Current score: 12512.789
+Slotlist:  4=5=6=13  7  8=9  10  11  12
+Stabilized score: 12510.957 from slot 4(total)
+Stabilized score: 12510.519 from slot 7(Pairwise)
+Stabilized score: 12507.845 from slot 8(Packing)
+Stabilized score: 12508.609 from slot 10(Bonding)
+Stabilized score: 12509.853 from slot 11(Ideality)
+Stabilized score: 12511.06 from slot 12(Backbone)
+Fuzing best position.
+DR 7.2.9 21-22 15 times. Wait... Current score: 12512.789
+Slotlist:  4=5=9=11=12  6  7  8  10=13
+Stabilized score: 12499.989 from slot 4(total)
+Stabilized score: 12216.379 from slot 6(Clashing)
+Stabilized score: 12462.256 from slot 7(Pairwise)
+Stabilized score: 12497.045 from slot 8(Packing)
+Stabilized score: 12442.75 from slot 10(Bonding)
+Fuzing best position.
+DR 7.2.10 35-36 15 times. Wait... Current score: 12512.789
+Slotlist:  4=5=7=10=11=12=13  6  8  9
+Stabilized score: 12510.629 from slot 4(total)
+Stabilized score: 12330.498 from slot 6(Clashing)
+Stabilized score: 12493.889 from slot 8(Packing)
+Stabilized score: 12502.537 from slot 9(Hiding)
+Fuzing best position.
+Deeprebuild gain: 13.107
+Searching worst scoring parts of len 3
+25-27 24-26 26-28 27-29 5-7 3-5 2-4 
+19-21 4-6 20-22 
+Deeprebuild started at score: 12512.789
+DR 7.3.1 25-27 15 times. Wait... Current score: 12512.789
+Slotlist:  4=5=11=12  6  7=10  8  9  13
+Stabilized score: 12503.889 from slot 4(total)
+Stabilized score: 12273.456 from slot 6(Clashing)
+Stabilized score: 12504.315 from slot 7(Pairwise)
+Gained another 6.137 pts.
+Stabilized score: 12518.927 from slot 8(Packing)
+Stabilized score: 11779.501 from slot 9(Hiding)
+Stabilized score: 12503.402 from slot 13(Sidechain)
+Fuzing best position.
+Gained another 0.088 pts.
+Gained another 1.356 pts.
+Gain from slots 	 8(RB10)
+DR 7.3.2 24-26 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=10=11=12  6  7  8  9  13
+Stabilized score: 12267.968 from slot 4(total)
+Stabilized score: 12223.794 from slot 6(Clashing)
+Stabilized score: 10783.883 from slot 7(Pairwise)
+Stabilized score: 11007.958 from slot 8(Packing)
+Stabilized score: 12056.743 from slot 9(Hiding)
+Stabilized score: 9806.226 from slot 13(Sidechain)
+DR 7.3.3 26-28 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=6=7  8  9  10  11=12=13
+Stabilized score: 12483.235 from slot 4(total)
+Stabilized score: 11507.023 from slot 8(Packing)
+Stabilized score: 11189.799 from slot 9(Hiding)
+Stabilized score: 11232.544 from slot 10(Bonding)
+Stabilized score: 12033.563 from slot 11(Ideality)
+DR 7.3.4 27-29 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=6=10=13  7=12  8  9  11
+Stabilized score: 12509.369 from slot 4(total)
+Stabilized score: 12421.363 from slot 7(Pairwise)
+Stabilized score: 11378.052 from slot 8(Packing)
+Stabilized score: 10578.022 from slot 9(Hiding)
+Stabilized score: 12439.917 from slot 11(Ideality)
+Fuzing best position.
+DR 7.3.5 5-7 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=10=11=12  6=9  7  8  13
+Stabilized score: 12414.166 from slot 4(total)
+Stabilized score: 12413.895 from slot 6(Clashing)
+Stabilized score: 12330.887 from slot 7(Pairwise)
+Stabilized score: 10369.194 from slot 8(Packing)
+Stabilized score: 12172.288 from slot 13(Sidechain)
+DR 7.3.6 3-5 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=6=7=11=12  8  9=10  13
+Stabilized score: 12510.39 from slot 4(total)
+Stabilized score: 11709.267 from slot 8(Packing)
+Stabilized score: 12452.035 from slot 9(Hiding)
+Stabilized score: 12303.073 from slot 13(Sidechain)
+Fuzing best position.
+DR 7.3.7 2-4 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=6=12  7  8  9  10  11=13
+Stabilized score: 12375.778 from slot 4(total)
+Stabilized score: 12359.064 from slot 7(Pairwise)
+Stabilized score: 11096.129 from slot 8(Packing)
+Stabilized score: 12120.364 from slot 9(Hiding)
+Stabilized score: 12029.844 from slot 10(Bonding)
+Stabilized score: 12504.225 from slot 11(Ideality)
+Fuzing best position.
+DR 7.3.8 19-21 15 times. Wait... Current score: 12520.371
+Slotlist:  4=6  5=12  7  8  9=11=13  10
+Stabilized score: 12488.751 from slot 4(total)
+Stabilized score: 12468.814 from slot 5(loctotal)
+Stabilized score: 12504.115 from slot 7(Pairwise)
+Stabilized score: 11848.78 from slot 8(Packing)
+Stabilized score: 12251.142 from slot 9(Hiding)
+Stabilized score: 12506.029 from slot 10(Bonding)
+Fuzing best position.
+DR 7.3.9 4-6 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=6=11  7  8=10  9  12  13
+Stabilized score: 12514.375 from slot 4(total)
+Stabilized score: 12349.537 from slot 7(Pairwise)
+Stabilized score: 12496.223 from slot 8(Packing)
+Stabilized score: 12121.686 from slot 9(Hiding)
+Stabilized score: 12323.974 from slot 12(Backbone)
+Stabilized score: 12354.443 from slot 13(Sidechain)
+Fuzing best position.
+DR 7.3.10 20-22 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=6=10=11  7  8  9  12  13
+Stabilized score: 12204.599 from slot 4(total)
+Stabilized score: 12207.65 from slot 7(Pairwise)
+Stabilized score: 11891.008 from slot 8(Packing)
+Stabilized score: 12182.04 from slot 9(Hiding)
+Stabilized score: 11626.378 from slot 12(Backbone)
+Stabilized score: 11516.273 from slot 13(Sidechain)
+Deeprebuild gain: 7.581
+Searching worst scoring parts of len 4
+26-29 24-27 25-28 23-26 2-5 3-6 4-7 
+27-30 5-8 20-23 
+Deeprebuild started at score: 12520.371
+DR 7.4.1 26-29 15 times. Wait... Current score: 12520.371
+Slotlist:  4  5  6=9  7=10=11=12=13  8
+Stabilized score: 12429.087 from slot 4(total)
+Stabilized score: 12427.502 from slot 5(loctotal)
+Stabilized score: 11144.721 from slot 6(Clashing)
+Stabilized score: 12505.871 from slot 7(Pairwise)
+Stabilized score: 9887.599 from slot 8(Packing)
+Fuzing best position.
+DR 7.4.2 24-27 15 times. Wait... Current score: 12520.371
+Slotlist:  4  5=11=12  6  7  8  9=13  10
+Stabilized score: 12394.631 from slot 4(total)
+Stabilized score: 12429.441 from slot 5(loctotal)
+Stabilized score: 12336.977 from slot 6(Clashing)
+Stabilized score: 12233.037 from slot 7(Pairwise)
+Stabilized score: 10881.309 from slot 8(Packing)
+Stabilized score: 11841.972 from slot 9(Hiding)
+Stabilized score: 7899.417 from slot 10(Bonding)
+DR 7.4.3 25-28 15 times. Wait... Current score: 12520.371
+Slotlist:  4=11  5=6=12  7=10  8  9  13
+Stabilized score: 12511.981 from slot 4(total)
+Stabilized score: 12044.924 from slot 5(loctotal)
+Stabilized score: 11794.055 from slot 7(Pairwise)
+Stabilized score: 11434.014 from slot 8(Packing)
+Stabilized score: 11533.472 from slot 9(Hiding)
+Stabilized score: 12370.432 from slot 13(Sidechain)
+Fuzing best position.
+DR 7.4.4 23-26 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=6  7  8  9  10  11  12  13
+Stabilized score: 11933.442 from slot 4(total)
+Stabilized score: 6640.582 from slot 7(Pairwise)
+Stabilized score: 11736.175 from slot 8(Packing)
+Stabilized score: 12030.94 from slot 9(Hiding)
+Stabilized score: 11767.866 from slot 10(Bonding)
+Stabilized score: 11926.381 from slot 11(Ideality)
+Stabilized score: 10389.379 from slot 12(Backbone)
+Stabilized score: 10860.921 from slot 13(Sidechain)
+DR 7.4.5 2-5 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=6=11=12  7  8  9  10=13
+Stabilized score: 12426.193 from slot 4(total)
+Stabilized score: 10175.31 from slot 7(Pairwise)
+Stabilized score: 11015.498 from slot 8(Packing)
+Stabilized score: 12416.17 from slot 9(Hiding)
+Stabilized score: 12514.82 from slot 10(Bonding)
+Fuzing best position.
+DR 7.4.6 3-6 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=12  6=11  7=8  9  10  13
+Stabilized score: 12507.588 from slot 4(total)
+Stabilized score: 12488.075 from slot 6(Clashing)
+Stabilized score: 12157.875 from slot 7(Pairwise)
+Stabilized score: 12409.565 from slot 9(Hiding)
+Stabilized score: 12403.432 from slot 10(Bonding)
+Stabilized score: 12395.818 from slot 13(Sidechain)
+Fuzing best position.
+DR 7.4.7 4-7 15 times. Wait... Current score: 12520.371
+Slotlist:  4=7=10  5=6  8  9  11=12  13
+Stabilized score: 12274.948 from slot 4(total)
+Stabilized score: 12397.719 from slot 5(loctotal)
+Stabilized score: 11432.795 from slot 8(Packing)
+Stabilized score: 12135.524 from slot 9(Hiding)
+Stabilized score: 12250.158 from slot 11(Ideality)
+Stabilized score: 12198.208 from slot 13(Sidechain)
+DR 7.4.8 27-30 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=6=11=12  7=8=10  9  13
+Stabilized score: 11871.862 from slot 4(total)
+Stabilized score: 11855.539 from slot 7(Pairwise)
+Stabilized score: 10442.03 from slot 9(Hiding)
+Stabilized score: 9996.796 from slot 13(Sidechain)
+DR 7.4.9 5-8 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=11=12  6  7  8  9=10=13
+Stabilized score: 12205.506 from slot 4(total)
+Stabilized score: 12022.619 from slot 6(Clashing)
+Stabilized score: 12121.047 from slot 7(Pairwise)
+Stabilized score: 8857.172 from slot 8(Packing)
+Stabilized score: 12334.127 from slot 9(Hiding)
+DR 7.4.10 20-23 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=6=11=12  7=13  8  9  10
+Stabilized score: 11859.972 from slot 4(total)
+Stabilized score: 11129.672 from slot 7(Pairwise)
+Stabilized score: 7240.86 from slot 8(Packing)
+Stabilized score: 11985.114 from slot 9(Hiding)
+Stabilized score: 12126.444 from slot 10(Bonding)
+Deeprebuild gain: 0
+Main cycle nr 	8
+Searching worst scoring parts of len 2
+Skipping
+4-5 11-12 21-22 23-24 29-30 35-36 36-37 
+37-38 
+Number of skips: 8
+26-27 25-26 20-21 2-3 5-6 6-7 28-29 
+24-25 3-4 27-28 19-20 
+Deeprebuild started at score: 12520.371
+DR 8.2.1 26-27 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=7=8=12  6  9=10  11  13
+Stabilized score: 12517.734 from slot 4(total)
+Stabilized score: 12488.184 from slot 6(Clashing)
+Stabilized score: 12426.566 from slot 9(Hiding)
+Stabilized score: 12511.032 from slot 11(Ideality)
+Stabilized score: 12514.919 from slot 13(Sidechain)
+Fuzing best position.
+DR 8.2.2 25-26 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=11=13  6  7=10  8=9  12
+Stabilized score: 12510.498 from slot 4(total)
+Stabilized score: 12309.687 from slot 6(Clashing)
+Stabilized score: 12502.496 from slot 7(Pairwise)
+Stabilized score: 9760.343 from slot 8(Packing)
+Stabilized score: 12512.066 from slot 12(Backbone)
+Fuzing best position.
+DR 8.2.3 20-21 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5  6  7=10  8=13  9  11  12
+Stabilized score: 12517.313 from slot 4(total)
+Stabilized score: 12500.089 from slot 6(Clashing)
+Stabilized score: 12514.846 from slot 7(Pairwise)
+Stabilized score: 12518 from slot 8(Packing)
+Stabilized score: 12497.486 from slot 9(Hiding)
+Stabilized score: 12516.371 from slot 11(Ideality)
+Stabilized score: 12514.44 from slot 12(Backbone)
+Fuzing best position.
+DR 8.2.4 2-3 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=11  6  7=13  8  9  10=12
+Stabilized score: 12512.722 from slot 4(total)
+Stabilized score: 12503.958 from slot 6(Clashing)
+Stabilized score: 12510.281 from slot 7(Pairwise)
+Stabilized score: 12329.827 from slot 8(Packing)
+Stabilized score: 12501.923 from slot 9(Hiding)
+Stabilized score: 12507.128 from slot 10(Bonding)
+Fuzing best position.
+DR 8.2.5 5-6 15 times. Wait... Current score: 12520.371
+Slotlist:  4  5=11=12  6  7=8  9  10  13
+Stabilized score: 12513.275 from slot 4(total)
+Stabilized score: 12513.039 from slot 5(loctotal)
+Stabilized score: 12390.947 from slot 6(Clashing)
+Stabilized score: 12322.68 from slot 7(Pairwise)
+Stabilized score: 12483.815 from slot 9(Hiding)
+Stabilized score: 12452.216 from slot 10(Bonding)
+Stabilized score: 12497.628 from slot 13(Sidechain)
+Fuzing best position.
+DR 8.2.6 6-7 15 times. Wait... Current score: 12520.371
+Slotlist:  4  5=6=12  7  8  9  10  11  13
+Stabilized score: 12506.745 from slot 4(total)
+Stabilized score: 12506.341 from slot 5(loctotal)
+Stabilized score: 12514.276 from slot 7(Pairwise)
+Stabilized score: 12235.288 from slot 8(Packing)
+Stabilized score: 12442.233 from slot 9(Hiding)
+Stabilized score: 12503.814 from slot 10(Bonding)
+Stabilized score: 12513.346 from slot 11(Ideality)
+Stabilized score: 12400.574 from slot 13(Sidechain)
+Fuzing best position.
+DR 8.2.7 28-29 15 times. Wait... Current score: 12520.371
+Slotlist:  4  5  6=13  7  8  9  10  11  12
+Stabilized score: 12518.324 from slot 4(total)
+Stabilized score: 12517.824 from slot 5(loctotal)
+Stabilized score: 12506.768 from slot 6(Clashing)
+Stabilized score: 12478.324 from slot 7(Pairwise)
+Stabilized score: 11112.318 from slot 8(Packing)
+Stabilized score: 11274.967 from slot 9(Hiding)
+Stabilized score: 12511.117 from slot 10(Bonding)
+Stabilized score: 12515.827 from slot 11(Ideality)
+Stabilized score: 12505.454 from slot 12(Backbone)
+Fuzing best position.
+DR 8.2.8 24-25 15 times. Wait... Current score: 12520.371
+Slotlist:  4=6=12  5=13  7  8  9  10  11
+Stabilized score: 12479.697 from slot 4(total)
+Stabilized score: 12479.981 from slot 5(loctotal)
+Stabilized score: 12397.67 from slot 7(Pairwise)
+Stabilized score: 12508.786 from slot 8(Packing)
+Stabilized score: 12458.676 from slot 9(Hiding)
+Stabilized score: 12490.425 from slot 10(Bonding)
+Stabilized score: 12477.938 from slot 11(Ideality)
+Fuzing best position.
+DR 8.2.9 3-4 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=6  7  8=10  9  11  12=13
+Stabilized score: 12514.992 from slot 4(total)
+Stabilized score: 12516.813 from slot 7(Pairwise)
+Stabilized score: 12510.167 from slot 8(Packing)
+Stabilized score: 12455.197 from slot 9(Hiding)
+Stabilized score: 12511.325 from slot 11(Ideality)
+Stabilized score: 12510.309 from slot 12(Backbone)
+Fuzing best position.
+DR 8.2.10 27-28 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=6=10=11  7=8=12  9  13
+Stabilized score: 12508.414 from slot 4(total)
+Stabilized score: 12509.092 from slot 7(Pairwise)
+Stabilized score: 12072.978 from slot 9(Hiding)
+Stabilized score: 12491.876 from slot 13(Sidechain)
+Fuzing best position.
+DR 8.2.11 19-20 15 times. Wait... Current score: 12520.371
+Slotlist:  4=10  5=6=11=13  7  8  9=12
+Stabilized score: 12518.542 from slot 4(total)
+Stabilized score: 12517.247 from slot 5(loctotal)
+Stabilized score: 12517.617 from slot 7(Pairwise)
+Stabilized score: 12516.314 from slot 8(Packing)
+Stabilized score: 12516.367 from slot 9(Hiding)
+Fuzing best position.
+Deeprebuild gain: 0
+Searching worst scoring parts of len 3
+Skipping
+2-4 3-5 4-6 5-7 19-21 20-22 24-26 
+25-27 26-28 27-29 
+Number of skips: 10
+23-25 1-3 36-38 28-30 6-8 21-23 29-31 
+34-36 37-39 35-37 11-13 
+Deeprebuild started at score: 12520.371
+DR 8.3.1 23-25 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=6=11=12  7=10  8  9  13
+Stabilized score: 12459.447 from slot 4(total)
+Stabilized score: 12454.967 from slot 7(Pairwise)
+Stabilized score: 12294.507 from slot 8(Packing)
+Stabilized score: 12390.67 from slot 9(Hiding)
+Stabilized score: 10477.302 from slot 13(Sidechain)
+DR 8.3.2 1-3 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=9=13  6  7=10  8  11  12
+Stabilized score: 12201.335 from slot 4(total)
+Stabilized score: 12080.328 from slot 6(Clashing)
+Stabilized score: 12437.463 from slot 7(Pairwise)
+Stabilized score: 11998.272 from slot 8(Packing)
+Stabilized score: 11883.034 from slot 11(Ideality)
+Stabilized score: 12128.714 from slot 12(Backbone)
+DR 8.3.3 36-38 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=6=12  7=10  8=9  11  13
+Stabilized score: 12505.234 from slot 4(total)
+Stabilized score: 12471.065 from slot 7(Pairwise)
+Stabilized score: 5424.199 from slot 8(Packing)
+Stabilized score: 12499.432 from slot 11(Ideality)
+Stabilized score: 12493.968 from slot 13(Sidechain)
+Fuzing best position.
+DR 8.3.4 28-30 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=6=7=10=11=12=13  8  9
+Stabilized score: 12515.2 from slot 4(total)
+Stabilized score: 11701.509 from slot 8(Packing)
+Stabilized score: 11034.381 from slot 9(Hiding)
+Fuzing best position.
+DR 8.3.5 6-8 15 times. Wait... Current score: 12520.371
+Slotlist:  4=5=7=11=12  6=10  8  9  13
+Stabilized score: 12518.703 from slot 4(total)
+Stabilized score: 11979.757 from slot 6(Clashing)
+Stabilized score: 11283.944 from slot 8(Packing)
+Stabilized score: 11161.715 from slot 9(Hiding)
+Stabilized score: 11089.72 from slot 13(Sidechain)
+Fuzing best position.
+Gained another 1.542 pts.
+Gain from slots 	 4=5=7=11=12(RB14)
+DR 8.3.6 21-23 15 times. Wait... Current score: 12521.913
+Slotlist:  4=5=7=10  6  8  9  11  12  13
+Stabilized score: 12220.217 from slot 4(total)
+Stabilized score: 12205.532 from slot 6(Clashing)
+Stabilized score: 9690.013 from slot 8(Packing)
+Stabilized score: 12080.028 from slot 9(Hiding)
+Stabilized score: 12125.359 from slot 11(Ideality)
+Stabilized score: 11386.451 from slot 12(Backbone)
+Stabilized score: 11994.442 from slot 13(Sidechain)
+DR 8.3.7 29-31 15 times. Wait... Current score: 12521.913
+Slotlist:  4=5=10=12  6  7  8  9  11  13
+Stabilized score: 12513.34 from slot 4(total)
+Stabilized score: 12510.792 from slot 6(Clashing)
+Stabilized score: 12441.268 from slot 7(Pairwise)
+Stabilized score: 4666.22 from slot 8(Packing)
+Stabilized score: 9307.959 from slot 9(Hiding)
+Restoring CI, initial selection, best result and structures
+[string "--[[..."]:1417: Cancelled
+ERROR: Cancelled
+</Foldit:ScriptOutput>
+</Foldit:Script>

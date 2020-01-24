@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Foldit:Script xmlns:Foldit="http://fold.it/scriptlog">
+<Foldit:Head>
+<Foldit:ScriptName>Deep Rebuild 2020</Foldit:ScriptName>
+<Foldit:ScriptDesc>Easier to read for beginners; Dev mode added for using a debugger (like Zerobrane Studio) to step through code locally to learn it more easily.</Foldit:ScriptDesc>
+<Foldit:MacroID>0</Foldit:MacroID>
+<Foldit:MacroRevisionID>0</Foldit:MacroRevisionID>
+<Foldit:ParentID>49233</Foldit:ParentID>
+<Foldit:ParentRevisionID>203349</Foldit:ParentRevisionID>
+</Foldit:Head>
+<Foldit:ScriptOutput>
+
+Computing puzzle properties...
+  Mutables found
+  Design puzzle
+  Puzzle is a symmetry puzzle or has bonuses
+  Puzzle name: [Beginner Puzzle (&lt;150): Symmetry Design]
+  Puzzle ID: [2008367]
+
+  Hello ProteinProgrammingLanguage!
+
+Activating Score Parts based on ScorePart Scores greater than 10 points...
+  Active Score Part: [Clashing] Score:[645.23502198235]
+  Active Score Part: [Pairwise] Score:[1995.4481676851]
+  Active Score Part: [Packing] Score:[5435.7168211506]
+  Active Score Part: [Hiding] Score:[4109.2437910589]
+  Active Score Part: [Bonding] Score:[1249.8798776555]
+  Active Score Part: [Ideality] Score:[185.04118670742]
+  Inactive Score Part: [Other Bonding] Score:[0]
+  Active Score Part: [Backbone] Score:[651.10203852671]
+  Active Score Part: [Sidechain] Score:[912.64009138393]
+  Inactive Score Part: [Disulfides] Score:[0]
+  Active Score Part: [Reference] Score:[1467.174]
+  Inactive Score Part: [Structure] Score:[0]
+  Inactive Score Part: [Holes] Score:[0]
+  Inactive Score Part: [Surface Area] Score:[0]
+  Inactive Score Part: [Interchain Docking] Score:[0]
+  Inactive Score Part: [Neighbor Vector] Score:[0]
+  Inactive Score Part: [Symmetry] Score:[0]
+  Inactive Score Part: [Van der Waals] Score:[0]
+  Inactive Score Part: [Density] Score:[0]
+  Inactive Score Part: [Other] Score:[0]
+  Total of All Score Parts: [16651.48099615]
+
+Mutate options are now:
+  Mutates [after qStab] [after Fuzing]
+  Mutate area is [is only the rebuilt and immediately surroundings parts]
+
+Deep Rebuild 2000
+
+Selected Options:
+  StartWorstSegment: [2]
+  EndWorstSegment: [4]
+  Segments to work on: [1-40]
+  Number of rebuilds per run cycle: [15]
+  Converting all segments to loops...
+  Will retry if gain raises above 40 pts.
+  Initial shake after rebuild (with Clash Importance: [0.31])
+  Max number of full run cycles: [40]
+  Main run cycle number: [1]
+  Searching for worst scoring Segments with g_WorstSegmentOffset: [2]
+  Segment Range(s): [20-21 26-27 25-26 5-6]
+  There are 4 segment ranges
+  Deep rebuild started with initial score of: [12225.858]
+
+Deep Rebuild - RunNumber: [1]
+  NumberOfSegmentsToBuild: [2]
+  CurrentSegmentRangeIndex: [1]
+  Segment Range: [20-21]
+  NumberOfRebuildsPerRunCycle: [15] 
+  Current score: [12225.858]
+  List of all SlotNumbers (grouped by matching SlotScore value):
+  SlotScore value: [11883.387713614] SlotNumbers: [4=5]
+  SlotScore value: [11849.171164957] SlotNumbers: [6]
+  SlotScore value: [11871.543680506] SlotNumbers: [7=10=13]
+  SlotScore value: [11864.449807331] SlotNumbers: [8]
+  SlotScore value: [11863.648967678] SlotNumbers: [9]
+  SlotScore value: [11883.116706933] SlotNumbers: [11]
+  SlotScore value: [11880.635923407] SlotNumbers: [12]
+  Stabilized score: [12222.678] from slot 4 (total)
+  Stabilized score: [12198.539] from slot 6 (Clashing)
+  Stabilized score: [12217.224] from slot 7 (Pairwise)
+  Stabilized score: [12213.442] from slot 8 (Packing)
+  Stabilized score: [12205.625] from slot 9 (Hiding)
