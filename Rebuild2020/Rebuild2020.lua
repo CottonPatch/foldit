@@ -3,6 +3,7 @@ g_ProgramVersion = "2020"
 
 -- Called from 1 place in DefineGlobalVariables()...
 function SetupLocalDebugFuntions()
+-- another Change
 
 	-- All of the following built-in FoldIt Lua functions are described here:
 	-- https://foldit.fandom.com/wiki/Foldit_Lua_Functions
