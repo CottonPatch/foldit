@@ -1,4 +1,6 @@
-Purpose: To enhance existing Lua "recipe" scripts for foldit puzzles.  
+Purpose:  
+
+To enhance existing Lua "recipe" scripts for foldit puzzles.  
 
 So far I have:  
 
