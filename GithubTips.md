@@ -28,5 +28,5 @@ Let's recap the git commands:
 
 Helpful guides:
 
-https://www.azuredevopslabs.com/labs/devopsserver/github/
+https://www.azuredevopslabs.com/labs/devopsserver/github/  
 https://www.azuredevopslabs.com/labs/devopsserver/git/
