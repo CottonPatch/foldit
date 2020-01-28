@@ -1,26 +1,22 @@
+This document descibes the rebuild program before I made any changes
+(i.e., when it was still called "Tvdl enhanced DRW 3.0.2.lua");
+therefore, most of the glossary terms, variable names and function names
+have changed since in the latest version of Rebuild2020.lua
+
 Glossary:
 
-  DRW = Deep Rebuild ?Worst?
-  bridgesaving
   CI = Clash Importance
   ED = Electron Density puzzle
-  qStab
   Fuse (Fuzing)
   Layer Filter
   nr = number
   RB = Recent Best
   WF = Wiggle Factor
+  DRW = Deep Rebuild Worst
+  qStab
+  bridgesaving
 
-
-Built-in Global Variables:
-  Hello World 2
-  Yet another change
- 
-Built-in functions:
-
-  print("Active subscore: "..Subs[i])
-  type(types)
-  xpcall(DRW,Cleanup)
+foldit functions:
 
   band.GetCount()
   behavior.GetClashImportance()
@@ -74,7 +70,7 @@ Built-in functions:
   *known* table.sort(list)
   user.GetPlayerName()
   
-User-defined Global Variables:
+Rebuild2020 Global Variables:
 
   action="rebuild"
   ActiveSub=FindActiveSubscores(true)
@@ -168,8 +164,7 @@ User-defined Global Variables:
   WORKON={{1,segCnt2}}
   WORKONbool={}
 
-
-User-defined functions:
+Rebuild2020 functions:
 
   function AddDone(first,last)
   function AddLoop(sS)
@@ -274,7 +269,6 @@ User-defined functions:
   function Sort(tab,items) --BACWARD bubble sorting - lowest on top, only needed items
   function Wiggle(how, iters, minppi,onlyselected)
 
-
 Local Variables:
 
   anychange=false
@@ -327,7 +321,6 @@ Local Variables:
   types
   wf=1
   x -- passed in to function round3(x); eg:round3(DENSITYWEIGHT),round3(Score())
-
 
 Ask values:
 
