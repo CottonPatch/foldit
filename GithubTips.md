@@ -25,3 +25,8 @@ Let's recap the git commands:
 10) Merge pull request on server
 11) Confirm merge on server
 12) Delete branch my-slide on server
+
+Helpful guides:
+
+https://www.azuredevopslabs.com/labs/devopsserver/github/
+https://www.azuredevopslabs.com/labs/devopsserver/git/
