@@ -983,10 +983,13 @@ end -- DefineGlobalVariables()
 function ScriptDocumentation()
 	--[[
 	Notes:
-	1. This script started as "Tvdl enhanced DRW 3.0.2"
-	2. See also "TvdL DRemixW 3.0.0" for possible improvements
-	3. This script uses a lot of save slots.
-	4. Best score is always stored in slot 3
+		1. This script uses a lot of save slots. Best score is always stored in slot 3
+		2. Learn more about the original script "Tvdl enhanced DRW 3.0.2" by "Timo van der Laan"
+	     here: https://foldit.fandom.com/wiki/EDRW
+		3. See also "Tvdl enhanced DRW 3.1.1" with small fixes and improvements:
+		   here: https://fold.it/portal/recipe/102840 
+		4. See also a different script approach, "Constructor v1.05" by "Grom"
+		   here: https://fold.it/portal/recipe/46192
 
 	Description:
 	1. This is a long run rebuilder script. The goal of this script is to rebuild selected and/or lowest scoring segments and segment ranges several times to find better scoring positions (aka: poses / conformations / shapes). If working on a design puzzle, this script will also look for better scoring amino acids for each (mutable / changeable) segment.
@@ -1138,7 +1141,7 @@ function CleanUp(l_ErrorMessage)
 		SelectSegmentRanges(g_OrigSelectedSegmentRanges)
 	end
 	if l_ErrorMessage ~= nil then
-		print("Error in Cleanup(): [" .. l_ErrorMessage .. "]")
+		print(l_ErrorMessage)
 	end
 	
 	local l_FinalScore = GetPoseTotalScore()
@@ -3884,8 +3887,8 @@ function AskUserToSelectSegmentsToWorkOn()
 
 					for l_SegmentIndex = 1, #l_SegmentsTable do
 						if l_SegmentsTable[l_SegmentIndex] == 0 or
-							-- l_SegmentsTable[l_SegmentIndex] > structure.GetCount() then
-							l_SegmentsTable[l_SegmentIndex] > g_SegmentCountWithLigands() then
+							l_SegmentsTable[l_SegmentIndex] > g_SegmentCountWithLigands then
+							--l_SegmentsTable[l_SegmentIndex] > structure.GetCount() then
 							print("Segment number " .. l_SegmentsTable[l_SegmentIndex] ..
 								" is not a valid segment number")
 							return false
@@ -5019,6 +5022,6 @@ function main()
 end -- main()
 
 -- run in protected mode, so if the program crashes we can fail gracefully, by calling CleanUp()...
--- xpcall(main, CleanUp)
-main()
+xpcall(main, CleanUp)
+-- main() -- Call main() directly when debugging to make finding broken line easier. It makes it more obvious where the error occured.
 

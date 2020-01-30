@@ -1,32 +1,36 @@
 Tips:
-1) #1 Tip! Immediately after cloning or creating a repository in Visual 
-  Studio, go to the menu option "View" > "Team Explorer" (Note: If 
-  you have already created a branch other than "master", then make sure
-  you are pointing to the "master" branch before continuing). If not
-  already on the "Home" page of the "Team Explorer" tab, click the
-  "Home" icon. In the "Project" section click on the "Settings" option.
-  In the "Git" section click on the "Repository Settings" link. In the 
-  "Ignore & Attributes Files" section, click the "Add" link to the right
-  of "Ignore File". To the right of "/.gitignore", click the "Edit" link.
-  Within the .gitignore file, make sure the entry ".vs/" is not commented
-  out (does not have a # sign at the beginning of the line). You might
-  also want to add the following entries, although they should not be
-  needed with the ".vs/" entry:
-    slnx.sqlite
-    VSWorkspaceState.json
-  Save the ".gitignore" file. On the "Team Explorer" tab, click the "Home"
-  icon. Click on the "Changes" option. Enter a required "commit message"
-  of "add visual studio file exclusions" Click on "Commit Staged" or
-  "Commit All" button (whichever one is displayed). Click the "Sync" link
-  to prepare an Outgoing Commit (seems weird?). In the "Outgoing Commits(1)"
-  section, click the "Push" link to push the changes to github.com. Wait
-  for confirmation. Verify the change on github.com. End of #1 Tip.
-
-Outstanding questions:
-1) Difference between fork and branch
-
-
-Glossary: (https://help.github.com/en/github/getting-started-with-github/github-glossary)  
+1 a) Immediately after cloning or creating a repository in Visual 
+     Studio, go to the menu option "View" > "Team Explorer" (Note: If 
+     you have already created a branch other than "master", then make 
+     sure you are pointing to the "master" branch before continuing). 
+1 b) If not already on the "Home" page of the "Team Explorer" tab, 
+     click on the "Home" icon. 
+1 c) In the "Project" section click on the "Settings" option. 
+1 d) In the "Git" section click on the "Repository Settings" link. 
+1 e) In the "Ignore & Attributes Files" section, click on the "Add" 
+     link to the right of "Ignore File". 
+1 f) To the right of "/.gitignore", click on the "Edit" link. 
+1 g) Within the .gitignore file, make sure the entry ".vs/" is not 
+     commented out (does not have a # sign at the beginning of the 
+     line). 
+1 h) You might also want to add the following entries, although they 
+     should not be needed with the ".vs/" entry: 
+    slnx.sqlite  
+    VSWorkspaceState.json  
+1 i) Save the ".gitignore" file. 
+1 j) On the "Team Explorer" tab, click on the "Home" icon. 
+1 k) Click on the "Changes" option. 
+1 l) Enter a required "commit message" of "add visual studio file 
+     exclusions" 
+1 m) Click on the "Commit Staged" or "Commit All" button (whichever 
+     one is displayed). 
+1 n) Click the "Sync" link to prepare an Outgoing Commit (seems weird?). 
+1 o) In the "Outgoing Commits(1)" section, click on the "Push" link to 
+     push the changes to github.com. Wait for the confirmation. 
+1 p) Verify the change on github.com. 
+  
+Glossary: 
+ (see also https://help.github.com/en/github/getting-started-with-github/github-glossary)  
 - Abandoned: 
 - Active: 
 - Actions: GitHub Actions enables you to create custom software development life cycle (SDLC) workflows directly in your GitHub repository. Actions are individual tasks that you can combine to create jobs and customize your workflow. You can create your own actions, and use and customize actions shared by the GitHub community.  
@@ -56,7 +60,7 @@ Glossary: (https://help.github.com/en/github/getting-started-with-github/github-
 - Force: 
 - Fork: A fork is a personal copy of another user's repository that lives on your account. Forks allow you to freely make changes to a project without affecting the original. Forks remain attached to the original, allowing you to submit a pull request to the original's author to update with your changes. You can also keep your fork up to date by pulling in updates from the original.  
 - .gitattributes (Attributes File): 
-- .gitignore (Ignore File): Example entry: ".vs\" ignores visual studio temp files
+- .gitignore (Ignore File): Example entry: ".vs\" ignores visual studio temp files 
 - gists: 
 - Git: Git is an open source program for tracking changes in text files, and is the core technology that GitHub, the social and user interface, is built on top of. 
 - GitHub: github.com 
@@ -66,12 +70,12 @@ Glossary: (https://help.github.com/en/github/getting-started-with-github/github-
 - Keep: 
 - Local branch: the code residing on your local machine.  
 - Manage Connections: 
-- master: The primary branch on the original repository. The main place that other changes are merged into. Also referred to as the "upstream". The branch/fork you are working on is then called the "downstream".
+- master: The primary branch on the original repository. The main place that other changes are merged into. Also referred to as the "upstream". The branch/fork you are working on is then called the "downstream". 
 - Merge: Merging takes the changes from one branch (in the same repository or from a fork), and applies them into another. This often happens as a pull request (which can be thought of as a request to merge), or via the command line. A merge can be done automatically via a pull request via the GitHub web interface if there are no conflicting changes, or can always be done via the command line. For more information, see "Merging a pull request."  
 - Merge Commits: Add all commits from the head branch to the base branch with a merge commit. 
 - Merge Conflicts: 
 - Non-Fast-Forward Errors: 
-- origin: "remotes/origin" usually refers to the branches (master and others) on github.com. In Git, "origin" is a shorthand name for the remote repository that a project was originally cloned from. More precisely, it is used instead of that original repository's URL (because "origin" is shorter than the full URL of the respository)
+- origin: "remotes/origin" usually refers to the branches (master and others) on github.com. In Git, "origin" is a shorthand name for the remote repository that a project was originally cloned from. More precisely, it is used instead of that original repository's URL (because "origin" is shorter than the full URL of the respository) 
 - Portable: 
 - Projects: 
 - Prune: The git prune command is an internal housekeeping utility that deletes lost or "orphaned" Git objects. Unreachable objects are those that are inaccessible by any refs. Any commit that cannot be accessed through a branch or tag is considered unreachable or not present. 
@@ -87,7 +91,7 @@ Glossary: (https://help.github.com/en/github/getting-started-with-github/github-
 - Repository: A repository is the most basic element of GitHub. They're easiest to imagine as a project's folder. A repository contains all of the project files (including documentation), and stores each file's revision history. Repositories can have multiple collaborators and can be either public or private.  
 - Runners: 
 - Settings: 
-- Squash Merging: Combine all commits from the head branch into a single commit in the base branch. vs Rebase Merging
+- Squash Merging: Combine all commits from the head branch into a single commit in the base branch. vs Rebase Merging 
 - Split: 
 - Stage: 
 - Staged: 
@@ -98,48 +102,56 @@ Glossary: (https://help.github.com/en/github/getting-started-with-github/github-
 - Tags: 
 - Topic Branch: 
 - Unify: 
-- Unset: Remove the line matching the key from config file. Example: "git config --unset diff.renames", deletes "renames=true" in the "[diff]" section of .git/config file. See also https://git-scm.com/docs/git-config/2.1.4
+- Unset: Remove the line matching the key from config file. Example: "git config --unset diff.renames", deletes "renames=true" in the "[diff]" section of .git/config file. See also https://git-scm.com/docs/git-config/2.1.4 
 - Workflow: 
 - Work Item: Same as an Issue? 
-
-
-Helpful guides and documents:
+  
+Helpful guides and documents: 
 https://www.azuredevopslabs.com/labs/devopsserver/github/  
-https://www.azuredevopslabs.com/labs/devopsserver/git/
-https://help.github.com/en/github/using-git
-
-Perform the github-slideshow tutorial, with the following steps:
-1) Create github.com account billybobbobrownjr
-2) While on github.com, clone github-slideshow to my billybobbobrownjr github account 
-3) Install VS-2019 or VS-Code
-4) Within VS-2019, clone my github.com copy of github-slideshow to my local machine into c:\users\bcotton\source\repos\billybobbobrownjr\github-slideshow
-5) Within VS-2019, create a branch from master called my-slide
-6) Within VS-2019, "push" the my-slide branch declaration to my github.com copy of github-slideshow
-7) Within VS-2019, add a new file (slide) called 0000-01-02-billybobbobrownjr.md to the local my-slide branch.
+https://www.azuredevopslabs.com/labs/devopsserver/git/ 
+https://help.github.com/en/github/using-git 
+ 
+Perform the github-slideshow tutorial, with the following steps: 
+1) Create a github.com account with [make up a github username] 
+2) While on github.com, clone github-slideshow to your github account 
+3) Install VS-2019 or VS-Code 
+4) Within VS-2019, clone your github.com copy of github-slideshow to your local machine into 
+   c:\users\[pc/mac/whatever username]\source\repos\[github username]\github-slideshow  
+5) Within VS-2019, create a branch from master called my-slide 
+6) Within VS-2019, "push" the my-slide branch declaration to your github.com copy of 
+   github-slideshow 
+7) Within VS-2019, add a new file called "0000-01-02-[github username].md" to your local 
+  my-slide branch. 
 8) Within VS-2019, commit the change to the local github-slideshow repos. 
-   I believe this is the equivalent of "add new file to version control database at the my-slide branch" and is the
-   file's first history entry in the local github-slideshow repos. This file is still not in the local master branch
-   of the github-slideshow repos and also is not yet on github.com.  
-9) Within VS-2019, create pull request (This creates the pull request locally and on the server) to ask if new file can be merged from local my-slide branch to local (and server!) master branch  
-10) On github.com, merge pull request (note:I also did a lot of stuff in VS-2019: Edited a file, commited the file, pushed, pulled, resolved conflicts, committed, merged; and not necessarily in that order. It was very messy)  
+   This is the equivalent of "add a new file to version control database at the my-slide branch",  
+   and this is the file's first history entry in the local github-slideshow repos. This file is 
+   still not in your local master branch of the github-slideshow repos and certainly is not yet 
+   on ithub.com.  
+9) Within VS-2019, create a pull request. This creates the pull request locally (and on the 
+   server!) to ask if the new file can be merged from your local "my-slide" branch to your 
+   local (and server!) master branch 
+10) On github.com, merge the pull request (note: I also did a lot of stuff in VS-2019: 
+    Edited a file, commited the file, pushed, pulled, resolved conflicts, committed, 
+    merged; and not necessarily in that order. It was very messy)  
 11) On github.com, confirm merge  
-12) On github.com, delete my-slide branch
-   
+12) On github.com, delete my-slide branch 
+    
 Let's recap the git commands:  
 2) Clone on server  
 4) Clone on local  
 5) Branch on local  
 6) Push branch to server  
-8) Commit new file to local
-9) Pull request to merge-to-master on local (and server!)
-10) Merge pull request on server
-11) Confirm merge on server
-12) Delete branch my-slide on server
-
-Another way to look at it:
+8) Commit new file to local 
+9) Pull request to merge-to-master on local (and server!) 
+10) Merge pull request on server 
+11) Confirm merge on server 
+12) Delete branch my-slide on server 
+ 
+Another way to look at it: 
 1) Create a branch from the repository.  
 2) Create, edit, rename, move, or delete files.  
 3) Send a pull request from your branch with your proposed changes to kick off a discussion.  
 4) Make changes on your branch as needed. Your pull request will update automatically.  
 5) Merge the pull request once the branch is ready to be merged.  
 6) Tidy up your branches using the delete button in the pull request or on the branches page.  
+
