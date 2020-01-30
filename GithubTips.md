@@ -102,24 +102,13 @@ Perform the github-slideshow tutorial, with the following steps:
 1) Create a github.com account with [make up a github username]  
 2) While on github.com, clone github-slideshow to your github account  
 3) Install VS-2019 or VS-Code  
-4) Within VS-2019, clone your github.com copy of github-slideshow to your local machine into  
-   c:\users\[pc/mac/whatever username]\source\repos\[github username]\github-slideshow  
+4) Within VS-2019, clone your github.com copy of github-slideshow to your local machine into c:\users\[pc/mac/whatever username]\source\repos\[github username]\github-slideshow  
 5) Within VS-2019, create a branch from master called my-slide  
-6) Within VS-2019, "push" the my-slide branch declaration to your github.com copy of  
-   github-slideshow  
-7) Within VS-2019, add a new file called "0000-01-02-[github username].md" to your local  
-  my-slide branch. 
-8) Within VS-2019, commit the change to the local github-slideshow repos.  
-   This is the equivalent of "add a new file to version control database at the my-slide branch",  
-   and this is the file's first history entry in the local github-slideshow repos. This file is  
-   still not in your local master branch of the github-slideshow repos and certainly is not yet  
-   on ithub.com.  
-9) Within VS-2019, create a pull request. This creates the pull request locally (and on the  
-   server!) to ask if the new file can be merged from your local "my-slide" branch to your  
-   local (and server!) master branch  
-10) On github.com, merge the pull request (note: I also did a lot of stuff in VS-2019:  
-    Edited a file, commited the file, pushed, pulled, resolved conflicts, committed,  
-    merged; and not necessarily in that order. It was very messy)  
+6) Within VS-2019, "push" the my-slide branch declaration to your github.com copy of github-slideshow  
+7) Within VS-2019, add a new file called "0000-01-02-[github username].md" to your local my-slide branch. 
+8) Within VS-2019, commit the change to the local github-slideshow repos. This is the equivalent of "add a new file to version control database at the my-slide branch", and this is the file's first history entry in the local github-slideshow repos. This file is still not in your local master branch of the github-slideshow repos and certainly is not on github.com yet.  
+9) Within VS-2019, create a pull request. This creates the pull request locally (and on the server!) to ask if the new file can be merged from your local "my-slide" branch to your local (and server!) master branch  
+10) On github.com, merge the pull request (note: I also did a lot of stuff in VS-2019: Edited a file, commited the file, pushed, pulled, resolved conflicts, committed, merged; and not necessarily in that order. It was very messy)  
 11) On github.com, confirm merge  
 12) On github.com, delete my-slide branch  
     
