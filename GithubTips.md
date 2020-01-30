@@ -1,33 +1,20 @@
-Tips:  
-1 a) Immediately after cloning or creating a repository in Visual  
-     Studio, go to the menu option "View" > "Team Explorer" (Note: If  
-     you have already created a branch other than "master", then make  
-     sure you are pointing to the "master" branch before continuing).  
-1 b) If not already on the "Home" page of the "Team Explorer" tab,  
-     click on the "Home" icon.  
-1 c) In the "Project" section click on the "Settings" option.  
-1 d) In the "Git" section click on the "Repository Settings" link.  
-1 e) In the "Ignore & Attributes Files" section, click on the "Add"  
-     link to the right of "Ignore File".  
-1 f) To the right of "/.gitignore", click on the "Edit" link.  
-1 g) Within the .gitignore file, make sure the entry ".vs/" is not  
-     commented out (does not have a # sign at the beginning of the  
-     line).  
-1 h) You might also want to add the following entries, although they  
-     should not be needed with the ".vs/" entry:  
-    slnx.sqlite  
-    VSWorkspaceState.json  
-1 i) Save the ".gitignore" file.  
-1 j) On the "Team Explorer" tab, click on the "Home" icon.  
-1 k) Click on the "Changes" option.  
-1 l) Enter a required "commit message" of "add visual studio file  
-     exclusions"  
-1 m) Click on the "Commit Staged" or "Commit All" button (whichever  
-     one is displayed).  
-1 n) Click the "Sync" link to prepare an Outgoing Commit (seems weird?).  
-1 o) In the "Outgoing Commits(1)" section, click on the "Push" link to  
-     push the changes to github.com. Wait for the confirmation.  
-1 p) Verify the change on github.com.  
+Tip:  Make sure your .gitignore file is set up correctly in Visual Studio 2019. If this file is not set up correctly you might end up getting merge conflicts between your local and remote (github.com) repositories. Here's how to check your .gitignore file in Visual Studio:  
+1. Immediately after cloning or creating a local repository in Visual Studio, go to the menu option "View" > "Team Explorer" (Note: If you have already created a branch other than "master", then make sure you are pointing to the "master" branch before continuing).
+2. If not already on the "Home" page of the "Team Explorer" tab, click on the "Home" icon.
+3. In the "Project" section click on the "Settings" option.  
+4. In the "Git" section click on the "Repository Settings" link.  
+5. In the "Ignore & Attributes Files" section, click on the "Add" link to the right of "Ignore File".  
+6. To the right of "/.gitignore", click on the "Edit" link.  
+7. Within the .gitignore file, make sure the entry ".vs/" is not commented out (does not have a # sign at the beginning of the line).  
+8. You might also want to add the following two entries, although they should not be needed with the ".vs/" entry:  slnx.sqlite, VSWorkspaceState.json (put each entry on its own line)
+9. Save the ".gitignore" file.  
+10. On the "Team Explorer" tab, click on the "Home" icon.  
+11. Click on the "Changes" option.  
+12. Enter a required "commit message" of "add visual studio file exclusions"  
+13. Click on the "Commit Staged" or "Commit All" button (whichever one is displayed). Or, better yet, click on "Commit All and Push", then you could skip the following two steps.
+14. Click the "Sync" link to prepare an Outgoing Commit (not sure why?).  
+15. In the "Outgoing Commits(1)" section, click on the "Push" link to push the changes to github.com. Wait for the confirmation.  
+16. Verify the file addition / change on github.com.  
   
 Glossary:  
  (see also https://help.github.com/en/github/getting-started-with-github/github-glossary)  
