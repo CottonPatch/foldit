@@ -1,38 +1,38 @@
-Tips:
-1 a) Immediately after cloning or creating a repository in Visual 
-     Studio, go to the menu option "View" > "Team Explorer" (Note: If 
-     you have already created a branch other than "master", then make 
-     sure you are pointing to the "master" branch before continuing). 
-1 b) If not already on the "Home" page of the "Team Explorer" tab, 
-     click on the "Home" icon. 
-1 c) In the "Project" section click on the "Settings" option. 
-1 d) In the "Git" section click on the "Repository Settings" link. 
-1 e) In the "Ignore & Attributes Files" section, click on the "Add" 
-     link to the right of "Ignore File". 
-1 f) To the right of "/.gitignore", click on the "Edit" link. 
-1 g) Within the .gitignore file, make sure the entry ".vs/" is not 
-     commented out (does not have a # sign at the beginning of the 
-     line). 
-1 h) You might also want to add the following entries, although they 
-     should not be needed with the ".vs/" entry: 
+Tips:  
+1 a) Immediately after cloning or creating a repository in Visual  
+     Studio, go to the menu option "View" > "Team Explorer" (Note: If  
+     you have already created a branch other than "master", then make  
+     sure you are pointing to the "master" branch before continuing).  
+1 b) If not already on the "Home" page of the "Team Explorer" tab,  
+     click on the "Home" icon.  
+1 c) In the "Project" section click on the "Settings" option.  
+1 d) In the "Git" section click on the "Repository Settings" link.  
+1 e) In the "Ignore & Attributes Files" section, click on the "Add"  
+     link to the right of "Ignore File".  
+1 f) To the right of "/.gitignore", click on the "Edit" link.  
+1 g) Within the .gitignore file, make sure the entry ".vs/" is not  
+     commented out (does not have a # sign at the beginning of the  
+     line).  
+1 h) You might also want to add the following entries, although they  
+     should not be needed with the ".vs/" entry:  
     slnx.sqlite  
     VSWorkspaceState.json  
-1 i) Save the ".gitignore" file. 
-1 j) On the "Team Explorer" tab, click on the "Home" icon. 
-1 k) Click on the "Changes" option. 
-1 l) Enter a required "commit message" of "add visual studio file 
-     exclusions" 
-1 m) Click on the "Commit Staged" or "Commit All" button (whichever 
-     one is displayed). 
-1 n) Click the "Sync" link to prepare an Outgoing Commit (seems weird?). 
-1 o) In the "Outgoing Commits(1)" section, click on the "Push" link to 
-     push the changes to github.com. Wait for the confirmation. 
-1 p) Verify the change on github.com. 
+1 i) Save the ".gitignore" file.  
+1 j) On the "Team Explorer" tab, click on the "Home" icon.  
+1 k) Click on the "Changes" option.  
+1 l) Enter a required "commit message" of "add visual studio file  
+     exclusions"  
+1 m) Click on the "Commit Staged" or "Commit All" button (whichever  
+     one is displayed).  
+1 n) Click the "Sync" link to prepare an Outgoing Commit (seems weird?).  
+1 o) In the "Outgoing Commits(1)" section, click on the "Push" link to  
+     push the changes to github.com. Wait for the confirmation.  
+1 p) Verify the change on github.com.  
   
-Glossary: 
+Glossary:  
  (see also https://help.github.com/en/github/getting-started-with-github/github-glossary)  
-- Abandoned: 
-- Active: 
+- Abandoned:  
+- Active:  
 - Actions: GitHub Actions enables you to create custom software development life cycle (SDLC) workflows directly in your GitHub repository. Actions are individual tasks that you can combine to create jobs and customize your workflow. You can create your own actions, and use and customize actions shared by the GitHub community.  
 - Assigned: 
 - Attributes File (.gitattributes): 
@@ -108,50 +108,50 @@ Glossary:
   
 Helpful guides and documents: 
 https://www.azuredevopslabs.com/labs/devopsserver/github/  
-https://www.azuredevopslabs.com/labs/devopsserver/git/ 
-https://help.github.com/en/github/using-git 
- 
-Perform the github-slideshow tutorial, with the following steps: 
-1) Create a github.com account with [make up a github username] 
-2) While on github.com, clone github-slideshow to your github account 
-3) Install VS-2019 or VS-Code 
-4) Within VS-2019, clone your github.com copy of github-slideshow to your local machine into 
+https://www.azuredevopslabs.com/labs/devopsserver/git/  
+https://help.github.com/en/github/using-git  
+  
+Perform the github-slideshow tutorial, with the following steps:  
+1) Create a github.com account with [make up a github username]  
+2) While on github.com, clone github-slideshow to your github account  
+3) Install VS-2019 or VS-Code  
+4) Within VS-2019, clone your github.com copy of github-slideshow to your local machine into  
    c:\users\[pc/mac/whatever username]\source\repos\[github username]\github-slideshow  
-5) Within VS-2019, create a branch from master called my-slide 
-6) Within VS-2019, "push" the my-slide branch declaration to your github.com copy of 
-   github-slideshow 
-7) Within VS-2019, add a new file called "0000-01-02-[github username].md" to your local 
+5) Within VS-2019, create a branch from master called my-slide  
+6) Within VS-2019, "push" the my-slide branch declaration to your github.com copy of  
+   github-slideshow  
+7) Within VS-2019, add a new file called "0000-01-02-[github username].md" to your local  
   my-slide branch. 
-8) Within VS-2019, commit the change to the local github-slideshow repos. 
+8) Within VS-2019, commit the change to the local github-slideshow repos.  
    This is the equivalent of "add a new file to version control database at the my-slide branch",  
-   and this is the file's first history entry in the local github-slideshow repos. This file is 
-   still not in your local master branch of the github-slideshow repos and certainly is not yet 
+   and this is the file's first history entry in the local github-slideshow repos. This file is  
+   still not in your local master branch of the github-slideshow repos and certainly is not yet  
    on ithub.com.  
-9) Within VS-2019, create a pull request. This creates the pull request locally (and on the 
-   server!) to ask if the new file can be merged from your local "my-slide" branch to your 
-   local (and server!) master branch 
-10) On github.com, merge the pull request (note: I also did a lot of stuff in VS-2019: 
-    Edited a file, commited the file, pushed, pulled, resolved conflicts, committed, 
+9) Within VS-2019, create a pull request. This creates the pull request locally (and on the  
+   server!) to ask if the new file can be merged from your local "my-slide" branch to your  
+   local (and server!) master branch  
+10) On github.com, merge the pull request (note: I also did a lot of stuff in VS-2019:  
+    Edited a file, commited the file, pushed, pulled, resolved conflicts, committed,  
     merged; and not necessarily in that order. It was very messy)  
 11) On github.com, confirm merge  
-12) On github.com, delete my-slide branch 
+12) On github.com, delete my-slide branch  
     
 Let's recap the git commands:  
 2) Clone on server  
 4) Clone on local  
 5) Branch on local  
 6) Push branch to server  
-8) Commit new file to local 
-9) Pull request to merge-to-master on local (and server!) 
-10) Merge pull request on server 
-11) Confirm merge on server 
-12) Delete branch my-slide on server 
- 
-Another way to look at it: 
+8) Commit new file to local  
+9) Pull request to merge-to-master on local (and server!)  
+10) Merge pull request on server  
+11) Confirm merge on server  
+12) Delete branch my-slide on server  
+  
+Another way to look at it:  
 1) Create a branch from the repository.  
 2) Create, edit, rename, move, or delete files.  
 3) Send a pull request from your branch with your proposed changes to kick off a discussion.  
 4) Make changes on your branch as needed. Your pull request will update automatically.  
 5) Merge the pull request once the branch is ready to be merged.  
-6) Tidy up your branches using the delete button in the pull request or on the branches page.  
-
+6) Tidy up your branches using the delete button in the pull request or on the branches page.   
+  
