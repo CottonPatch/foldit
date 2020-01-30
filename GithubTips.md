@@ -106,7 +106,7 @@ Glossary:
 - Workflow: 
 - Work Item: Same as an Issue? 
   
-Helpful guides and documents: 
+Helpful guides and documents:  
 https://www.azuredevopslabs.com/labs/devopsserver/github/  
 https://www.azuredevopslabs.com/labs/devopsserver/git/  
 https://help.github.com/en/github/using-git  

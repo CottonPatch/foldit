@@ -21,5 +21,7 @@ Tips:
 6) See GithubTip.md for tips on using GitHub within VS-2019. 
  
 Learn more: 
-1) Learn more about the original foldit lua script "Tvdl enhanced DRW 3.0.2" by "Timo van der Laan" here: https://foldit.fandom.com/wiki/EDRW 
+1. Learn more about the original foldit lua script "Tvdl enhanced DRW 3.0.2" by "Timo van der Laan" here: https://foldit.fandom.com/wiki/EDRW 
+2. See also "Tvdl enhanced DRW 3.1.1" with small fixes and improvements here: https://fold.it/portal/recipe/102840 
+3. See also a different script approach, "Constructor v1.05" by "Grom" here: https://fold.it/portal/recipe/46192
  
