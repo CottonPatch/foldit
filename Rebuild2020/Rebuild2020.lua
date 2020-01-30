@@ -581,12 +581,10 @@ function DefineGlobalVariables()
 	--
 	-- *** Start of Table Declarations...***
 	--
-	-- g_CysteineSegmentsTable:
 	--  Used in CountDisulfideBonds(), PopulateGlobalCysteinesTable() and DisplayPuzzleProperties()
 	g_CysteineSegmentsTable = {}
 	--g_CysteineSegmentsTable={SegmentIndex}
 
-	-- g_SegmentRangesTable:
 	--  Used in InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges(), DefineGlobalVariables(),
 	--          Add_Loop_SegmentRange_To_SegmentRangesTable(),
 	--          Add_Loop_Plus_One_Other_Type_SegmentRange_To_SegmentRangesTable(), DisplaySegmentRanges(),
@@ -599,28 +597,24 @@ function DefineGlobalVariables()
 		srt_EndSegment = 2
 	-- g_SegmentRangesTable initially includes all the segments in the main protein (ie; no ligands)
 
-	-- g_SegmentScoresTable:
 	--  Used in GetScorePart_Score() and PopulateGlobalSegmentScoresTableBasedOnUserSelectedScoreParts()
 	g_SegmentScoresTable = {}
 	-- g_SegmentScoresTable={SegmentScore}
 	-- g_SegmentScoresTable is optimized for quickly searching for 
 	-- the worst scoring segments, so we can work on those first.
 
-	-- g_SegmentRangesDoneIndexTable:
 	--  Used in AddSegmentRangeDone() and ClearSegmentRangesDoneAndSegmentsDoneTables()
 	g_SegmentRangesDoneIndexTable = {}
 	-- g_SegmentRangesDoneIndexTable={SegmentRangesDoneTableIndex}
 	-- g_SegmentRangesDoneIndexTable gives us convenient way (only way) to look up
 	-- l_SegmentRangesDoneTableIndex values to allow us to clear the g_SegmentRangesDoneTable...
 
-	-- g_SegmentRangesDoneTable:
 	--  Used in AddSegmentRangeDone(), bCheckIfSegmentRangeIsDone() and
 	--          ClearSegmentRangesDoneAndSegmentsDoneTables()
 	g_SegmentRangesDoneTable = {}
 	-- g_SegmentRangesDoneTable={true/false}
 	-- g_SegmentRangesDoneTable keeps track of which Segment Ranges have already been processed...
 
-	-- g_SegmentsDoneTable:
 	--  Used in AddSegmentRangeDone(), bCheckIfSegmentRangeIsDone(), CheckIfDoneSegmentsMustBeIncluded() and
 	--          ClearSegmentRangesDoneAndSegmentsDoneTables()
 	g_SegmentsDoneTable = {}
@@ -633,7 +627,6 @@ function DefineGlobalVariables()
 	g_SegmentsToWorkOnBooleanTable = {}
 	-- g_SegmentsToWorkOnBooleanTable={true/false}
 
-	-- g_SlotScoresTable:
 	--  Used in PopulateGlobalSlotScoresTable(),
 	--  Update_SlotScoresTable_ScorePart_Score_SlotScore_And_RebuildNumber_Fields(),
 	--  Update_SlotScoresTable_ToDo_And_ShowList_Fields() and RebuildManySegmentRanges()
@@ -646,11 +639,10 @@ function DefineGlobalVariables()
 		sst_bToDo = 5 -- work to do?
 		sst_RebuildNumber = 6 -- why?
 
-	--  g_SlotsTable:
-	--    Used in PopulateGlobalSlotsTable(), PopulateGlobalSlotScoresTable(),
-	--            Update_SlotScoresTable_ScorePart_Score_SlotScore_And_RebuildNumber_Fields(),
-	--            AskUserToSelectSlotsToWorkOn(), AskUserToSelectScorePartsToWorkOn(),
-	--            bAskUserToSelectRebuildOptions() and RebuildManySegmentRanges()
+	--  Used in PopulateGlobalSlotsTable(), PopulateGlobalSlotScoresTable(),
+	--          Update_SlotScoresTable_ScorePart_Score_SlotScore_And_RebuildNumber_Fields(),
+	--          AskUserToSelectSlotsToWorkOn(), AskUserToSelectScorePartsToWorkOn(),
+	--          bAskUserToSelectRebuildOptions() and RebuildManySegmentRanges()
 	g_SlotsTable = {}
 	-- g_SlotsTable={SlotNumber=1, ScorePart_Name=2, bIsActive=3, LongName=4}
 		st_SlotNumber = 1
@@ -658,15 +650,13 @@ function DefineGlobalVariables()
 		st_bIsActive = 3
 		st_LongName = 4
 
-	-- g_UserSelectedScorePartsToWorkOnTable:
 	--  Used by PopulateGlobalSegmentScoresTableBasedOnUserSelectedScoreParts() and
 	--          AskUserToSelectScorePartsToWorkOn()
 	g_UserSelectedScorePartsToWorkOnTable = {}
 	--g_UserSelectedScorePartsToWorkOnTable={ScorePart_Name}
 	--
 	-- ***...end of Table Declarations.***
-	--
-	-- g_SegmentCountWithLigands:
+	
 	--  Used in DefineGlobalVariables(), InvertSegmentRangesTable(),
 	--          ConvertSegmentRangesTableToSegmentsToWorkOnBooleanTable(), FindSelectedSegments(),
 	--          CalculateSegmentRangeScore(), GetScorePart_Score(), PopulateGlobalActiveScorePartsTable(),
@@ -676,7 +666,6 @@ function DefineGlobalVariables()
 	-- protein plus number of segments in ligand
 	-- print("structure.GetCount()=[" .. structure.GetCount() .. "]")
 
-	-- g_SegmentCountWithoutLigands:
 	--  Used in DefineGlobalVariables(), InvertSegmentsTable(), GetNumberOfMutableSegments(),
 	--          FindFrozenSegments(), FindFrozenSegmentRanges(), FindSegmentsWithSecondaryStructureType(),
 	--          FindSegmentsWithAminoAcidType(), ConvertAllSegmentsToLoops(), AddSegmentRangeDone(), 
@@ -690,8 +679,9 @@ function DefineGlobalVariables()
 	--          DisplayPuzzleProperties(), AskMoreOptions(), bAskUserToSelectRebuildOptions() and
 	--          PrepareToRebuildSegmentRanges()
 	g_SegmentCountWithoutLigands = g_SegmentCountWithLigands -- minus ligand segments (see below)
-	-- g_SegmentCountWithLigands = The number of segments (amino acids) in just the protein, not the ligand
+	-- g_SegmentCountWithLigands = The number of segments (amino acids) in the protein plus the segments in any ligand
 	-- g_SegmentCountWithoutLigands = The number of segments without structure type="M" (ligands)
+	
 	-- Now, subtract the ligand segments...
 	local l_SegmentIndex
 	for l_SegmentIndex = g_SegmentCountWithLigands, 1, -1 do
@@ -707,62 +697,63 @@ function DefineGlobalVariables()
 		end
 	end
 	-- print("g_SegmentCountWithoutLigands=[" .. g_SegmentCountWithoutLigands .. "]")
-	g_SegmentRangesTable = {{1, g_SegmentCountWithoutLigands}} -- Ligands always come last.
+	g_SegmentRangesTable = {{1, g_SegmentCountWithoutLigands}} -- Ligand segment numbers are always after the protein segment numbers.
 
-	-- g_AdditionalNumberOfSegmentRangesToProcessPerRunCycle:
 	--  Used in AskMoreOptions() and main()
 	g_AdditionalNumberOfSegmentRangesToProcessPerRunCycle = 1
-	-- g_bAllowMultipleAttempts:
+	
 	--  Used in AddSegmentRangeDone(), bCheckIfSegmentRangeIsDone(),
-	--          CheckMinimumPointsGainedRequiredToAllowRetryingSegmentRanges(), 
+	--          CheckbAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesIfRebuildGainsMoreThan(), 
 	--          DisplaySelectedOptions() and AskMoreOptions()
-	g_bAllowMultipleAttempts = false -- This can only get set to true if user selects it's checkbox
-	-- g_bBetterRecentBest:
+	g_bAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCycles = false -- This can only get set to true if user selects it's checkbox
+	
 	--  Used in EnableFastCPUProcessing(), DisableFastCPUProcessing()
 	g_bBetterRecentBest = false
-	-- g_bConvertAllSegmentsToLoops:
+	
 	--  Used in DisplaySelectedOptions(), bAskUserToSelectRebuildOptions() and 
 	--          RebuildManySegmentRanges
 	g_bConvertAllSegmentsToLoops = true -- Why is the default true?
-	-- g_bFreeDesignPuzzle:
+	
 	--  Used in DisplayPuzzleProperties() -- for informational display to user only.
 	g_bFreeDesignPuzzle = false
-	-- g_bFuseBestPosition:
+	
 	--  Used in CheckForLowStartingScore(), DisplaySelectedOptions(), AskMoreOptions() and
 	--          RebuildManySegmentRanges()
 	g_bFuseBestPosition = true
-	-- g_bHasDensity:
+	
 	--  Used in CheckForLowStartingScore() and DisplayPuzzleProperties()
 	g_bHasDensity = false
-	-- g_bHasLigand:
+	
 	--  Used in PopulateGlobalSlotsTable(), 
 	g_bHasLigand = (g_SegmentCountWithoutLigands < g_SegmentCountWithLigands)
-	-- g_bMaxClashImportance:
+	
 	--  Used in SetClashImportance() and ShakeAndOrWiggle()
 	g_bMaxClashImportance = true
-	-- g_bMutateAfterFuseBestPosition:
+	
 	--  Used in DefineGlobalVariables(), AskUserForMutateOptions(), bAskUserToSelectRebuildOptions() and
 	--          RebuildManySegmentRanges()
 	g_bMutateAfterFuseBestPosition = false
-	-- g_bMutateAfterNormalStabilization:
+
 	--  Used in DefineGlobalVariables(), AskUserForMutateOptions(), bAskUserToSelectRebuildOptions() and
 	--          RebuildManySegmentRanges()
 	g_bMutateAfterNormalStabilization = false
-	-- g_bMutateAfterRebuild:
+
 	--  Used in AskUserForMutateOptions(), bAskUserToSelectRebuildOptions(),
 	--          RebuildOneSegmentRangeManyTimes()
 	g_bMutateAfterRebuild = false
+
 	g_bMutateBeforeFuseBestPosition = false
 	g_bMutateDuringNormalStabilization = false
 	g_bMutateOnlySelectedSegments = false
 	g_bMutateSelectedAndNearbySegments = false
 	g_bOnlyRebuildLoops = true -- only rebuild loop segments
-	-- g_bOnlyWorkOnPreviouslyDoneSegments:
+
 	--  Used in AddSegmentRangeDone(), bCheckIfSegmentRangeIsDone(), CheckIfDoneSegmentsMustBeIncluded(),
 	--          ClearSegmentRangesDoneAndSegmentsDoneTables(),
-	--          CheckMinimumPointsGainedRequiredToAllowRetryingSegmentRanges(), 
+	--          CheckbAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesIfRebuildGainsMoreThan(), 
 	--          DisplaySelectedOptions() and bAskUserToSelectRebuildOptions()
 	g_bOnlyWorkOnPreviouslyDoneSegments = false -- User can change this on options page
+
 	g_bPerformExtraStabilization = false
 	g_bPerformNormalStabilization = true
 	g_bProbableSymmetryPuzzle = false
@@ -774,50 +765,52 @@ function DefineGlobalVariables()
 	g_bShake_And_Wiggle_OnlySelectedSegments = true -- false = include nearby segments
 	g_bShake_And_Wiggle_WithSelectedSegments = true -- (after each rebuild) not too slow
 	g_bShake_And_Wiggle_WithSideChainsAndBackbone_WithSelectedAndNearbySegments = false -- true = very slow
-	-- g_bUserWantsToKeepDisulfideBondsIntact:
+
 	--  Used in bOneOrMoreDisulfideBondsHaveBroken(), RememberSolutionWithDisulfideBondsIntact(),
 	--          CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact(), DisplayPuzzleProperties(),
 	--          bAskUserToSelectRebuildOptions(), RebuildSelectedSegments(),
 	--          RebuildOneSegmentRangeManyTimes() and RebuildManySegmentRanges()
 	g_bUserWantsToKeepDisulfideBondsIntact = false
-	-- g_Current_ClearSegmentRangesDoneAndSegmentsDone_Score:
+
 	--  Used in ClearSegmentRangesDoneAndSegmentsDoneTables() and
-	--          CheckMinimumPointsGainedRequiredToAllowRetryingSegmentRanges()
+	--          CheckbAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesIfRebuildGainsMoreThan()
 	g_Current_ClearSegmentRangesDoneAndSegmentsDone_Score = GetPoseTotalScore()
-	-- g_StartingScore:
+
 	--  Used in CleanUp()
 	g_StartingScore = GetPoseTotalScore()
-	-- g_DensityWeight:
+
 	--  Used in PopulateGlobalSegmentScoresTableBasedOnUserSelectedScoreParts(),
 	--          CheckForLowStartingScore() and DisplayPuzzleProperties()
 	g_DensityWeight = 0
+
 	g_FirstRebuildSegment = 0
 	g_LastRebuildSegment = 0
 	g_LastSegmentScore = 0
-	-- g_MutateClashImportance:
+
 	--  Used in MutateOneSegmentRange() and AskUserForMutateOptions()
 	g_MutateClashImportance = 0.9
-	-- g_MutateSphereRadius:
+
 	--  Used in MutateOneSegmentRange(), AskUserForMutateOptions() and AskUserToSelectRebuildOptions()
 	g_MutateSphereRadius = 8 -- Angstroms
-	-- g_OriginalNumberOfDisulfideBonds:
+
 	--  Used in PopulateGlobalCysteinesTable(), bOneOrMoreDisulfideBondsHaveBroken(), 
 	--          PopulateGlobalActiveScorePartsTable(), DisplayPuzzleProperties() and
 	--          AskUserToSelectRebuildOptions()
 	g_OriginalNumberOfDisulfideBonds = 0
-	-- g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle:
+
 	--  Used in AskMoreOptions(), RebuildSelectedSegments() and RebuildOneSegmentRangeManyTimes()
 	g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle = 10 -- set to at least 10
-	-- g_NumberOfRunCycles:
+
 	--  Used in bAskUserToSelectRebuildOptions(), RebuildSelectedSegments(),
 	--          PrepareToRebuildSegmentRanges() and main()
 	g_NumberOfRunCycles = 40 -- Set it very high if you want to run forever
-	-- g_NumberOfSegmentsSkipping:
+
 	--  Used in DisplaySelectedOptions(), bAskUserToSelectRebuildOptions() and main()
 	g_NumberOfSegmentsSkipping = 0
-	-- g_RebuildClashImportance:
+
 	--  Used in RebuildOneSegmentRangeManyTimes()
 	g_RebuildClashImportance = 0 -- clash importance while rebuild
+
 	g_RunCycle = 0
 	g_SegmentRangeIndex = 0
 	g_SegmentRangeRebuildAttempt = 0
@@ -857,35 +850,34 @@ function DefineGlobalVariables()
 	--          Add_Loop_Plus_One_Other_Type_SegmentRange_To_SegmentRangesTable(),
 	--          bAskUserToSelectRebuildOptions() and PrepareToRebuildSegmentRanges()
 	g_StartProcessingWithThisManyConsecutiveSegments = 2 -- user has option to change this
-	-- g_StopAfterProcessingWithThisManyConsecutiveSegments:
+
 	--  Used in bAskUserToSelectRebuildOptions(), RebuildSelectedSegments() and 
 	--          PrepareToRebuildSegmentRanges()
 	g_StopAfterProcessingWithThisManyConsecutiveSegments = 4 -- user has option to change this
-	-- g_RequiredNumberOfConsecutiveSegments:
+
 	--  Used in bAskUserToSelectRebuildOptions(), RebuildSelectedSegments() and
 	--          PrepareToRebuildSegmentRanges()
 	g_RequiredNumberOfConsecutiveSegments = g_StartProcessingWithThisManyConsecutiveSegments
 
 	-- Note the difference between:
-	-- g_MinimumPointsGained_RequiringRetrying_SegmentRanges and
-	-- g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges?
-	-- Could someone please explain how this formula was determined?
-	-- g_MinimumPointsGained_RequiringRetrying_SegmentRanges:
+	-- g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan and
+	-- g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges
 	--  Used in DefineGlobalVariables(), AskMoreOptions() and RebuildManySegmentRanges()
-	g_MinimumPointsGained_RequiringRetrying_SegmentRanges =
+	g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan =
 		(g_SegmentCountWithoutLigands - (g_SegmentCountWithoutLigands % 4)) / 4
+	-- Could someone please explain how this formula was determined?
 	-- Example:
 	--   g_SegmentCountWithoutLigands = 135
-	--   MinimumPointsGainedRequiringRetryingSegmentRanges =
+	--   g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan =
 	--    (135 - (135 % 4)) /4 = (135 - 3) / 4 = 135 / 4 = 33.75
-	if g_MinimumPointsGained_RequiringRetrying_SegmentRanges < 40 then
-		g_MinimumPointsGained_RequiringRetrying_SegmentRanges = 40
+	if g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan < 40 then
+		g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan = 40
 	end
 
 	-- Default to one point per segment? Seems pretty arbitrary to me...
-	-- CheckMinimumPointsGainedRequiredToAllowRetryingSegmentRanges:
-	-- Used in CheckMinimumPointsGainedRequiredToAllowRetryingSegmentRanges() and DisplaySelectedOptions()
-	g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges = g_SegmentCountWithLigands
+	-- Used in CheckbAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesIfRebuildGainsMoreThan() and DisplaySelectedOptions()
+	g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges = 
+		g_SegmentCountWithLigands
 	-- "To Allow" or "To Force"?
 	-- Example:
 	--   g_SegmentCountWithoutLigands = 135
@@ -908,28 +900,26 @@ function DefineGlobalVariables()
 	end
 
 	local l_NumberOfBands = band.GetCount()
-	-- g_bDisableBandsDuringRebuild:
+
 	-- Used in bAskUserToSelectRebuildOptions() and RebuildSelectedSegments()
 	g_bDisableBandsDuringRebuild = l_NumberOfBands > 0 -- set default to true if there are any bands.
 
-	-- If loss is more than g_MaxLossBeforeFuseBestPosition, we will not call FuseBestPosition()...
-	-- g_MaxLossBeforeFuseBestPosition:
 	--  Used in DefineGlobalVariables(), AskMoreOptions() and RebuildManySegmentRanges()
-	g_MaxLossBeforeFuseBestPosition = 
+	g_SkipFusingBestPositionIfLossIsGreaterThan = 
 		(g_SegmentCountWithoutLigands - (g_SegmentCountWithoutLigands % 4)) / 4
+	-- Could someone please explain how this formula was determined?
 	-- Example:
 	--   g_SegmentCountWithoutLigands = 135
-	--   g_MaxLossBeforeFuseBestPosition =
+	--   g_SkipFusingBestPositionIfLossIsGreaterThan =
 	--    (135 - (135 % 4)) /4 = (135 - 3) / 4 = 135 / 4 = 33.75
-	if g_MaxLossBeforeFuseBestPosition < 30 then
-		g_MaxLossBeforeFuseBestPosition = 30
+	if g_SkipFusingBestPositionIfLossIsGreaterThan < 30 then
+		g_SkipFusingBestPositionIfLossIsGreaterThan = 30
 	end
 
 	-- Set Clash Importance Factor...
 	-- note: we don't actually have a g_ClashImportance variable,
 	--       we only have a g_ClashImportanceFactor variable.
 	--       we do, however, have an l_ClashImportance variable in function SetClashImportance() above.
-	-- g_ClashImportanceFactor:
 	--  Used in DefineGlobalVariables(), SetClashImportance() and CheckClashImportance()
 	g_ClashImportanceFactor = behavior.GetClashImportance()
 	-- print("behavior.GetClashImportance()=[" .. g_ClashImportanceFactor .. "].")
@@ -950,13 +940,12 @@ function DefineGlobalVariables()
 	-- Calculate Allowable Bonus Score (not available in beginner puzzles)...
 	-- I guess I have not seen this yet, because none of my tests have included
 	-- an allowable bonus score yet..
-	-- g_MaxBonus:
 	--  Used in DefineGlobalVariables(), AskFastCPUProcessingOptions() and SaveBest().
 	g_MaxBonus = l_FastCPUScore - l_NormalCPUScore 
+
 	g_CurrentBonus = g_MaxBonus -- g_CurrentBonus is only used in DisplayPuzzleProperties.
 	
 	-- Fast CPU Processing enables faster CPU processing, but your score will not be counted...
-	-- g_bEnableFastCPUProcessing:
 	--  Used in DefineGlobalVariables(), CleanUp(), AskFastCPUProcessingOptions() and SaveBest()
 	g_bEnableFastCPUProcessing = false
 	if math.abs(g_MaxBonus) > 0.1 then -- Better than if l_NormalCPUScore ~= l_FastCPUScore then
@@ -969,7 +958,6 @@ function DefineGlobalVariables()
 		AskFastCPUProcessingOptions()
 	end
 
-	-- g_BestScore:
 	--  Used in SaveBest() and RebuildManySegmentRanges()
 	g_BestScore = GetPoseTotalScore()
 	if g_bEnableFastCPUProcessing == true then
@@ -1100,15 +1088,15 @@ end
 --- Called from 1 place in DefineGlobalVariables()...
 function CheckClashImportance()
 
-	local l_Ask = dialog.CreateDialog("Clash Importance is not 1. It is currently: [" ..
-		tostring(g_ClashImportanceFactor) .. "].")
-	l_Ask.l1 = dialog.AddLabel("Last chance to change it.")
-	l_Ask.l2 = dialog.AddLabel("Clash Importance will always be multiplied by ClashImportanceFactor,")
-	l_Ask.l3 = dialog.AddLabel("which is currently: [" .. g_ClashImportanceFactor .. "].")
+	local l_Ask = dialog.CreateDialog("Warning: Clash Importance is not 1")
+	l_Ask.l2 = dialog.AddLabel("Clash Importance is currently: [" .. tostring(g_ClashImportanceFactor) .. "]")
+	l_Ask.l2 = dialog.AddLabel("Clash Importance will always be multiplied by")
+	l_Ask.l3 = dialog.AddLabel("ClashImportanceFactor which is currently: [" .. g_ClashImportanceFactor .. "].")
 	l_Ask.l4 = dialog.AddLabel("If you want to change the ClashImportanceFactor,")
-	l_Ask.l5 = dialog.AddLabel(" stop this script, set Clash Importance in the FoldIt program")
-	l_Ask.l6 = dialog.AddLabel(" (which will become this script's ClashImportanceFactor),")
-	l_Ask.l7 = dialog.AddLabel(" then restart this script.")
+	l_Ask.l5 = dialog.AddLabel("stop this script, and set the Clash Importance")
+	l_Ask.l6 = dialog.AddLabel("in the FoldIt program (which will become this")
+	l_Ask.l7 = dialog.AddLabel("script's ClashImportanceFactor), then restart")
+	l_Ask.l8 = dialog.AddLabel("this script.")
 	l_Ask.continue = dialog.AddButton("Continue", 1)
 	dialog.Show(l_Ask)
 end
@@ -2126,8 +2114,8 @@ end
 -- Called from 1 place in RebuildManySegmentRanges()...
 function AddSegmentRangeDone(l_StartSegment, l_EndSegment)
 
-	if g_bAllowMultipleAttempts == false then
-		-- The user has not enabled multiple attempts, therefore,
+	if g_bAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCycles == false then
+
 		-- let's go ahead and flag this segment range as completed...
 
 		local l_RangeDiff = l_EndSegment - l_StartSegment
@@ -2182,9 +2170,9 @@ end -- AddSegmentRangeDone(l_StartSegment, l_EndSegment)
 -- Called from 1 place in InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges()...
 function bCheckIfSegmentRangeIsDone(l_StartSegment, l_EndSegment)
 
-	if g_bAllowMultipleAttempts == true then
+	if g_bAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCycles == true then
 		-- Since the user has enabled multiple attempts, we
-		-- will just keep on processing this Segment Range...
+		-- will allow rebuilding this Segment Range...
 		return false
 	end
 
@@ -2272,7 +2260,7 @@ function CheckIfDoneSegmentsMustBeIncluded()
 
 end
 
--- Called from 1 place in CheckMinimumPointsGainedRequiredToAllowRetryingSegmentRanges() and
+-- Called from 1 place in CheckbAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesIfRebuildGainsMoreThan() and
 --             1 place in InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges()...
 function ClearSegmentRangesDoneAndSegmentsDoneTables()
 
@@ -2295,24 +2283,19 @@ function ClearSegmentRangesDoneAndSegmentsDoneTables()
 end
 
 -- Called from 1 place in RebuildManySegmentRanges()...
-function CheckMinimumPointsGainedRequiredToAllowRetryingSegmentRanges()
+function CheckbAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesIfRebuildGainsMoreThan()
 
 	if g_bOnlyWorkOnPreviouslyDoneSegments == true then
 		return
 	end
-	if g_bAllowMultipleAttempts == false then
-		return
-	end
-
-	-- Note the difference between g_MinimumPointsGained_RequiringRetrying_SegmentRanges and
-	--                             g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges
 
 	local l_GetPoseTotalScore = GetPoseTotalScore()
 	local l_MinimumTotalPointsRequiredToAllowRetryingSegmentRanges =
 		g_Current_ClearSegmentRangesDoneAndSegmentsDone_Score +
 		g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges
 
-	if l_GetPoseTotalScore > l_MinimumTotalPointsRequiredToAllowRetryingSegmentRanges then
+	if g_bAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCycles == true or
+		l_GetPoseTotalScore > l_MinimumTotalPointsRequiredToAllowRetryingSegmentRanges then
 			ClearSegmentRangesDoneAndSegmentsDoneTables()
 	end
 
@@ -2344,7 +2327,7 @@ end
 --             1 place  in FuseBestPosition(),
 --             2 places in PerformNormalStabilizationOnSegmentRange(),
 --             1 place  in ClearSegmentRangesDoneAndSegmentsDoneTables(),
---             1 place  in CheckMinimumPointsGainedRequiredToAllowRetryingSegmentRanges(),
+--             1 place  in CheckbAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesIfRebuildGainsMoreThan(),
 --             1 place  in GetScorePart_Score(),
 --             1 place  in PopulateGlobalSegmentScoresTableBasedOnUserSelectedScoreParts(),
 --             1 place  in Update_SlotScoresTable_ScorePart_Score_SlotScore_And_RebuildNumber_Fields(),
@@ -3441,10 +3424,11 @@ function DisplaySelectedOptions()
 		print("  Converting all segments to loops...")
 	end
 
-	if g_bAllowMultipleAttempts == true then
-		print("  Will retry already tried segment ranges.")
+	if g_bAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCycles == true then
+		print("  We will allow rebuilding already rebuilt segment ranges from previous cycles.")
 	else
-		print("  Will retry already tried segment ranges if points gained is greater than: [" ..
+		print("  We will only allow rebuilding already rebuilt segment ranges from previous cycles" ..
+					" if points gained is greater than: [" ..
 			g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges .. "]")
 	end
 
@@ -3550,69 +3534,81 @@ function AskMoreOptions()
 
 	local l_Ask = dialog.CreateDialog("More Options")
 
-	l_Ask.l_0 = dialog.AddLabel("Perform Extra Stabilization")
+	l_Ask.l_0 = dialog.AddLabel("Perform Extra Stabilization (shake and wiggle more)")
 	l_Ask.bPerformExtraStabilization =
-		dialog.AddCheckbox("Extra Stabilization", g_bPerformExtraStabilization) -- default is false
+		dialog.AddCheckbox("Extra", g_bPerformExtraStabilization) -- default is false
 
-	-- Min points to Force next round...
-	l_Ask.l_1 = dialog.AddLabel("Minimum points gained to force retry of segment ranges")
-	l_Ask.MinimumPointsGainedRequiringRetryingSegmentRanges =
-		dialog.AddSlider("Min Gain Require:",
-			g_MinimumPointsGained_RequiringRetrying_SegmentRanges, 0, 500, 0) -- default is 40 or less
+	l_Ask.l_1 = dialog.AddLabel("Move on to more consecutive segments per")
+	l_Ask.l_2 = dialog.AddLabel("range if current rebuild gains more than:")
+	l_Ask.MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan =
+		dialog.AddSlider("Points:",
+			g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan, 0, 500, 0) -- default is 40 or less
 
-	-- Min point to Allow next round...
-	l_Ask.l_2 = dialog.AddLabel("Minimum points gained to allow retry of segment ranges")
-	l_Ask.MinimumPointsGainedRequiredToAllowRetryingSegmentRanges =
-		dialog.AddSlider("Min Gain Allow:",
-			g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges, 0, 500, 0)
+	l_Ask.l_3 = dialog.AddLabel("Skip fusing best position if current rebuild loss is")
+	l_Ask.l_4 = dialog.AddLabel("greater than (Points * # of segments per range / 3):")
+	l_Ask.SkipFusingBestPositionIfLossIsGreaterThan = 
+		dialog.AddSlider("Points:", g_SkipFusingBestPositionIfLossIsGreaterThan, -5, 200, 0)
 
-	l_Ask.l_3 = dialog.AddLabel("Skip fuse best position if loss is more")
-	l_Ask.l_4 = dialog.AddLabel("Threshold used is RBlength * threshold / 3")
-	l_Ask.maxLoss = dialog.AddSlider("Skip fuse:", g_MaxLossBeforeFuseBestPosition, -5, 200, 0)
+	l_Ask.l_5 = dialog.AddLabel("Allow rebuilding already rebuilt segment ranges")
+	l_Ask.l_6 = dialog.AddLabel("from previous cycles:")
+	l_Ask.bAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCycles = 
+		dialog.AddCheckbox("Allow",
+			g_bAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCycles)
 
-	l_Ask.bAllowMultipleAttempts = dialog.AddCheckbox("Allow many attempts to complete Segment Range",
-		g_bAllowMultipleAttempts)
+	l_Ask.l_7 = dialog.AddLabel("Automatically allow rebuilding already rebuilt")
+	l_Ask.l_8 = dialog.AddLabel("segment ranges from previous cycles if current")
+	l_Ask.l_9 = dialog.AddLabel("rebuild gains more than:")
+	l_Ask.bAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesIfRebuildGainsMoreThan =
+		dialog.AddSlider("Points:",
+			g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges, 0, 500, 0) -- default depends on number of segments
 
-	l_Ask.l_5 = dialog.AddLabel("Number of rebuild-one-segment-range attempts per run cycle")
+	l_Ask.l_10 = dialog.AddLabel("Number of times to rebuild a single segment range")
+	l_Ask.l_11 = dialog.AddLabel("per run cycle:") -- default is 15 (or 10)
 	l_Ask.NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle =
-		dialog.AddSlider("Rebuilds per run:", g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle, 1, 100, 0)
+		dialog.AddSlider("Rebuilds:", g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle, 1, 100, 0)
 
+	l_Ask.l_12 = dialog.AddLabel("Starting number of segment ranges to rebuild per")
+	l_Ask.l_13 = dialog.AddLabel("run cycle:")
 	l_Ask.StartingNumberOfSegmentRangesToProcessPerRunCycle =
-		dialog.AddSlider("Ranges/cycle:",
+		dialog.AddSlider("Ranges / cycle:",
 			g_StartingNumberOfSegmentRangesToProcessPerRunCycle, 1, g_SegmentCountWithoutLigands, 0)
+
+	l_Ask.l_14 = dialog.AddLabel("Additional number of segment ranges to rebuild per")
+	l_Ask.l_15 = dialog.AddLabel("run cycle to add after each run cycle completes:")
 	l_Ask.AdditionalNumberOfSegmentRangesToProcessPerRunCycle =
-		dialog.AddSlider("Add post-cycle:",
+		dialog.AddSlider("Add more ranges:",
 			g_AdditionalNumberOfSegmentRangesToProcessPerRunCycle, 0, 4, 0)
 
-	l_Ask.l_6a = dialog.AddLabel("Shake and Wiggle (with SideChains and Backbone)")
-	l_Ask.l_6b = dialog.AddLabel("with selected and nearby segments after each rebuild")
-	l_Ask.l_6c = dialog.AddLabel("(with clash importance: 1)")
+	l_Ask.l_16 = dialog.AddLabel("Shake and Wiggle (with SideChains and Backbone)")
+	l_Ask.l_17 = dialog.AddLabel("with selected and nearby segments after each rebuild")
+	l_Ask.l_18 = dialog.AddLabel("(with clash importance: 1)")
 	l_Ask.Shake_And_WiggleWithSideChainsAndBackbone_WithSelectedAndNearbySegments =
 		dialog.AddCheckbox("Very SLOW!",
 			g_bShake_And_Wiggle_WithSideChainsAndBackbone_WithSelectedAndNearbySegments)
 		
-	l_Ask.l_6d = dialog.AddLabel("Shake and Wiggle with selected segments after each rebuild.")
+	l_Ask.l_19 = dialog.AddLabel("Shake and Wiggle with selected segments after")
+	l_Ask.l_20 = dialog.AddLabel("each rebuild.")
 	l_Ask.Shake_And_Wiggle_WithSelectedSegments = 
 		dialog.AddCheckbox("Not too slow", g_bShake_And_Wiggle_WithSelectedSegments)
 
-	l_Ask.l_6e = dialog.AddLabel("... with clash importance:")
+	l_Ask.l_21 = dialog.AddLabel("... with clash importance:")
 	l_Ask.shakeClashImportance = dialog.AddSlider("Shake C.I.", g_ShakeClashImportance, 0, 1, 2)
 	
-	l_Ask.bPerformNormalStabilization =
-		dialog.AddCheckbox("Perform normal stabilization instead of local shake ony",
-			g_bPerformNormalStabilization)
+	l_Ask.l_22 = dialog.AddLabel("Perform normal stabilization instead of local shake")
+	l_Ask.l_23 = dialog.AddLabel("only:")
+	l_Ask.bPerformNormalStabilization =	dialog.AddCheckbox("Normal", g_bPerformNormalStabilization)
 	l_Ask.bFuseBestPosition = dialog.AddCheckbox("Fuse best position", g_bFuseBestPosition)
 	
 	l_Ask.OK = dialog.AddButton("OK", 1)
 	dialog.Show(l_Ask)
 
-	g_MinimumPointsGained_RequiringRetrying_SegmentRanges =
-		l_Ask.MinimumPointsGainedRequiringRetryingSegmentRanges.value -- default is 40 or less
+	g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan =
+		l_Ask.MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan.value -- default is 40 or less
 	g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges =
-		l_Ask.MinimumPointsGainedRequiredToAllowRetryingSegmentRanges.value
+		l_Ask.bAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesIfRebuildGainsMoreThan.value
 
 	g_bPerformExtraStabilization = l_Ask.bPerformExtraStabilization.value -- default is false
-	g_MaxLossBeforeFuseBestPosition = l_Ask.maxLoss.value
+	g_SkipFusingBestPositionIfLossIsGreaterThan = l_Ask.SkipFusingBestPositionIfLossIsGreaterThan.value
 
 	g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle =
 		l_Ask.NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle.value
@@ -3628,7 +3624,8 @@ function AskMoreOptions()
 	
 	g_ShakeClashImportance = l_Ask.shakeClashImportance.value
 	g_bPerformNormalStabilization = l_Ask.bPerformNormalStabilization.value
-	g_bAllowMultipleAttempts = l_Ask.bAllowMultipleAttempts.value
+	g_bAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCycles =
+		l_Ask.bAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCycles.value
 	g_bFuseBestPosition = l_Ask.bFuseBestPosition.value
 
 end -- AskMoreOptions()
@@ -4694,9 +4691,11 @@ function RebuildManySegmentRanges()
 
 				save.Quickload(l_CurrentHighSlotNumber) -- Load
 
-				if g_bFuseBestPosition == true and          
-					l_StartSegmentPoseTotalScore - l_CheckPoseTotalScore <
-						g_MaxLossBeforeFuseBestPosition * (l_EndSegment - l_StartSegment + 1) / 3 then
+				local l_PotentialPointsLoss = l_StartSegmentPoseTotalScore - l_CheckPoseTotalScore
+				local l_MaxLossAllowed = g_SkipFusingBestPositionIfLossIsGreaterThan * 
+																(l_EndSegment - l_StartSegment + 1) / 3
+				if g_bFuseBestPosition == true and 
+				   l_PotentialPointsLoss < l_MaxLossAllowed then
 
 					print("  Fusing best position...")
 					
@@ -4773,17 +4772,13 @@ function RebuildManySegmentRanges()
 			l_PoseTotalScore = l_CheckPoseTotalScore
 		end
 
-		CheckMinimumPointsGainedRequiredToAllowRetryingSegmentRanges()
+		CheckbAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesIfRebuildGainsMoreThan()
 
-		-- The default value for g_MinimumPointsGained_RequiringRetrying_SegmentRanges is 40 or less...
-		-- If we just gained more than g_MinimumPointsGained_RequiringRetrying_SegmentRanges, 
-		-- this is a huge gain!
-		-- That means, we should reprocess this range for more big gains...
-		-- So, skip the rest of the these segment ranges and move on to
-		-- to the next set of segment ranges, which basically starts this
-		-- set of segment ranges all over again, but with one more consecutive
-		-- segment added to each segment range...
-		if l_DeepRebuildGain > g_MinimumPointsGained_RequiringRetrying_SegmentRanges then
+		-- The default for g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan is 40 or less.
+		-- If we just gained more than g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan, 
+		-- then we figure, that's good enough for now. It is now time to move on to more consecutive
+		-- segments per segment range...
+		if l_DeepRebuildGain > g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan then
 			break
 		end
 
