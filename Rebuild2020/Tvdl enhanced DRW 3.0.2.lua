@@ -128,9 +128,9 @@ end
 -- Module Filteractive
 
 Filterscore=Score()
-behavior.SetSlowFiltersDisabled(true)
+if SKETCHBOOKPUZZLE == false then behavior.SetSlowFiltersDisabled(true) end
 FilterOffscore=Score()
-behavior.SetSlowFiltersDisabled(false)
+if SKETCHBOOKPUZZLE == false then behavior.SetSlowFiltersDisabled(false) end
 maxbonus=Filterscore-FilterOffscore
 CURBONUS=maxbonus
 
@@ -182,6 +182,8 @@ if Filteractive then
 end
 -- End of module Filteractive
 
+MINGAIN=0
+foundahighgain=true
 bestScore=Score()
 if Filteractive then FilterOff() end
 function SaveBest()
@@ -189,10 +191,11 @@ function SaveBest()
      (Score()+maxbonus>bestScore) then
      if Filteractive then FilterOn() end
      local g=Score()-bestScore
-     if g>0 then
+     if g>MINGAIN or ( g>0 and foundahighgain) then
         if g>0.01 then print("Gained another "..round3(g).." pts.") end
         bestScore=Score()
         save.Quicksave(3)
+ foundahighgain=true
      end
      if Filteractive then FilterOff() end
   end
@@ -594,7 +597,7 @@ HASLIGAND= (segCnt2<segCnt)
 DENSITYWEIGHT=0
 PROBABLESYM=false
 FREEDESIGN=false
-ISAUNTDEEN=false
+SKETCHBOOKPUZZLE=false
 
 function SetPuzzleProperties()
     print("Computing puzzle properties")
@@ -631,10 +634,10 @@ function SetPuzzleProperties()
         if PROBABLESYM then print("Puzzle is a symmetry puzzle or has bonuses") end
     end
 
-    -- Check to see if the player is auntdeen
-    if user.GetPlayerName() == "auntdeen" then
-        print("Hello auntdeen")
-        ISAUNTDEEN=true
+    name=puzzle.GetName()
+    if string.find(name,"Sketchbook") then
+     print("SketchbookPuzzle")
+     SKETCHBOOKPUZZLE=true
     end
 end
 
@@ -1076,16 +1079,17 @@ function ReBuild(ss,se,tries)
     if ss>se then ss,se=se,ss end --switch if needed
     local Foundone=false
     for try=1,tries do -- perform loop for number of tries
+        if SKETCHBOOKPUZZLE then save.Quickload(3) end
         selection.DeselectAll()
         CI(rebuildCI)
         selection.SelectRange(ss,se)
-        local extra_rebuilds = 1
-        if savebridges then extra_rebuilds=3 end --extra if bridges keep breaking
+      -- local extra_rebuilds = 1
+      -- if savebridges then extra_rebuilds=3 end --extra if bridges keep breaking
         local done
-        repeat
-            done=localRebuild(nil)
-            extra_rebuilds = extra_rebuilds -1
-        until done or extra_rebuilds == 0
+      -- repeat
+            done=localRebuild(try)
+      -- extra_rebuilds = extra_rebuilds -1
+      -- until done or extra_rebuilds == 0
         SaveBest()
         if done==true then
             Foundone=true
@@ -1111,7 +1115,8 @@ function ReBuild(ss,se,tries)
             SaveScores(ss,se,try)
             if AfterRB then PopPosition() end
         end
-        if (try > 3 or savebridges) and Foundone==false then
+      -- if (try > 3 or savebridges) and Foundone==false then
+          if Foundone==false then
             print("No valid rebuild found on this section")
             print("After 9 or more rebuild attempts, giving up")
             break
@@ -1394,9 +1399,13 @@ function DeepRebuild()
 if Runnr > 0 then --Runnr 0 is to skip worst parts
         print("DR "..Runnr.."."..(e-s+1).."."..i.." "..s.."-"..e.." "..
              rebuilds.." times. Wait... Current score: "..round3(Score()))
+if SKETCHBOOKPUZZLE then
+foundahighgain=false
+end
 
         if ReBuild(s,e,rebuilds) then
 
+if SKETCHBOOKPUZZLE == false then
             -- Make sure we do not miss an improvement during rebuild
             if RBScore() > bestScore then
                 Bridgesave()
@@ -1407,6 +1416,7 @@ if Runnr > 0 then --Runnr 0 is to skip worst parts
                     SaveScores(s,e,0)
                 end
             end
+end
             ListSlots()
             for r=1,#Scores do
                 if Scores[r][5] then
@@ -1651,6 +1661,9 @@ repeat
     ask.l1 = dialog.AddLabel("Length to rebuild, From can be bigger than To")
     ask.minLen = dialog.AddSlider("From length:",minLen,1,10,0)
     ask.maxLen = dialog.AddSlider("To length:",maxLen,1,10,0)
+if SKETCHBOOKPUZZLE then
+    ask.MINGAIN = dialog.AddSlider("Mingain:",MINGAIN,0,100,0)
+end
     ask.lll=dialog.AddLabel("Wiggle more when CI is on its maximum")
     ask.WF = dialog.AddSlider("WiggleFactor:",WF,1,5,0)
     ask.slotl=dialog.AddLabel("Slot selection, last choice counts")
@@ -1691,6 +1704,9 @@ repeat
 
         struct=ask.struct.value
 
+if SKETCHBOOKPUZZLE then
+        MINGAIN=ask.MINGAIN.value
+end
         WF=ask.WF.value
         SlotAll=ask.selall.value
         if SlotAll then
@@ -1719,8 +1735,8 @@ repeat
             SelMode.askligands=false
             SelMode.defligands=false
             WORKON=AskForSelections("Tvdl enhanced "..progname..DRWVersion,SelMode)
-            print("Selection is now, reselect if not okay: ")
-            print("[" .. SegmentSetToString(WORKON) .. "]")
+            print("Selection is now, reselect if not oke:")
+            print(SegmentSetToString(WORKON))
             if askresult==1 then askresult=4 end --to force return to main menu
         end
         if ask.selSP.value then
@@ -1861,11 +1877,19 @@ Disj={} --To administrate which segments have be touched
 disjunct=false
 donotrevisit=true
 clrdonelistgain=segCnt
+if clrdonelistgain > 500 then clrdonelistgain=500 end
 curclrscore=Score()
 WORKONbool={}
 SegmentScores={} --Optimalisation for fast worst search
 lastSegScores=0
-DRWVersion="3.0.2"
+DRWVersion="3.1.1"
+lookformissedgains=true
+if SKETCHBOOKPUZZLE then
+   lookformissedgains=false
+   skipfuze=true
+   clrdonelistgain=500
+   struct=true
+end
 
 -- MAIN PROGRAM
 firstDRWcall=true
