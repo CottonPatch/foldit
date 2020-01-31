@@ -3566,13 +3566,13 @@ function AskMoreOptions()
 	l_Ask.l_1 = dialog.AddLabel("Move on to more consecutive segments per")
 	l_Ask.l_2 = dialog.AddLabel("range if current rebuild gains more than:")
 	l_Ask.MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan =
-		dialog.AddSlider("Points:",
+		dialog.AddSlider("  Points:",
 			g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan, 0, 500, 0) -- default is 40 or less
 
 	l_Ask.l_3 = dialog.AddLabel("Skip fusing best position if current rebuild loss is")
 	l_Ask.l_4 = dialog.AddLabel("greater than (Points * # of segments per range / 3):")
 	l_Ask.SkipFusingBestPositionIfLossIsGreaterThan = 
-		dialog.AddSlider("Points:", g_SkipFusingBestPositionIfLossIsGreaterThan, -5, 200, 0)
+		dialog.AddSlider("  Points:", g_SkipFusingBestPositionIfLossIsGreaterThan, -5, 200, 0)
 
 	l_Ask.l_5 = dialog.AddLabel("Allow rebuilding already rebuilt segment ranges")
 	l_Ask.l_6 = dialog.AddLabel("from previous cycles:")
@@ -3584,24 +3584,24 @@ function AskMoreOptions()
 	l_Ask.l_8 = dialog.AddLabel("segment ranges from previous cycles if current")
 	l_Ask.l_9 = dialog.AddLabel("rebuild gains more than:")
 	l_Ask.bAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesIfRebuildGainsMoreThan =
-		dialog.AddSlider("Points:",
+		dialog.AddSlider("  Points:",
 			g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges, 0, 500, 0) -- default depends on number of segments
 
 	l_Ask.l_10 = dialog.AddLabel("Number of times to rebuild a single segment range")
 	l_Ask.l_11 = dialog.AddLabel("per run cycle:") -- default is 15 (or 10)
 	l_Ask.NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle =
-		dialog.AddSlider("Rebuilds:", g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle, 1, 100, 0)
+		dialog.AddSlider("  Rebuilds:", g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle, 1, 100, 0)
 
 	l_Ask.l_12 = dialog.AddLabel("Starting number of segment ranges to rebuild per")
 	l_Ask.l_13 = dialog.AddLabel("run cycle:")
 	l_Ask.StartingNumberOfSegmentRangesToProcessPerRunCycle =
-		dialog.AddSlider("Ranges / cycle:",
+		dialog.AddSlider("  Ranges / cycle:",
 			g_StartingNumberOfSegmentRangesToProcessPerRunCycle, 1, g_SegmentCountWithoutLigands, 0)
 
 	l_Ask.l_14 = dialog.AddLabel("Additional number of segment ranges to rebuild per")
 	l_Ask.l_15 = dialog.AddLabel("run cycle to add after each run cycle completes:")
 	l_Ask.AdditionalNumberOfSegmentRangesToProcessPerRunCycle =
-		dialog.AddSlider("Add more ranges:",
+		dialog.AddSlider("  Add ranges:",
 			g_AdditionalNumberOfSegmentRangesToProcessPerRunCycle, 0, 4, 0)
 
 	l_Ask.l_16 = dialog.AddLabel("Shake and Wiggle (with SideChains and Backbone)")
@@ -3617,7 +3617,7 @@ function AskMoreOptions()
 		dialog.AddCheckbox("Not too slow", g_bShake_And_Wiggle_WithSelectedSegments)
 
 	l_Ask.l_21 = dialog.AddLabel("... with clash importance:")
-	l_Ask.shakeClashImportance = dialog.AddSlider("Shake C.I.", g_ShakeClashImportance, 0, 1, 2)
+	l_Ask.shakeClashImportance = dialog.AddSlider(" CI:", g_ShakeClashImportance, 0, 1, 2)
 	
 	l_Ask.l_22 = dialog.AddLabel("Perform normal stabilization instead of local shake")
 	l_Ask.l_23 = dialog.AddLabel("only:")
@@ -3686,9 +3686,9 @@ function AskUserForMutateOptions()
 	l_Ask.l7 =
 		dialog.AddLabel("Mutate sphere radius, Angstroms, for nearby segments")
 	l_Ask.MutateSphereSize =
-		dialog.AddSlider("Sphere Radius:", g_MutateSphereRadius, 3, 15, 0) -- default is 8 Angstroms
+		dialog.AddSlider("  Sphere Radius:", g_MutateSphereRadius, 3, 15, 0) -- default is 8 Angstroms
 	l_Ask.MutateClashImportance =
-		dialog.AddSlider("Clash Importance:", g_MutateClashImportance, 0.1, 1, 2)
+		dialog.AddSlider("  Clash Importance:", g_MutateClashImportance, 0.1, 1, 2)
 
 	l_Ask.OK = dialog.AddButton("OK", 1) l_Ask.Cancel = dialog.AddButton("Cancel", 0)
 	if dialog.Show(l_Ask) > 0 then
@@ -3716,7 +3716,7 @@ function AskUserToSelectSlotsToWorkOn()
 	local l_title = "Select Slots to work on"
 
 	local l_Ask = dialog.CreateDialog(l_title)
-	l_Ask.l1 = dialog.AddLabel("Select slots")
+	l_Ask.l1 = dialog.AddLabel("Select slots:")
 	local l_SlotNumber, l_ScorePart_Name, l_bSlotActive
 
 	-- g_SlotsTable={SlotNumber=1, ScorePart_Name=2, bIsActive=3, LongName=4}
@@ -3750,7 +3750,7 @@ function AskUserToSelectScorePartsToWorkOn()
 	local l_title = "Select ScoreParts to work on"
 
 	local l_Ask = dialog.CreateDialog(l_title)
-	l_Ask.l1 = dialog.AddLabel("Select ScoreParts")
+	l_Ask.l1 = dialog.AddLabel("Select ScoreParts:")
 	local l_ScorePart_Name
 
 	-- g_SlotsTable={SlotNumber=1, ScorePart_Name=2, bIsActive=3, LongName=4}
@@ -3782,7 +3782,7 @@ end -- AskUserToSelectScorePartsToWorkOn()
 -- Called from 1 place in bAskUserToSelectRebuildOptions()...
 function AskUserToSelectSegmentsToWorkOn()
 
-	title = "Select Segments to work on"
+	title = "Segments and Segment Ranges"
 
 	-- g_SegmentRangesTable={StartSegment, EndSegment}
 	l_ListOfSegmentRanges = ConvertSegmentRangesTableToListOfSegmentRanges(g_SegmentRangesTable)
@@ -3840,9 +3840,9 @@ function AskUserToSelectSegmentsToWorkOn()
 		end
 
 		if l_SelectionOptions.bUserWantsToSelectSegmentRanges == true then
-			l_Ask.R1 = dialog.AddLabel("Edit Segment Ranges to work on.")
-			l_Ask.R2 = dialog.AddLabel("(Below selections will override this list)")
-			l_Ask.ListOfSegmentRanges = dialog.AddTextbox("Segment Ranges", l_ListOfSegmentRanges)
+			l_Ask.R1 = dialog.AddLabel("Select segment ranges to work on:")
+			l_Ask.ListOfSegmentRanges = dialog.AddTextbox("  Ranges:", l_ListOfSegmentRanges)
+			l_Ask.R2 = dialog.AddLabel("Below selections override above list:")
 		end
 
 		l_Ask.bIncludeLoopSegments = dialog.AddCheckbox("Include loop segments",
@@ -4065,10 +4065,10 @@ function bAskUserToSelectRebuildOptions()
 		l_Ask.L1 =
 			dialog.AddLabel("Number of consecutive segments to rebuild")
 		l_Ask.MinimunWorstSegmentOffset =
-			dialog.AddSlider("Starting with:",
+			dialog.AddSlider("  Starting with:",
 				g_StartProcessingWithThisManyConsecutiveSegments, 1, 10, 0)
 		l_Ask.MaximunWorstSegmentOffset =
-			dialog.AddSlider("Continue through:",
+			dialog.AddSlider("  Continue thru:",
 				g_StopAfterProcessingWithThisManyConsecutiveSegments, 1, 10, 0)
 
 		if g_bSketchBookPuzzle == true then
@@ -4076,12 +4076,12 @@ function bAskUserToSelectRebuildOptions()
 			l_Ask.L3 = dialog.AddLabel("Save the current position if the")
 			l_Ask.L4 = dialog.AddLabel("current rebuild gain is more than:")
 			l_Ask.SketchBookPuzzleMinimumGainForSave =
-				dialog.AddSlider("Points:",
+				dialog.AddSlider("  Points:",
 					g_SketchBookPuzzleMinimumGainForSave, 0, 100, 0)
 		end
 
 		l_Ask.L5 = dialog.AddLabel("Wiggle more when Clash Importance is maximum")
-		l_Ask.g_WiggleFactor = dialog.AddSlider("WiggleFactor:", g_WiggleFactor, 1, 5, 0)
+		l_Ask.g_WiggleFactor = dialog.AddSlider("  WiggleFactor:", g_WiggleFactor, 1, 5, 0)
 
 		l_Ask.L6 = dialog.AddLabel("Slot selection, last choice counts")
 		l_Ask.bSelectAllSlotsToWorkOn = dialog.AddCheckbox("Work on all slots", g_bSelectAllSlotsToWorkOn)
@@ -4090,10 +4090,10 @@ function bAskUserToSelectRebuildOptions()
 		l_Ask.bSelectSlotsToWorkOn = dialog.AddCheckbox("Select slots to work on", false)
 
 		l_Ask.L7 = dialog.AddLabel("Max number of full run cycles")
-		l_Ask.NumberOfRunCycles = dialog.AddSlider("Run cycles:", g_NumberOfRunCycles, 1, 40, 0)
+		l_Ask.NumberOfRunCycles = dialog.AddSlider("  Run cycles:", g_NumberOfRunCycles, 1, 40, 0)
 
 		l_Ask.L8 = dialog.AddLabel("Skip first X number of segments (crash resume)")
-		l_Ask.NumberOfSegmentsToSkip = dialog.AddSlider("Segments to skip:",
+		l_Ask.NumberOfSegmentsToSkip = dialog.AddSlider("  X segments:",
 				g_NumberOfSegmentsSkipping, 0, g_SegmentCountWithoutLigands, 0)
 
 		l_Ask.bUserWantsToSelectSegmentsToWorkOn =
@@ -4119,8 +4119,8 @@ function bAskUserToSelectRebuildOptions()
 		l_Ask.bConvertAllSegmentsToLoops =
 			dialog.AddCheckbox("Convert all segments to loops", g_bConvertAllSegmentsToLoops)
 
-		l_Ask.L9 = dialog.AddLabel("Only work on previously done segments")
-		l_Ask.bRunningInDisjunctMode = dialog.AddCheckbox("Only Work On Done Segments",
+		--l_Ask.L9 = dialog.AddLabel("Only work on previously done segments:")
+		l_Ask.bRunningInDisjunctMode = dialog.AddCheckbox("Only work on previously done segments",
 			g_bOnlyWorkOnPreviouslyDoneSegments)
 
 		l_Ask.bDisableBandsDuringRebuild =
