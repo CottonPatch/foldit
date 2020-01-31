@@ -714,6 +714,9 @@ function DefineGlobalVariables()
 	--          RebuildManySegmentRanges
 	g_bConvertAllSegmentsToLoops = true -- Why is the default true?
 	
+	g_SketchBookPuzzleMinimumGainForSave = 0
+	g_bFoundAHighGain = true
+	
 	--  Used in DisplayPuzzleProperties() -- for informational display to user only.
 	g_bFreeDesignPuzzle = false
 	
@@ -859,9 +862,6 @@ function DefineGlobalVariables()
 	--          PrepareToRebuildSegmentRanges()
 	g_RequiredNumberOfConsecutiveSegments = g_StartProcessingWithThisManyConsecutiveSegments
 
-	-- Note the difference between:
-	-- g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan and
-	-- g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges
 	--  Used in DefineGlobalVariables(), AskMoreOptions() and RebuildManySegmentRanges()
 	g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan =
 		(g_SegmentCountWithoutLigands - (g_SegmentCountWithoutLigands % 4)) / 4
@@ -874,6 +874,13 @@ function DefineGlobalVariables()
 		g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan = 40
 	end
 
+	g_bSketchBookPuzzle = false
+  local l_PuzzleName = puzzle.GetName()
+  if string.find(l_PuzzleName, "Sketchbook") then
+		print("Note: This is a Sketchbook Puzzle.")
+		g_bSketchBookPuzzle = true
+  end
+	
 	-- Default to one point per segment? Seems pretty arbitrary to me...
 	-- Used in CheckbAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesIfRebuildGainsMoreThan() and DisplaySelectedOptions()
 	g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges = 
@@ -882,6 +889,15 @@ function DefineGlobalVariables()
 	-- Example:
 	--   g_SegmentCountWithoutLigands = 135
 	--   g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges = 135 -- Pretty simple formula...
+	if g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges > 500 then
+		g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges = 500
+	end
+
+	if g_bSketchBookPuzzle == true then
+	   g_bFuseBestPosition = false
+	   g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges = 500
+	   g_bConvertAllSegmentsToLoops = false
+	end
 
 	-- g_bProteinHasMutableSegments:
 	-- Used in DefineGlobalVariables(), MutateOneSegmentRange(), DisplayPuzzleProperties() and 
@@ -929,12 +945,18 @@ function DefineGlobalVariables()
 
 	-- Start of Fast CPU processing module...
 	-- Enable Fast CPU processing...
-	behavior.SetFiltersDisabled(true) -- enables faster CPU processing, but scores don't count...
+	if g_bSketchBookPuzzle == false then 
+		behavior.SetFiltersDisabled(true) -- enables faster CPU processing, but scores don't count...
+	end
+
 	local l_FastCPUScore = GetPoseTotalScore()
 	-- g_Debug_bAllowNewRandomScoreOnNextCallToGetEnergyScore = true -- see current.GetEnergyScore for details.  
 	
 	-- Disable Fast CPU processing...
+	if g_bSketchBookPuzzle == false then 
 		behavior.SetFiltersDisabled(false) -- Disables faster CPU processing, but your score will be counted...
+	end
+	
 	local l_NormalCPUScore = GetPoseTotalScore()
 		
 	-- Calculate Allowable Bonus Score (not available in beginner puzzles)...
@@ -1855,7 +1877,9 @@ function SaveBest()
 		end
 
 		local l_PointsGained = l_PoseTotalScore - g_BestScore
-		if l_PointsGained > 0 then
+		
+		if l_PointsGained > g_SketchBookPuzzleMinimumGainForSave or 
+		  (l_PointsGained > 0 and g_bFoundAHighGain == true) then
 			-- Why two checks here...
 			-- Oh, I see, first we check for even tiny improvement to keep track of, but
 			-- the second check makes sure the improvement is significant enough to be reported
@@ -1867,6 +1891,7 @@ function SaveBest()
 			end
 			g_BestScore = l_PoseTotalScore
 			save.Quicksave(3) -- Save
+			g_bFoundAHighGain = true
 		end
 
 		if g_bEnableFastCPUProcessing == true then
@@ -4037,7 +4062,7 @@ function bAskUserToSelectRebuildOptions()
 
 		local l_Ask = dialog.CreateDialog("Select Rebuild Options")
 
-		l_Ask.l1 =
+		l_Ask.L1 =
 			dialog.AddLabel("Number of consecutive segments to rebuild")
 		l_Ask.MinimunWorstSegmentOffset =
 			dialog.AddSlider("Starting with:",
@@ -4046,19 +4071,28 @@ function bAskUserToSelectRebuildOptions()
 			dialog.AddSlider("Continue through:",
 				g_StopAfterProcessingWithThisManyConsecutiveSegments, 1, 10, 0)
 
-		l_Ask.lll = dialog.AddLabel("Wiggle more when Clash Importance is maximum")
+		if g_bSketchBookPuzzle == true then
+			l_Ask.L2 = dialog.AddLabel("For a sketch book puzzle:")
+			l_Ask.L3 = dialog.AddLabel("Save the current position if the")
+			l_Ask.L4 = dialog.AddLabel("current rebuild gain is more than:")
+			l_Ask.SketchBookPuzzleMinimumGainForSave =
+				dialog.AddSlider("Points:",
+					g_SketchBookPuzzleMinimumGainForSave, 0, 100, 0)
+		end
+
+		l_Ask.L5 = dialog.AddLabel("Wiggle more when Clash Importance is maximum")
 		l_Ask.g_WiggleFactor = dialog.AddSlider("WiggleFactor:", g_WiggleFactor, 1, 5, 0)
 
-		l_Ask.slotl = dialog.AddLabel("Slot selection, last choice counts")
+		l_Ask.L6 = dialog.AddLabel("Slot selection, last choice counts")
 		l_Ask.bSelectAllSlotsToWorkOn = dialog.AddCheckbox("Work on all slots", g_bSelectAllSlotsToWorkOn)
 		l_Ask.bSelectMain4SlotsToWorkOn =
 			dialog.AddCheckbox("Select 4 main slots to work on (faster)", g_bSelectMain4SlotsToWorkOn)
 		l_Ask.bSelectSlotsToWorkOn = dialog.AddCheckbox("Select slots to work on", false)
 
-		l_Ask.ll3 = dialog.AddLabel("Max number of full run cycles")
+		l_Ask.L7 = dialog.AddLabel("Max number of full run cycles")
 		l_Ask.NumberOfRunCycles = dialog.AddSlider("Run cycles:", g_NumberOfRunCycles, 1, 40, 0)
 
-		l_Ask.ll4 = dialog.AddLabel("Skip first X number of segments (crash resume)")
+		l_Ask.L8 = dialog.AddLabel("Skip first X number of segments (crash resume)")
 		l_Ask.NumberOfSegmentsToSkip = dialog.AddSlider("Segments to skip:",
 				g_NumberOfSegmentsSkipping, 0, g_SegmentCountWithoutLigands, 0)
 
@@ -4085,7 +4119,7 @@ function bAskUserToSelectRebuildOptions()
 		l_Ask.bConvertAllSegmentsToLoops =
 			dialog.AddCheckbox("Convert all segments to loops", g_bConvertAllSegmentsToLoops)
 
-		l_Ask.l6 = dialog.AddLabel("Only work on previously done segments")
+		l_Ask.L9 = dialog.AddLabel("Only work on previously done segments")
 		l_Ask.bRunningInDisjunctMode = dialog.AddCheckbox("Only Work On Done Segments",
 			g_bOnlyWorkOnPreviouslyDoneSegments)
 
@@ -4109,6 +4143,11 @@ function bAskUserToSelectRebuildOptions()
 			g_bOnlyWorkOnPreviouslyDoneSegments = l_Ask.bRunningInDisjunctMode.value
 
 			g_bConvertAllSegmentsToLoops = l_Ask.bConvertAllSegmentsToLoops.value
+
+			if g_bSketchBookPuzzle == true then
+				g_SketchBookPuzzleMinimumGainForSave = 
+					ask.SketchBookPuzzleMinimumGainForSave.value
+			end
 
 			g_WiggleFactor = l_Ask.g_WiggleFactor.value
 
@@ -4299,19 +4338,6 @@ end -- bAskUserToSelectRebuildOptions()
 -- Called from 1 place in RebuildOneSegmentRangeManyTimes()...
 function RebuildSelectedSegments()
 
-	-- Ugh, I hate doing this is two places...
-	-- It's either this, or create yet another global variable called something like...
-	-- g_TheRealNumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle
-	--local l_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle = 
-	--  g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle
-	-- If user wants to keep disulfide bonds intact then add some extra rebuild 
-	-- attempts to allow for recovering from disulfide bonds breaking
-	-- (and then having to restore the last save solution because of it)...
-	--if g_bUserWantsToKeepDisulfideBondsIntact == true then
-	--  l_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle = 
-	--    l_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle + 3
-	--end
-
 	local l_MaxIterations = 3
 
 	local l_PoseTotalScore = GetPoseTotalScore()
@@ -4327,28 +4353,18 @@ function RebuildSelectedSegments()
 
 		l_CurrentIteration = l_CurrentIteration + 1
 
-		--print("Run " .. g_RunCycle .. " of " .. g_NumberOfRunCycles .. "," ..
-		--  " " .. g_RequiredNumberOfConsecutiveSegments .. " of " .. 
-		--  g_StopAfterProcessingWithThisManyConsecutiveSegments .. " consecutive segments," ..
-		--  " " .. g_SegmentRangeIndex .. " of " .. #g_SegmentRangesTable .. " segment ranges," ..
-		--  --" (" .. l_StartSegment .. "-" .. l_EndSegment .. ")," ..
-		--  " " .. g_SegmentRangeRebuildAttempt .. " of" .. 
-		--  " " .. l_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle .. " attempts," ..
-		--  " " .. l_CurrentIteration .. " of " .. l_MaxIterations .. " rebuilds," ..
-		--  " Score: " .. RoundToThirdDecimal(l_PoseTotalScore) .. "")
-		
 		-- This is what you are looking for...
 		-- This is what you are looking for...
 		structure.RebuildSelected(l_CurrentIteration)
 		-- This is what you are looking for...
 		-- This is what you are looking for...
 	
-		l_CheckPoseTotalScore = GetPoseTotalScore()  
-		if l_CheckPoseTotalScore ~= l_PoseTotalScore then
+		-- No! l_CheckPoseTotalScore = GetPoseTotalScore() -- No! l_CheckPoseTotalScore must remain the same!
+		if GetPoseTotalScore() ~= l_PoseTotalScore then
 			if bOneOrMoreDisulfideBondsHaveBroken() == true then
 				local l_NumberOfTimesBondsHaveBroken
 				-- Try up to 3 times to succeed without breaking disulfide bonds...
-				local l_bDarnit = true -- allows setting a breakpoint in the debuugger
+				local l_bDummy = true -- allows setting a breakpoint in the debuugger
 			else
 				-- Yay, our score changed. I hope it increased instead of decreased.
 				-- Should the above line be changed to "if GetPoseTotalScore() > l_PoseTotalScore then"???
@@ -4366,10 +4382,11 @@ function RebuildSelectedSegments()
 
 	local l_bDoneStatus = false
 	l_CheckPoseTotalScore = GetPoseTotalScore()
-	-- local l_ScoreDiff = math.abs(l_CheckPoseTotalScore - l_PoseTotalScore)
-	local l_ScoreDiff = l_CheckPoseTotalScore - l_PoseTotalScore
+	-- No! local l_ScoreDiff = l_CheckPoseTotalScore - l_PoseTotalScore
+	local l_ScoreDiff = math.abs(l_CheckPoseTotalScore - l_PoseTotalScore)
 	if l_ScoreDiff > 0.0001 then
 		-- The rebuild completed successfully, but we don't know if the score improved yet...
+		-- Even if score dropped a little bit, that might be okay after some shake and wiggle...
 		l_bDoneStatus = true    
 	end
 	return l_bDoneStatus
@@ -4393,21 +4410,16 @@ function RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment)
 	local l_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle = 
 		g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle
 
-	-- If user wants to keep disulfide bonds intact then add some extra rebuild 
-	-- attempts to allow for recovering from disulfide bonds breaking
-	-- (and then having to restore the last save solution because of it)...
-	-- I don't think this is really needed...
-	--if g_bUserWantsToKeepDisulfideBondsIntact == true then
-	--  l_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle = 
-	--    l_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle + 3
-	--end
-
-	selection.DeselectAll()
-	SetClashImportance(g_RebuildClashImportance)
-	selection.SelectRange(l_StartSegment, l_EndSegment)
-
 	for l_SegmentRangeRebuildAttempt = 1, l_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle do
 		-- Default g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle = 10
+
+		if g_bSketchBookPuzzle == true then 
+			save.Quickload(3)
+		end       
+
+		selection.DeselectAll()
+		SetClashImportance(g_RebuildClashImportance)
+		selection.SelectRange(l_StartSegment, l_EndSegment)
 		
 		g_SegmentRangeRebuildAttempt = l_SegmentRangeRebuildAttempt    
 		
@@ -4426,9 +4438,9 @@ function RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment)
 		-- Here's what you are looking for...
 		-- Here's what you are looking for...
 
-		if l_bRebuildSucceeded == true then
-			
-			SaveBest()
+		SaveBest() -- Even if l_bRebuildSucceeded == false we still need to restore the best saved.
+		
+		if l_bRebuildSucceeded == true then			
 			
 			l_NumberOfSuccessfulSegmentRangeRebuildAttempts = l_NumberOfSuccessfulSegmentRangeRebuildAttempts + 1
 		
@@ -4440,7 +4452,7 @@ function RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment)
 			if g_bShake_And_Wiggle_WithSideChainsAndBackbone_WithSelectedAndNearbySegments == true then
 				-- Very slow...
 
-				local l_SphereRadius = 12 -- Angstroms
+				local l_SphereRadius = 9 -- Angstroms
 				SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
 				
 				SetClashImportance(1)
@@ -4488,17 +4500,17 @@ function RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment)
 		else  
 			l_NumberOfFailedSegmentRangeRebuildAttempts = l_NumberOfFailedSegmentRangeRebuildAttempts + 1
 			if l_NumberOfFailedSegmentRangeRebuildAttempts >= l_MaxFailedAttemptsAllowed then
-				break
+				--nah... break
 			end
 		end
 	end 
 	
-	local l_SegmentRangeRebuildAttempts = l_NumberOfSuccessfulSegmentRangeRebuildAttempts +
-		l_NumberOfFailedSegmentRangeRebuildAttempts
-	local l_s = "s"
-	if l_NumberOfSuccessfulSegmentRangeRebuildAttempts == 1 then
-		l_s = ""
-	end
+	--local l_SegmentRangeRebuildAttempts = l_NumberOfSuccessfulSegmentRangeRebuildAttempts +
+	--	l_NumberOfFailedSegmentRangeRebuildAttempts
+	--local l_s = "s"
+	--if l_NumberOfSuccessfulSegmentRangeRebuildAttempts == 1 then
+	--	l_s = ""
+	--end
 	--print("  " .. l_NumberOfSuccessfulSegmentRangeRebuildAttempts .. 
 	--  " of " .. l_SegmentRangeRebuildAttempts .. " successful attempts.")
 
@@ -4531,7 +4543,6 @@ function RebuildManySegmentRanges()
 
 	save.Quicksave(3) -- Save
 	recentbest.Save() -- Save the current pose as the recentbest pose.  
-
 
 	-- This is the real meat of this script...
 	-- After laboriously determining which segment ranges to work on, we now finally work on them...
@@ -4566,6 +4577,10 @@ function RebuildManySegmentRanges()
 			--	" " .. l_StartSegment .. "-" .. l_EndSegment .. " segments, " ..
 			--	" Current score: " .. RoundToThirdDecimal(l_StartSegmentPoseTotalScore) .. "")
 
+			if g_bSketchBookPuzzle == true then
+				g_bFoundAHighGain = false
+			end
+
 			-- Here's what you are looking for!!!
 			-- Here's what you are looking for!!!
 			l_NumberOfSuccessfulSegmentRangeRebuildAttempts =
@@ -4574,53 +4589,56 @@ function RebuildManySegmentRanges()
 			-- Here's what you are looking for!!!
 
 			if l_NumberOfSuccessfulSegmentRangeRebuildAttempts >= 1 then
+			
+				if g_bSketchBookPuzzle == false then
 
-				-- We just performed several rebuilds. Each of those rebuilt solutions was saved to 
-				-- foldit's undo history. We now need to restore the best of those recent solutions
-				-- as the current solution...
-				-- Note: g_BestScore is updated in SaveBest(), which is called from many functions
-				--       in the rebuild process. If SaveBest() detects the current solution has
-				--       a better score than g_BestScore, it calls save.Quicksave to store the 
-				--       current solution to foldit's undo history. Then SaveBest() updates 
-				--       g_BestScore with the better score. It does not check for broken disulfide
-				--       bonds. Here we will make sure no disulfide bonds get broken...
-				l_RecentBestScore = GetRecentBestScore()
-				if l_RecentBestScore > g_BestScore then 
-					
-					-- Save the current solution just in case we break any disufide
-					-- bonds while restoring the recentbest solution...
-					RememberSolutionWithDisulfideBondsIntact()
-					
-					-- Restore the recentbest solution, from foldit's undo history...
-					recentbest.Restore()          
-					
-					-- Make sure the restored solution didn't break any disulfide bonds.
-					-- If it did, then undo the restore...
-					CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()          
-	
-					-- Get the updated Pose Total Score from the restored solution...
-					-- Or, if a disulfide bond was broken by the restore, then we get
-					-- the score of the solution as it was just before the restore.
-					-- I guess ideally, if the recentbest solution did break any bonds, we would 
-					-- continue looking for the "next best" recent solution and check it for 
-					-- broken bonds, and so on until we found one that didn't break bonds.
-					-- Then again, I'm not sure how many times we allow broken bond solutions
-					-- to end up in the undo history. I should look into that.
-					l_CheckPoseTotalScore = GetPoseTotalScore() 
-					if l_CheckPoseTotalScore > g_BestScore + 0.00001 then
-						-- Note the difference between the following:
-						--    g_BestScore <-- Updated in SaveBest(), which is called from many functions
-						--                    in the rebuild process. 
-						--    GetRecentBestScore() <-- This is from the recent best solution in foldit's undo history
-						--    GetPoseTotalScore() <-- The score of the current pose, which is now the one just restored
+					-- We just performed several rebuilds. Each of those rebuilt solutions was saved to 
+					-- foldit's undo history. We now need to restore the best of those recent solutions
+					-- as the current solution...
+					-- Note: g_BestScore is updated in SaveBest(), which is called from many functions
+					--       in the rebuild process. If SaveBest() detects the current solution has
+					--       a better score than g_BestScore, it calls save.Quicksave to store the 
+					--       current solution to foldit's undo history. Then SaveBest() updates 
+					--       g_BestScore with the better score. It does not check for broken disulfide
+					--       bonds. Here we will make sure no disulfide bonds get broken...
+					l_RecentBestScore = GetRecentBestScore()
+					if l_RecentBestScore > g_BestScore then 
 						
-						print("  Found a missed gain!!!") -- Found a gain by restoring foldit's recent best solution?
+						-- Save the current solution just in case we break any disufide
+						-- bonds while restoring the recentbest solution...
+						RememberSolutionWithDisulfideBondsIntact()
 						
-						Update_SlotScoresTable_ScorePart_Score_SlotScore_And_RebuildNumber_Fields(l_StartSegment,
-							l_EndSegment, 0)
+						-- Restore the recentbest solution, from foldit's undo history...
+						recentbest.Restore()          
 						
-					end
-				end
+						-- Make sure the restored solution didn't break any disulfide bonds.
+						-- If it did, then undo the restore...
+						CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()          
+		
+						-- Get the updated Pose Total Score from the restored solution...
+						-- Or, if a disulfide bond was broken by the restore, then we get
+						-- the score of the solution as it was just before the restore.
+						-- I guess ideally, if the recentbest solution did break any bonds, we would 
+						-- continue looking for the "next best" recent solution and check it for 
+						-- broken bonds, and so on until we found one that didn't break bonds.
+						-- Then again, I'm not sure how many times we allow broken bond solutions
+						-- to end up in the undo history. I should look into that.
+						l_CheckPoseTotalScore = GetPoseTotalScore() 
+						if l_CheckPoseTotalScore > g_BestScore + 0.00001 then
+							-- Note the difference between the following:
+							--    g_BestScore <-- Updated in SaveBest(), which is called from many functions
+							--                    in the rebuild process. 
+							--    GetRecentBestScore() <-- This is from the recent best solution in foldit's undo history
+							--    GetPoseTotalScore() <-- The score of the current pose, which is now the one just restored
+							
+							print("  Found a missed gain!!!") -- Found a gain by restoring foldit's recent best solution?
+							
+							Update_SlotScoresTable_ScorePart_Score_SlotScore_And_RebuildNumber_Fields(l_StartSegment,
+								l_EndSegment, 0)
+							
+						end -- if l_CheckPoseTotalScore > g_BestScore + 0.00001 then
+					end -- if g_bSketchBookPuzzle == false then
+				end -- if l_NumberOfSuccessfulSegmentRangeRebuildAttempts >= 1 then
 
 				Update_SlotScoresTable_ToDo_And_ShowList_Fields()
 
