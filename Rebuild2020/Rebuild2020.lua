@@ -3063,7 +3063,7 @@ function Update_SlotScoresTable_ToDo_And_SlotList_Fields()
 
 	end
 
-	print("\nList of all SlotNumbers (grouped by matching SlotScore value):\n" ..
+	print("\n  List of all SlotNumbers (grouped by matching SlotScore value):\n" ..
 		l_OrganizedListOfAllSlotNumbers)
 
 end -- Update_SlotScoresTable_ToDo_And_SlotList_Fields()
@@ -3093,8 +3093,8 @@ function CheckForLowStartingScore()
 	end
 
 	print("\nSince the starting score of " .. l_PoseTotalScore ..
-         " is less than 4000 points, to speed things up, we are adjusting the defaults" ..
-        "  options to:'skip normal stabilization' and 'skip fusing best position'." ..
+         " is less than 4000 points, to speed things up, we are adjusting the default" ..
+         " options to:'skip normal stabilization' and 'skip fusing best position'." ..
          " However, these defaults can be changed on the More options page.")
 	g_bFuseBestPosition = false
 	g_bPerformNormalStabilization = false
@@ -3125,7 +3125,7 @@ function SelectSegmentRanges(l_SegmentRangesTable)
 
 	end
 
-end
+end -- function SelectSegmentRanges(l_SegmentRangesTable)
 
 -- Called from 2 places in RebuildOneSegmentRangeManyTimes,
 --             1 place in MutateOneSegmentRange, and
@@ -3142,7 +3142,7 @@ function SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_Radius)
 			end
 		end
 	end
-end
+end -- function SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_Radius)
 
 -- Called from 1 place in InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges()...
 function bCheckIfSegmentRangeToWorkOn(l_StartSegment, l_EndSegment)
@@ -3217,7 +3217,7 @@ function PerformNormalStabilizationOnSegmentRange(l_StartSegment, l_EndSegment)
 		RemoveLastSavedSolutionFromQuickSaveStack()
 	end
 	
-end
+end -- function PerformNormalStabilizationOnSegmentRange(l_StartSegment, l_EndSegment)
 
 -- Called from 1 place in Add_Loop_Helix_And_Sheet_Segments_To_SegmentRangesTable()...
 function Add_Loop_SegmentRange_To_SegmentRangesTable(l_StartSegment)
@@ -3325,10 +3325,12 @@ function Add_Loop_Plus_One_Other_Type_SegmentRange_To_SegmentRangesTable(l_Start
 			l_EndSegment = l_EndSegment - 1
 		end
 	end
+  
 	if g_bRebuildSheetsAndLoops == false and l_SecondaryStructureTypeStart == "E" then
 		-- If we are not supposed to be working on sheets, 'E', and we are looking at a
 		-- sheet segment, then get out of here...
 		return l_EndSegment
+    
 	end
 	if g_bRebuildHelicesAndLoops == false and l_SecondaryStructureTypeStart == "H" then
 		-- If we are not supposed to be working on helices, 'H', and we are looking at a
@@ -3478,7 +3480,7 @@ function DisplaySegmentRanges()
 
 	end
 
-	print("\nRebuilding the following [" .. #g_SegmentRangesTable .. "] segment ranges:" ..
+	print("\n  Rebuilding the following [" .. #g_SegmentRangesTable .. "] segment ranges:" ..
 		" [" .. l_ListOfSegmentRanges .. "]" ..
     "\n")
 
@@ -4707,14 +4709,18 @@ function RebuildManySegmentRanges()
 							--  GetRecentBestScore() <-- This is from the recent best solution in foldit's undo history
 							--  GetPoseTotalScore() <-- The score of the current pose, which is now the one just restored
 							
-							print("  Found a missed gain!!!") -- Found a gain by restoring foldit's recent best solution?
+               -- Found a gain by restoring foldit's recent best solution?
+							print("\n  Found a missed gain by restoring foldit's recent best solution! Why?" ..
+                       " Old Best Score: " .. g_BestScore .. "," ..
+                       " gain: " .. l_CheckPoseTotalScore - g_BestScore .. "," ..
+                       " new best score: " .. g_BestScore)
 							
 							Update_SlotScoresTable_ScorePart_Score_And_SlotScore_Fields(l_StartSegment,
 								l_EndSegment, 0)
 							
 						end -- if l_CheckPoseTotalScore > g_BestScore + 0.00001 then
-					end -- if g_bSketchBookPuzzle == false then
-				end -- if l_NumberOfSuccessfulSegmentRangeRebuildAttempts >= 1 then
+					end -- if l_RecentBestScore > g_BestScore then 
+				end -- if g_bSketchBookPuzzle == false then
 
 				Update_SlotScoresTable_ToDo_And_SlotList_Fields()
 
@@ -4789,7 +4795,7 @@ function RebuildManySegmentRanges()
 				if g_bFuseBestPosition == true and 
 				   l_PotentialPointsLoss < l_MaxLossAllowed then
 
-					print("  Fusing best position...")
+					print("\n  Fusing the best position from several rebuilds of one segment range...\n")
 					
 					-- This checks for g_bMutateAfterNormalStabilization == false because if it were true, 
 					-- then we would have already performed the mutate above, after the stabilization. duh
@@ -4819,7 +4825,7 @@ function RebuildManySegmentRanges()
 						MutateOneSegmentRange(l_StartSegment, l_EndSegment)
 					end
 
-				end
+				end -- if g_bFuseBestPosition == true and 
 
 				SaveBest()
 				save.Quickload(3) -- Load
@@ -4830,7 +4836,7 @@ function RebuildManySegmentRanges()
 				-- We did not find an improvement, so let's restore the last known good position...
 				save.Quickload(3) -- Load
 				
-			end -- if l_bFoundOne == true then
+			end -- if l_NumberOfSuccessfulSegmentRangeRebuildAttempts >= 1 then
 
 		end -- if g_RunCycle > 0 then
 
@@ -4857,8 +4863,10 @@ function RebuildManySegmentRanges()
 
 		-- if l_CheckPoseTotalScore > l_StartSegmentRangePoseTotalScore + 0.00001 then
 		if l_DeepRebuildGain > 0 then
-			print("  Slot(s)" .. l_DisplayGainFromThis .. " gained " ..
-        l_DeepRebuildGain .. " points, new score: " .. g_BestScore)
+			print("\n  Slot(s)" .. l_DisplayGainFromThis .. " gained " ..
+                 l_DeepRebuildGain .. " points," .. 
+               " old best score: " .. l_StartSegmentRangePoseTotalScore .. "," ..
+               " new best score: " .. g_BestScore)
 			-- print("  Rebuilding this segment range gained us: [" .. l_DeepRebuildGain .. "] points")
 			l_PoseTotalScore = l_CheckPoseTotalScore
 		end
