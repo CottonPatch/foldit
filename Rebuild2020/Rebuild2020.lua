@@ -17,7 +17,7 @@ function SetupLocalDebugFuntions()
 	function RandomFloat(n1, n2) -- e.g.; RandomFloat(3, 9) --> 4.30195013275552
 		l_RandomFloat = math.random() * (n2 - n1) + n1
 		--l_RandomFloat = math.random(n1, (n2 - 1)) + math.random() 
-		return RoundToThirdDecimal(l_RandomFloat)
+		return l_RandomFloat
 		-- e.g.; RandomFloat(3, 9)
 		-- return math.random() * (n2 - n1) + n1
 		--     (0.0 <= x < 1.0) * (9 - 3) + 3
@@ -127,7 +127,7 @@ function SetupLocalDebugFuntions()
 	end
 	current.GetSegmentEnergyScore = function(l_SegmentIndex)    
 		local l_SegmentEnergyScore
-		l_SegmentEnergyScore = RandomFloat(-200, 200)
+		l_SegmentEnergyScore = RandomFloat(-10, 10) -- was (-200, 200)
 		return l_SegmentEnergyScore
 	end
   
@@ -219,21 +219,23 @@ function SetupLocalDebugFuntions()
 	end
 	pose.GetSegmentEnergyScore = function(l_SegmentIndex)
 		local l_SegmentEnergyScore
-		l_SegmentEnergyScore = RandomFloat(-200, 200)
+		l_SegmentEnergyScore = RandomFloat(-10, 10) -- was (-200, 200)
 		return l_SegmentEnergyScore
 	end
 
 	pose.GetSegmentEnergySubscore = function(l_SegmentIndex, l_ScorePart)
 		local l_SegmentEnergySubscore
-		l_SegmentEnergySubscore = RandomFloat(-50, 50)
+			
+		l_ScorePart = string.lower(l_ScorePart)
+		if l_ScorePart == "disulfides" then
+			l_SegmentEnergySubscore = "-0"
+		elseif l_ScorePart == "reference" then
+			l_SegmentEnergySubscore = "0.1"
+		else
+			l_SegmentEnergySubscore = RandomFloat(-1, 1) -- was (-50, 50) prior to 2020/02/01
+		end
 		return l_SegmentEnergySubscore
-		
-		-- The old method...
-		-- if (l_SegmentIndex == 1) and l_ScorePart == 'Density' then
-		--	return "-0"
-		-- else
-		-- return "0"
-		-- end
+
 	end
 
 	puzzle = {}
@@ -608,12 +610,10 @@ end
 
 -- Called from 1 place in main()...
 function DefineGlobalVariables()
--- a change
-	-- Perhaps these should be listed alphabetically and/or grouped into named categories...
 
-	local l_LocalDebugMode = false -- not presently used, but you could...
+	g_bDebugMode = false
 	if _G ~= nil then
-		l_LocalDebugMode = true
+		g_bDebugMode = true
 		SetupLocalDebugFuntions()
 	end
 	--
@@ -627,56 +627,43 @@ function DefineGlobalVariables()
 
 	--  Used in InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges(), DefineGlobalVariables(),
 	--          Add_Loop_SegmentRange_To_SegmentRangesTable(),
-	--          Add_Loop_Plus_One_Other_Type_SegmentRange_To_SegmentRangesTable(), DisplaySegmentRanges(),
-	--          DisplaySelectedOptions(), AskUserToSelectSegmentsToWorkOn(), bAskUserToSelectRebuildOptions(),
-	--          RebuildSelectedSegments(), RebuildManySegmentRanges(), PrepareToRebuildSegmentRanges() and
-	--           main()
-	g_SegmentRangesTable = {}
-	-- g_SegmentRangesTable={StartSegment, EndSegment}
+	--          Add_Loop_Plus_One_Other_Type_SegmentRange_To_SegmentRangesTable(), 
+  --          DisplaySegmentRanges(), DisplaySelectedOptions(), AskUserToSelectSegmentsToRebuild(),
+  --          bAskUserToSelectRebuildOptions(), RebuildSelectedSegments(), 
+  --          RebuildManySegmentRanges(), PrepareToRebuildSegmentRanges() and main()
+	g_SegmentRangesToRebuildTable = {}
+	-- g_SegmentRangesToRebuildTable={StartSegment, EndSegment}
 		srt_StartSegment = 1
 		srt_EndSegment = 2
-	-- g_SegmentRangesTable initially includes all the segments in the main protein (ie; no ligands)
+	-- g_SegmentRangesToRebuildTable initially includes all the segments in the main protein (ie; no ligands)
 
-	--  Used in GetScorePart_Score(), and
+	-- g_bSegmentsToRebuildBooleanTable:
+	--  Used in PopulateGlobalSegmentScoresTableBasedOnUserSelectedScoreParts(),
+	--          bSegmentIsAllowedToBeRebuilt() and
+  --          main()
+	g_bSegmentsToRebuildBooleanTable = {}
+	-- g_bSegmentsToRebuildBooleanTable={true/false}
+
+	--  Used in SetSegmentsAlreadyRebuilt(),
+  --          bSegmentIsAllowedToBeRebuilt(),
+  --          CheckIfAlreadyRebuiltSegmentsMustBeIncluded() and
+	--          ResetSegmentsAlreadyRebuiltTable()
+	g_SegmentsAlreadyRebuiltTable = {}
+	-- g_SegmentsAlreadyRebuiltTable={true/false}
+	-- g_SegmentsAlreadyRebuiltTable keeps track of which segments have already been processed...
+
+	--  Used in PopulateGlobalSlotScoresTable(),
+	--          Update_SlotScoresTable_ScorePart_Score_And_SlotScore_Fields(),
+	--          Update_SlotScoresTable_ToDo_And_SlotList_Fields() and
+  --          RebuildManySegmentRanges()
+  
+	--  Used in GetScorePart_Score() and
   --          PopulateGlobalSegmentScoresTableBasedOnUserSelectedScoreParts()
 	g_SegmentScoresTable = {}
 	-- g_SegmentScoresTable={SegmentScore}
 	-- g_SegmentScoresTable is optimized for quickly searching for 
 	-- the worst scoring segments, so we can work on those first.
 
-	--  Used in AddSegmentRangeDone(), and
-  --          ClearSegmentRangesDoneAndSegmentsDoneTables()
-	g_SegmentRangesDoneIndexTable = {}
-	-- g_SegmentRangesDoneIndexTable={SegmentRangesDoneTableIndex}
-	-- g_SegmentRangesDoneIndexTable gives us convenient way (only way) to look up
-	-- l_SegmentRangesDoneTableIndex values to allow us to clear the g_SegmentRangesDoneTable...
-
-	--  Used in AddSegmentRangeDone(),
-  --          bCheckIfSegmentRangeIsDone(), and
-	--          ClearSegmentRangesDoneAndSegmentsDoneTables()
-	g_SegmentRangesDoneTable = {}
-	-- g_SegmentRangesDoneTable={true/false}
-	-- g_SegmentRangesDoneTable keeps track of which Segment Ranges have already been processed...
-
-	--  Used in AddSegmentRangeDone(),
-  --          bCheckIfSegmentRangeIsDone(),
-  --          CheckIfDoneSegmentsMustBeIncluded(), and
-	--          ClearSegmentRangesDoneAndSegmentsDoneTables()
-	g_SegmentsDoneTable = {}
-	-- g_SegmentsDoneTable={true/false}
-	-- g_SegmentsDoneTable keeps track of which segments have already been processed...
-
-	-- g_SegmentsToWorkOnBooleanTable:
-	--  Used in PopulateGlobalSegmentScoresTableBasedOnUserSelectedScoreParts(),
-	--          bCheckIfSegmentRangeToWorkOn(), and
-  --          main()
-	g_SegmentsToWorkOnBooleanTable = {}
-	-- g_SegmentsToWorkOnBooleanTable={true/false}
-
-	--  Used in PopulateGlobalSlotScoresTable(),
-	--          Update_SlotScoresTable_ScorePart_Score_And_SlotScore_Fields(),
-	--          Update_SlotScoresTable_ToDo_And_SlotList_Fields(), and
-  --          RebuildManySegmentRanges()
 	g_SlotScoresTable = {}
 	-- g_SlotScoresTable={SlotNumber=1, ScorePart_Score=2, SlotScore=3, SlotList=4, bToDo=5}
 		sst_SlotNumber = 1
@@ -702,28 +689,20 @@ function DefineGlobalVariables()
 	--g_UserSelectedScorePartsToWorkOnTable={ScorePart_Name}
 	--
 	-- ***...end of Table Declarations.***
+  
+  	--  Used in SaveBest() and RebuildManySegmentRanges()
+	g_BestScore = GetPoseTotalScore()
 	
 	--  Used in DefineGlobalVariables(), InvertSegmentRangesTable(),
-	--          ConvertSegmentRangesTableToSegmentsToWorkOnBooleanTable(), FindSelectedSegments(),
+	--          ConvertSegmentRangesTableToSegmentsToRebuildBooleanTable(), FindSelectedSegments(),
 	--          CalculateSegmentRangeScore(), GetScorePart_Score(), PopulateGlobalActiveScorePartsTable(),
-	--          DisplayPuzzleProperties() and AskUserToSelectSegmentsToWorkOn()
+	--          DisplayPuzzleProperties() and AskUserToSelectSegmentsToRebuild()
 	g_SegmentCountWithLigands = structure.GetCount()
 	-- g_SegmentCountWithLigands = The number of segments (amino acids) in the
 	-- protein plus number of segments in ligand
 	-- print("structure.GetCount()=[" .. structure.GetCount() .. "]")
 
-	--  Used in DefineGlobalVariables(), InvertSegmentsTable(), GetNumberOfMutableSegments(),
-	--          FindFrozenSegments(), FindFrozenSegmentRanges(), FindSegmentsWithSecondaryStructureType(),
-	--          FindSegmentsWithAminoAcidType(), ConvertAllSegmentsToLoops(), AddSegmentRangeDone(), 
-	--          bCheckIfSegmentRangeIsDone(), CheckIfDoneSegmentsMustBeIncluded(), 
-	--          ClearSegmentRangesDoneAndSegmentsDoneTables(), GetSegmentScore(), 
-	--          InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges(), GetScorePart_Score(),
-	--          PopulateGlobalSegmentScoresTableBasedOnUserSelectedScoreParts(),
-	--          SelectSegmentsNearSegmentRange(), Add_Loop_SegmentRange_To_SegmentRangesTable(), 
-	--          Add_Loop_Plus_One_Other_Type_SegmentRange_To_SegmentRangesTable(),
-	--          Add_Loop_Helix_And_Sheet_Segments_To_SegmentRangesTable(),
-	--          DisplayPuzzleProperties(), AskMoreOptions(), bAskUserToSelectRebuildOptions() and
-	--          PrepareToRebuildSegmentRanges()
+	--  Used in 24 functions...
 	g_SegmentCountWithoutLigands = g_SegmentCountWithLigands -- minus ligand segments (see below)
 	-- g_SegmentCountWithLigands = The number of segments (amino acids) in the protein plus the
   --                             segments in any ligand
@@ -744,17 +723,13 @@ function DefineGlobalVariables()
 		end
 	end
 	-- print("g_SegmentCountWithoutLigands=[" .. g_SegmentCountWithoutLigands .. "]")
-	g_SegmentRangesTable = {{1, g_SegmentCountWithoutLigands}} -- Ligand segment numbers are always after the protein segment numbers.
+	g_SegmentRangesToRebuildTable = {{1, g_SegmentCountWithoutLigands}} 
+  -- ...Ligand segment numbers are always after the protein segment numbers.
 
 	--  Used in AskMoreOptions() and main()
 	g_AdditionalNumberOfSegmentRangesToProcessPerRunCycle = 1
 	
-	--  Used in AddSegmentRangeDone(), bCheckIfSegmentRangeIsDone(),
-	--          CheckbAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesIfRebuildGainsMoreThan(), 
-	--          DisplaySelectedOptions() and AskMoreOptions()
-	g_bAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCycles = false -- This can only get set to true if user selects it's checkbox
-	
-	--  Used in EnableFastCPUProcessing(), DisableFastCPUProcessing()
+		--  Used in EnableFastCPUProcessing(), DisableFastCPUProcessing()
 	g_bBetterRecentBest = false
 	
 	--  Used in DisplaySelectedOptions(), bAskUserToSelectRebuildOptions() and 
@@ -798,11 +773,12 @@ function DefineGlobalVariables()
 	g_bMutateSelectedAndNearbySegments = false
 	g_bOnlyRebuildLoops = true -- only rebuild loop segments
 
-	--  Used in AddSegmentRangeDone(), bCheckIfSegmentRangeIsDone(), CheckIfDoneSegmentsMustBeIncluded(),
-	--          ClearSegmentRangesDoneAndSegmentsDoneTables(),
-	--          CheckbAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesIfRebuildGainsMoreThan(), 
-	--          DisplaySelectedOptions() and bAskUserToSelectRebuildOptions()
-	g_bOnlyWorkOnPreviouslyDoneSegments = false -- User can change this on options page
+	--  Used in 7 functions...
+	g_bAlwaysAllowRebuildingAlreadyRebuiltSegments = true
+  -- ...User can change this on the Select Rebuild Options page.
+  if g_bDebugMode == true then
+    g_bAlwaysAllowRebuildingAlreadyRebuiltSegments = false
+  end
 
 	g_bPerformExtraStabilization = false
 	g_bPerformNormalStabilization = true
@@ -822,12 +798,12 @@ function DefineGlobalVariables()
 	--          RebuildOneSegmentRangeManyTimes() and RebuildManySegmentRanges()
 	g_bUserWantsToKeepDisulfideBondsIntact = false
 
-	--  Used in ClearSegmentRangesDoneAndSegmentsDoneTables() and
-	--          CheckbAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesIfRebuildGainsMoreThan()
-	g_Current_ClearSegmentRangesDoneAndSegmentsDone_Score = GetPoseTotalScore()
+	--  Used in bSegmentIsAllowedToBeRebuilt() and
+	--          RebuildManySegmentRanges()
+	g_CurrentRebuildPointsGained = 0
 
 	--  Used in CleanUp()
-	g_StartingScore = GetPoseTotalScore()
+	g_StartingScore = g_BestScore
 
 	--  Used in PopulateGlobalSegmentScoresTableBasedOnUserSelectedScoreParts(),
 	--          CheckForLowStartingScore() and DisplayPuzzleProperties()
@@ -850,10 +826,16 @@ function DefineGlobalVariables()
 
 	--  Used in AskMoreOptions(), RebuildSelectedSegments() and RebuildOneSegmentRangeManyTimes()
 	g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle = 15 -- set to at least 10
+  if g_bDebugMode == true then
+    g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle = 10 -- 5 is high enough for debug mode
+  end
 
 	--  Used in bAskUserToSelectRebuildOptions(), RebuildSelectedSegments(),
 	--          PrepareToRebuildSegmentRanges() and main()
 	g_NumberOfRunCycles = 40 -- Set it very high if you want to run forever
+  if g_bDebugMode == true then
+    g_NumberOfRunCycles = 5 -- 5 is high enough for debug mode
+  end
 
 	--  Used in DisplaySelectedOptions(), bAskUserToSelectRebuildOptions() and main()
 	g_NumberOfSegmentsSkipping = 0
@@ -892,7 +874,7 @@ function DefineGlobalVariables()
 	--  then rebuild/shake/wiggle segments 2, 3 and 4, and so on...
 	--  After rebuilding segment ranges with 3 consecutive segments we once again increment
 	--  g_RequiredNumberOfConsecutiveSegments by 1, to 4 consecutive segments.
-	--  Because g_StopAfterProcessingWithThisManyConsecutiveSegments = 4, this will be the final
+	--  Because g_ResetToStartValueAfterProcessingWithThisManyConsecutiveSegments = 4, this will be the final
 	--  segment range configuration, and will look like this: {{1-4},{2-5},{3-6},{4-7} ... {132-135}}
 	-- g_StartProcessingWithThisManyConsecutiveSegments:
 	--  Used in DefineGlobalVariables(), Add_Loop_SegmentRange_To_SegmentRangesTable(),
@@ -902,7 +884,10 @@ function DefineGlobalVariables()
 
 	--  Used in bAskUserToSelectRebuildOptions(), RebuildSelectedSegments() and 
 	--          PrepareToRebuildSegmentRanges()
-	g_StopAfterProcessingWithThisManyConsecutiveSegments = 4 -- user has option to change this
+	g_ResetToStartValueAfterProcessingWithThisManyConsecutiveSegments = 10 -- was 4 -- user has option to change this
+  if g_bDebugMode == true then
+    g_ResetToStartValueAfterProcessingWithThisManyConsecutiveSegments = 5 -- 5 is high enough for debug mode
+  end
 
 	--  Used in bAskUserToSelectRebuildOptions(), RebuildSelectedSegments() and
 	--          PrepareToRebuildSegmentRanges()
@@ -919,6 +904,9 @@ function DefineGlobalVariables()
 	if g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan < 40 then
 		g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan = 40
 	end
+  if g_bDebugMode == true then
+    g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan = 200
+  end
 
 	g_bSketchBookPuzzle = false
   local l_PuzzleName = puzzle.GetName()
@@ -928,22 +916,30 @@ function DefineGlobalVariables()
   end
 	
 	-- Default to one point per segment? Seems pretty arbitrary to me...
-	-- Used in CheckbAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesIfRebuildGainsMoreThan() and DisplaySelectedOptions()
-	g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges = 
-		g_SegmentCountWithLigands
+	-- Used in DefineGlobalVariables(),
+  --         bSegmentIsAllowedToBeRebuilt() and 
+  --         DisplaySelectedOptions()
+	g_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan = 
+    g_SegmentCountWithLigands
+  
 	-- "To Allow" or "To Force"?
 	-- Example:
-	--   g_SegmentCountWithoutLigands = 135
-	--   g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges = 135 -- Pretty simple formula...
-	if g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges > 500 then
-		g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges = 500
+	-- g_SegmentCountWithoutLigands = 135
+	-- g_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan = 135
+  -- ...Pretty simple formula
+	if g_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan > 500 then
+		g_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan = 500
 	end
 
 	if g_bSketchBookPuzzle == true then
 	   g_bFuseBestPosition = false
-	   g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges = 500
+	   g_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan = 500
 	   g_bConvertAllSegmentsToLoops = false
 	end
+
+  if g_bDebugMode == true then
+    g_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan = 900
+  end  
 
 	-- g_bProteinHasMutableSegments:
 	-- Used in DefineGlobalVariables(), MutateOneSegmentRange(), DisplayPuzzleProperties() and 
@@ -1003,7 +999,7 @@ function DefineGlobalVariables()
     -- ...Disables faster CPU processing, so your score will be counted...
 	end
 	
-	local l_NormalCPUScore = GetPoseTotalScore()
+	local l_NormalCPUScore = g_BestScore
 		
 	-- Calculate Allowable Bonus Score (not available in beginner puzzles)...
 	-- I guess I have not seen this yet, because none of my tests have included
@@ -1026,8 +1022,6 @@ function DefineGlobalVariables()
 		AskFastCPUProcessingOptions()
 	end
 
-	--  Used in SaveBest() and RebuildManySegmentRanges()
-	g_BestScore = GetPoseTotalScore()
 	if g_bEnableFastCPUProcessing == true then
 		EnableFastCPUProcessing()
 	end
@@ -1170,8 +1164,33 @@ end
 
 -- Called from 1 place in DefineGlobalVariables(), 1 place in DisplayPuzzleProperties(),
 -- 1 place in RebuildSelectedSegments(), and 2 places in RebuildManySegmentRanges()...
-function RoundToThirdDecimal(l_RoundMe) -- remove anything after the 3rd decimal place
-	return l_RoundMe - l_RoundMe % 0.001
+function RoundToThirdDecimal_ReturnFloat(l_DirtyFloat) -- remove anything after the 3rd decimal place
+  local l_MaybeDirtyFloat = RoundTo(l_DirtyFloat, 1000)
+  -- Rarely l_MaybeDirtyFloat looks like this 123.456000000000001, but 
+  -- usually it looks like this 123.456. 
+  -- The  extra .000000000000001 sometimes, randomly, gets introduced in
+  -- any division operation. This happens in many programming languages.
+  -- If you want a cleaner number for display purposes then use the
+  -- below function PrettyNumber...
+  return l_MaybeDirtyFloat
+end
+
+function PrettyNumber(l_DirtyFloat)
+  -- Previously called RoundToThirdDecimal()
+  local l_MaybeDirtyFloat = RoundTo(l_DirtyFloat, 1000)  
+  local l_PrettyString = string.format("%.3f", l_MaybeDirtyFloat)  
+  return l_PrettyString
+end
+
+function RoundTo(l_DirtyFloat, l_RoundTo)
+  local x = .5
+  if l_DirtyFloat * l_RoundTo < 0 then
+    x = -.5 
+  end
+  Integer, Decimal = math.modf(l_DirtyFloat * l_RoundTo + x)
+  l_MaybeDirtyFloat = Integer / l_RoundTo -- any division can accidentally introduce 0.000000000000001
+  
+  return l_MaybeDirtyFloat
 end
 
 -- Called from 1 place in main() and
@@ -1199,11 +1218,10 @@ function CleanUp(l_ErrorMessage)
 		print(l_ErrorMessage)
 	end
 	
-	print("\nStarting Score: " .. g_StartingScore)
-	print("Points Gained: " .. g_BestScore - g_StartingScore)
-	print("Final Score: " .. g_BestScore)
-	print("\n")
-	
+	print("\nStarting Score: " .. PrettyNumber(g_StartingScore) ..
+        "\nPoints Gained: " .. PrettyNumber(g_BestScore - g_StartingScore) ..
+        "\nFinal Score: " .. PrettyNumber(g_BestScore) ..
+        "\n")
 end
 -- ...end of Misc Utils  module.
 
@@ -1250,9 +1268,10 @@ function DisableFastCPUProcessing()
 	-- Disables faster CPU processing, so your scores will be counted...
 
 	local l_RecentBestPoseTotalScore = GetPoseTotalScore(recentbest) -- class "recentbest"
-	local l_PoseTotalScore = GetPoseTotalScore()
-	g_bBetterRecentBest =  l_RecentBestPoseTotalScore > l_PoseTotalScore
-	if g_bBetterRecentBest == true then
+  
+	if l_RecentBestPoseTotalScore > g_BestScore then
+    g_bBetterRecentBest == true 
+    g_BestScore = l_RecentBestPoseTotalScore
 		save.Quicksave(99) -- Save
 		recentbest.Restore() -- Keep the current pose if it's better; otherwise, restore the recentbest pose.
 		save.Quicksave(98) -- Save
@@ -1341,8 +1360,7 @@ function ConvertSegmentRangesTableToSegmentsTable(l_SegmentRangesTable)
 	return l_SegmentsTable
 end
 
-
--- Called from 1 place in AskUserToSelectSegmentsToWorkOn()...
+-- Called from 1 place in AskUserToSelectSegmentsToRebuild()...
 function CleanUpSegmentRangesTable(l_SegmentRangesTable)
 	-- l_SegmentRangesTable={StartSegment, EndSegment} e.g., {{1,3},{9,11},{134,135}}
 	-- l_SegmentsTable={SegmentIndex} e.g., {1,2,3,9,10,11,134,135}
@@ -1355,7 +1373,7 @@ function CleanUpSegmentRangesTable(l_SegmentRangesTable)
 
 end
 
--- Called from 1 place in SegmentRangesMinus() and 1 place in AskUserToSelectSegmentsToWorkOn()...
+-- Called from 1 place in SegmentRangesMinus() and 1 place in AskUserToSelectSegmentsToRebuild()...
 function InvertSegmentRangesTable(l_SegmentRangesTable, l_MaxSegmentIndex)
 	-- l_SegmentRangesTable={StartSegment, EndSegment} e.g., {{1,3},{9,11},{134,135}}
 	-- l_InvertedSegmentRangesTable={StartSegment, EndSegment} e.g., {{4,8},{12,133}}
@@ -1395,57 +1413,7 @@ function InvertSegmentRangesTable(l_SegmentRangesTable, l_MaxSegmentIndex)
 	return l_InvertedSegmentRangesTable
 end
 
- -- Presently not used...
-function InvertSegmentsTable(l_SegmentsTable)
-	-- l_SegmentsTable={SegmentIndex} e.g., {1,2,3,9,10,11,134,135}
-	-- l_InvertedSegmentsTable={SegmentIndex} e.g., {4,5,6,7,8,12,13,...132,133}
-
-	table.sort(l_SegmentsTable)
-
-	local l_InvertedSegmentsTable = {}
-	local l_StartSegment, l_EndSegment, l_SegmentIndex
-
-	for l_TableIndex = 1, #l_SegmentsTable - 1 do
-
-		l_StartSegment = l_SegmentsTable[l_TableIndex] + 1
-		l_EndSegment   = l_SegmentsTable[l_TableIndex + 1] -1
-
-		for l_SegmentIndex = l_StartSegment, l_EndSegment do
-			l_InvertedSegmentsTable[#l_InvertedSegmentsTable + 1] = l_SegmentIndex
-		end
-
-	end
-
-	l_StartSegment = l_SegmentsTable[#l_SegmentsTable] + 1
-	l_EndSegment   = g_SegmentCountWithoutLigands
-
-	for l_SegmentIndex = l_StartSegment, l_EndSegment do
-		l_InvertedSegmentsTable[#l_InvertedSegmentsTable + 1] = l_SegmentIndex
-	end
-
-	return l_InvertedSegmentsTable
-end
-
- -- Presently not used...
-function bIsSegmentIndexInSegmentsTable(l_SegmentIndex, l_SegmentsTable)
-	-- l_SegmentsTable={SegmentIndex} e.g., {1,2,3,9,10,11,134,135}
-
-	table.sort(l_SegmentsTable)
-
-	for l_TableIndex = 1, #l_SegmentsTable do
-
-		if l_SegmentsTable[l_TableIndex] == l_SegmentIndex then
-			return true
-
-		elseif l_SegmentsTable[l_TableIndex] > l_SegmentIndex then
-			return false
-		end
-
-	end
-	return false
-end
-
--- Called from 1 place in ConvertSegmentRangesTableToSegmentsToWorkOnBooleanTable()...
+-- Called from 1 place in ConvertSegmentRangesTableToSegmentsToRebuildBooleanTable()...
 function bIsSegmentIndexInSegmentRangesTable(l_SegmentIndex, l_SegmentRangesTable)
 	-- l_SegmentRangesTable={StartSegment, EndSegment} e.g., {{1,3},{9,11},{134,135}}
 
@@ -1470,35 +1438,6 @@ function bIsSegmentIndexInSegmentRangesTable(l_SegmentIndex, l_SegmentRangesTabl
 	end
 
 	return false
-end
-
--- Presently not used...
-function AddSegmentsTables(l_SegmentsTable1, l_SegmentsTable2)
-	-- l_SegmentsTable1={SegmentIndex} e.g., {1,2,3,9,10,11,134,135}
-	-- l_SegmentsTable2={SegmentIndex} e.g., {4,5,6,7,9,10,11,134}
-	-- l_JoinedSegmentsTable={SegmentIndex} e.g., {1,2,3,4,5,6,7,9,10,11,134,135}
-
-	local l_JoinedSegmentsTable = l_SegmentsTable1
-	if l_JoinedSegmentsTable == nil then
-		return l_SegmentsTable2
-	end
-	for l_TableIndex = 1, #l_SegmentsTable2 do
-		l_JoinedSegmentsTable[#l_JoinedSegmentsTable + 1] =
-				 l_SegmentsTable2[l_TableIndex]
-	end
-	table.sort(l_JoinedSegmentsTable)
-	return l_JoinedSegmentsTable
-end
-
--- Presently not used...
-function AddSegmentRangesTables(l_SegmentRangesTable1, l_SegmentRangesTable2)
-	-- l_SegmentRangesTable1={StartSegment, EndSegment} e.g., {{1,3},{9,10},{134,135}}
-	-- l_SegmentRangesTable2={StartSegment, EndSegment} e.g., {{3,4},{11,11}}
-	-- l_JoinedTable={StartSegment, EndSegment} e.g., {{1,4},{9,11},{134,135}}
-
-	--return ConvertSegmentsTableToSegmentRangesTable
-	--  (AddSegmentsTables(ConvertSegmentRangesTableToSegmentsTable(l_SegmentRangesTable1),
-	--                    ConvertSegmentRangesTableToSegmentsTable(l_SegmentRangesTable2)))
 end
 
 -- Called from 1 place in GetCommonSegmentRangesInBothTables()...
@@ -1543,7 +1482,7 @@ function FindCommonSegmentsInBothTables(l_SegmentsTable1, l_SegmentsTable2)
 	return l_CommonSegmentsInBothTables
 end
 
--- Called from 1 place in SegmentRangesMinus() and 2 places in AskUserToSelectSegmentsToWorkOn()...
+-- Called from 1 place in SegmentRangesMinus() and 2 places in AskUserToSelectSegmentsToRebuild()...
 function GetCommonSegmentRangesInBothTables(l_SegmentRangesTable1, l_SegmentRangesTable2)
 	-- l_SegmentRangesTable={StartSegment, EndSegment} e.g., {{1,3},{9,11},{134,135}}
 
@@ -1556,13 +1495,13 @@ function GetCommonSegmentRangesInBothTables(l_SegmentRangesTable1, l_SegmentRang
 	return l_GetCommonSegmentRangesInBothTables
 end
 
- -- Called from 6 places in AskUserToSelectSegmentsToWorkOn() and
+ -- Called from 6 places in AskUserToSelectSegmentsToRebuild() and
  --             3 places in bAskUserToSelectRebuildOptions()...
 function SegmentRangesMinus(l_SegmentRangesTable1, l_SegmentRangesTable2)
 	return GetCommonSegmentRangesInBothTables(l_SegmentRangesTable1, InvertSegmentRangesTable(l_SegmentRangesTable2))
 end
 
--- Called from 1 place in DisplaySelectedOptions(), 1 place in AskUserToSelectSegmentsToWorkOn(), and
+-- Called from 1 place in DisplaySelectedOptions(), 1 place in AskUserToSelectSegmentsToRebuild(), and
 --  1 place in bAskUserToSelectRebuildOptions()...
 function ConvertSegmentRangesTableToListOfSegmentRanges(l_SegmentRangesTable)
 
@@ -1586,80 +1525,22 @@ function ConvertSegmentRangesTableToListOfSegmentRanges(l_SegmentRangesTable)
 	return l_SegmentString
 end
 
--- Presently not used...
-function bSmallerSegmentRangesInLargerSegmentRangesTable
-	(l_SmallerSegmentRangesTable, l_LargerSegmentRangesTable)
-	-- l_SmallerSegmentRangesTable={StartSegment, EndSegment} e.g., {{1,2},{10,11}}
-	-- l_LargerSegmentRangesTable={StartSegment, EndSegment} e.g., {{1,3},{9,11},{134,135}}
-
-	if l_SmallerSegmentRangesTable == nil then
-		return true
-	end
-
-	local l_OneSegmentRange = {}
-
-	for l_TableIndex = 1, #l_SmallerSegmentRangesTable do
-
-		l_OneSegmentRange = l_SmallerSegmentRangesTable[TableIndex]
-
-		if bOneSegmentRangeInSegmentRangesTable(l_OneSegmentRange, l_LargerSegmentRangesTable)
-			== false then
-
-			return false
-
-		end
-
-	end
-
-	return true
-end
-
--- Presently not used...
-function bOneSegmentRangeInSegmentRangesTable(l_OneSegmentRange, l_SegmentRangesTable)
-	-- l_OneSegmentRange={StartSegment, EndSegment} e.g., {2,3}
-	-- l_SegmentRangesTable={StartSegment, EndSegment} e.g., {{1,3},{9,11},{134,135}}
-
-	if l_OneSegmentRange == nil or #l_OneSegmentRange == 0 then
-		return true
-	end
-
-	local l_StartSegment = l_OneSegmentRange[1]
-	local l_EndSegment = l_OneSegmentRange[2]
-
-	for l_TableIndex = 1, #l_SegmentRangesTable do
-
-		if l_StartSegment >= l_SegmentRangesTable[l_TableIndex][1] and
-			 l_StartSegment <= l_SegmentRangesTable[l_TableIndex][2] then
-
-			return (l_EndSegment <= l_SegmentRangesTable[l_TableIndex][2])
-
-		elseif l_EndSegment <= l_SegmentRangesTable[l_TableIndex][1] then
-
-			return false -- helps us bail out quickly if the EndSegment is less than the first StartSegment
-
-		end
-
-	end
-
-	return false
-end
-
 -- Called from 1 place in main()...
-function ConvertSegmentRangesTableToSegmentsToWorkOnBooleanTable(l_SegmentRangesTable)
-	-- l_SegmentRangesTable={StartSegment, EndSegment} e.g., {{1,3},{9,11},{134,135}}
-	-- l_bSegmentsToWorkOnBooleanTable={bToWorkOn} -- e.g., {true,true,false,true, ...}
+function ConvertSegmentRangesTableToSegmentsToRebuildBooleanTable(l_SegmentRangesToRebuildTable)
+	-- l_SegmentRangesToRebuildTable={StartSegment, EndSegment} e.g., {{1,3},{9,11},{134,135}}
+	-- l_bSegmentsToRebuildBooleanTable={bToWorkOn} -- e.g., {true,true,false,true, ...}
 
-	local l_bSegmentsToWorkOnBooleanTable = {}
+	local l_bSegmentsToRebuildBooleanTable = {}
 
 	-- for l_SegmentIndex = 1, structure.GetCount() do
 	for l_SegmentIndex = 1, g_SegmentCountWithLigands do
 
-		l_bSegmentsToWorkOnBooleanTable[l_SegmentIndex] =
-			bIsSegmentIndexInSegmentRangesTable(l_SegmentIndex, l_SegmentRangesTable)
+		l_bSegmentsToRebuildBooleanTable[l_SegmentIndex] =
+			bIsSegmentIndexInSegmentRangesTable(l_SegmentIndex, l_SegmentRangesToRebuildTable)
 
 	end
 
-	return l_bSegmentsToWorkOnBooleanTable
+	return l_bSegmentsToRebuildBooleanTable
 end
 -- ...end of Segments and Segment Ranges manipulation module.
 --
@@ -1697,7 +1578,7 @@ function FindFrozenSegments()
 	return l_SegmentsTable
 end
 
--- Called from 1 place in AskUserToSelectSegmentsToWorkOn() and
+-- Called from 1 place in AskUserToSelectSegmentsToRebuild() and
 --             1 place in bAskUserToSelectRebuildOptions()...
 function FindFrozenSegmentRanges()
 	return ConvertSegmentsTableToSegmentRangesTable(FindFrozenSegments())
@@ -1715,7 +1596,7 @@ function FindLockedSegments()
 	return l_SegmentsTable
 end
 
--- Called from 1 place in AskUserToSelectSegmentsToWorkOn() and
+-- Called from 1 place in AskUserToSelectSegmentsToRebuild() and
 --             1 place in bAskUserToSelectRebuildOptions()...
 function FindLockedSegmentRanges()
 	return ConvertSegmentsTableToSegmentRangesTable(FindLockedSegments())
@@ -1734,7 +1615,7 @@ function FindSelectedSegments()
 end
 
 -- Called from 1 place in SetSegmentRangeSecondaryStructureType,
---             2 places in AskUserToSelectSegmentsToWorkOn(), and 1 place in main()...
+--             2 places in AskUserToSelectSegmentsToRebuild(), and 1 place in main()...
 function FindSelectedSegmentRanges()
 	return ConvertSegmentsTableToSegmentRangesTable(FindSelectedSegments())
 end
@@ -1752,7 +1633,7 @@ function FindSegmentsWithSecondaryStructureType(In_SecondaryStructureType)
 	return l_SegmentsTable
 end
 
--- Called from 4 places in AskUserToSelectSegmentsToWorkOn() and 
+-- Called from 4 places in AskUserToSelectSegmentsToRebuild() and 
 --             1 place  in bAskUserToSelectRebuildOptions()...
 function FindSegmentRangesWithSecondaryStructureType(l_SecondaryStructureType)
 	return ConvertSegmentsTableToSegmentRangesTable(FindSegmentsWithSecondaryStructureType(l_SecondaryStructureType))
@@ -1905,13 +1786,13 @@ end
 -- Start of FuseBestPosition module...
 -- Called from 1 place in FuseBestPositionEnd(), 
 --             4 times in FuseBestPosition(),
---      1 time  in Update_SlotScoresTable_ScorePart_Score_And_SlotScore_Fields(),
+--             1 time  in Update_SlotScoresTable_ScorePart_Score_And_SlotScore_Fields(),
 --             1 time  in RebuildOneSegmentRangeManyTimes(), and 
 --             2 times in RebuildManySegmentRanges()...
 function SaveBest()
   
-	local l_PoseTotalScore = GetPoseTotalScore()
-	local l_ScorePlusMaxBonus = l_PoseTotalScore + g_MaxBonus
+	local l_FunctionStartPoseTotalScore = GetPoseTotalScore()
+	local l_ScorePlusMaxBonus = l_FunctionStartPoseTotalScore + g_MaxBonus
 	-- Note, g_MaxBonus, in the above calculation is not the same variable as 
 	-- g_BestScore in the next line.  Perhaps I am tired and should go to sleep...
 	-- Seems like the next line should be checking for (g_bEnableFastCPUProcessing == true)...
@@ -1923,7 +1804,7 @@ function SaveBest()
 			DisableFastCPUProcessing()
 		end
 
-		local l_PointsGained = l_PoseTotalScore - g_BestScore
+		local l_PointsGained = l_FunctionStartPoseTotalScore - g_BestScore
 		
 		if l_PointsGained > g_SketchBookPuzzleMinimumGainForSave or 
 		  (l_PointsGained > 0 and g_bFoundAHighGain == true) then
@@ -1934,7 +1815,15 @@ function SaveBest()
 			if l_PointsGained > 0.01 then
 				--no need print("  Gained another " .. l_PointsGained .. " pts.")
 			end
-			g_BestScore = l_PoseTotalScore
+			g_BestScore = l_FunctionStartPoseTotalScore
+      
+      if g_bFuseBestPosition == false and g_BestScore > 0 then
+      	print("\nNow that the total score is positive, we will switch back on: " ..
+              "'perform normal stabilization' and 'fuse best position'.\n")
+        g_bFuseBestPosition = true
+        g_bPerformNormalStabilization = true
+      end
+      
 			save.Quicksave(3) -- Save
 			g_bFoundAHighGain = true
 		end
@@ -2008,16 +1897,23 @@ function GetRecentBest(l_DoPreFunction, l_DoPostFunction)
 	-- Keep the current pose if it's better; otherwise, restore the recentbest pose.
 	-- Picks up all gains by using recentbest...
 	local l_RecentBestScore = GetRecentBestScore()
-	local l_PoseTotalScore = GetPoseTotalScore()
-	if l_RecentBestScore > l_PoseTotalScore then
+	--local l_PoseTotalScore = GetPoseTotalScore()
+	if l_RecentBestScore > g_BestScore then
+    
 		if l_DoPreFunction ~= nil then
 			l_DoPreFunction()
 		end
+    
 		recentbest.Restore() -- Keep the current pose if it's better; otherwise, restore the recentbest pose.
+    
 		if l_DoPostFunction ~= nil then
 			l_DoPostFunction()
 		end
+    
 	end
+  
+  -- All calls to GetRecentBest() eventually call SaveBest(), so we don't need to do it here.
+  
 end
 
 -- Called from 2 places in FuseBestPosition()...
@@ -2100,14 +1996,14 @@ end
 -- Called from 5 places in FuseBestPosition()...
 function reFuseBestPosition(l_Score, l_SlotNumber)
 	
-	local l_PoseTotalScore = GetPoseTotalScore()
+	local l_CheckPoseTotalScore = GetPoseTotalScore()
 	
-	if l_PoseTotalScore < l_Score then
+	if l_CheckPoseTotalScore < l_Score then
 		-- new score is not good, so load previous position...
 		save.Quickload(l_SlotNumber) -- Load previous position
 	else
 		-- new score is better. keep it and save the current position...
-		l_Score = l_PoseTotalScore
+		l_Score = l_CheckPoseTotalScore
 		save.Quicksave(l_SlotNumber) -- Save current position
 	end
 	
@@ -2184,124 +2080,77 @@ end
 
 -- Start of Segment Range Done module...
 -- Called from 1 place in RebuildManySegmentRanges()...
-function AddSegmentRangeDone(l_StartSegment, l_EndSegment)
+function SetSegmentsAlreadyRebuilt(l_StartSegment, l_EndSegment)
 
-	if g_bAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCycles == false then
+  -- Loop through the given segment range and set the g_SegmentsAlreadyRebuiltTable
+  -- values to true for each segments in the given range...
+  for l_TableIndex = l_StartSegment, l_EndSegment do
 
-		-- let's go ahead and flag this segment range as completed...
+    -- Update one row in the g_SegmentsAlreadyRebuiltTable...
+    g_SegmentsAlreadyRebuiltTable[l_TableIndex] = true
+  end
 
-		local l_RangeDiff = l_EndSegment - l_StartSegment
-		-- Example 1:
-		-- l_StartSegment = 8, l_EndSegment = 9, g_SegmentCountWithoutLigands = 135
-		-- l_RangeDiff = l_EndSegment - l_StartSegment = 9 - 8 = 1
-		-- l_RangeDiff = 1
-		-- l_SegmentRangesDoneTableIndex = l_StartSegment + l_RangeSpan * g_SegmentCountWithoutLigands
-		-- l_SegmentRangesDoneTableIndex = 8 + (1 * 135) = 8 + 135 = 143
-		-- l_SegmentRangesDoneTableIndex = 143 -- I guess this just sticks us way out there, to prevent
-		--                                conflicts with other ranges.
-		-- Example 2:
-		-- l_StartSegment = 135, l_EndSegment = 135, g_SegmentCountWithoutLigands = 135
-		-- l_RangeDiff = l_EndSegment - l_StartSegment = 135 - 135 = 0
-		-- l_RangeDiff = 0
-		-- l_SegmentRangesDoneTableIndex = l_StartSegment + l_RangeSpan * g_SegmentCountWithoutLigands
-		-- l_SegmentRangesDoneTableIndex = 135 + (0 * 135) = 135 + 0 = 135
-		-- l_SegmentRangesDoneTableIndex = 135 -- ...well no conflict here
+end -- SetSegmentsAlreadyRebuilt(l_StartSegment, l_EndSegment)
 
-		-- The following math prevents any other range from coming up with the
-		-- same l_SegmentRangesDoneTableIndex
-		-- The same calculation is performed below in bCheckIfSegmentRangeIsDone()...
-		local l_SegmentRangesDoneTableIndex
-		l_SegmentRangesDoneTableIndex = l_StartSegment + l_RangeDiff * g_SegmentCountWithoutLigands
-
-		-- Add (and/or update?) one row in the g_SegmentRangesDoneTable...
-		g_SegmentRangesDoneTable[l_SegmentRangesDoneTableIndex] = true
-
-		-- Add one row to the g_SegmentRangesDoneIndexTable...
-		-- This table is indexed starting at 1 and increments sequentially;
-		-- whereas, g_SegmentRangesDoneTable, is indexed by the rather odd
-		-- l_SegmentRangesDoneTableIndex...
-		-- The g_SegmentRangesDoneIndexTable gives us convenient way (only way) of
-		-- looking up l_SegmentRangesDoneTableIndex values to allow us to clear the
-		-- g_SegmentRangesDoneTable...
-		g_SegmentRangesDoneIndexTable[#g_SegmentRangesDoneIndexTable + 1] = l_SegmentRangesDoneTableIndex
+-- Called from bSegmentRangeIsAllowedToBeRebuilt()...
+function bSegmentIsAllowedToBeRebuilt(l_SegmentIndex)
+  
+  -- Normally all worst scoring segment ranges are selected to be rebuilt.
+  -- They can only be removed on the "Select Segments to Rebuild" page...
+  -- g_bSegmentsToRebuildBooleanTable is populated in main()
+  if g_bSegmentsToRebuildBooleanTable[l_SegmentIndex] == false then
+			return false -- note how this option overrides the below options.
 	end
 
-	if g_bOnlyWorkOnPreviouslyDoneSegments == false then
-
-		-- Loop through the given segment range and set the g_SegmentsDoneTable
-		-- values to true for each segments in the given range...
-		for l_TableIndex = l_StartSegment, l_EndSegment do
-
-			-- Add or update one row in the g_SegmentsDoneTable...
-			g_SegmentsDoneTable[l_TableIndex] = true
-		end
+  if g_bAlwaysAllowRebuildingAlreadyRebuiltSegments == true then
+		return true
 	end
+  
+  -- g_CurrentRebuildPointsGained is set in RebuildManySegmentRanges()...
+  if g_CurrentRebuildPointsGained > 
+    g_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan then
+    return true
+  end
+  
+  if g_SegmentsAlreadyRebuiltTable[l_SegmentIndex] == true then
+    return false
+  end
+  
+  -- This segment has not already been rebuilt and
+  -- the user did not unselect the segment range...
+  return true
+  
+end -- function bSegmentIsAllowedToBeRebuilt(l_SegmentIndex)
 
-end -- AddSegmentRangeDone(l_StartSegment, l_EndSegment)
+function bSegmentRangeIsAllowedToBeRebuilt(l_StartSegment, l_EndSegment)
+  
+  -- First, let's make sure each segment in the range is allowed to be rebuilt...
+  -- If any one segment in the this segment range is not allowed to be rebuilt, 
+  -- then this entire segment range is not allowed to be rebuilt...
+  for l_SegmentIndex = l_StartSegment, l_EndSegment do
+    if bSegmentIsAllowedToBeRebuilt(l_SegmentIndex) == false then
+      return false -- it only takes one false to fail.
+    end
+  end
+ 
+  return true
+  
+end -- function bSegmentRangeIsAllowedToBeRebuilt(l_StartSegment, l_EndSegment)
 
 -- Called from 1 place in InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges()...
-function bCheckIfSegmentRangeIsDone(l_StartSegment, l_EndSegment)
+function CheckIfAlreadyRebuiltSegmentsMustBeIncluded()
 
-	if g_bAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCycles == true then
-		-- Since the user has enabled multiple attempts, we
-		-- will allow rebuilding this Segment Range...
-		return false
-	end
-
-	local l_SegmentRangesDoneTableIndex
-	local l_bSegmentRangeIsDone = false
-
-	local l_RangeDiff = l_EndSegment - l_StartSegment
-
-	-- The following math prevents any other segment range from
-	-- coming up with the same l_SegmentRangesDoneTableIndex...
-	-- The same calculation is performed above in AddSegmentRangeDone()...
-	l_SegmentRangesDoneTableIndex = l_StartSegment + l_RangeDiff * g_SegmentCountWithoutLigands
-
-	l_bSegmentRangeIsDone = g_SegmentRangesDoneTable[l_SegmentRangesDoneTableIndex]
-	if l_bSegmentRangeIsDone == nil then
-		-- If this l_SegmentRangesDoneTableIndex is not in the g_SegmentRangesDoneTable yet,
-		-- then this segment range is not done yet...
-		return false
-	end
-
-	if g_bOnlyWorkOnPreviouslyDoneSegments == false then
-
-		-- Loop through each segment in the passed in segment range
-		-- to see if any of the segments are set to true in the g_SegmentsDoneTable.
-		-- If any one segment in the range is set to true, we can report back
-		-- that this segment range is done...
-		local l_TableIndex
-		for l_TableIndex = l_StartSegment, l_EndSegment do
-
-			if g_SegmentsDoneTable[l_TableIndex] == true then
-				return true
-			end
-		end
-	end
-
-	return l_bSegmentRangeIsDone
-
-end -- bCheckIfSegmentRangeIsDone(l_StartSegment, l_EndSegment)
-
--- Called from 1 place in InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges()...
-function CheckIfDoneSegmentsMustBeIncluded()
-
-	if g_bOnlyWorkOnPreviouslyDoneSegments == true then
-		return
-	end
-
-	-- If we cannot find enough consecutive non-done segments in a row to
-	-- meet the minimum, we will set all the entries in the g_SegmentsDoneTable to false.
-	-- This will allow done segments to be treated as normal, not-yet-done, segments.
-	-- Then when we are forming segment ranges to process, we be able to meet the
+  -- If we cannot find enough consecutive not-already-rebuilt segments available to meet
+	-- the minimum, we will set all the entries in the g_SegmentsAlreadyRebuiltTable to false.
+  -- This will allow all already-rebuilt segments to be treated as not-already-rebuilt segments.
+	-- Then, when we are forming segment ranges to process, we be able to meet the
 	-- minimun number of consecutive segments per segment range required by the user.
 
 	local l_ConsecutiveSegmentsCounter = 0
 	for l_TableIndex = 1, g_SegmentCountWithoutLigands do
-		if g_SegmentsDoneTable[l_TableIndex] == true then
-			-- Since this segment is done it does not count as a
-			-- consecutive segment. Start the counter over again...
+    if bSegmentIsAllowedToBeRebuilt(l_TableIndex) == false then
+			-- Since this segment is not allowed to be rebuilt, it cannot be
+      -- counted as a consecutive segment. Start the counter over again...
 			l_ConsecutiveSegmentsCounter = 0
 
 		else
@@ -2310,68 +2159,32 @@ function CheckIfDoneSegmentsMustBeIncluded()
 
 		if l_ConsecutiveSegmentsCounter >= g_RequiredNumberOfConsecutiveSegments then
 			-- Ah ha, there are enough consecutive Segments to meet the minimun required
-			-- segments per segment range, despite having a bunch of done segments in our way...
+			-- segments per segment range, despite having a bunch of already-rebuilt segments 
+      -- in our way...
 			-- No action required. We can return now...
 			return
 		end
 	end
 
 	-- Since there are not enough non-done segments in a row to meet
-	-- the minimum, let's set all the entries in the g_SegmentsDoneTable to false.
+	-- the minimum, let's set all the entries in the g_SegmentsAlreadyRebuiltTable to false.
 	-- This should give us plenty of segments to work with...
-	print("\nNot enough consecutive segments available to create a segment range;" ..
-         " therefore, we will set all done segments to undone and try again...")
+	print("\nNot enough consecutive not-already-rebuilt segments available to create a segment range;" ..
+         " therefore, we will set all already-rebuilt segments to not-already-rebuilt and try again...")
+       
+  ResetSegmentsAlreadyRebuiltTable()
+       
+end -- CheckIfAlreadyRebuiltSegmentsMustBeIncluded()
+
+-- Called from 1 place in InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges()...
+function ResetSegmentsAlreadyRebuiltTable()
+
 	for l_TableIndex = 1, g_SegmentCountWithoutLigands do
-		g_SegmentsDoneTable[l_TableIndex] = false
+		g_SegmentsAlreadyRebuiltTable[l_TableIndex] = false
 	end
 
-	-- Why not just call ClearSegmentRangesDoneAndSegmentsDoneTables() here instead?
-	-- ClearSegmentRangesDoneAndSegmentsDoneTables() clears both the g_SegmentsDoneTable
-	-- AND the g_bSegmentRangesDoneTable.  Would it be bad to clear the
-	-- g_bSegmentRangesDoneTable here?
+end -- function ResetSegmentsAlreadyRebuiltTable()
 
-end
-
--- Called from 1 place in CheckbAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesIfRebuildGainsMoreThan() and
---             1 place in InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges()...
-function ClearSegmentRangesDoneAndSegmentsDoneTables()
-
-	for l_TableIndex = 1, #g_SegmentRangesDoneIndexTable do
-		g_SegmentRangesDoneTable[g_SegmentRangesDoneIndexTable[l_TableIndex]] = false
-	end
-	g_SegmentRangesDoneIndexTable = {}
-
-	if g_bOnlyWorkOnPreviouslyDoneSegments == false then
-		-- should the above clearing of the g_SegmentRangesDoneTable be down here?
-
-		-- Clear the g_SegmentsDoneTable...
-		for l_TableIndex = 1, g_SegmentCountWithoutLigands do
-			g_SegmentsDoneTable[l_TableIndex] = false
-		end
-
-	end
-
-	g_Current_ClearSegmentRangesDoneAndSegmentsDone_Score = GetPoseTotalScore()
-end
-
--- Called from 1 place in RebuildManySegmentRanges()...
-function CheckbAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesIfRebuildGainsMoreThan()
-
-	if g_bOnlyWorkOnPreviouslyDoneSegments == true then
-		return
-	end
-
-	local l_GetPoseTotalScore = GetPoseTotalScore()
-	local l_MinimumTotalPointsRequiredToAllowRetryingSegmentRanges =
-		g_Current_ClearSegmentRangesDoneAndSegmentsDone_Score +
-		g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges
-
-	if g_bAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCycles == true or
-		l_GetPoseTotalScore > l_MinimumTotalPointsRequiredToAllowRetryingSegmentRanges then
-			ClearSegmentRangesDoneAndSegmentsDoneTables()
-	end
-
-end
 -- ...end of Segment Ranges Done module.
 
 -- Start of Slots and Scores module...
@@ -2389,28 +2202,15 @@ function GetSegmentScore(l_pose)
 	return l_TotalSegmentScore
 end
 
--- Called from 1 place  in GetRecentBestScore(), 
---             2 places in DisableFastCPUProcessing(),
---             3 places in SaveBest(),
---             1 place  in CalculateSegmentRangeScore(),
---             1 place  in DisplayPuzzleProperties(),
---             1 place  in GetRecentBest(),
---             1 place  in reFuseBestPosition(),
---             1 place  in FuseBestPosition(),
---             2 places in PerformNormalStabilizationOnSegmentRange(),
---             1 place  in ClearSegmentRangesDoneAndSegmentsDoneTables(),
---             1 place  in CheckbAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesIfRebuildGainsMoreThan(),
---             1 place  in GetScorePart_Score(),
---             1 place  in PopulateGlobalSegmentScoresTableBasedOnUserSelectedScoreParts(),
---     1 place  in Update_SlotScoresTable_ScorePart_Score_And_SlotScore_Fields(),
---             1 place  in GetScorePart_Score(),
---             1 place  in PopulateGlobalSegmentScoresTableBasedOnUserSelectedScoreParts(),
---     1 place  in Update_SlotScoresTable_ScorePart_Score_And_SlotScore_Fields(),
---             2 places in MutateOneSegmentRange(),
---             1 place  in CheckForLowStartingScore(),
---             4 places in RebuildSelectedSegments(),
---            10 places in RebuildManySegmentRanges(), and
---             4 places in DefineGlobalVariables()...
+-- Called from 42 places in 21 functions...
+--  When possible use g_BestScore instead of calling this function.
+--  If only recording the current score before performing an action
+--  which might change the current score, then use g_BestScore.
+--  If something was done that could have changed the current score, like 
+--  Rebuild, Shake, Wiggle, etc, then call this function for the latest score.
+--  Honestly, always calling this function in production should be fine, it 
+--  really only matters in debug mode, because any call to this function 
+--  might return a new random value.
 function GetPoseTotalScore(l_pose)
   -- A pose is everything, including the main protein and any ligands.
 	-- Keep the current pose if it's better; otherwise, restore the recentbest pose.
@@ -2424,8 +2224,6 @@ function GetPoseTotalScore(l_pose)
 	if l_Total < -999999 and l_Total > -1000001 then -- Why check the lower limit of -1000001?
 		l_Total = GetSegmentScore(l_pose)
 	end
-
-  --l_Total = RoundToThirdDecimal(l_Total)
 
 	return l_Total
 
@@ -2472,8 +2270,8 @@ function CalculateSegmentRangeScore(l_ScorePart_NameOrTable, l_StartSegment, l_E
 		end
 	else
 		if l_ScorePart_NameOrTable == nil and l_StartSegment == nil and l_EndSegment == nil then            
-			local l_PoseTotalScore = GetPoseTotalScore(l_pose)
-			return l_PoseTotalScore
+			--local l_PoseTotalScore = GetPoseTotalScore(l_pose)
+			return g_BestScore
 		end
 		if l_StartSegment == nil then
 			l_StartSegment = 1
@@ -2536,16 +2334,16 @@ function InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges(l_RecursionLe
          " worst scoring segment ranges (each range containing " ..
           g_RequiredNumberOfConsecutiveSegments .. " consecutive segments)...")
 
-	CheckIfDoneSegmentsMustBeIncluded()
-
+  CheckIfAlreadyRebuiltSegmentsMustBeIncluded()
+  
 	-- l_WorstScoringSegmentRangesTable={Segment Score, StartSegment}
 	l_WorstScoringSegmentRangesTable = {}
 
 	-- g_SegmentScoresTable = {SegmentScore}
 	PopulateGlobalSegmentScoresTableBasedOnUserSelectedScoreParts()
 
-	local l_SegmentRangeSkipList = ""
-	local l_NumberOfSegmentRangesSkipping = 0
+	local l_SkipTheseSegments = ""
+	local l_NumberOfSegmentsSkipping = 0
 	local l_StartSegment, l_EndSegment
 
 	local l_FirstPossibleSegmentThatCanStartARangeOfSegments = 1
@@ -2560,7 +2358,8 @@ function InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges(l_RecursionLe
 	-- So our last possible segment range would be {2, 3, 4}
 
 	local l_CurrentWorseScoringSegment
-	local l_bSegmentRangeIsDone
+	local l_bSegmentIsAllowedToBeRebuilt
+	local l_bSegmentRangeIsAllowedToBeRebuilt
 	local l_bSegmentRangeToWorkOn
 	local l_SegmentScore
   
@@ -2568,51 +2367,54 @@ function InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges(l_RecursionLe
 		l_FirstPossibleSegmentThatCanStartARangeOfSegments,
 		l_LastPossibleSegmentThatCanStartARangeOfSegments do
 
-		l_StartSegment = l_CurrentWorseScoringSegment
-		l_EndSegment = l_CurrentWorseScoringSegment + g_RequiredNumberOfConsecutiveSegments - 1
-		-- An Example:
-		-- l_StartSegment = 1
-		-- l_EndSegment = 1 + 3 - 1 = 3
-		-- SegmentRange = {1, 2, 3}
+    l_bSegmentIsAllowedToBeRebuilt = bSegmentIsAllowedToBeRebuilt(l_CurrentWorseScoringSegment)
+    if l_bSegmentIsAllowedToBeRebuilt == true then
 
-		l_bSegmentRangeIsDone = bCheckIfSegmentRangeIsDone(l_StartSegment, l_EndSegment)
-		l_bSegmentRangeToWorkOn = bCheckIfSegmentRangeToWorkOn(l_StartSegment, l_EndSegment)
+      l_StartSegment = l_CurrentWorseScoringSegment
+      l_EndSegment = l_CurrentWorseScoringSegment + g_RequiredNumberOfConsecutiveSegments - 1
+      -- An Example:
+      -- l_StartSegment = 1
+      -- l_EndSegment = 1 + 3 - 1 = 3
+      -- SegmentRange = {1, 2, 3}
 
-		if l_bSegmentRangeIsDone == false  and l_bSegmentRangeToWorkOn == true then
-			l_SegmentScore = GetScorePart_Score(l_StartSegment, l_EndSegment)
+      l_bSegmentRangeIsAllowedToBeRebuilt = bSegmentRangeIsAllowedToBeRebuilt(l_StartSegment, l_EndSegment)
 
-			-- Add a row to the l_WorstScoringSegmentRangesTable which will be used
-			-- below to populate the g_SegmentRangesTable...
-			-- Note: The only reason we add the l_SegmentScore as the first field
-			--       in the l_WorstScoringSegmentRangesTable, is so we can sort the table from
-			--       lowest to highest Segment Scores.
-			-- Note: Although we are only placing the l_StartSegment in this table, and
-			--       not the l_EndSegment, this is still a segment *range* table. We just
-			--       don't need the l_EndSegment in this table, because we will calculate
-			--       it later as l_StartSegment + g_RequiredNumberOfConsecutiveSegments - 1
-			--       Also, we don't want the l_EndSegment is this table because it would
-			--       break the SortBySegmentScore() function used below...
-			l_WorstScoringSegmentRangesTable[#l_WorstScoringSegmentRangesTable + 1] =
-				{l_SegmentScore, l_StartSegment}
+      if l_bSegmentRangeIsAllowedToBeRebuilt == true then
         
-		else
+        l_SegmentScore = GetScorePart_Score(l_StartSegment, l_EndSegment)
+
+        -- Add a row to the l_WorstScoringSegmentRangesTable which will be used
+        -- below to populate the g_SegmentRangesToRebuildTable...
+        -- Note: The only reason we add the l_SegmentScore as the first field
+        --       in the l_WorstScoringSegmentRangesTable, is so we can sort the table from
+        --       lowest to highest Segment Scores.
+        -- Note: Although we are only placing the l_StartSegment in this table, and
+        --       not the l_EndSegment, this is still a segment *range* table. We just
+        --       don't need the l_EndSegment in this table, because we will calculate
+        --       it later as l_StartSegment + g_RequiredNumberOfConsecutiveSegments - 1
+        --       Also, we don't want the l_EndSegment is this table because it would
+        --       break the SortBySegmentScore() function used below...
+        l_WorstScoringSegmentRangesTable[#l_WorstScoringSegmentRangesTable + 1] =
+          {l_SegmentScore, l_StartSegment}
+          
+      end
       
-			if l_bSegmentRangeIsDone == true then
+		else -- l_bSegmentIsAllowedToBeRebuilt ~= true
+      
+      l_NumberOfSegmentsSkipping = l_NumberOfSegmentsSkipping + 1
 
-				l_NumberOfSegmentRangesSkipping = l_NumberOfSegmentRangesSkipping + 1
+      if l_SkipTheseSegments ~= "" then
+        l_SkipTheseSegments = l_SkipTheseSegments .. ", "
+      end
+      l_SkipTheseSegments = l_SkipTheseSegments .. l_CurrentWorseScoringSegment
 
-				if l_SegmentRangeSkipList ~= "" then
-					l_SegmentRangeSkipList = l_SegmentRangeSkipList .. " "
-				end
-				l_SegmentRangeSkipList = l_SegmentRangeSkipList .. l_StartSegment .. "-" .. l_EndSegment
-
-			end
-		end
+		end -- if l_bSegmentIsAllowedToBeRebuilt == true then
+  
 	end
   
-	if l_NumberOfSegmentRangesSkipping > 0 then
-		 print("\nSkipping the following [" .. l_NumberOfSegmentRangesSkipping ..
-           "] done segment ranges: [" .. l_SegmentRangeSkipList .. "]")
+	if l_NumberOfSegmentsSkipping > 0 then
+		 print("\nSkipping the following " .. l_NumberOfSegmentsSkipping ..
+           " already rebuilt (or unselected) segments: [" .. l_SkipTheseSegments .. "]")
 	end
 
 	-- Note: The only reason we add the l_SegmentScore as the first field
@@ -2637,13 +2439,13 @@ function InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges(l_RecursionLe
 	 -- l_WorstScoringSegmentRangesTable={SegmentScore=1, StartSegment=2}
 	local wst_SegmentScore = 1
 	local wst_StartSegment = 2
-	local l_WorstSegmentTableRow
+	local l_WorstSegmentTableRow = {}
 
-	-- Finally populate the g_SegmentRangesTable...
+	-- Finally populate the g_SegmentRangesToRebuildTable...
 
-	g_SegmentRangesTable = {}
+	g_SegmentRangesToRebuildTable = {}
 
-	-- Note how we increment l_WorstScoringSegmentsTableIndex by 1 each time,
+	-- Note: In the for loop below, we increment l_WorstScoringSegmentsTableIndex by 1,
 	-- instead of by g_RequiredNumberOfConsecutiveSegments. That's because we want a rolling
 	-- list of segment ranges. This gives us lots of possible segment combinations to
 	-- work on...
@@ -2661,23 +2463,21 @@ function InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges(l_RecursionLe
 
 		l_EndSegment = l_StartSegment + g_RequiredNumberOfConsecutiveSegments - 1
 
-		-- Finally, add a row to the g_SegmentRangesTable...
+		-- Finally, add a row to the g_SegmentRangesToRebuildTable...
 
-		-- g_SegmentRangesTable={StartSegment=1, EndSegment=2}
-		g_SegmentRangesTable[#g_SegmentRangesTable + 1] = {l_StartSegment, l_EndSegment}
+		-- g_SegmentRangesToRebuildTable={StartSegment=1, EndSegment=2}
+		g_SegmentRangesToRebuildTable[#g_SegmentRangesToRebuildTable + 1] = {l_StartSegment, l_EndSegment}
 
 	end
 
 	if l_RecursionLevel == 1 and #l_WorstScoringSegmentRangesTable == 0 then
 
 		-- Not exactly sure why we are doing the following, since we already
-		-- called CheckIfDoneSegmentsMustBeIncluded() at the beginning of this function.
-		-- Well, I guess it's because this will clear not only SegmentsDoneTable, but
-		-- also the SegmentRangesDoneTable..
-		-- Why not just clear both tables in CheckIfDoneSegmentsMustBeIncluded? I donno.
-		print("\nNot enough consecutive segments available to create a segment range; therefore," ..
-           " we will set all done segments and segment ranges to undone and try again...")
-		ClearSegmentRangesDoneAndSegmentsDoneTables()
+		-- called CheckIfAlreadyRebuiltSegmentsMustBeIncluded() at the beginning of this function.
+    print("\nNot enough consecutive not-already-rebuilt segments available to create a segment range;" ..
+           " therefore, we will set all already-rebuilt segments to not-already-rebuilt and try again...")
+         
+		ResetSegmentsAlreadyRebuiltTable()
 
 		-- Recursion...
 		l_RecursionLevel = l_RecursionLevel + 1
@@ -2695,7 +2495,8 @@ function GetScorePart_Score(l_StartSegment, l_EndSegment, l_Attr)
 
 	if l_Attr == 'total' then
 
-		l_PartScore = GetPoseTotalScore()
+		--l_PartScore = GetPoseTotalScore()
+    l_PartScore = g_BestScore
 
 	elseif l_Attr == nil then
 		--is only called from InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges
@@ -2728,19 +2529,18 @@ end
 -- Called from 1 place in InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges()...
 function PopulateGlobalSegmentScoresTableBasedOnUserSelectedScoreParts()
 	
-	local l_PoseTotalScore = GetPoseTotalScore()
-	if l_PoseTotalScore == g_LastSegmentScore then
+	if g_BestScore == g_LastSegmentScore then
 		return
 	end
 
 	local l_SegmentScore, l_ReferencePartScore, l_DensityPartScore
 
 	-- Fortunately this is the only function that sets and checks g_LastSegmentScore...
-	g_LastSegmentScore = l_PoseTotalScore
+	g_LastSegmentScore = g_BestScore
 
 	for l_SegmentIndex = 1, g_SegmentCountWithoutLigands do
 
-		if g_SegmentsToWorkOnBooleanTable[l_SegmentIndex] == true then
+		if g_bSegmentsToRebuildBooleanTable[l_SegmentIndex] == true then
 
 			if #g_UserSelectedScorePartsToWorkOnTable == 0 then
 				-- If no ScoreParts were selected by the user to work on, the default segment score is
@@ -2768,7 +2568,7 @@ function PopulateGlobalSegmentScoresTableBasedOnUserSelectedScoreParts()
 			-- This is the only place this table is populated...
 			g_SegmentScoresTable[l_SegmentIndex] = l_SegmentScore
 
-		end -- If g_SegmentsToWorkOnBooleanTable[l_SegmentIndex] == true then
+		end -- If g_bSegmentsToRebuildBooleanTable[l_SegmentIndex] == true then
 
 	end -- for l_SegmentIndex = 1, g_SegmentCountWithoutLigands do
 
@@ -2836,8 +2636,9 @@ function PopulateGlobalActiveScorePartsTable()
 			g_ActiveScorePartsTable[#g_ActiveScorePartsTable + 1] = l_ScorePart_Name
 
 			print("  Active Score Part: " .. l_ScorePart_Name .. "," ..
-            " activity: " .. l_TotalOf_OneScorePart_AbsoluteValueOfEachScoreFromAllSegments .. "," .. 
-            " Score: " .. l_TotalOf_OneScorePart_ScoresFromAllSegments .. "")
+            " activity: " .. 
+            PrettyNumber(l_TotalOf_OneScorePart_AbsoluteValueOfEachScoreFromAllSegments) .. "," .. 
+            " Score: " .. PrettyNumber(l_TotalOf_OneScorePart_ScoresFromAllSegments) .. "")
     
 		else
 
@@ -2850,15 +2651,16 @@ function PopulateGlobalActiveScorePartsTable()
 			else
         -- commenting this out because it is basically just noise in the log file...
         --print("  Inactive Score Part: " .. l_ScorePart_Name .. "," ..
-        --      " activity: " .. l_TotalOf_OneScorePart_AbsoluteValueOfEachScoreFromAllSegments .. "," .. 
-        --      " Score: " .. l_TotalOf_OneScorePart_ScoresFromAllSegments .. "")
+        --      " activity: " ..
+        --       PrettyNumber(l_TotalOf_OneScorePart_AbsoluteValueOfEachScoreFromAllSegments) .. "," .. 
+        --      " Score: " .. PrettyNumber(l_TotalOf_OneScorePart_ScoresFromAllSegments) .. "")
 			end
       
 		end -- if l_TotalOf_OneScorePart_AbsoluteValueOfEachScoreFromAllSegments > 10 then
 
 	end -- for l_ScorePart_NamesTableIndex = 1, #l_ScorePart_NamesTable do
 
-	print("\nTotal of All Score Parts: [" .. l_TotalOfAll_ScorePart_Scores .. "]")
+	print("\nTotal of All Score Parts: " .. PrettyNumber(l_TotalOfAll_ScorePart_Scores) .. "")
 
 end -- PopulateGlobalActiveScorePartsTable()
 
@@ -2962,7 +2764,7 @@ function Update_SlotScoresTable_ScorePart_Score_And_SlotScore_Fields(l_StartSegm
 		local aspst_ScorePart_Score = 2
 	--}
 
-	-- Create a new list of active ScoreParts, then calls
+	-- Create a new list of active ScoreParts, then call
 	-- GetScorePart_Score() to get each ScorePart's scores...
 	local l_ActiveScorePartsScoreTable = {}  -- {1=SlotNumber, 2=ScorePart_Score}
 	local l_SlotNumber, l_ScoreType, l_bSlotIsActive, l_ScorePart_Score
@@ -2981,7 +2783,8 @@ function Update_SlotScoresTable_ScorePart_Score_And_SlotScore_Fields(l_StartSegm
 		end
 
 	end
-	local l_PoseTotalScore = GetPoseTotalScore()
+	--local l_PoseTotalScore = GetPoseTotalScore()
+  local l_PoseTotalScore = g_BestScore -- note: several g_SlotScoreTable rows will have the same value.
 
 	local l_NewScorePart_Score, l_OldScorePart_Score
 
@@ -3073,7 +2876,7 @@ function Update_SlotScoresTable_ToDo_And_SlotList_Fields()
 			g_SlotScoresTable[l_TableIndex][sst_SlotList] = l_ListOfSlotNumbersWithMatchingSlotScoreValue
 
 			l_OrganizedListOfAllSlotNumbers = l_OrganizedListOfAllSlotNumbers ..
-				"\n  SlotScore value: [" .. l_CurrentSlotScore .. "]" ..
+				"\n  SlotScore value: [" .. PrettyNumber(l_CurrentSlotScore) .. "]" ..
 				" SlotNumbers: [" .. l_ListOfSlotNumbersWithMatchingSlotScoreValue .."]"
 		end
 
@@ -3089,27 +2892,26 @@ function CheckForLowStartingScore()
   -- Change defaults if the starting score is low (or negative)...
   local l_LowScore = 0 -- This was 4000, but why? Perhaps 4000 was a good low limit for ED puzzles.
 
-	local l_PoseTotalScore = GetPoseTotalScore()
-	if l_PoseTotalScore >= l_LowScore then -- well, not exactly negative...
+	if g_BestScore >= l_LowScore then
 		return -- score is high enough for now...
 	end
 
 	if g_bHasDensity == true then
 
 		local l_DensitySubScore = CalculateSegmentRangeScore("density")
-		local l_WeightedDensitySubScore = RoundToThirdDecimal(l_DensitySubScore  * (g_DensityWeight + 1))
-		local l_ScoreWithoutElectronDensity = l_PoseTotalScore - l_WeightedDensitySubScore
+		local l_WeightedDensitySubScore = l_DensitySubScore  * (g_DensityWeight + 1)
+		local l_ScoreWithoutElectronDensity = g_BestScore - l_WeightedDensitySubScore
 
 		if l_ScoreWithoutElectronDensity > 4000 then
 			print("\nThis is an electron density puzzle: Since the starting score of " ..
-              l_ScoreWithoutElectronDensity .. " is already greater than 4000 points" ..
+              PrettyNumber(l_ScoreWithoutElectronDensity) .. " is already greater than 4000 points" ..
              " (high enough without including Electron Density), we will keep the defaults" ..
              " options of: 'perform normal stabilization' and 'fuse best position'.")
 			return
 		end
 	end
 
-	print("\nSince the starting score of " .. l_PoseTotalScore ..
+	print("\nSince the starting score of " .. PrettyNumber(g_BestScore) ..
          " is less than " .. l_LowScore .. " points, to speed things up, we are" ..
          " adjusting the default options to:" ..
         "'skip normal stabilization' and 'skip fusing best position'.")
@@ -3164,38 +2966,11 @@ function SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_Radius)
 	end
 end -- function SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_Radius)
 
--- Called from 1 place in InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges()...
-function bCheckIfSegmentRangeToWorkOn(l_StartSegment, l_EndSegment)
-
-	-- This function is only called by one function:
-	-- InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges()
-
-	-- If we don't find any segment within the passed in range to be false
-	-- in the SegmentsToWorkOnTable then we default to true?
-	-- Seem like the default should be false and only set to true if
-	-- we find a true match entry in the SegmentsToWorkOnTable table.
-	for l_SegmentIndex = l_StartSegment, l_EndSegment do
-		if g_SegmentsToWorkOnBooleanTable[l_SegmentIndex] == false then
-			return false
-		end
-	end
-	return true
-
-end -- bCheckIfSegmentRangeToWorkOn(l_StartSegment, l_EndSegment)
-
--- Not presently not used...
-function SetSegmentRangeSecondaryStructureType(l_SegmentRangesTable, In_SecondaryStructureType)
-	local l_SaveSelectedSegmentRanges = FindSelectedSegmentRanges()
-	SelectSegmentRanges(l_SegmentRangesTable)
-	structure.SetSecondaryStructureSelected(In_SecondaryStructureType)
-	SelectSegmentRanges(l_SaveSelectedSegmentRanges)
-end
-
 -- Called from 1 place in RebuildManySegmentRanges()...
 function PerformNormalStabilizationOnSegmentRange(l_StartSegment, l_EndSegment)
 
 	-- Do not accept Stabilization losses...
-	local l_PoseTotalScore = GetPoseTotalScore()
+	local l_FunctionStartPoseTotalScore = GetPoseTotalScore()
 	
 	-- As a precaution, let's save our current solution... If the next build
 	-- decreases our score, then we will revert back to this solution...
@@ -3229,7 +3004,7 @@ function PerformNormalStabilizationOnSegmentRange(l_StartSegment, l_EndSegment)
 	recentbest.Restore()-- Keep the current pose if it's better; otherwise, restore the recentbest pose.
 	
 	local l_CheckPoseTotalScore = GetPoseTotalScore()
-	if l_CheckPoseTotalScore < l_PoseTotalScore then
+	if l_CheckPoseTotalScore < l_FunctionStartPoseTotalScore then
 		-- This build was a failure, so load the last saved solution from the Quicksave stack...
 		LoadLastSavedSolutionFromQuickSaveStack()
 	else
@@ -3242,7 +3017,7 @@ end -- function PerformNormalStabilizationOnSegmentRange(l_StartSegment, l_EndSe
 -- Called from 1 place in Add_Loop_Helix_And_Sheet_Segments_To_SegmentRangesTable()...
 function Add_Loop_SegmentRange_To_SegmentRangesTable(l_StartSegment)
 
-	-- Add mulitple loop segments in a SegmentRange to the g_SegmentRangesTable...
+	-- Add mulitple loop segments in a SegmentRange to the g_SegmentRangesToRebuildTable...
 
 	local l_SecondaryStructureTypeStart = structure.GetSecondaryStructure(l_StartSegment)
 	local l_EndSegment = l_StartSegment
@@ -3257,15 +3032,15 @@ function Add_Loop_SegmentRange_To_SegmentRangesTable(l_StartSegment)
 
 	-- Script defaults:
 	-- g_StartProcessingWithThisManyConsecutiveSegments = 2
-	-- g_StopAfterProcessingWithThisManyConsecutiveSegments = 4
+	-- g_ResetToStartValueAfterProcessingWithThisManyConsecutiveSegments = 4
 	local l_RequiredNumberOfConsecutiveSegments = l_EndSegment - l_StartSegment + 1
 
-	-- Add one row to the g_SegmentRangesTable...
+	-- Add one row to the g_SegmentRangesToRebuildTable...
 	if l_RequiredNumberOfConsecutiveSegments >= g_StartProcessingWithThisManyConsecutiveSegments then
 
 		if g_bRebuildLoopsOnly == true then
-			-- g_SegmentRangesTable={StartSegment=1, EndSegment=2}
-			g_SegmentRangesTable[#g_SegmentRangesTable + 1] = {l_StartSegment, l_EndSegment}
+			-- g_SegmentRangesToRebuildTable={StartSegment=1, EndSegment=2}
+			g_SegmentRangesToRebuildTable[#g_SegmentRangesToRebuildTable + 1] = {l_StartSegment, l_EndSegment}
 		end
 	end
 	return l_EndSegment
@@ -3360,7 +3135,7 @@ function Add_Loop_Plus_One_Other_Type_SegmentRange_To_SegmentRangesTable(l_Start
 
 	-- Script defaults:
 	-- g_StartProcessingWithThisManyConsecutiveSegments = 2
-	-- g_StopAfterProcessingWithThisManyConsecutiveSegments = 4
+	-- g_ResetToStartValueAfterProcessingWithThisManyConsecutiveSegments = 4
 	local l_NumberofConsecutiveSegments = l_EndSegment - l_StartSegment + 1
 
 	-- Make sure this segment range contains the minimum number of consecutive segments
@@ -3371,10 +3146,10 @@ function Add_Loop_Plus_One_Other_Type_SegmentRange_To_SegmentRangesTable(l_Start
 	if l_NumberofConsecutiveSegments >= g_StartProcessingWithThisManyConsecutiveSegments then
 		-- Not sure why we are using g_StartProcessingWithThisManyConsecutiveSegments here
 		-- instead of g_RequiredNumberOfConsecutiveSegments. Things that make you go hmmm.
-		-- g_SegmentRangesTable={StartSegment=1, EndSegment=2}
+		-- g_SegmentRangesToRebuildTable={StartSegment=1, EndSegment=2}
 
-		-- Add one row to the g_SegmentRangesTable...
-		g_SegmentRangesTable[#g_SegmentRangesTable + 1] = {l_StartSegment, l_EndSegment}
+		-- Add one row to the g_SegmentRangesToRebuildTable...
+		g_SegmentRangesToRebuildTable[#g_SegmentRangesToRebuildTable + 1] = {l_StartSegment, l_EndSegment}
 	end
 	return l_EndSegment
 
@@ -3435,7 +3210,7 @@ function MutateOneSegmentRange(l_StartSegment, l_EndSegment)
 	end
 
 	-- Do not accept loss if mutating...
-	local l_PoseTotalScore = GetPoseTotalScore()
+	local l_FunctionStartPoseTotalScore = g_BestScore
 	-- Save the current solution. If our score goes down after mutating
 	-- this segment, then we will restore to this solution...
 	SaveCurrentSolutionToQuickSaveStack()
@@ -3466,7 +3241,7 @@ function MutateOneSegmentRange(l_StartSegment, l_EndSegment)
 
 	CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
 	local l_CheckPoseTotalScore = GetPoseTotalScore()
-	if l_CheckPoseTotalScore < l_PoseTotalScore then   
+	if l_CheckPoseTotalScore < l_FunctionStartPoseTotalScore then   
 		
 		LoadLastSavedSolutionFromQuickSaveStack()
 	else
@@ -3474,37 +3249,6 @@ function MutateOneSegmentRange(l_StartSegment, l_EndSegment)
 	end
 
 end -- MutateOneSegmentRange()
-
--- Called from 1 place in RebuildManySegmentRanges()...
-function DisplaySegmentRanges()
-
-	-- g_SegmentRangesTable={StartSegment=1, EndSegment=2}
-
-	local l_ListOfSegmentRanges = ""
-	local l_MaxNumberOfSegmentRangesToDisplay = #g_SegmentRangesTable
-
-	if l_MaxNumberOfSegmentRangesToDisplay > 100 then
-		l_MaxNumberOfSegmentRangesToDisplay = 100
-	end
-
-	for l_SegmentIndex = 1, l_MaxNumberOfSegmentRangesToDisplay do
-
-		l_ListOfSegmentRanges = l_ListOfSegmentRanges ..
-						g_SegmentRangesTable[l_SegmentIndex][srt_StartSegment] .. "-" ..
-						g_SegmentRangesTable[l_SegmentIndex][srt_EndSegment]
-
-		if l_SegmentIndex ~= l_MaxNumberOfSegmentRangesToDisplay then
-			-- If we are not at the end of the table, add a space...
-			l_ListOfSegmentRanges = l_ListOfSegmentRanges .. " "
-		end
-
-	end
-
-	print("\n  Rebuilding the following " .. #g_SegmentRangesTable .. " worst scoring segment ranges:" ..
-		" [" .. l_ListOfSegmentRanges .. "]" ..
-    "\n")
-
-end -- DisplaySegmentRanges()
 
 -- ...end of Segment Ranges module.
 
@@ -3516,15 +3260,15 @@ function DisplaySelectedOptions()
 
 	-- Script defaults:
 	-- g_StartProcessingWithThisManyConsecutiveSegments = 2
-	-- g_StopAfterProcessingWithThisManyConsecutiveSegments = 4
+	-- g_ResetToStartValueAfterProcessingWithThisManyConsecutiveSegments = 4
 
 	--print("  Start Processing With This Many Consecutive Segments: [" ..
 	--	g_StartProcessingWithThisManyConsecutiveSegments .. "]")
 	--print("  Stop After Processing With This Many Consecutive Segments: [" ..
-	--	g_StopAfterProcessingWithThisManyConsecutiveSegments .. "]")
+	--	g_ResetToStartValueAfterProcessingWithThisManyConsecutiveSegments .. "]")
 
 	print("  Segments to work on: [" ..
-		ConvertSegmentRangesTableToListOfSegmentRanges(g_SegmentRangesTable) .. "]")
+		ConvertSegmentRangesTableToListOfSegmentRanges(g_SegmentRangesToRebuildTable) .. "]")
 
 	--print("  Number of rebuild-one-segment-range attempts per run cycle: [" ..
 	--	g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle .. "]")
@@ -3537,25 +3281,17 @@ function DisplaySelectedOptions()
 		print("  Converting all segments to loops...")
 	end
 
-	if g_bAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCycles == true then
-		print("  We will allow rebuilding already rebuilt segment ranges from previous cycles.")
-	else
-		print("  We will only allow rebuilding already rebuilt segment ranges from previous cycles" ..
-					" if points gained is greater than: [" ..
-			g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges .. "]")
-	end
-
 	if g_bShake_And_Wiggle_WithSideChainsAndBackbone_WithSelectedAndNearbySegments == true then
 		print("  Shake and Wiggle (with SideChains and Backbone)" ..
-			" with selected and nearby segments after each rebuild" ..
-			" (with clash importance: [1])")
+           " with selected and nearby segments after each rebuild" ..
+          " (with clash importance = 1.0)")
 	elseif g_bShake_And_Wiggle_WithSelectedSegments == true then
 		print("  Shake and Wiggle selected segments after each rebuild" ..
-			" (with clash importance: [" .. g_ShakeClashImportance .. "])")
+          " (with clash importance: " .. g_ShakeClashImportance .. ")")
 	end
 
 	if g_bPerformNormalStabilization == false then
-			print("  Skip normal stabilization. Instead, perform local shake.")
+    print("  Skip normal stabilization. Instead, perform local shake.")
 	end
 	if g_bFuseBestPosition == true then
 		print("  Enabled: Fuse best position of each segment range.")
@@ -3567,8 +3303,12 @@ function DisplaySelectedOptions()
 		print("  Skip " .. g_NumberOfSegmentsSkipping .. " worst segment parts.")
 	end
 
-	if g_bOnlyWorkOnPreviouslyDoneSegments == true then
-		print("  Only working on previously done segments")
+	if g_bAlwaysAllowRebuildingAlreadyRebuiltSegments == true then
+		print("  We will always allow rebuilding already rebuilt segments")
+	else
+		print("  We will only allow rebuilding already rebuilt segments " ..
+					 " if current rebuild points gained is more than: [" ..
+             g_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan .. "]")
 	end
 
 end -- DisplaySelectedOptions()
@@ -3584,8 +3324,6 @@ function DisplayPuzzleProperties()
 
 	print("  Protein has [" .. g_SegmentCountWithoutLigands .. "] segments.")
 	
-	local l_PoseTotalScore = GetPoseTotalScore()
-
 	-- Find out if the puzzle has mutables
 	local l_MutablesList
 	local l_NumberOfMutableSegments
@@ -3626,24 +3364,26 @@ function DisplayPuzzleProperties()
 
 	if g_bHasDensity == true then
 		print("  Puzzle has Density scores")
-    -- How was this formula derived? What if l_PoseTotalScore is negative?
-    if l_PoseTotalScore > 0 then
+    -- How was this formula derived? What if g_BestScore is negative?
+    if g_BestScore > 0 then
       g_DensityWeight = 
-        RoundToThirdDecimal((l_PoseTotalScore - g_CurrentBonus - l_SegmentTotal - 8000) /
-          l_DensityTotal)
+        (g_BestScore - g_CurrentBonus - l_SegmentTotal - 8000) / l_DensityTotal
     end
-		print("  The Density component has an extra weight of " .. g_DensityWeight)
+		print("  The Density component has an extra weight of " .. PrettyNumber(g_DensityWeight))
 	end
 
 	-- Check if this is likely a symmetry puzzle...
 	if g_bHasDensity == false then		
-		local l_ComputedScore = math.abs(l_PoseTotalScore - l_SegmentTotal - 8000) -- why?
-		-- print("PoseTotalScore: [" .. l_PoseTotalScore .. "] ComputedScore: [" .. l_ComputedScore .. "]")
+		local l_ComputedScore = math.abs(g_BestScore - l_SegmentTotal - 8000) -- why?
+		-- print("PoseTotalScore: " .. PrettyNumber(g_BestScore) .. 
+    --      " ComputedScore: " .. PrettyNumber(l_ComputedScore) .. "")
 		g_bProbableSymmetryPuzzle = l_ComputedScore > 2
 		if g_bProbableSymmetryPuzzle == true then
 			print("  Puzzle is a symmetry puzzle or has bonuses")
 		end
 	end
+
+  print("  Starting score is " .. g_BestScore)
 
 end -- DisplayPuzzleProperties()
 
@@ -3667,18 +3407,12 @@ function AskMoreOptions()
 	l_Ask.SkipFusingBestPositionIfLossIsGreaterThan = 
 		dialog.AddSlider("  Points:", g_SkipFusingBestPositionIfLossIsGreaterThan, -5, 200, 0)
 
-	l_Ask.l_5 = dialog.AddLabel("Allow rebuilding already rebuilt segment ranges")
-	l_Ask.l_6 = dialog.AddLabel("from previous cycles:")
-	l_Ask.bAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCycles = 
-		dialog.AddCheckbox("Allow",
-			g_bAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCycles)
-
-	l_Ask.l_7 = dialog.AddLabel("Automatically allow rebuilding already rebuilt")
-	l_Ask.l_8 = dialog.AddLabel("segment ranges from previous cycles if current")
-	l_Ask.l_9 = dialog.AddLabel("rebuild gains more than:")
-	l_Ask.bAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesIfRebuildGainsMoreThan =
+	l_Ask.l_7 = dialog.AddLabel("Only allow rebuilding already rebuilt segments")
+	l_Ask.l_9 = dialog.AddLabel("if current rebuild points gained is more than:")
+	l_Ask.OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan =
 		dialog.AddSlider("  Points:",
-			g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges, 0, 500, 0) -- default depends on number of segments
+			g_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan, 0, 500, 0) 
+      -- ...default depends on number of segments
 
 	l_Ask.l_10 = dialog.AddLabel("Number of times to rebuild a single segment range")
 	l_Ask.l_11 = dialog.AddLabel("per run cycle:") -- default is 15 (or 10)
@@ -3722,8 +3456,8 @@ function AskMoreOptions()
 
 	g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan =
 		l_Ask.MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan.value -- default is 40 or less
-	g_MinimumPointsGainedRequired_ToAllowRetrying_SegmentRanges =
-		l_Ask.bAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesIfRebuildGainsMoreThan.value
+	g_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan =
+    l_Ask.OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan.value
 
 	g_bPerformExtraStabilization = l_Ask.bPerformExtraStabilization.value -- default is false
 	g_SkipFusingBestPositionIfLossIsGreaterThan = l_Ask.SkipFusingBestPositionIfLossIsGreaterThan.value
@@ -3742,8 +3476,7 @@ function AskMoreOptions()
 	
 	g_ShakeClashImportance = l_Ask.shakeClashImportance.value
 	g_bPerformNormalStabilization = l_Ask.bPerformNormalStabilization.value
-	g_bAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCycles =
-		l_Ask.bAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCycles.value
+  
 	g_bFuseBestPosition = l_Ask.bFuseBestPosition.value
 
 end -- AskMoreOptions()
@@ -3873,19 +3606,15 @@ function AskUserToSelectScorePartsToWorkOn()
 end -- AskUserToSelectScorePartsToWorkOn()
 
 -- Called from 1 place in bAskUserToSelectRebuildOptions()...
-function AskUserToSelectSegmentsToWorkOn()
+function AskUserToSelectSegmentsToRebuild()
 
-	title = "Segments and Segment Ranges"
+	title = "Select Segments To Rebuild"
 
-	-- g_SegmentRangesTable={StartSegment, EndSegment}
-	l_ListOfSegmentRanges = ConvertSegmentRangesTableToListOfSegmentRanges(g_SegmentRangesTable)
-
-	l_ListOfSegmentRanges = "1-3 2-4 6-8 10-11 13-15 20-24" -- for debugging
-
-	-- We start with all the segments including ligands...
-	local l_SegmentRangesTable
-	--l_SegmentRangesTable = {{1, g_SegmentCountWithLigands}} -- All segments
-	l_SegmentRangesTable = g_SegmentRangesTable
+	-- g_SegmentRangesToRebuildTable={StartSegment, EndSegment}
+	l_ListOfSegmentRanges = ConvertSegmentRangesTableToListOfSegmentRanges(g_SegmentRangesToRebuildTable)
+  -- e.g.;  "1-3 2-4 6-8 10-11 13-15 20-24" 
+	
+	local l_SegmentRangesToRebuildTable = g_SegmentRangesToRebuildTable
 
 	if l_SelectionOptions == nil then l_SelectionOptions = {} end
 
@@ -3933,7 +3662,7 @@ function AskUserToSelectSegmentsToWorkOn()
 		end
 
 		if l_SelectionOptions.bUserWantsToSelectSegmentRanges == true then
-			l_Ask.R1 = dialog.AddLabel("Select segment ranges to work on:")
+			l_Ask.R1 = dialog.AddLabel("Select segment ranges to rebuild:")
 			l_Ask.ListOfSegmentRanges = dialog.AddTextbox("  Ranges:", l_ListOfSegmentRanges)
 			l_Ask.R2 = dialog.AddLabel("Below selections override above list:")
 		end
@@ -4017,10 +3746,10 @@ function AskUserToSelectSegmentsToWorkOn()
 
 					-- l_ListOfSegmentRanges = e.g., {"1-3 9-11 134-135"}
 					-- l_SegmentsTable={SegmentIndex} e.g., {1,2,3,9,10,11,134,135}
-					-- l_SegmentRangesTable={StartSegment, EndSegment} e.g., {{1,3},{9,11},{134,135}}
+					-- l_SegmentRangesToRebuildTable={StartSegment, EndSegment} e.g., {{1,3},{9,11},{134,135}}
 
 					local l_SegmentsTable = {}
-					local l_SegmentRangesTable = {}
+					local l_SegmentRangesToRebuildTable = {}
 					local l_NoNegatives = '%d+'
 
 					--for l_SegmentIndex in string.gfind(l_ListOfSegmentRanges, l_NoNegatives) do
@@ -4037,34 +3766,35 @@ function AskUserToSelectSegmentsToWorkOn()
 							local l_StartSegment = l_SegmentsTable[2 * l_SegmentIndex - 1]
 							local l_EndSegment = l_SegmentsTable[2 * l_SegmentIndex]
 
-							-- Insert one row into the l_SegmentRangesTable...
-							l_SegmentRangesTable[l_SegmentIndex] = {l_StartSegment, l_EndSegment}
+							-- Insert one row into the l_SegmentRangesToRebuildTable...
+							l_SegmentRangesToRebuildTable[l_SegmentIndex] = {l_StartSegment, l_EndSegment}
 						end
 
-						l_SegmentRangesTable = CleanUpSegmentRangesTable(l_SegmentRangesTable)
+						l_SegmentRangesToRebuildTable = CleanUpSegmentRangesTable(l_SegmentRangesToRebuildTable)
 
 					else
 
 						l_bErrorFound = true
-						l_SegmentRangesTable = {}
+						l_SegmentRangesToRebuildTable = {}
 
 					end
-					return l_SegmentRangesTable
+					return l_SegmentRangesToRebuildTable
 
 				end
 
-				-- Convert l_ListOfSegmentRanges to l_SegmentRangesTable...
+				-- Convert l_ListOfSegmentRanges to l_SegmentRangesToRebuildTable...
 				local l_ConvertedSegmentRangesTable =
 					ConvertListOfSegmentRangesToSegmentRangesTable(l_ListOfSegmentRanges)
 
 				if l_ConvertedSegmentRangesTable ~= "" then
-					l_SegmentRangesTable = l_ConvertedSegmentRangesTable
+					l_SegmentRangesToRebuildTable = l_ConvertedSegmentRangesTable
 				end
 
 				-- Not sure what I screwed up here...
 				--if l_bErrorFound == false then
-				--  l_SegmentRangesTable =
-				--    GetCommonSegmentRangesInBothTables(l_SegmentRangesTable, l_SegmentRangesTable)
+				--  l_SegmentRangesToRebuildTable =
+				--    GetCommonSegmentRangesInBothTables(l_SegmentRangesToRebuildTable,
+        --    l_SegmentRangesToRebuildTable)
 				--end
 
 			end
@@ -4072,21 +3802,21 @@ function AskUserToSelectSegmentsToWorkOn()
 			l_SelectionOptions.bIncludeLoopSegments = l_Ask.bIncludeLoopSegments.value
 			if l_SelectionOptions.bIncludeLoopSegments == false then
 				-- User does not want to include loop segments...
-				l_SegmentRangesTable = SegmentRangesMinus(l_SegmentRangesTable,
+				l_SegmentRangesToRebuildTable = SegmentRangesMinus(l_SegmentRangesToRebuildTable,
 					FindSegmentRangesWithSecondaryStructureType("L"))
 			end
 
 			l_SelectionOptions.bIncludeHelixSegments = l_Ask.bIncludeHelixSegments.value
 			if l_SelectionOptions.bIncludeHelixSegments == false then
 				-- User does not want to include helix segments...
-				l_SegmentRangesTable = SegmentRangesMinus(l_SegmentRangesTable,
+				l_SegmentRangesToRebuildTable = SegmentRangesMinus(l_SegmentRangesToRebuildTable,
 					FindSegmentRangesWithSecondaryStructureType("H"))
 			end
 
 			l_SelectionOptions.bIncludeSheetSegments = l_Ask.bIncludeSheetSegments.value
 			if l_SelectionOptions.bIncludeSheetSegments == false then
 				-- User does not want to include sheet segments...
-				l_SegmentRangesTable = SegmentRangesMinus(l_SegmentRangesTable,
+				l_SegmentRangesToRebuildTable = SegmentRangesMinus(l_SegmentRangesToRebuildTable,
 					FindSegmentRangesWithSecondaryStructureType("E"))
 			end
 
@@ -4094,7 +3824,7 @@ function AskUserToSelectSegmentsToWorkOn()
 				l_SelectionOptions.bIncludeLigandSegments = l_Ask.bIncludeLigandSegments.value
 			end
 			if l_SelectionOptions.bIncludeLigandSegments == false then -- This never appears to be true.
-				l_SegmentRangesTable = SegmentRangesMinus(l_SegmentRangesTable,
+				l_SegmentRangesToRebuildTable = SegmentRangesMinus(l_SegmentRangesToRebuildTable,
 					FindSegmentRangesWithSecondaryStructureType("M"))
 			end
 
@@ -4102,14 +3832,14 @@ function AskUserToSelectSegmentsToWorkOn()
 				l_SelectionOptions.bIncludeLockedSegments = l_Ask.bIncludeLockedSegments.value
 			end
 			if l_SelectionOptions.bIncludeLockedSegments == false then -- never appears to be true.
-				l_SegmentRangesTable = SegmentRangesMinus(l_SegmentRangesTable, FindLockedSegmentRanges())
+				l_SegmentRangesToRebuildTable = SegmentRangesMinus(l_SegmentRangesToRebuildTable, FindLockedSegmentRanges())
 			end
 
 			if l_SelectionOptions.bAllowAskingToIncludeFrozenSegments == true then -- never appears to be true.
 				l_SelectionOptions.bIncludeFrozenSegments = l_Ask.bIncludeFrozenSegments.value
 			end
 			if l_SelectionOptions.bIncludeFrozenSegments == false then
-				l_SegmentRangesTable = SegmentRangesMinus(l_SegmentRangesTable, FindFrozenSegmentRanges())
+				l_SegmentRangesToRebuildTable = SegmentRangesMinus(l_SegmentRangesToRebuildTable, FindFrozenSegmentRanges())
 			end
 
 			if l_SelectionOptions.bAllowAskingToIncludeOnlySelectedSegments == true then
@@ -4117,8 +3847,8 @@ function AskUserToSelectSegmentsToWorkOn()
 					l_Ask.bIncludeOnlySelectedSegments.value
 			end
 			if l_SelectionOptions.bIncludeOnlySelectedSegments == true then
-				l_SegmentRangesTable =
-					GetCommonSegmentRangesInBothTables(l_SegmentRangesTable, FindSelectedSegmentRanges())
+				l_SegmentRangesToRebuildTable =
+					GetCommonSegmentRangesInBothTables(l_SegmentRangesToRebuildTable, FindSelectedSegmentRanges())
 			end
 
 			if l_SelectionOptions.bAllowAskingToIncludeOnlyUnSelectedSegments == true then
@@ -4126,8 +3856,8 @@ function AskUserToSelectSegmentsToWorkOn()
 					l_Ask.bIncludeOnlyUnSelectedSegments.value
 			end
 			if l_SelectionOptions.bIncludeOnlyUnSelectedSegments == true then
-				l_SegmentRangesTable =
-					GetCommonSegmentRangesInBothTables(l_SegmentRangesTable,
+				l_SegmentRangesToRebuildTable =
+					GetCommonSegmentRangesInBothTables(l_SegmentRangesToRebuildTable,
 						InvertSegmentRangesTable(FindSelectedSegmentRanges()))
 			end
 
@@ -4135,15 +3865,15 @@ function AskUserToSelectSegmentsToWorkOn()
 
 	until l_bErrorFound == false
 
-	return l_SegmentRangesTable
+	return l_SegmentRangesToRebuildTable
 
-end -- AskUserToSelectSegmentsToWorkOn()
+end -- AskUserToSelectSegmentsToRebuild()
 
 -- Called from 1 place in main()...
 function bAskUserToSelectRebuildOptions()
 
-	local l_bUserWantsToSelectSegmentsToWorkOn = false
-	--local l_bUserWantsToSelectSegmentsToWorkOn = true -- allows debugging offline
+	local l_bUserWantsToSelectSegmentsToRebuild = false
+	--local l_bUserWantsToSelectSegmentsToRebuild = true -- allows debugging offline
 
 	local l_bUserWantsToSelectMutateOptions = false
 	if g_bProteinHasMutableSegments == true then
@@ -4162,7 +3892,7 @@ function bAskUserToSelectRebuildOptions()
 				g_StartProcessingWithThisManyConsecutiveSegments, 1, 10, 0)
 		l_Ask.MaximunWorstSegmentOffset =
 			dialog.AddSlider("  Continue thru:",
-				g_StopAfterProcessingWithThisManyConsecutiveSegments, 1, 10, 0)
+				g_ResetToStartValueAfterProcessingWithThisManyConsecutiveSegments, 1, 10, 0)
 
 		if g_bSketchBookPuzzle == true then
 			l_Ask.L2 = dialog.AddLabel("For a sketch book puzzle:")
@@ -4189,8 +3919,8 @@ function bAskUserToSelectRebuildOptions()
 		l_Ask.NumberOfSegmentsToSkip = dialog.AddSlider("  X segments:",
 				g_NumberOfSegmentsSkipping, 0, g_SegmentCountWithoutLigands, 0)
 
-		l_Ask.bUserWantsToSelectSegmentsToWorkOn =
-			dialog.AddCheckbox("Select Segments to work on", l_bUserWantsToSelectSegmentsToWorkOn)
+		l_Ask.bUserWantsToSelectSegmentsToRebuild =
+			dialog.AddCheckbox("Select Segments to Rebuild", l_bUserWantsToSelectSegmentsToRebuild)
 
 		if g_bProteinHasMutableSegments == true then
 			l_Ask.bUserWantsToSelectMutateOptions =
@@ -4212,9 +3942,9 @@ function bAskUserToSelectRebuildOptions()
 		l_Ask.bConvertAllSegmentsToLoops =
 			dialog.AddCheckbox("Convert all segments to loops", g_bConvertAllSegmentsToLoops)
 
-		--l_Ask.L9 = dialog.AddLabel("Only work on previously done segments:")
-		l_Ask.bRunningInDisjunctMode = dialog.AddCheckbox("Only work on previously done segments",
-			g_bOnlyWorkOnPreviouslyDoneSegments)
+		l_Ask.L9 = dialog.AddLabel("Always allow rebuilding already rebuilt segments:")
+		l_Ask.bAlwaysAllowRebuildingAlreadyRebuiltSegments = dialog.AddCheckbox("Always allow",
+			g_bAlwaysAllowRebuildingAlreadyRebuiltSegments)
 
 		l_Ask.bDisableBandsDuringRebuild =
 			dialog.AddCheckbox("Disable bands during rebuild", g_bDisableBandsDuringRebuild)
@@ -4227,13 +3957,14 @@ function bAskUserToSelectRebuildOptions()
 		if l_AskResult > 0 then -- 0 = Cancel
 
 			g_StartProcessingWithThisManyConsecutiveSegments = l_Ask.MinimunWorstSegmentOffset.value
-			g_StopAfterProcessingWithThisManyConsecutiveSegments = l_Ask.MaximunWorstSegmentOffset.value
+			g_ResetToStartValueAfterProcessingWithThisManyConsecutiveSegments = l_Ask.MaximunWorstSegmentOffset.value
 
 			g_NumberOfRunCycles = l_Ask.NumberOfRunCycles.value
 
 			g_NumberOfSegmentsSkipping = l_Ask.NumberOfSegmentsToSkip.value
 			g_bDisableBandsDuringRebuild = l_Ask.bDisableBandsDuringRebuild.value
-			g_bOnlyWorkOnPreviouslyDoneSegments = l_Ask.bRunningInDisjunctMode.value
+			g_bAlwaysAllowRebuildingAlreadyRebuiltSegments =
+        l_Ask.bAlwaysAllowRebuildingAlreadyRebuiltSegments.value
 
 			g_bConvertAllSegmentsToLoops = l_Ask.bConvertAllSegmentsToLoops.value
 
@@ -4330,24 +4061,24 @@ function bAskUserToSelectRebuildOptions()
 
 			end
 
-			l_bUserWantsToSelectSegmentsToWorkOn = l_Ask.bUserWantsToSelectSegmentsToWorkOn.value
+			l_bUserWantsToSelectSegmentsToRebuild = l_Ask.bUserWantsToSelectSegmentsToRebuild.value
 
-			if l_bUserWantsToSelectSegmentsToWorkOn == true then
+			if l_bUserWantsToSelectSegmentsToRebuild == true then
 
 				g_bSelectMain4SlotsToWorkOn = false
 				g_bSelectAllSlotsToWorkOn = false
 
-				-- l_SegmentRangesTable={StartSegment=1, EndSegment=2}
-				local l_SegmentRangesTable = {}
-				l_SegmentRangesTable = AskUserToSelectSegmentsToWorkOn()
-				if l_SegmentRangesTable ~= nil and #l_SegmentRangesTable ~= 0 then
-					g_SegmentRangesTable = l_SegmentRangesTable
+				-- l_SegmentRangesToRebuildTable={StartSegment=1, EndSegment=2}
+				local l_SegmentRangesToRebuildTable = {}
+				l_SegmentRangesToRebuildTable = AskUserToSelectSegmentsToRebuild()
+				if l_SegmentRangesToRebuildTable ~= nil and #l_SegmentRangesToRebuildTable ~= 0 then
+					g_SegmentRangesToRebuildTable = l_SegmentRangesToRebuildTable
 				end
 
 				print("  Selected Segment Ranges: [" ..
-					ConvertSegmentRangesTableToListOfSegmentRanges(g_SegmentRangesTable) .. "]")
+					ConvertSegmentRangesTableToListOfSegmentRanges(g_SegmentRangesToRebuildTable) .. "]")
 
-				l_bUserWantsToSelectSegmentsToWorkOn = false -- this will turn off the check box on the top menu
+				l_bUserWantsToSelectSegmentsToRebuild = false -- this will turn off the check box on the top menu
 				if l_AskResult == 1 then -- 1 = OK
 					l_AskResult = 4 -- 4 = Go back to top menu
 				end
@@ -4355,12 +4086,13 @@ function bAskUserToSelectRebuildOptions()
 			else
 
 				-- By default do not include frozen, locked or ligand segments...
-				g_SegmentRangesTable =
-					SegmentRangesMinus(g_SegmentRangesTable, FindFrozenSegmentRanges())
-				g_SegmentRangesTable =
-					SegmentRangesMinus(g_SegmentRangesTable, FindLockedSegmentRanges())
-				g_SegmentRangesTable =
-					SegmentRangesMinus(g_SegmentRangesTable, FindSegmentRangesWithSecondaryStructureType("M"))
+				g_SegmentRangesToRebuildTable =
+					SegmentRangesMinus(g_SegmentRangesToRebuildTable, FindFrozenSegmentRanges())
+				g_SegmentRangesToRebuildTable =
+					SegmentRangesMinus(g_SegmentRangesToRebuildTable, FindLockedSegmentRanges())
+				g_SegmentRangesToRebuildTable =
+					SegmentRangesMinus(g_SegmentRangesToRebuildTable, 
+            FindSegmentRangesWithSecondaryStructureType("M"))
 
 			end
 
@@ -4428,12 +4160,48 @@ end -- bAskUserToSelectRebuildOptions()
 -- ...end of Ask and Display Options module.
 
 -- Start of Core Rebuild Functions module...
+
+-- Called from 1 place in RebuildManySegmentRanges()...
+function DisplaySegmentRanges()
+
+	-- g_SegmentRangesToRebuildTable={StartSegment=1, EndSegment=2}
+
+	local l_ListOfSegmentRanges = ""
+	local l_MaxNumberOfSegmentRangesToDisplay = #g_SegmentRangesToRebuildTable
+
+	if l_MaxNumberOfSegmentRangesToDisplay > 100 then
+		l_MaxNumberOfSegmentRangesToDisplay = 100
+	end
+
+	for l_SegmentIndex = 1, l_MaxNumberOfSegmentRangesToDisplay do
+
+    if l_ListOfSegmentRanges ~= "" then
+      l_ListOfSegmentRanges = l_ListOfSegmentRanges .. ", "
+    end
+    
+		l_ListOfSegmentRanges = l_ListOfSegmentRanges ..
+						g_SegmentRangesToRebuildTable[l_SegmentIndex][srt_StartSegment] .. "-" ..
+						g_SegmentRangesToRebuildTable[l_SegmentIndex][srt_EndSegment]
+
+		--if l_SegmentIndex ~= l_MaxNumberOfSegmentRangesToDisplay then
+		--	-- If we are not at the end of the table, add a space...
+		--	l_ListOfSegmentRanges = l_ListOfSegmentRanges .. " "
+		--end
+
+	end
+
+	print("\nRebuilding the following " .. #g_SegmentRangesToRebuildTable .. " worst scoring segment ranges:" ..
+		" [" .. l_ListOfSegmentRanges .. "]")
+
+end -- DisplaySegmentRanges()
+
+
 -- Called from 1 place in RebuildOneSegmentRangeManyTimes()...
 function RebuildSelectedSegments()
 
 	local l_MaxIterations = 3
 
-	local l_FunctionStartPoseTotalScore = GetPoseTotalScore()
+	local l_FunctionStartPoseTotalScore = g_BestScore
 	local l_CheckPoseTotalScore = 0
 	local l_CurrentIteration = 0
   local l_NumberOfTimesBondsHaveBroken = 0
@@ -4514,6 +4282,8 @@ function RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment)
 	
 	local l_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle = 
 		g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle
+    
+  print(" ") -- add a blank line
 
 	for l_SegmentRangeRebuildAttempt = 1, l_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle do
 		-- Default g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle = 10
@@ -4528,13 +4298,12 @@ function RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment)
 		
 		print("  Run " .. g_RunCycle .. " of " .. g_NumberOfRunCycles .. "," ..
 			" consecutive segments " .. g_RequiredNumberOfConsecutiveSegments .. " of " .. 
-			g_StopAfterProcessingWithThisManyConsecutiveSegments .. "," ..
-			" segment range " .. g_SegmentRangeIndex .. " of " .. #g_SegmentRangesTable .. "" ..
+			g_ResetToStartValueAfterProcessingWithThisManyConsecutiveSegments .. "," ..
+			" segment range " .. g_SegmentRangeIndex .. " of " .. #g_SegmentRangesToRebuildTable .. "" ..
 			" (" .. l_StartSegment .. "-" .. l_EndSegment .. ")," ..
-			" range attempt " .. l_SegmentRangeRebuildAttempt .. " of" .. 
+			" rebuild " .. l_SegmentRangeRebuildAttempt .. " of" .. 
 			" " .. g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle .. "," ..
-			" Score: " .. g_BestScore .. "")
-      --" Score: " .. GetPoseTotalScore() .. "")
+			" Score: " .. PrettyNumber(g_BestScore) .. "")
 
 		-- Here's what you are looking for...
 		-- Here's what you are looking for...
@@ -4544,7 +4313,7 @@ function RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment)
 
 		SaveBest() -- Even if l_bRebuildSucceeded == false we still need to restore the best saved.
 		
-		if l_bRebuildSucceeded == true then			
+		if l_bRebuildSucceeded == true then
 			
 			l_NumberOfSuccessfulSegmentRangeRebuildAttempts =
       l_NumberOfSuccessfulSegmentRangeRebuildAttempts + 1
@@ -4581,7 +4350,7 @@ function RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment)
 				l_Iterations = 1
 				ShakeAndOrWiggle("ShakeAndWiggle", l_Iterations, l_bShake_And_Wiggle_OnlySelectedSegments)
 				
-			end
+			end -- if g_bShake_And_Wiggle_WithSideChainsAndBackbone_WithSelectedAndNearbySegments == true then
 
 			CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
 
@@ -4593,6 +4362,7 @@ function RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment)
 			end
 
 			Update_SlotScoresTable_ScorePart_Score_And_SlotScore_Fields(l_StartSegment, l_EndSegment)
+       -- ...calls SaveBest(), which updates g_BestScore
 
 			if g_bMutateAfterRebuild == true then
 				-- Return to the last saved solution before peforming the mutate. 
@@ -4602,12 +4372,17 @@ function RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment)
 			end
 			
 		else  
+      
+      -- Rebuild failed...
+      
 			l_NumberOfFailedSegmentRangeRebuildAttempts = l_NumberOfFailedSegmentRangeRebuildAttempts + 1
 			if l_NumberOfFailedSegmentRangeRebuildAttempts >= l_MaxFailedAttemptsAllowed then
 				--nah... break
 			end
-		end
-	end 
+      
+		end -- if l_bRebuildSucceeded == true then
+    
+	end -- for l_SegmentRangeRebuildAttempt = 1, l_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle do
 	
 	--local l_SegmentRangeRebuildAttempts = l_NumberOfSuccessfulSegmentRangeRebuildAttempts +
 	--	l_NumberOfFailedSegmentRangeRebuildAttempts
@@ -4650,18 +4425,19 @@ function RebuildManySegmentRanges()
 	-- This is the real meat of this script...
 	-- After laboriously determining which segment ranges to work on, we now finally work on them...
 
-	-- g_SegmentRangesTable={StartSegment=1, EndSegment=2}
+	-- g_SegmentRangesToRebuildTable={StartSegment=1, EndSegment=2}
 	-- g_SlotsTable={SlotNumber=1, ScorePart_Name=2, bIsActive=3, LongName=4}
 	-- g_SlotScoresTable={SlotNumber=1, ScorePart_Score=2, SlotScore=3, SlotList=4, bToDo=5}
-	for l_SegmentRangeIndex = 1, #g_SegmentRangesTable do
+	for l_SegmentRangeIndex = 1, #g_SegmentRangesToRebuildTable do
 
 		g_SegmentRangeIndex = l_SegmentRangeIndex
 
-		l_StartSegmentRangePoseTotalScore = GetPoseTotalScore()
+		--l_StartSegmentRangePoseTotalScore = GetPoseTotalScore()
+    l_StartSegmentRangePoseTotalScore = g_BestScore
 
-		-- g_SegmentRangesTable={StartSegment=1, EndSegment=2}
-		l_StartSegment = g_SegmentRangesTable[l_SegmentRangeIndex][srt_StartSegment]
-		l_EndSegment = g_SegmentRangesTable[l_SegmentRangeIndex][srt_EndSegment]
+		-- g_SegmentRangesToRebuildTable={StartSegment=1, EndSegment=2}
+		l_StartSegment = g_SegmentRangesToRebuildTable[l_SegmentRangeIndex][srt_StartSegment]
+		l_EndSegment = g_SegmentRangesToRebuildTable[l_SegmentRangeIndex][srt_EndSegment]
 		l_CurrentHighSlotNumber = 0
 		l_DisplayGainFromThis = "" -- to report where gains came from
 		l_CurrentHighScore = -99999999
@@ -4675,10 +4451,10 @@ function RebuildManySegmentRanges()
 
 			--print("\nRun " .. g_RunCycle .. " of " .. g_NumberOfRunCycles .. "," ..
 			--  " " .. g_RequiredNumberOfConsecutiveSegments .. " of " .. 
-			--  g_StopAfterProcessingWithThisManyConsecutiveSegments .. " consecutive segments," ..
-			--	" " .. l_SegmentRangeIndex .. " of " .. #g_SegmentRangesTable .. " segment ranges, " ..
+			--  g_ResetToStartValueAfterProcessingWithThisManyConsecutiveSegments .. " consecutive segments," ..
+			--	" " .. l_SegmentRangeIndex .. " of " .. #g_SegmentRangesToRebuildTable .. " segment ranges, " ..
 			--	" " .. l_StartSegment .. "-" .. l_EndSegment .. " segments, " ..
-			--	" Current score: " .. l_StartSegmentRangePoseTotalScore .. "")
+			--	" Current score: " .. PrettyNumber(l_StartSegmentRangePoseTotalScore) .. "")
 
 			if g_bSketchBookPuzzle == true then
 				g_bFoundAHighGain = false
@@ -4738,12 +4514,13 @@ function RebuildManySegmentRanges()
 							
                -- Found a gain by restoring foldit's recent best solution?
 							print("\n  Found a missed gain by restoring foldit's recent best solution! Why?" ..
-                       " Old Best Score: " .. g_BestScore .. "," ..
-                       " gain: " .. l_CheckPoseTotalScore - g_BestScore .. "," ..
-                       " new best score: " .. g_BestScore)
+                       " Old Best Score: " .. PrettyNumber(g_BestScore) .. "," ..
+                       " gain: " .. PrettyNumber(l_CheckPoseTotalScore - g_BestScore) .. "," ..
+                       " new best score: " .. PrettyNumber(l_CheckPoseTotalScore))
 							
 							Update_SlotScoresTable_ScorePart_Score_And_SlotScore_Fields(l_StartSegment,
-								l_EndSegment, 0)
+								l_EndSegment, 0) -- ...calls SaveBest(), which updates g_BestScore
+
 							
 						end -- if l_CheckPoseTotalScore > g_BestScore + 0.00001 then
 					end -- if l_RecentBestScore > g_BestScore then 
@@ -4753,6 +4530,8 @@ function RebuildManySegmentRanges()
 
 				-- Process each row in the g_SlotScoresTable...
 
+        print(" ") -- add blank line
+        
 				--g_SlotScoresTable=
 					--  {SlotNumber=1, ScorePart_Score=2, SlotScore=3, SlotList=4, bToDo=5}
 				for l_SlotScoresTableIndex = 1, #g_SlotScoresTable do
@@ -4812,7 +4591,7 @@ function RebuildManySegmentRanges()
 						SaveBest()
 
 						-- g_SlotsTable  {1=SlotNumber, 2=ScorePart_Name, 3=bIsActive, 4=LongName}
-						print("  Stabilized score: [" .. l_CheckPoseTotalScore .. "]" ..
+						print("  Stabilized score: [" .. PrettyNumber(l_CheckPoseTotalScore) .. "]" ..
 							" from slot " .. g_SlotsTable[l_SlotNumber - 3][st_LongName])
 
 					end -- if g_SlotScoresTable[l_SlotScoresTableIndex][sst_bToDo] == true then
@@ -4827,7 +4606,9 @@ function RebuildManySegmentRanges()
 				if g_bFuseBestPosition == true and 
 				   l_PotentialPointsLoss < l_MaxLossAllowed then
 
-					print("\n  Fusing the best position from several rebuilds of one segment range...\n")
+					print("\n  Fusing the best position of segment range (" .. 
+            l_StartSegment .. "-" .. l_EndSegment .. ") after " ..
+            l_NumberOfSuccessfulSegmentRangeRebuildAttempts .. " successful rebuilds...")
 					
 					-- This checks for g_bMutateAfterNormalStabilization == false because if it were true, 
 					-- then we would have already performed the mutate above, after the stabilization. duh
@@ -4879,7 +4660,11 @@ function RebuildManySegmentRanges()
               "\nDiscarding score gains and restoring last known vaild protein pose.\n")
 				CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
 				save.Quicksave(3) -- Quicksave? Shouldn't this be Quickload?
-				g_BestScore = GetPoseTotalScore()
+        
+				l_CheckPoseTotalScore = GetPoseTotalScore()
+        if l_CheckPoseTotalScore > g_BestScore then
+          g_BestScore = l_CheckPoseTotalScore
+        end
 			else
 				CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
 			end
@@ -4887,7 +4672,7 @@ function RebuildManySegmentRanges()
 			CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
 		end
 
-		AddSegmentRangeDone(l_StartSegment, l_EndSegment)
+		SetSegmentsAlreadyRebuilt(l_StartSegment, l_EndSegment)
 
 		local l_DeepRebuildGain = 0
 		l_DeepRebuildGain = g_BestScore - l_StartSegmentRangePoseTotalScore
@@ -4895,22 +4680,22 @@ function RebuildManySegmentRanges()
 		-- if l_CheckPoseTotalScore > l_StartSegmentRangePoseTotalScore + 0.00001 then
 		if l_DeepRebuildGain > 0 then
 			print("\n  Points gained from slots: [" .. l_DisplayGainFromThis .. "]," ..
-               " Old Best Score: " .. l_StartSegmentRangePoseTotalScore .. "," ..
-               " Gain: " .. l_DeepRebuildGain .. "," .. 
-               " New Best Score: " .. g_BestScore)
+               " Old Best Score: " .. PrettyNumber(l_StartSegmentRangePoseTotalScore) .. "," ..
+               " Gain: " .. PrettyNumber(l_DeepRebuildGain) .. "," .. 
+               " New Best Score: " .. PrettyNumber(g_BestScore))
 			-- print("  Rebuilding this segment range gained us: [" .. l_DeepRebuildGain .. "] points")
-			l_PoseTotalScore = l_CheckPoseTotalScore
+			--l_PoseTotalScore = l_CheckPoseTotalScore
 		end
-
-CheckbAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesIfRebuildGainsMoreThan()
+    
+    g_CurrentRebuildPointsGained = l_DeepRebuildGain -- this will be checked in bSegmentIsAllowedToBeRebuilt
 
 		-- The default for g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan is 40 or less.
 		-- If we just gained more than g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan, 
 		-- then we figure, that's good enough for now. It is now time to move on to more consecutive
 		-- segments per segment range...But why such a low number?
 		if l_DeepRebuildGain > g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan then
-      l_RemainingSegmentRanges = #g_SegmentRangesTable - l_SegmentRangeIndex
-      print("\nThe rebuild gain of " .. l_DeepRebuildGain .. " is greater than the" ..
+      l_RemainingSegmentRanges = #g_SegmentRangesToRebuildTable - l_SegmentRangeIndex
+      print("\nThe rebuild gain of " .. PrettyNumber(l_DeepRebuildGain) .. " is greater than the" ..
             " 'Move on to more consecutive segments per range if current rebuild gains more than'" ..
             " value of " .. g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan .. 
             " points (this value can be changed on the 'More Options' page);" ..
@@ -4919,10 +4704,10 @@ CheckbAutomaticallyAllowRebuildingAlreadyRebuiltSegmentRangesFromPreviousCyclesI
             " consecutive segments, and begin processing segments ranges with " ..
             (g_RequiredNumberOfConsecutiveSegments + 1) .. " consecutive segments.")
       
-			break -- for l_SegmentRangeIndex = 1, #g_SegmentRangesTable do
+			break -- for l_SegmentRangeIndex = 1, #g_SegmentRangesToRebuildTable do
 		end
 
-	end -- for l_SegmentRangeIndex = 1, #g_SegmentRangesTable do
+	end -- for l_SegmentRangeIndex = 1, #g_SegmentRangesToRebuildTable do
 
 	if g_bConvertAllSegmentsToLoops == true and g_bSavedSecondaryStructure == true then
 		save.LoadSecondaryStructure()
@@ -4933,8 +4718,6 @@ end -- RebuildManySegmentRanges()
 -- Called from 6 places in main()...
 function PrepareToRebuildSegmentRanges(l_How)
 
-	local l_PoseTotalScore = GetPoseTotalScore()
-
 	if l_How == "drw" then
 
 		-- drw means Deep Rebuild with Worst scoring segments
@@ -4944,11 +4727,11 @@ function PrepareToRebuildSegmentRanges(l_How)
 
 		-- Script defaults:
 		-- g_StartProcessingWithThisManyConsecutiveSegments = 2
-		-- g_StopAfterProcessingWithThisManyConsecutiveSegments = 4
+		-- g_ResetToStartValueAfterProcessingWithThisManyConsecutiveSegments = 4
 
 		local l_Step = 1
 		if g_StartProcessingWithThisManyConsecutiveSegments >
-			 g_StopAfterProcessingWithThisManyConsecutiveSegments then
+			 g_ResetToStartValueAfterProcessingWithThisManyConsecutiveSegments then
 			l_Step = -1 -- process backwards if needed
 		end
 
@@ -4967,7 +4750,7 @@ function PrepareToRebuildSegmentRanges(l_How)
 		-- to see the change...
 		for l_RequiredNumberOfConsecutiveSegments =
 			g_StartProcessingWithThisManyConsecutiveSegments,
-			g_StopAfterProcessingWithThisManyConsecutiveSegments,
+			g_ResetToStartValueAfterProcessingWithThisManyConsecutiveSegments,
 			l_Step do
 
 			-- ...and that's why we have to do this...
@@ -4977,8 +4760,8 @@ function PrepareToRebuildSegmentRanges(l_How)
 			
 			--print("\nRun " .. g_RunCycle .. " of " .. g_NumberOfRunCycles .. "," ..
 			--  " " .. g_RequiredNumberOfConsecutiveSegments .. " of " .. 
-			--  g_StopAfterProcessingWithThisManyConsecutiveSegments .. " consecutive segments," ..
-			--	" Current score: " .. l_PoseTotalScore .. "")
+			--  g_ResetToStartValueAfterProcessingWithThisManyConsecutiveSegments .. " consecutive segments," ..
+			--	" Current score: " .. PrettyNumber(g_BestScore) .. "")
 
 			-- Here's what you are looking for...
 			-- Here's what you are looking for...
@@ -5000,10 +4783,10 @@ function PrepareToRebuildSegmentRanges(l_How)
 		local l_StartSegment
 		local l_EndSegment
 
-		-- g_SegmentRangesTable={StartSegment=1, EndSegment=2}
-		for l_SegmentRangesTableIndex = 1, #g_SegmentRangesTable do
+		-- g_SegmentRangesToRebuildTable={StartSegment=1, EndSegment=2}
+		for l_TableIndex = 1, #g_SegmentRangesToRebuildTable do
 
-			l_CurrentSegmentRange = g_SegmentRangesTable[l_SegmentRangesTableIndex]
+			l_CurrentSegmentRange = g_SegmentRangesToRebuildTable[l_TableIndex]
 
 			l_StartSegment = l_CurrentSegmentRange[srt_StartSegment] --start segment of worst area
 			l_EndSegment = l_CurrentSegmentRange[srt_EndSegment] --end segment of worst area
@@ -5015,7 +4798,7 @@ function PrepareToRebuildSegmentRanges(l_How)
 					if l_SegmentIndex + l_WorstSegmentIndex <= l_EndSegment then
 
 						-- Finally, add one row to l_WorstSegmentRangesTable,
-						-- which will eventually be copied to the g_SegmentRangesTable below...
+						-- which will eventually be copied to the g_SegmentRangesToRebuildTable below...
 
 					-- l_WorstSegmentRangesTable={StartSegment=1, EndSegment=2}
 						l_WorstSegmentRangesTable[#l_WorstSegmentRangesTable + 1] =
@@ -5025,20 +4808,20 @@ function PrepareToRebuildSegmentRanges(l_How)
 			end
 
 		end
-		g_SegmentRangesTable = l_WorstSegmentRangesTable
+		g_SegmentRangesToRebuildTable = l_WorstSegmentRangesTable
 		RebuildManySegmentRanges()
 
 	elseif l_How == "all" then
 
-		g_SegmentRangesTable = {}
+		g_SegmentRangesToRebuildTable = {}
 
 		-- Script defaults:
 			g_StartProcessingWithThisManyConsecutiveSegments = 2
-			g_StopAfterProcessingWithThisManyConsecutiveSegments = 4
+			g_ResetToStartValueAfterProcessingWithThisManyConsecutiveSegments = 4
 
 		for l_RequiredNumberOfConsecutiveSegments =
 			g_StartProcessingWithThisManyConsecutiveSegments,
-			g_StopAfterProcessingWithThisManyConsecutiveSegments do
+			g_ResetToStartValueAfterProcessingWithThisManyConsecutiveSegments do
 
 			g_RequiredNumberOfConsecutiveSegments = l_RequiredNumberOfConsecutiveSegments
 
@@ -5049,8 +4832,8 @@ function PrepareToRebuildSegmentRanges(l_How)
 
 				if l_EndSegment <= g_SegmentCountWithoutLigands then
 
-					-- g_SegmentRangesTable = {StartSegment, EndSegment}
-					g_SegmentRangesTable[#g_SegmentRangesTable + 1] = {l_StartSegment, l_EndSegment}
+					-- g_SegmentRangesToRebuildTable = {StartSegment, EndSegment}
+					g_SegmentRangesToRebuildTable[#g_SegmentRangesToRebuildTable + 1] = {l_StartSegment, l_EndSegment}
 				end
 
 			end
@@ -5064,8 +4847,8 @@ function PrepareToRebuildSegmentRanges(l_How)
 
 	elseif l_How=="segments" then
 
-		-- g_SegmentRangesTable={StartSegment=1, EndSegment=2}
-		g_SegmentRangesTable = {}
+		-- g_SegmentRangesToRebuildTable={StartSegment=1, EndSegment=2}
+		g_SegmentRangesToRebuildTable = {}
 		Add_Loop_Helix_And_Sheet_Segments_To_SegmentRangesTable()
 		RebuildManySegmentRanges()
 
@@ -5102,8 +4885,8 @@ function main()
 
 	DisplaySelectedOptions()
 
-	g_SegmentsToWorkOnBooleanTable =
-		ConvertSegmentRangesTableToSegmentsToWorkOnBooleanTable(g_SegmentRangesTable)
+	g_bSegmentsToRebuildBooleanTable =
+		ConvertSegmentRangesTableToSegmentsToRebuildBooleanTable(g_SegmentRangesToRebuildTable)
 
 	g_MaxNumberOfSegmentRangesToProcessThisRunCycle = g_StartingNumberOfSegmentRangesToProcessPerRunCycle
 
@@ -5158,4 +4941,3 @@ end -- main()
 -- run in protected mode, so if the program crashes we can fail gracefully, by calling CleanUp()...
 xpcall(main, CleanUp)
 -- main() -- Call main() directly when debugging to make finding broken line easier. It makes it more obvious where the error occured.
-
