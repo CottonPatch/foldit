@@ -87,22 +87,13 @@ function SetupLocalDebugFuntions()
   g_Debug_QuickSaveEnergyScore = 0
 	g_Debug_bAllowNewRandomScoreOnNextCallToGetEnergyScore = true
   -- ...set to false in various key debug places.
+  g_Debug_RecentBestEnergyScore = 0  
 	
 	current = {}
-	current.GetEnergyScore = function()
-		-- Returns the overall score for the current pose of the protein
-		-- Depends on whether conditions are enabled, like behavior.GetFiltersDisabled
-		--local lEnergyScore = 10341.295301992
-		
-		-- See if we are allowed to change the score at this point...
-		if g_Debug_bAllowNewRandomScoreOnNextCallToGetEnergyScore == false then
-			-- Nothing has happend yet that warrants a new random score to be returned...
-			return g_Debug_CurrentEnergyScore      
-		end
-		
-		-- Time to get a new random score..
-		local l_EnergyScore = RandomFloat(-10000, 10000)
+  current.UpdateEnergyScore = function()
     
+		-- Time to get a new random score..
+		local l_EnergyScore = RandomFloat(-10000, 10000)    
     
 		if l_EnergyScore > g_Debug_ScriptBestEnergyScore then
       
@@ -118,13 +109,16 @@ function SetupLocalDebugFuntions()
     end
       
 		g_Debug_CurrentEnergyScore = l_EnergyScore
-		g_Debug_bAllowNewRandomScoreOnNextCallToGetEnergyScore = false 
-    -- ...triggered to true in other debug funcs
-				
-    l_EnergyScore = l_EnergyScore
-		return l_EnergyScore 
-    -- l_EnergyScore could be less or more than g_Debug_CurrentEnergyScore was prior to this call.
+    
+  end
+  
+	current.GetEnergyScore = function()
+		-- Returns the overall score for the current pose of the protein
+		-- Depends on whether conditions are enabled, like behavior.GetFiltersDisabled
+		
+			return g_Debug_CurrentEnergyScore      
 	end
+  
 	current.GetSegmentEnergyScore = function(l_SegmentIndex)    
 		local l_SegmentEnergyScore
 		l_SegmentEnergyScore = RandomFloat(-10, 10) -- was (-200, 200)
@@ -214,7 +208,7 @@ function SetupLocalDebugFuntions()
 	--                                      l_NumSegmentsWithFrozenSidechain) end
 
 	pose = {} -- same structure as "current" above
-	pose.GetEnergyScore = function() -- not present used
+	pose.GetEnergyScore = function()
 		return g_Debug_CurrentEnergyScore
 	end
 	pose.GetSegmentEnergyScore = function(l_SegmentIndex)
@@ -285,27 +279,19 @@ function SetupLocalDebugFuntions()
 
 	recentbest = {}
 	recentbest.Restore = function()
-		-- Keep the current pose if it's better; otherwise, restore the recentbest pose.
-    if g_Debug_ScriptBestEnergyScore > g_Debug_CurrentEnergyScore then
-      g_Debug_CurrentEnergyScore = g_Debug_ScriptBestEnergyScore
-    elseif g_Debug_CurrentEnergyScore > g_Debug_ScriptBestEnergyScore then
-      g_Debug_ScriptBestEnergyScore = g_Debug_CurrentEnergyScore
+		-- Keep the current pose if it's better; otherwise, restore the recentbest pose.    
+    if g_Debug_RecentBestEnergyScore > g_Debug_CurrentEnergyScore then
+      g_Debug_CurrentEnergyScore = g_Debug_RecentBestEnergyScore
     end
-		return
 	end
 	recentbest.Save = function()
-		 -- Save the current pose as the recentbest pose.  
-    if g_Debug_CurrentEnergyScore > g_Debug_ScriptBestEnergyScore then
-      g_Debug_ScriptBestEnergyScore = g_Debug_CurrentEnergyScore
-    end
-		return
+		 -- Save the current pose as the recentbest pose.
+     g_Debug_RecentBestEnergyScore = g_Debug_CurrentEnergyScore
 	end
 	-- Some "recentbest" functions this script does not yet use...
 	--   recentbest.AreConditionsMet
   recentbest.GetEnergyScore = function()
-    local l_EnergyScore = g_Debug_ScriptBestEnergyScore -- sure, why not.
-    --local l_EnergyScore = RandomFloat(-10000, 10000)
-    return l_EnergyScore
+    return g_Debug_RecentBestEnergyScore
   end
 	--   recentbest.GetSegmentEnergyScore = function(l_SegmentIndex)
 	--     local l_SegmentEnergyScore
@@ -545,32 +531,24 @@ function SetupLocalDebugFuntions()
 		end
 		return false
 	end
-	structure.MutateSidechainsSelected = function(l_Iterations) return end
+	structure.MutateSidechainsSelected = function(l_Iterations) 
+    current.UpdateEnergyScore()
+  end
 	structure.RebuildSelected = function(l_Iterations) 
-		g_Debug_bAllowNewRandomScoreOnNextCallToGetEnergyScore = true
-    -- ...see current.GetEnergyScore for details.
-		return
+    current.UpdateEnergyScore()
 	end
 	structure.SetSecondaryStructureSelected = function(l_StringSecondaryStructure) return end
 	structure.ShakeSidechainsAll = function(l_Iterations)
-		g_Debug_bAllowNewRandomScoreOnNextCallToGetEnergyScore = true
-    -- ...see current.GetEnergyScore for details.
-		return
+    current.UpdateEnergyScore()
 	end
 	structure.ShakeSidechainsSelected = function(l_Iterations)
-		g_Debug_bAllowNewRandomScoreOnNextCallToGetEnergyScore = true
-    -- ...see current.GetEnergyScore for details.
-		return
+    current.UpdateEnergyScore()
 	end
 	structure.WiggleAll = function(l_Iterations,l_bBackbone,l_bSideChains)
-		g_Debug_bAllowNewRandomScoreOnNextCallToGetEnergyScore = true
-    -- ...see current.GetEnergyScore for details.
-		return
+    current.UpdateEnergyScore()
 	end
 	structure.WiggleSelected = function(l_Iterations,l_bBackbone,l_bSideChains)
-		g_Debug_bAllowNewRandomScoreOnNextCallToGetEnergyScore = true
-    -- ...see current.GetEnergyScore for details.
-		return
+    current.UpdateEnergyScore()
 	end
 	-- Additional "structure" functions, which this script does not yet use...
 	--   structure.CanMutate = function(l_SegmentIndex, l_AminoAcid)
@@ -605,6 +583,9 @@ function SetupLocalDebugFuntions()
 	--   user.GetGroupID = function()
 	--   user.GetGroupName = function()
 	--   user.GetPlayerID = function()
+  
+  -- Well, we gotta start somewhere, right...
+  current.UpdateEnergyScore()
 
 end
 
@@ -619,6 +600,12 @@ function DefineGlobalVariables()
 	--
 	-- *** Start of Table Declarations...***
 	--
+  
+  -- Used in PopulateGlobalActiveScorePartsTable() and
+  --         PopulateGlobalScorePartsTable()..
+  g_ActiveScorePartsTable = {}
+  --g_ActiveScorePartsTable = {ScorePart_Name}
+  
 	--  Used in CountDisulfideBonds(),
   --          PopulateGlobalCysteinesTable(), and
   --          DisplayPuzzleProperties()
@@ -633,8 +620,8 @@ function DefineGlobalVariables()
   --          RebuildManySegmentRanges(), PrepareToRebuildSegmentRanges() and main()
 	g_SegmentRangesToRebuildTable = {}
 	-- g_SegmentRangesToRebuildTable={StartSegment, EndSegment}
-		srt_StartSegment = 1
-		srt_EndSegment = 2
+		srtrt_StartSegment = 1
+		srtrt_EndSegment = 2
 	-- g_SegmentRangesToRebuildTable initially includes all the segments in the main protein (ie; no ligands)
 
 	-- g_bSegmentsToRebuildBooleanTable:
@@ -652,9 +639,9 @@ function DefineGlobalVariables()
 	-- g_SegmentsAlreadyRebuiltTable={true/false}
 	-- g_SegmentsAlreadyRebuiltTable keeps track of which segments have already been processed...
 
-	--  Used in PopulateGlobalSlotScoresTable(),
-	--          Update_SlotScoresTable_ScorePart_Score_And_SlotScore_Fields(),
-	--          Update_SlotScoresTable_ToDo_And_SlotList_Fields() and
+	--  Used in PopulateGlobalScorePartScoresTable(),
+	--          Update_ScorePartScoresTable_ScorePart_Score_And_PoseTotalScore_Fields(),
+	--          Update_ScorePartScoresTable_ToDo_And_ScorePartsList_Fields() and
   --          RebuildManySegmentRanges()
   
 	--  Used in GetScorePart_Score() and
@@ -664,29 +651,31 @@ function DefineGlobalVariables()
 	-- g_SegmentScoresTable is optimized for quickly searching for 
 	-- the worst scoring segments, so we can work on those first.
 
-	g_SlotScoresTable = {}
-	-- g_SlotScoresTable={SlotNumber=1, ScorePart_Score=2, SlotScore=3, SlotList=4, bToDo=5}
-		sst_SlotNumber = 1
-		sst_ScorePart_Score = 2
-		sst_SlotScore = 3 -- PoseTotalScore
-		sst_SlotList = 4 -- examples: "4", "5=7=12", "6=9", "8=11=13"
-		sst_bToDo = 5 -- work to do?
+	g_ScorePartScoresTable = {}
+	-- g_ScorePartScoresTable={ScorePart_Number=1, ScorePart_Score=2, PoseTotalScore=3, ScorePartsList=4, bToDo=5}
+		spst_ScorePart_Number = 1
+		spst_ScorePart_Score = 2
+		spst_PoseTotalScore = 3
+		spst_ScorePartsList = 4 -- examples: "4", "5=7=12", "6=9", "8=11=13"
+		spst_bToDo = 5 -- 'true' means first score part with a unque PoseTotalScore, 
+                  -- 'false' means all duplicate PoseTotalScore score parts
 
-	--  Used in PopulateGlobalSlotsTable(), PopulateGlobalSlotScoresTable(),
-	--          Update_SlotScoresTable_ScorePart_Score_And_SlotScore_Fields(),
-	--          AskUserToSelectSlotsToWorkOn(), AskUserToSelectScorePartsToWorkOn(),
+	--  Used in PopulateGlobalScorePartsTable(), PopulateGlobalScorePartScoresTable(),
+	--          Update_ScorePartScoresTable_ScorePart_Score_And_PoseTotalScore_Fields(),
+	--          AskUserToSelectScorePartsToStabilize(),
+  --          AskUserToSelectScorePartsToIncludeWhenCalculatingWorseScoringSegments(),
 	--          bAskUserToSelectRebuildOptions() and RebuildManySegmentRanges()
-	g_SlotsTable = {}
-	-- g_SlotsTable={SlotNumber=1, ScorePart_Name=2, bIsActive=3, LongName=4}
-		st_SlotNumber = 1
-		st_ScorePart_Name = 2 -- could have been called SlotName, but since most of the slot are ScoreParts
-		st_bIsActive = 3
-		st_LongName = 4
+	g_ScorePartsTable = {}
+	-- g_ScorePartsTable={ScorePart_Number=1, ScorePart_Name=2, bIsActive=3, LongName=4}
+		spt_ScorePart_Number = 1
+		spt_ScorePart_Name = 2 -- could have been called "SlotName", but since most of the "slots" are ScoreParts...
+		spt_bScorePartIsActive = 3
+		spt_LongName = 4
 
 	--  Used by PopulateGlobalSegmentScoresTableBasedOnUserSelectedScoreParts(), and
-	--          AskUserToSelectScorePartsToWorkOn()
-	g_UserSelectedScorePartsToWorkOnTable = {}
-	--g_UserSelectedScorePartsToWorkOnTable={ScorePart_Name}
+	--          AskUserToSelectScorePartsToIncludeWhenCalculatingWorseScoringSegments()
+	g_UserSelectedScorePartsToIncludeWhenCalculatingWorseScoringSegments_Table = {}
+	--g_UserSelectedScorePartsToIncludeWhenCalculatingWorseScoringSegments_Table={ScorePart_Name}
 	--
 	-- ***...end of Table Declarations.***
   
@@ -729,7 +718,7 @@ function DefineGlobalVariables()
 	--  Used in AskMoreOptions() and main()
 	g_AdditionalNumberOfSegmentRangesToProcessPerRunCycle = 1
 	
-		--  Used in EnableFastCPUProcessing(), DisableFastCPUProcessing()
+		--  Used in TemporarilyDisableConditionChecking() and ReenableNormalConditionChecking()...
 	g_bBetterRecentBest = false
 	
 	--  Used in DisplaySelectedOptions(), bAskUserToSelectRebuildOptions() and 
@@ -749,7 +738,7 @@ function DefineGlobalVariables()
 	--  Used in CheckForLowStartingScore() and DisplayPuzzleProperties()
 	g_bHasDensity = false
 	
-	--  Used in PopulateGlobalSlotsTable(), 
+	--  Used in PopulateGlobalScorePartsTable(), 
 	g_bHasLigand = (g_SegmentCountWithoutLigands < g_SegmentCountWithLigands)
 	
 	--  Used in SetClashImportance() and ShakeAndOrWiggle()
@@ -786,8 +775,8 @@ function DefineGlobalVariables()
 	g_bRebuildHelicesAndLoops = true -- rebuild helix segments + surrounding loop segments
 	g_bRebuildSheetsAndLoops = false -- rebuild sheet segments + surrounding loop segments
 	g_bSavedSecondaryStructure = false
-	g_bSelectAllSlotsToWorkOn = true
-	g_bSelectMain4SlotsToWorkOn = false
+	g_bSelectAllScorePartsToStabilize = true
+	g_bSelectMain4ScorePartsToStabilize = false
 	g_bShake_And_Wiggle_OnlySelectedSegments = true -- false = include nearby segments
 	g_bShake_And_Wiggle_WithSelectedSegments = true -- (after each rebuild) not too slow
 	g_bShake_And_Wiggle_WithSideChainsAndBackbone_WithSelectedAndNearbySegments = false -- true = very slow
@@ -803,7 +792,7 @@ function DefineGlobalVariables()
 	g_CurrentRebuildPointsGained = 0
 
 	--  Used in CleanUp()
-	g_StartingScore = g_BestScore
+	g_StartingScore = GetPoseTotalScore()
 
 	--  Used in PopulateGlobalSegmentScoresTableBasedOnUserSelectedScoreParts(),
 	--          CheckForLowStartingScore() and DisplayPuzzleProperties()
@@ -825,7 +814,7 @@ function DefineGlobalVariables()
 	g_OriginalNumberOfDisulfideBonds = 0
 
 	--  Used in AskMoreOptions(), RebuildSelectedSegments() and RebuildOneSegmentRangeManyTimes()
-	g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle = 15 -- set to at least 10
+	g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle = 10 -- set to at least 10
   if g_bDebugMode == true then
     g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle = 10 -- 5 is high enough for debug mode
   end
@@ -884,11 +873,12 @@ function DefineGlobalVariables()
 
 	--  Used in bAskUserToSelectRebuildOptions(), RebuildSelectedSegments() and 
 	--          PrepareToRebuildSegmentRanges()
-	g_ResetToStartValueAfterProcessingWithThisManyConsecutiveSegments = 10 -- was 4 -- user has option to change this
-  if g_bDebugMode == true then
-    g_ResetToStartValueAfterProcessingWithThisManyConsecutiveSegments = 5 -- 5 is high enough for debug mode
-  end
-
+	g_ResetToStartValueAfterProcessingWithThisManyConsecutiveSegments = 3 -- user has option to change this
+  -- ...any more than 4 consecutive segments does not appear to be fruitful;
+  -- Actually, 4 consecutive segments is not great.
+  -- And, 3 consecutive segments is barely better then 4.
+  -- Really, most of the gains are with just 2 consecutive segments!
+  
 	--  Used in bAskUserToSelectRebuildOptions(), RebuildSelectedSegments() and
 	--          PrepareToRebuildSegmentRanges()
 	g_RequiredNumberOfConsecutiveSegments = g_StartProcessingWithThisManyConsecutiveSegments
@@ -985,47 +975,57 @@ function DefineGlobalVariables()
 		CheckClashImportance()
 	end
 
-	-- Start of Fast CPU processing module...
-	-- Enable Fast CPU processing...
+	-- Start of Temporarily Disable Condition Checking module...
+	-- Temporarily disable condition checking...
 	if g_bSketchBookPuzzle == false then 
-		behavior.SetFiltersDisabled(true) -- enables faster CPU processing, but scores don't count...
+		behavior.SetFiltersDisabled(true) -- enables faster CPU processing, but scores are not counted...
 	end
 
-	local l_FastCPUScore = GetPoseTotalScore()
-	
-	-- Disable Fast CPU processing...
+	local l_ScoreWithConditionCheckingTemporarilyDisabled = GetPoseTotalScore()
+    
+  -- debugging...
+  --l_ScoreWithConditionCheckingTemporarilyDisabled = l_ScoreWithConditionCheckingTemporarilyDisabled + 500
+	  
+	-- Re-enable normal condition checking...
 	if g_bSketchBookPuzzle == false then 
 		behavior.SetFiltersDisabled(false)
-    -- ...Disables faster CPU processing, so your score will be counted...
+    -- ...Disables faster CPU processing, so your score will be counted as normal...
 	end
 	
-	local l_NormalCPUScore = g_BestScore
+	local l_ScoreWithNormalConditionCheckingEnabled = GetPoseTotalScore()
 		
-	-- Calculate Allowable Bonus Score (not available in beginner puzzles)...
-	-- I guess I have not seen this yet, because none of my tests have included
-	-- an allowable bonus score yet..
-	--  Used in DefineGlobalVariables(), AskFastCPUProcessingOptions() and SaveBest().
-	g_MaxBonus = l_FastCPUScore - l_NormalCPUScore 
+	-- Compute the maximum potential bonus points (not available in beginner puzzles)...
+	--  Used in DefineGlobalVariables() and DisplayPuzzleProperties()...
+	g_ComputedMaximumPotentialBonusPoints = 
+    l_ScoreWithConditionCheckingTemporarilyDisabled - l_ScoreWithNormalConditionCheckingEnabled 
 
-	g_CurrentBonus = g_MaxBonus -- g_CurrentBonus is only used in DisplayPuzzleProperties.
+  -- g_MaximumPotentialBonusPoints can be changed in AskTemporarilyDisableConditionCheckingOptions()...
+  --  Used in AskTemporarilyDisableConditionCheckingOptions() and SaveBest()...
+  g_MaximumPotentialBonusPoints = g_ComputedMaximumPotentialBonusPoints
 	
-	-- Fast CPU Processing enables faster CPU processing, but your score will not be counted...
-	--  Used in DefineGlobalVariables(), CleanUp(), AskFastCPUProcessingOptions() and SaveBest()
-	g_bEnableFastCPUProcessing = false
-	if math.abs(g_MaxBonus) > 0.1 then -- Better than if l_NormalCPUScore ~= l_FastCPUScore then
-		print("l_FastCPUScore=[" .. l_FastCPUScore .. "].")  
-		print("l_NormalCPUScore=[" .. l_NormalCPUScore .. "].")  
-		print("g_MaxBonus=[" .. g_MaxBonus .. "].")  
+	-- TemporarilyDisableConditionChecking (enables faster CPU processing, but
+  -- your score improvements will not be counted in foldit's Undo history)...
+	--  Used in DefineGlobalVariables(), CleanUp(), AskTemporarilyDisableConditionCheckingOptions() and SaveBest()
+	g_bTemporarilyDisableConditionChecking = false -- false means "Enable Normal Condition Checking"
+  
+  if math.abs(g_MaximumPotentialBonusPoints) > 0.1 then
+    
+		print("\nl_ScoreWithConditionCheckingTemporarilyDisabled: " ..
+          PrettyNumber(l_ScoreWithConditionCheckingTemporarilyDisabled) ..
+          "\nl_ScoreWithNormalConditionCheckingEnabled: " ..
+          PrettyNumber(l_ScoreWithNormalConditionCheckingEnabled) ..
+          "\ng_MaximumPotentialBonusPoints: " .. g_MaximumPotentialBonusPoints)
 		
-		g_bEnableFastCPUProcessing = true
+		g_bTemporarilyDisableConditionChecking = true
+    
 		-- Ask user for their desired maximum bonus...
-		AskFastCPUProcessingOptions()
+		AskTemporarilyDisableConditionCheckingOptions()
 	end
-
-	if g_bEnableFastCPUProcessing == true then
-		EnableFastCPUProcessing()
+  
+	if g_bTemporarilyDisableConditionChecking == true then
+		TemporarilyDisableConditionChecking()
 	end
-	-- ...end of Fast CPU processing module.
+	-- ...end of Temporarily Disable Condition Checking module.
 
 end -- DefineGlobalVariables()
 
@@ -1033,7 +1033,7 @@ end -- DefineGlobalVariables()
 function ScriptDocumentation()
 	--[[
 	Notes:
-		1. This script uses a lot of save slots. Best score is always stored in slot 3
+		1. This script uses a lot of foldit save slots. Best score is always stored in slot 3
 		2. Learn more about the original script "Tvdl enhanced DRW 3.0.2" by "Timo van der Laan"
 	     here: https://foldit.fandom.com/wiki/EDRW
 		3. See also "Tvdl enhanced DRW 3.1.1" with small fixes and improvements:
@@ -1097,24 +1097,24 @@ function ScriptDocumentation()
 	13. FuseBestPosition and NormalStabilization can be suppressed (this is the default, if the score is negative from the start)
 	14. User can specify to disable bands when rebuilding and enable them afterwards.
 	NEW in version 2
-	15. User can choose which slots will be active. What does this mean?
-	16. User can choose which segment ScoreParts count for finding worst scoring segments.
+	15. User can choose which ScoreParts will be stabilized.
+	16. User can choose which ScoreParts count for finding worst scoring segments.
 	17. It will recognize puzzle properties and set defaults for them.
-	18. Instead of skipping cycles you can specify number of worst (segments?) to skip (variable name "g_NumberOfSegmentsSkipping"?).
+	18. Instead of skipping cycles you can specify number of worst segments to skip (variable name "g_NumberOfSegmentsSkipping"?).
 	Should probably split the variable g_NumberOfSegmentsSkipping into two
 	different variables g_NumberOfSegmentsSkipping and g_NumberOfSegmentsToSkip. And maybe into a third variable g_NumberOfSegmentsSkipped.
 	19. On electron density puzzles the other components are given proper weight for finding worst.
 	20. Cleaned up code.
 	2.1.0 Added code for processing only previously done segments
 	2.1.1 Changed some max and min slider values and autodetects Layer Filter.
-	2.2.0 Added ligand slot.
+	2.2.0 Added ligand ScorePart.
 	2.3.0 Changed other by Density. What does this mean?
 	2.4.0 Dynamic list of active ScoreParts,
 				Puts back the old selection when stopped,
 				Added alternative local cleanup after rebuild,
 				Resets the original structure if mutated after rebuild for the next rebuild,
 				Set default mutate settings if a design puzzle.
-	2.4.1 Added WiggleFactor, removed reference as a slot.
+	2.4.1 Added WiggleFactor, removed reference as a ScorePart.
 	2.5.0 Added g_bShake_And_Wiggle_OnlySelectedSegments option. Thanks Susume.
 	2.5.1 Added finding wins during NormalStabilization wiggle.
 	2.6.0 Changed defaults and user interface.
@@ -1201,8 +1201,8 @@ function CleanUp(l_ErrorMessage)
 	SetClashImportance(1)
 	save.Quickload(3) -- Load
 
-	if g_bEnableFastCPUProcessing == true then
-		DisableFastCPUProcessing()
+	if g_bTemporarilyDisableConditionChecking == true then
+		ReenableNormalConditionChecking()
 	end
 	if g_bSavedSecondaryStructure == true then
 		save.LoadSecondaryStructure()
@@ -1225,61 +1225,89 @@ function CleanUp(l_ErrorMessage)
 end
 -- ...end of Misc Utils  module.
 
--- Start of Fast CPU Processing module...
+-- Start of Temporarily Disable Condition Checking module...
 -- Called from 1 place in DefineGlobalVariables()...
-function AskFastCPUProcessingOptions()
-	local l_Ask = dialog.CreateDialog("Fast CPU processing appears to be enabled")
-	l_Ask.bEnableFastCPUProcessing =
-		dialog.AddCheckbox("Enable fast CPU processing (but your score will not be counted) ",
-			g_bEnableFastCPUProcessing)
-	-- Seems like this should be called g_MinBonus g_MaxBonus
-	l_Ask.l1 = dialog.AddLabel("Current bonus is: [" .. g_MaxBonus .. "]")
-	l_Ask.l2 = dialog.AddLabel("If this is not the currect maximum bonus, enter the correct value here")
-	if g_MaxBonus < 0 then
-		g_MaxBonus = 0
+function AskTemporarilyDisableConditionCheckingOptions()
+  
+	local l_Ask = dialog.CreateDialog("Temporary Fast CPU Processing")
+	l_Ask.bTemporarilyDisableConditionChecking =
+		dialog.AddCheckbox("Temporarily disable condition checking", g_bTemporarilyDisableConditionChecking)
+	l_Ask.l1 = dialog.AddLabel("Computed maximum potential bonus points: " .. g_MaximumPotentialBonusPoints)
+	l_Ask.l2 = dialog.AddLabel("If this is not the correct maximum potential bonus,")
+  l_Ask.l3 = dialog.AddLabel("enter the correct value here:")
+	if g_MaximumPotentialBonusPoints < 0 then
+		g_MaximumPotentialBonusPoints = 0
 	end
-	l_Ask.maxbonus = dialog.AddTextbox("Set Max Bonus:", g_MaxBonus)
-	l_Ask.l3 = dialog.AddLabel("Scores will only be checked for real gains if")
-	l_Ask.l4 = dialog.AddLabel(" score with filter off + Max Bonus is a potential gain")
+	l_Ask.maxbonus = dialog.AddTextbox("Set Max Bonus:", g_MaximumPotentialBonusPoints)
+  l_Ask.l5 = dialog.AddLabel("Design puzzles typically include several conditions.")
+  l_Ask.l6 = dialog.AddLabel("If all conditions are met then any potential penalty")
+  l_Ask.l7 = dialog.AddLabel("points (negative points) are removed from your score")
+  l_Ask.l8 = dialog.AddLabel("and any potential bonus points are added to your")
+  l_Ask.l9 = dialog.AddLabel("score. Evaluating these conditions can slow down")
+  l_Ask.l10 = dialog.AddLabel("shake, wiggle, and other operations. 'Temporarily")
+  l_Ask.l11 = dialog.AddLabel("disable condition checking' disables condition")
+  l_Ask.l12 = dialog.AddLabel("checking as much as possible, to speed up the")
+  l_Ask.l13 = dialog.AddLabel("rebuild process. While condition checking is disabled")
+  l_Ask.l14 = dialog.AddLabel("our current score is only a 'potential-score-if-all-")
+  l_Ask.l15 = dialog.AddLabel("conditions-are-met'. We won't know our actual score")
+  l_Ask.l16 = dialog.AddLabel("until we re-enable condition checking, to see if the")
+  l_Ask.l17 = dialog.AddLabel("conditions are met. The value in 'Set Max Bonus'")
+  l_Ask.l18 = dialog.AddLabel("shows the potential bonus (if all conditions are")
+  l_Ask.l19 = dialog.AddLabel("met), or zero if there's currently a penalty. The")
+  l_Ask.l20 = dialog.AddLabel("'Set Max Bonus' value determines when to re-enable")
+  l_Ask.l21 = dialog.AddLabel("condition checking. Once our current score (with")
+  l_Ask.l22 = dialog.AddLabel("condition checking disabled) plus the Set Max Bonus")
+  l_Ask.l23 = dialog.AddLabel("value is greater than the last saved real best score")
+  l_Ask.l24 = dialog.AddLabel("(g_BestScore), we will re-enable condition checking")
+  l_Ask.l25 = dialog.AddLabel("and hopefully we will realize the loss of penalties")
+  l_Ask.l26 = dialog.AddLabel("points and gain of bonus points. We only update")
+  l_Ask.l27 = dialog.AddLabel("g_BestScore when condition checking is enabled.")  
+  
 	l_Ask.continue = dialog.AddButton("Continue", 1)
 	dialog.Show(l_Ask)
-	g_MaxBonus = l_Ask.maxbonus.value
-	if g_MaxBonus == "" then
-		g_MaxBonus = 0
+	g_MaximumPotentialBonusPoints = l_Ask.maxbonus.value
+	if g_MaximumPotentialBonusPoints == "" then
+		g_MaximumPotentialBonusPoints = 0
 	end
-	g_bEnableFastCPUProcessing = l_Ask.bEnableFastCPUProcessing.value
+	g_bTemporarilyDisableConditionChecking = l_Ask.bTemporarilyDisableConditionChecking.value
 end
 
--- Called from 1 place in SaveBest() and 1 place in DefineGlobalVariables()...
-function EnableFastCPUProcessing()
+-- Called from SaveBest() and DefineGlobalVariables()...
+function TemporarilyDisableConditionChecking()
 	-- Enables faster CPU processing, but your scores will not be counted...
 
 	behavior.SetFiltersDisabled(true)
-	if g_bBetterRecentBest == true then
+  
+	if g_bBetterRecentBest == true then -- set in ReenableNormalConditionChecking() below...
 		save.Quicksave(99) -- Save
 		save.Quickload(98) -- Load
 		recentbest.Save() -- Save the current pose as the recentbest pose.  
 		save.Quickload(99) -- Load
+    
+    -- shouldn't we reset g_bBetterRecentBest to false here?
+    g_bBetterRecentBest = false -- well, I'm doing it.
 	end
+  
 end
 
--- Called from 1 place in SaveBest() and 1 place in CleanUp()...
-function DisableFastCPUProcessing()
+-- Called from SaveBest() and CleanUp()...
+function ReenableNormalConditionChecking()
 	-- Disables faster CPU processing, so your scores will be counted...
 
 	local l_RecentBestPoseTotalScore = GetPoseTotalScore(recentbest) -- class "recentbest"
   
-	if l_RecentBestPoseTotalScore > g_BestScore then
-    g_bBetterRecentBest == true 
+	if l_RecentBestPoseTotalScore > g_BestScore then    
+    g_bBetterRecentBest = true -- read in TemporarilyDisableConditionChecking() above...
     g_BestScore = l_RecentBestPoseTotalScore
 		save.Quicksave(99) -- Save
 		recentbest.Restore() -- Keep the current pose if it's better; otherwise, restore the recentbest pose.
 		save.Quicksave(98) -- Save
 		save.Quickload(99) -- Load
 	end
+  
 	behavior.SetFiltersDisabled(false)
 end
--- ...end of Fast CPU Processing module.
+-- ...end of Temporarily Disable Condition Checking module.
 
 -- Start of Segments and Segment Ranges manipulation module...
 -- Notice that most functions assume that the segment
@@ -1786,55 +1814,65 @@ end
 -- Start of FuseBestPosition module...
 -- Called from 1 place in FuseBestPositionEnd(), 
 --             4 times in FuseBestPosition(),
---             1 time  in Update_SlotScoresTable_ScorePart_Score_And_SlotScore_Fields(),
+--             1 time  in Update_ScorePartScoresTable_ScorePart_Score_And_PoseTotalScore_Fields(),
 --             1 time  in RebuildOneSegmentRangeManyTimes(), and 
 --             2 times in RebuildManySegmentRanges()...
 function SaveBest()
   
-	local l_FunctionStartPoseTotalScore = GetPoseTotalScore()
-	local l_ScorePlusMaxBonus = l_FunctionStartPoseTotalScore + g_MaxBonus
-	-- Note, g_MaxBonus, in the above calculation is not the same variable as 
-	-- g_BestScore in the next line.  Perhaps I am tired and should go to sleep...
-	-- Seems like the next line should be checking for (g_bEnableFastCPUProcessing == true)...
-  
-	if (g_bEnableFastCPUProcessing == false) or (l_ScorePlusMaxBonus > g_BestScore) then
+  if g_bTemporarilyDisableConditionChecking == true then
     
-		if g_bEnableFastCPUProcessing == true then
-			-- Temporarily disable fast CPU processing...
-			DisableFastCPUProcessing()
-		end
-
-		local l_PointsGained = l_FunctionStartPoseTotalScore - g_BestScore
-		
-		if l_PointsGained > g_SketchBookPuzzleMinimumGainForSave or 
-		  (l_PointsGained > 0 and g_bFoundAHighGain == true) then
-			-- Why two checks here...
-			-- Oh, I see, first we check for even tiny improvement to keep track of, but
-			-- the second check makes sure the improvement is significant enough to be reported
-			-- to the user...
-			if l_PointsGained > 0.01 then
-				--no need print("  Gained another " .. l_PointsGained .. " pts.")
-			end
-			g_BestScore = l_FunctionStartPoseTotalScore
-      
-      if g_bFuseBestPosition == false and g_BestScore > 0 then
-      	print("\nNow that the total score is positive, we will switch back on: " ..
-              "'perform normal stabilization' and 'fuse best position'.\n")
-        g_bFuseBestPosition = true
-        g_bPerformNormalStabilization = true
-      end
-      
-			save.Quicksave(3) -- Save
-			g_bFoundAHighGain = true
-		end
-
-		if g_bEnableFastCPUProcessing == true then
-			-- Re-enable fast CPU processing if it was previously enabled...
-			EnableFastCPUProcessing()
-		end
+   	local l_PoseTotalScoreWithConditionCheckingDisabled = GetPoseTotalScore()
+  	local l_PotentialScoreIfAllConditionsAreMet = 
+          l_PoseTotalScoreWithConditionCheckingDisabled + g_MaximumPotentialBonusPoints
     
-	end -- if (g_bEnableFastCPUProcessing == false) or (l_ScorePlusMaxBonus > g_BestScore) then
+    if (l_PotentialScoreIfAllConditionsAreMet <= g_BestScore) then  
+      return
+    end
+    
+    -- Do not attempt to improve g_BestScore if:
+    -- 1) Normal condition checking is temporarily disabled, and
+    -- 2) Reenabling normal condition checking would not likely improve our g_BestSCore.
+    
+    -- When normal condition checking is disabled, our scores are only potential scores; that is,
+    -- if all conditions are met. We won't know if all conditions are met until we re-enable
+    -- normal condition checking. We only temporarily disable normal condition checking to speed
+    -- up the rebuld process, and only when there are potential bonus points to be earned.
+  end
+    
+  if g_bTemporarilyDisableConditionChecking == true then
+    -- Temporarily re-enable normal condition checking, so we
+    -- can look at real scores instead of potential scores...
+    ReenableNormalConditionChecking()
+  end
   
+  local l_RealPoseTotalScore = GetPoseTotalScore()
+  local l_RealPointsGained = l_RealPoseTotalScore - g_BestScore
+  local l_MinimumGainForSave = 0
+  if g_bSketchBookPuzzle == true then
+    l_MinimumGainForSave = g_SketchBookPuzzleMinimumGainForSave
+  end
+  
+  if l_RealPointsGained > l_MinimumGainForSave or 
+    (l_RealPointsGained > 0 and g_bFoundAHighGain == true) then
+    
+    g_BestScore = l_RealPoseTotalScore  -- This is what you are looking for.
+    
+    if g_bFuseBestPosition == false and g_BestScore > 0 then
+      print("\nNow that the total score is positive, we will switch back on: " ..
+            "'perform normal stabilization' and 'fuse best position'.\n")
+      g_bFuseBestPosition = true
+      g_bPerformNormalStabilization = true
+    end
+    
+    save.Quicksave(3) -- Save
+    g_bFoundAHighGain = true -- not exactly sure how this one works yet.
+  end
+  
+  if g_bTemporarilyDisableConditionChecking == true then
+    -- Disable condition checking again (re-enable fast CPU processing)...
+    TemporarilyDisableConditionChecking()
+  end
+
 end -- SaveBest()
 
 -- Called from 1 place  in FuseBestPositionEnd(),
@@ -2012,7 +2050,8 @@ function reFuseBestPosition(l_Score, l_SlotNumber)
 end
 
 -- Called from 2 places in RebuildManySegmentRanges()...
-function FuseBestPosition(l_SlotNumber, l_DoPreFunction, l_DoPostFunction, l_bShake_And_Wiggle_OnlySelectedSegments)
+function FuseBestPosition(l_SlotNumber, l_DoPreFunction, l_DoPostFunction,
+                          l_bShake_And_Wiggle_OnlySelectedSegments)
 
 	local l_PoseTotalScore = GetPoseTotalScore()
 	
@@ -2187,7 +2226,7 @@ end -- function ResetSegmentsAlreadyRebuiltTable()
 
 -- ...end of Segment Ranges Done module.
 
--- Start of Slots and Scores module...
+-- Start of ScoreParts and Scores module...
 -- Called from 1 place in GetPoseTotalScore()...
 function GetSegmentScore(l_pose)
 	if l_pose == nil then
@@ -2260,12 +2299,11 @@ function CalculateSegmentRangeScore(l_ScorePart_NameOrTable, l_StartSegment, l_E
 	local l_ScorePart_Score = 0
 	local l_ScorePart_Name = ""
 	if type(l_ScorePart_NameOrTable) == "table" then
-		for l_ScorePartTableIndex = 1, #l_ScorePart_NameOrTable do
+		for l_ScorePart_NameOrTableIndex = 1, #l_ScorePart_NameOrTable do
 			-- recursion...
-			-- Call back with each ScorePart in the ScorePartsTable...
-			l_ScorePart_Name = l_ScorePart_NameOrTable[l_ScorePartTableIndex]
-			l_ScorePart_Score = CalculateSegmentRangeScore(l_ScorePart_Name, l_StartSegment,
-				l_EndSegment, l_pose)
+			-- Call back with each ScorePart in the ScorePart_NameOrTable...
+			l_ScorePart_Name = l_ScorePart_NameOrTable[l_ScorePart_NameOrTableIndex]
+			l_ScorePart_Score = CalculateSegmentRangeScore(l_ScorePart_Name, l_StartSegment, l_EndSegment, l_pose)
 			l_ScoreTotal = l_ScoreTotal + l_ScorePart_Score
 		end
 	else
@@ -2487,7 +2525,7 @@ function InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges(l_RecursionLe
 
 end -- InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges(l_RecursionLevel)
 
--- Called from 1 place in Update_SlotScoresTable_ScorePart_Score_And_SlotScore_Fields() and
+-- Called from 1 place in Update_ScorePartScoresTable_ScorePart_Score_And_PoseTotalScore_Fields() and
 --             1 place in InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges()...
 function GetScorePart_Score(l_StartSegment, l_EndSegment, l_Attr)
 
@@ -2495,8 +2533,8 @@ function GetScorePart_Score(l_StartSegment, l_EndSegment, l_Attr)
 
 	if l_Attr == 'total' then
 
-		--l_PartScore = GetPoseTotalScore()
-    l_PartScore = g_BestScore
+		l_PartScore = GetPoseTotalScore()
+    -- nope, does not work...l_PartScore = g_BestScore
 
 	elseif l_Attr == nil then
 		--is only called from InitGlobalSegmentRangesTableWithWorstScoringSegmentRanges
@@ -2530,7 +2568,9 @@ end
 function PopulateGlobalSegmentScoresTableBasedOnUserSelectedScoreParts()
 	
 	if g_BestScore == g_LastSegmentScore then
-		return
+    -- If g_BestScore has not changed since the last time we set Segment Scores,
+    -- then we assume the segment scores also have not changed. So we leave them alone.
+		return 
 	end
 
 	local l_SegmentScore, l_ReferencePartScore, l_DensityPartScore
@@ -2542,7 +2582,7 @@ function PopulateGlobalSegmentScoresTableBasedOnUserSelectedScoreParts()
 
 		if g_bSegmentsToRebuildBooleanTable[l_SegmentIndex] == true then
 
-			if #g_UserSelectedScorePartsToWorkOnTable == 0 then
+			if #g_UserSelectedScorePartsToIncludeWhenCalculatingWorseScoringSegments_Table == 0 then
 				-- If no ScoreParts were selected by the user to work on, the default segment score is
 				-- SegmentEnergyScore - ReferencePartScore + weighted DensityPartScore
 				l_SegmentScore = current.GetSegmentEnergyScore(l_SegmentIndex)
@@ -2559,8 +2599,9 @@ function PopulateGlobalSegmentScoresTableBasedOnUserSelectedScoreParts()
 					l_SegmentScore = l_SegmentScore + g_DensityWeight * l_DensityPartScore
 				end
 			else
-				l_SegmentScore = CalculateSegmentRangeScore(g_UserSelectedScorePartsToWorkOnTable,
-					l_SegmentIndex, l_SegmentIndex)
+				l_SegmentScore = 
+          CalculateSegmentRangeScore(g_UserSelectedScorePartsToIncludeWhenCalculatingWorseScoringSegments_Table,
+                                     l_SegmentIndex, l_SegmentIndex)
 			end
 
 			-- Add (and/or update?) one row in the g_SegmentScoresTable...
@@ -2574,7 +2615,7 @@ function PopulateGlobalSegmentScoresTableBasedOnUserSelectedScoreParts()
 
 end -- PopulateGlobalSegmentScoresTableBasedOnUserSelectedScoreParts()
 
--- Called from 1 place in PopulateGlobalSlotsTable()...
+-- Called from 1 place in PopulateGlobalScorePartsTable()...
 function PopulateGlobalActiveScorePartsTable()
 
 	local l_ScorePart_NamesTable = puzzle.GetPuzzleSubscoreNames()
@@ -2665,37 +2706,37 @@ function PopulateGlobalActiveScorePartsTable()
 end -- PopulateGlobalActiveScorePartsTable()
 
 -- Called from 1 place in main()...
-function PopulateGlobalSlotsTable()
+function PopulateGlobalScorePartsTable()
 
 	-- Quick fix for failing first rebuild...
-	for l_SlotNumber = 3, 12 do
-		save.Quicksave(l_SlotNumber) -- Save
+	for l_ScorePart_Number = 3, 12 do
+		save.Quicksave(l_ScorePart_Number) -- Save
 	end
 
-	-- What's in Slots 1 and 2, I wonder?
-	-- Slot 3 always stores the best score
+	-- What's in ScoreParts (Slots) 1 and 2, I wonder?
+	-- ScorePart (Slot) 3 always stores the best score
 
-	-- g_SlotsTable={SlotNumber=1, ScorePart_Name=2, bIsActive=3, LongName=4}
-	g_SlotsTable = {
+	-- g_ScorePartsTable={ScorePart_Number=1, ScorePart_Name=2, bIsActive=3, LongName=4}
+	g_ScorePartsTable = {
 		{4, 'total', true, '4 (total)'},
 		{5, 'loctotal', true, '5 (loctotal)'}
 	}
-	local l_SlotNumber = 6 -- Note, slot numbers do not line up with ScorePart numbers.
+	local l_ScorePart_Number = 6 -- Note, there are more "slot" numbers than "ScorePart" numbers.
 	local l_ScorePart_Name
 	local l_bIsActive
 	local l_LongName
 
 	if g_bHasLigand == true then
-		-- l_SlotNumber = 6 -- we know, we know
+		-- l_ScorePart_Number = 6 -- we know, we know
 		l_ScorePart_Name = 'ligand'
 		l_bIsActive = true
-		l_LongName = l_SlotNumber .. " (" .. l_ScorePart_Name .. ")"
+		l_LongName = l_ScorePart_Number .. " (" .. l_ScorePart_Name .. ")"
 
-		g_SlotsTable[#g_SlotsTable + 1] = {l_SlotNumber, l_ScorePart_Name, l_bIsActive, l_LongName}
+		g_ScorePartsTable[#g_ScorePartsTable + 1] = {l_ScorePart_Number, l_ScorePart_Name, l_bIsActive, l_LongName}
 
-		print("\n  Note: Ligand scoring is active in slot 6.")
+		print("\n  Note: Ligand scoring is active in ScorePart (slot) 6.")
 
-		l_SlotNumber = l_SlotNumber + 1 -- now it's 7.
+		l_ScorePart_Number = l_ScorePart_Number + 1 -- now it's 7.
 	end
 
 	PopulateGlobalActiveScorePartsTable()
@@ -2707,185 +2748,226 @@ function PopulateGlobalSlotsTable()
 		-- Symmetry, Van del Waals, Density, Other...
 	--}
 
-	-- Continue to populate g_SlotsTable with one slot per active ScorePart...
+	-- Continue to populate g_ScorePartsTable with one row per ActiveScorePart...
 	for l_ActiveScorePartsTableIndex = 1, #g_ActiveScorePartsTable do
 
 		l_ScorePart_Name = g_ActiveScorePartsTable[l_ActiveScorePartsTableIndex]
 
-		-- Add one g_SlotTable record for each active ScorePart, except for the 'Reference' ScorePart...
+		-- Add one g_ScorePartsTable row for each ActiveScorePart, except for the 'Reference' ScorePart...
 		if l_ScorePart_Name ~= 'Reference' then -- NOT equal to!
 
 			l_bIsActive = true
-			l_LongName = l_SlotNumber .. " (" .. g_ActiveScorePartsTable[l_ActiveScorePartsTableIndex] .. ")"
+			l_LongName = l_ScorePart_Number .. " (" .. g_ActiveScorePartsTable[l_ActiveScorePartsTableIndex] .. ")"
 
-			-- Finally, add the new g_SlotTable record...
-			g_SlotsTable[#g_SlotsTable + 1] = {l_SlotNumber, l_ScorePart_Name, l_bIsActive, l_LongName}
+			-- Finally, add the new g_ScorePartsTable record...
+			g_ScorePartsTable[#g_ScorePartsTable + 1] = {l_ScorePart_Number, l_ScorePart_Name, l_bIsActive, l_LongName}
 
-			l_SlotNumber = l_SlotNumber + 1
+			l_ScorePart_Number = l_ScorePart_Number + 1
 		end
 	end
 
-end -- PopulateGlobalSlotsTable()
+end -- PopulateGlobalScorePartsTable()
 
 -- Called from 1 place in RebuildOneSegmentRangeManyTimes()...
-function PopulateGlobalSlotScoresTable()
+function PopulateGlobalScorePartScoresTable()
 
-	g_SlotScoresTable = {} -- reset it
+	g_ScorePartScoresTable = {} -- reset it
 
-	local l_SlotNumber
+	local l_ScorePart_Number
 	local l_ScorePart_Score = -9999999
-	local l_SlotScore = -9999999
-	local l_SlotList = ''
+	local l_PoseTotalScore = -9999999
+	local l_ScorePartsList = ''
 	local l_bToDo = false
 	local l_SegmentRangeRebuildAttempt = -1
 
-	local l_bSlotIsActive
+	local l_bScorePartIsActive
 
-	-- g_SlotScoresTable={SlotNumber=1, ScorePart_Score=2, SlotScore=3, SlotList=4, bToDo=5}
-	-- g_SlotsTable={SlotNumber=1, ScorePart_Name=2, bIsActive=3, LongName=4}
-	for l_SlotTableIndex = 1, #g_SlotsTable do
-		l_SlotNumber = g_SlotsTable[l_SlotTableIndex][st_SlotNumber]
-		l_bSlotIsActive = g_SlotsTable[l_SlotTableIndex][st_bIsActive]
+	-- g_ScorePartScoresTable={ScorePart_Number=1, ScorePart_Score=2, PoseTotalScore=3, ScorePartsList=4, bToDo=5}
+	-- g_ScorePartsTable={ScorePart_Number=1, ScorePart_Name=2, bIsActive=3, LongName=4}
+	for l_ScorePartsTableIndex = 1, #g_ScorePartsTable do
+		l_ScorePart_Number = g_ScorePartsTable[l_ScorePartsTableIndex][spt_ScorePart_Number]
+		l_bScorePartIsActive = g_ScorePartsTable[l_ScorePartsTableIndex][spt_bScorePartIsActive]
 
-		if l_bSlotIsActive == true then
-			g_SlotScoresTable[#g_SlotScoresTable + 1] =
-				{l_SlotNumber, l_ScorePart_Score, l_SlotScore, l_SlotList, l_bToDo}
+		if l_bScorePartIsActive == true then
+			g_ScorePartScoresTable[#g_ScorePartScoresTable + 1] =
+				{l_ScorePart_Number, l_ScorePart_Score, l_PoseTotalScore, l_ScorePartsList, l_bToDo}
 		end
 	end
 
-end -- PopulateGlobalSlotScoresTable()
+end -- PopulateGlobalScorePartScoresTable()
 
 -- Called from 1 place in RebuildOneSegmentRangeManyTimes() and 
 --             1 place in RebuildManySegmentRanges()...
-function Update_SlotScoresTable_ScorePart_Score_And_SlotScore_Fields(l_StartSegment, l_EndSegment)
-
-	--l_ActiveScorePartsScoreTable {
-		local aspst_SlotNumber = 1
+function Update_ScorePartScoresTable_ScorePart_Score_And_PoseTotalScore_Fields(l_StartSegment, l_EndSegment)
+  
+  -- Check for ScorePart improvements for this particular segment range rebuild attempt.
+  -- For each ScorePart that improves, associate the current pose of the protein to 
+  -- that ScorePart. After all the rebuild attempts (with their local shakes, wiggles
+  -- and mutates) for this segment range have completed, we will step through each of
+  -- the saved best ScorePart poses and regionally shake and wiggle them to see if we
+  -- can further improve our score...
+  
+  -- Example g_ScorePartsTable entries...
+  -- g_ScorePartsTable={
+  -- ScorePart_Number=1, ScorePart_Name=2, bIsActive=3, LongName=4
+  -- }
+	-- {{4, "total", true, "4 (total)"},         {5, "loctotal", true, "5 (loctotal)"},
+  --  {6, "ligand", true, "6 (ligand)"},       {7, "Clashing", true, "7 (Clashing)"},
+  --  {8, "Pairwise", true, "8 (Pairwise)"},   {9, "Packing", true, "9 (Packing)"},
+  --  {10, "Hiding", true, "10 (Hiding)"},     {11, "Bonding", true, "11 (Bonding)"},
+  --  {12, "Ideality", true, "12 (Ideality)"}, {13, "Backbone", true, "13 (Backbone)"},
+  --  {14, "Sidechain", true, "14 (Sidechain)"}}
+    
+	-- Example l_ActiveScorePartsScoreTable entries...
+  --l_ActiveScorePartsScoreTable={
+		local aspst_ScorePart_Number = 1
 		local aspst_ScorePart_Score = 2
 	--}
-
+  -- {{4, -6977.2286118734919},   {5, -12.456666312787226},
+  --  {6, 32.926353206790921},    {7, 0.78147661683925884},
+  --  {8, 0.85188072449657337},   {9, -0.013940290319947923},
+  --  {10, 1.4852902498961473},   {11, 0.54829136056463312},
+  --  {12, 0.089609316803455741}, {13, -0.59525161763844237},
+  --  {14, 0.32827495834027864}}
+  
+  -- Example g_ScorePartScoresTable entries...
+  -- g_ScorePartScoresTable={
+  -- ScorePart_Number=1, ScorePart_Score=2, PoseTotalScore=3, ScorePartsList=4, bToDo=5
+ --{{4,-2070.4815006125305,-2070.4815006125305,"",false},{5,4.2974272030802663,-8544.6292812514057,"",false},
+ -- {6,41.990611234103064,-5500.1149833617283,"",false},{7,0.45661696445231925,-4424.6808476751285,"",false},
+ -- {8,1.3090043250227277,-5500.1149833617283,"",false},{9,0.39072751016342933,-8544.6292812514057,"",false},
+ -- {10,1.3220077059699959,-4424.6808476751285,"",false},{11,0.38540636762751435,-4424.6808476751285,"",false},
+ -- {12,1.3755310009280133,-5500.1149833617283,"",false},{13,1.2065804745244151,-4424.6808476751285,"",false},
+ -- {14,0.20953376817391112,-5500.1149833617283,"",false}}
+  
 	-- Create a new list of active ScoreParts, then call
 	-- GetScorePart_Score() to get each ScorePart's scores...
-	local l_ActiveScorePartsScoreTable = {}  -- {1=SlotNumber, 2=ScorePart_Score}
-	local l_SlotNumber, l_ScoreType, l_bSlotIsActive, l_ScorePart_Score
+	local l_ActiveScorePartsScoreTable = {}  -- {1=ScorePart_Number, 2=ScorePart_Score}
+	local l_ScorePart_Number, l_ScoreType, l_bScorePartIsActive, l_ScorePart_Score
+  
+	-- g_ScorePartsTable={ScorePart_Number=1, ScorePart_Name=2, bIsActive=3, LongName=4}
+	for l_ScorePartsTableIndex = 1, #g_ScorePartsTable do
+		l_ScorePart_Number = g_ScorePartsTable[l_ScorePartsTableIndex][spt_ScorePart_Number]
+		l_ScorePart_Name = g_ScorePartsTable[l_ScorePartsTableIndex][spt_ScorePart_Name]
+		l_bScorePartIsActive = g_ScorePartsTable[l_ScorePartsTableIndex][spt_bScorePartIsActive]
 
-	-- g_SlotsTable={SlotNumber=1, ScorePart_Name=2, bIsActive=3, LongName=4}
-	for l_SlotsTableIndex = 1, #g_SlotsTable do
-		l_SlotNumber = g_SlotsTable[l_SlotsTableIndex][st_SlotNumber]
-		l_ScorePart_Name = g_SlotsTable[l_SlotsTableIndex][st_ScorePart_Name]
-		l_bSlotIsActive = g_SlotsTable[l_SlotsTableIndex][st_bIsActive]
-
-		if l_bSlotIsActive == true then
+		if l_bScorePartIsActive == true then
 
 			-- Here is where we are getting the actual score to save...
 			l_ScorePart_Score = GetScorePart_Score(l_StartSegment, l_EndSegment, l_ScorePart_Name)
-			l_ActiveScorePartsScoreTable[#l_ActiveScorePartsScoreTable + 1] = {l_SlotNumber, l_ScorePart_Score}
+			l_ActiveScorePartsScoreTable[#l_ActiveScorePartsScoreTable + 1] = {l_ScorePart_Number, l_ScorePart_Score}
 		end
 
 	end
-	--local l_PoseTotalScore = GetPoseTotalScore()
-  local l_PoseTotalScore = g_BestScore -- note: several g_SlotScoreTable rows will have the same value.
 
 	local l_NewScorePart_Score, l_OldScorePart_Score
+  
+	local l_PoseTotalScore = GetPoseTotalScore()
+  -- note 1: Several g_ScorePartScoresTable rows will have the same l_PoseTotalScore.
 
-	-- Update the global SlotScoresTable with each new ScorePart Score...
-	-- g_SlotScoresTable={SlotNumber=1, ScorePart_Score=2, SlotScore=3, SlotList=4, bToDo=5}
-	for l_TableIndex = 1, #g_SlotScoresTable do
+  -- Let's keep track of any ScorePart improvements. If there are improvements for
+  -- a particular ScorePart, save the protein's pose for later regional shaking and wiggling...
+	-- Update the global ScorePartScoresTable with each new ScorePart Score...
+	-- g_ScorePartScoresTable={ScorePart_Number=1, ScorePart_Score=2, PoseTotalScore=3, ScorePartsList=4, bToDo=5}
+	for l_TableIndex = 1, #g_ScorePartScoresTable do
 		l_NewScorePart_Score = l_ActiveScorePartsScoreTable[l_TableIndex][aspst_ScorePart_Score]
-		l_OldScorePart_Score = g_SlotScoresTable[l_TableIndex][sst_ScorePart_Score]
+		l_OldScorePart_Score = g_ScorePartScoresTable[l_TableIndex][spst_ScorePart_Score]
 
 		if l_NewScorePart_Score > l_OldScorePart_Score then
-			l_SlotNumber = l_ActiveScorePartsScoreTable[l_TableIndex][aspst_SlotNumber]
+			l_ScorePart_Number = l_ActiveScorePartsScoreTable[l_TableIndex][aspst_ScorePart_Number]
 
-			-- Save current solution (progress) to FoldIt. Not sure why. Perhaps to allow for
-			-- later finding most recent best solution?...
-			save.Quicksave(l_SlotNumber) -- Save
-			g_SlotScoresTable[l_TableIndex][sst_ScorePart_Score] = l_NewScorePart_Score
-			g_SlotScoresTable[l_TableIndex][sst_SlotScore] = l_PoseTotalScore
+			-- Save current solution (protein's pose) to FoldIt. After we finish rebuilding this
+      -- segment range several times, we will reload the successful poses (the rebuilds
+      -- that gained ScorePart points) and apply some regional shakes and wiggles to find more
+      -- gains...
+			g_ScorePartScoresTable[l_TableIndex][spst_ScorePart_Score] = l_NewScorePart_Score
+			g_ScorePartScoresTable[l_TableIndex][spst_PoseTotalScore] = l_PoseTotalScore
+			save.Quicksave(l_ScorePart_Number) -- Save
 		end
 	end
-	SaveBest()
+  local debug = 1
 
-end -- Update_SlotScoresTable_ScorePart_Score_And_SlotScore_Fields()
+end -- Update_ScorePartScoresTable_ScorePart_Score_And_PoseTotalScore_Fields()
 
 -- Called from 1 place in RebuildManySegmentRanges()...
-function Update_SlotScoresTable_ToDo_And_SlotList_Fields()
-	-- Create a list of all slot numbers, grouped by matching SlotScores values...
-	-- For each SlotScore row (or the first of a group of rows with matching SlotScore values),
-	-- set the bToDo flag to true...
+function Update_ScorePartScoresTable_ToDo_And_ScorePartsList_Fields()
+	-- Create a list of all ScoreParts, grouped by matching PoseTotalScore values...
+	-- For each ScorePartScoresTable row (or the first of a group of rows with matching 
+  -- PoseTotalScore values),  set the bToDo flag to true...
 
-	-- Create a list of all slot numbers, grouped by matching SlotScores values...
+	-- Create a list of all ScorePart_Numbers, grouped by matching PoseTotalScore values...
 	-- It will look something like this 1=5=7 2=3=9 4 6=8...
-	local l_OrganizedListOfAllSlotNumbers = ""
+	local l_OrganizedListOfAllScorePart_Numbers = ""
 
-	-- Create a table with one row per g_SlotScoreTable row, and set each row's
-	-- Done status to false. This way, when we look ahead in the g_SlotScoreTable for
-	-- Slots with a matching SlotScore value, we can set those rows to Done, so we can
-	-- skip them (because we will have already added them to the l_OrganizedListOfAllSlotNumbers)...
-	local l_SlotScoresDoneStatusTable = {}
-	for l_TableIndex = 1, #g_SlotScoresTable do
-		l_SlotScoresDoneStatusTable[l_TableIndex] = false
+	-- Create a table with one row per g_ScorePartScoresTable row, and set each row's
+	-- Done status to false. This way, when we look ahead in the g_ScorePartScoresTable for
+	-- ScoreParts with a matching PoseTotalScore value, we can set those rows to Done, so we can
+	-- skip them (because we will have already added them to the l_OrganizedListOfAllScorePart_Numbers)...
+	local l_ScorePartScoresDoneStatusTable = {}
+	for l_TableIndex = 1, #g_ScorePartScoresTable do
+		l_ScorePartScoresDoneStatusTable[l_TableIndex] = false
 	end
 
-	-- Go through every row in the g_SlotScoresTable and look for other row's
-	-- with a matching SlotScore value...
+	-- Go through every row in the g_ScorePartScoresTable and look for other row's
+	-- with a matching PoseTotalScore value...
 
-	-- g_SlotScoresTable={SlotNumber=1, ScorePart_Score=2, SlotScore=3, SlotList=4, bToDo=5}
-	for l_TableIndex = 1, #g_SlotScoresTable do
+	-- g_ScorePartScoresTable={ScorePart_Number=1, ScorePart_Score=2, PoseTotalScore=3, ScorePartsList=4, bToDo=5}
+	for l_TableIndex = 1, #g_ScorePartScoresTable do
 
-		-- Skip the Slots (SlotNumbers) which have already been accounted for in the inner loop below...
-		if l_SlotScoresDoneStatusTable[l_TableIndex] == false then
+		-- Skip the ScoreParts which have already been accounted for in the inner loop below...
+		if l_ScorePartScoresDoneStatusTable[l_TableIndex] == false then
 
-			local l_CurrentSlotNumber = g_SlotScoresTable[l_TableIndex][sst_SlotNumber]
-			local l_CurrentSlotScore = g_SlotScoresTable[l_TableIndex][sst_SlotScore]
+			local l_CurrentScorePart_Number = g_ScorePartScoresTable[l_TableIndex][spst_ScorePart_Number]
+			local l_CurrentPoseTotalScore = g_ScorePartScoresTable[l_TableIndex][spst_PoseTotalScore]
 
-			-- Start creating a List of SlotNumbers with matching SlotScore value...
-			-- Note: The l_ListOfSlotNumbersWithMatchingSlotScoreValue could end up with just a single
-			-- SlotNumber if no other rows have a matching SlotScore value. And this is okay...
-			local l_ListOfSlotNumbersWithMatchingSlotScoreValue = l_CurrentSlotNumber -- add first SlotNumber
+			-- Start creating a List of ScorePart_Numbers with matching PoseTotalScore values...
+			-- Note: The l_ListOfScorePart_NumbersWithMatchingPoseTotalScoreValue could end up with just a single
+			-- ScorePart_Number if no other rows have a matching PoseTotalScore value. And this is okay...
+			local l_ListOfScorePart_NumbersWithMatchingPoseTotalScoreValue = l_CurrentScorePart_Number
+      -- ...add first ScorePart_Number.
 
-			-- For each SlotScore row (or the first of a group of
-			-- matching SlotScores rows), set the bToDo flag to true...
-			g_SlotScoresTable[l_TableIndex][sst_bToDo] = true -- checked in RebuildManySegmentRanges()
+			-- For each ScorePartScoresTable row (or the first of a group of
+			-- matching ScorePartScores rows), set the bToDo flag to true...
+			g_ScorePartScoresTable[l_TableIndex][spst_bToDo] = true -- checked in RebuildManySegmentRanges()
 
-			-- Now, for each row in g_SlotScoresTable, loop through the table
+			-- Now, for each row in g_ScorePartScoresTable, loop through the table
 			-- a second time, (starting at the first row we have not yet look at),
-			-- to find other rows with a matching SlotScore value...
-			for l_PotentialMatchIndex = l_TableIndex + 1, #g_SlotScoresTable do
+			-- to find other rows with a matching PoseTotalScore value...
+			for l_PotentialMatchIndex = l_TableIndex + 1, #g_ScorePartScoresTable do
 
-				local l_SlotScore = g_SlotScoresTable[l_PotentialMatchIndex][sst_SlotScore]
-				local l_SlotNumber = g_SlotScoresTable[l_PotentialMatchIndex][sst_SlotNumber]
+				local l_PoseTotalScore = g_ScorePartScoresTable[l_PotentialMatchIndex][spst_PoseTotalScore]
+				local l_ScorePart_Number = g_ScorePartScoresTable[l_PotentialMatchIndex][spst_ScorePart_Number]
 
-				if l_SlotScore == l_CurrentSlotScore then
-					-- Ah ha, we found another SlotScore row with a matching SlotScore value...
+				if l_PoseTotalScore == l_CurrentPoseTotalScore then
+					-- Ah ha, we found another ScorePartScoresTable row with a matching PoseTotalScore value...
 
-					-- Let's add this slot number to the list of SlotNumbers with a matching SlotScore value...
-					l_ListOfSlotNumbersWithMatchingSlotScoreValue =
-						l_ListOfSlotNumbersWithMatchingSlotScoreValue .. "=" .. l_SlotNumber
+					-- Let's add this l_ScorePart_Number to the l_ListOfScorePart_NumbersWithMatchingPoseTotalScoreValue...
+					l_ListOfScorePart_NumbersWithMatchingPoseTotalScoreValue =
+						l_ListOfScorePart_NumbersWithMatchingPoseTotalScoreValue .. "=" .. l_ScorePart_Number
 
-					-- Since we will be adding this SlotNumber to the organized list of all
-					-- SlotNumbers below, will need to skip this SlotNumber in the outter loop;
+					-- Since we will be adding this ScorePart_Number to the organized list of all
+					-- ScorePart_Numbers below, will need to skip this ScorePart_Number in the outter loop;
 					-- otherwise, we would end up with duplicates in our organized list...
-					l_SlotScoresDoneStatusTable[l_PotentialMatchIndex] = true
+					l_ScorePartScoresDoneStatusTable[l_PotentialMatchIndex] = true
 
 				end
 			end
 
-			-- Not sure where we use this SlotList value yet...
-			-- SlotList examples: "4", "5=7=12", "[6=9]", "[8=11=13]"
-			g_SlotScoresTable[l_TableIndex][sst_SlotList] = l_ListOfSlotNumbersWithMatchingSlotScoreValue
+			-- ScorePartsList examples: "4", "5=7=12", "[6=9]", "[8=11=13]"
+			g_ScorePartScoresTable[l_TableIndex][spst_ScorePartsList] =
+        l_ListOfScorePart_NumbersWithMatchingPoseTotalScoreValue
 
-			l_OrganizedListOfAllSlotNumbers = l_OrganizedListOfAllSlotNumbers ..
-				"\n  SlotScore value: [" .. PrettyNumber(l_CurrentSlotScore) .. "]" ..
-				" SlotNumbers: [" .. l_ListOfSlotNumbersWithMatchingSlotScoreValue .."]"
+			l_OrganizedListOfAllScorePart_Numbers = l_OrganizedListOfAllScorePart_Numbers ..
+				"\n  PoseTotalScore value: [" .. PrettyNumber(l_CurrentPoseTotalScore) .. "]" ..
+				" ScorePart_Numbers: [" .. l_ListOfScorePart_NumbersWithMatchingPoseTotalScoreValue .."]"
 		end
 
 	end
 
-	print("\n  List of all SlotNumbers (grouped by matching SlotScore value):\n" ..
-		l_OrganizedListOfAllSlotNumbers)
+	print("\n  List of all ScoreParts (grouped by matching PoseTotalScore value):\n" ..
+		l_OrganizedListOfAllScorePart_Numbers)
 
-end -- Update_SlotScoresTable_ToDo_And_SlotList_Fields()
+end -- Update_ScorePartScoresTable_ToDo_And_ScorePartsList_Fields()
 
 -- Called from 1 place in main()...
 function CheckForLowStartingScore()
@@ -2912,9 +2994,9 @@ function CheckForLowStartingScore()
 	end
 
 	print("\nSince the starting score of " .. PrettyNumber(g_BestScore) ..
-         " is less than " .. l_LowScore .. " points, to speed things up, we are" ..
-         " adjusting the default options to:" ..
-        "'skip normal stabilization' and 'skip fusing best position'.")
+         " is less than " .. l_LowScore .. " points, to speed things up, we will" ..
+         " temporarily suspend normal stabilization and fusing best position, until" ..
+         " the score increases above " .. l_LowScore .. " points.")
        -- The More Options page only provides a way to set these variables to false,
        -- which would do nothing in this case. So the following statement is not true...
        -- " However, these defaults can be changed on the More options page.")
@@ -2922,7 +3004,7 @@ function CheckForLowStartingScore()
 	g_bPerformNormalStabilization = false
 
 end
--- ...end of Slots and Scores module.
+-- ...end of ScoreParts and Scores module.
 
 -- Start of Segment Ranges module...
 -- Called from 1 place, at the end of CleanUp()...
@@ -3274,7 +3356,7 @@ function DisplaySelectedOptions()
 	--	g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle .. "]")
 
 	if g_WiggleFactor > 1 then
-		print("  Wiggle factor :[" .. g_WiggleFactor .. "]")
+		print("  Wiggle factor: " .. g_WiggleFactor .. "")
 	end
 
 	if g_bConvertAllSegmentsToLoops == true then
@@ -3294,10 +3376,10 @@ function DisplaySelectedOptions()
     print("  Skip normal stabilization. Instead, perform local shake.")
 	end
 	if g_bFuseBestPosition == true then
-		print("  Enabled: Fuse best position of each segment range.")
+		print("  Fuse best position of each segment range is Enabled.")
 	end
 
-	-- print("  Number of full run cycles: [" .. g_NumberOfRunCycles .. "]")
+	-- print("  Number of full run cycles: " .. g_NumberOfRunCycles .. "")
 
 	if g_NumberOfSegmentsSkipping > 0 then
 		print("  Skip " .. g_NumberOfSegmentsSkipping .. " worst segment parts.")
@@ -3306,9 +3388,9 @@ function DisplaySelectedOptions()
 	if g_bAlwaysAllowRebuildingAlreadyRebuiltSegments == true then
 		print("  We will always allow rebuilding already rebuilt segments")
 	else
-		print("  We will only allow rebuilding already rebuilt segments " ..
-					 " if current rebuild points gained is more than: [" ..
-             g_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan .. "]")
+		print("  We will only allow rebuilding already rebuilt segments" ..
+					 " if current rebuild points gained is more than: " ..
+             g_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan .. "")
 	end
 
 end -- DisplaySelectedOptions()
@@ -3318,11 +3400,11 @@ function DisplayPuzzleProperties()
 
 	print("\nPuzzle properties...\n")
 
-	print("  Puzzle name: [" .. puzzle.GetName() .. "]")
-	print("  Puzzle ID: [" .. puzzle.GetPuzzleID() .. "]")
+	print("  Puzzle name: " .. puzzle.GetName() .. "")
+	print("  Puzzle ID: " .. puzzle.GetPuzzleID() .. "")
 	-- print("  Puzzle description: [" .. puzzle.GetDescription() .. "]")
 
-	print("  Protein has [" .. g_SegmentCountWithoutLigands .. "] segments.")
+	print("  Protein has " .. g_SegmentCountWithoutLigands .. " segments.")
 	
 	-- Find out if the puzzle has mutables
 	local l_MutablesList
@@ -3330,24 +3412,24 @@ function DisplayPuzzleProperties()
 	l_NumberOfMutableSegments = GetNumberOfMutableSegments()
 
 	if g_bProteinHasMutableSegments == true then
-		print("  Protein has [" .. l_NumberOfMutableSegments .. "] mutables segments.")
+  print("  Protein has " .. l_NumberOfMutableSegments .. " mutable segments.")
 	end
 
 	local l_HalfOfTheProteinSegments
 	l_HalfOfTheProteinSegments = g_SegmentCountWithoutLigands / 2
 	if l_NumberOfMutableSegments > l_HalfOfTheProteinSegments then
 		g_bFreeDesignPuzzle = true
-		print("  Since more than half of the protein's segments are mutable, [" ..
-			l_NumberOfMutableSegments .." of " .. g_SegmentCountWithoutLigands ..
-			"], this is considered a design puzzle.")
+		print("  Since more than half of the protein's segments are mutable, " ..
+             l_NumberOfMutableSegments .." of " .. g_SegmentCountWithoutLigands ..
+          ", this is considered a design puzzle.")
 	end
 
 	-- Find out if the puzzle has any disulfide bonds...
 	PopulateGlobalCysteinesTable()
 	if #g_CysteineSegmentsTable > 1 then
-		print("  Puzzle has [" .. #g_CysteineSegmentsTable .. "] cysteine segments.")
+		print("  Puzzle has " .. #g_CysteineSegmentsTable .. " cysteine segments.")
 		if g_OriginalNumberOfDisulfideBonds > 0 then
-			print("  Puzzle has [" .. g_OriginalNumberOfDisulfideBonds .. "] disulfide bonds.")
+			print("  Puzzle has " .. g_OriginalNumberOfDisulfideBonds .. " disulfide bonds.")
 			g_bUserWantsToKeepDisulfideBondsIntact = true -- so much for the user deciding...
 		end
 	end
@@ -3363,13 +3445,12 @@ function DisplayPuzzleProperties()
 	-- print("g_bHasDensity=[" .. tostring(g_bHasDensity) .. "]")
 
 	if g_bHasDensity == true then
-		print("  Puzzle has Density scores")
     -- How was this formula derived? What if g_BestScore is negative?
     if g_BestScore > 0 then
       g_DensityWeight = 
-        (g_BestScore - g_CurrentBonus - l_SegmentTotal - 8000) / l_DensityTotal
+        (g_BestScore - g_ComputedMaximumPotentialBonusPoints - l_SegmentTotal - 8000) / l_DensityTotal
     end
-		print("  The Density component has an extra weight of " .. PrettyNumber(g_DensityWeight))
+		print("  Puzzle has Density scores. The density weight = " .. PrettyNumber(g_DensityWeight) .. " points")
 	end
 
 	-- Check if this is likely a symmetry puzzle...
@@ -3383,7 +3464,7 @@ function DisplayPuzzleProperties()
 		end
 	end
 
-  print("  Starting score is " .. g_BestScore)
+  print("  Starting score: " .. PrettyNumber(g_BestScore))
 
 end -- DisplayPuzzleProperties()
 
@@ -3537,73 +3618,112 @@ function AskUserForMutateOptions()
 end -- AskUserForMutateOptions()
 
 -- Called from 1 place in bAskUserToSelectRebuildOptions()...
-function AskUserToSelectSlotsToWorkOn()
+function AskUserToSelectScorePartsToStabilize()
 
-	local l_title = "Select Slots to work on"
+	local l_title = "Select ScoreParts to Stabilize"
 
 	local l_Ask = dialog.CreateDialog(l_title)
-	l_Ask.l1 = dialog.AddLabel("Select slots:")
-	local l_SlotNumber, l_ScorePart_Name, l_bSlotActive
+	l_Ask.l1 = dialog.AddLabel("After rebuilding each segment range several times,")
+  l_Ask.l2 = dialog.AddLabel("select the best scoring poses of each of the below")
+  l_Ask.l3 = dialog.AddLabel("selected ScoreParts to Stabilize (shake and wiggle")
+  l_Ask.l4 = dialog.AddLabel("regionally) to look for more score gains:")
+	local l_ScorePart_Number, l_ScorePart_Name, l_bScorePartIsActive
 
-	-- g_SlotsTable={SlotNumber=1, ScorePart_Name=2, bIsActive=3, LongName=4}
-	for l_TableIndex = 1, #g_SlotsTable do
-		--g_SlotsTable  {1=slot_number, 2=name, 3=active, 4=long_name}
-		l_SlotNumber = g_SlotsTable[l_TableIndex][st_SlotNumber]
-		l_ScorePart_Name = g_SlotsTable[l_TableIndex][st_ScorePart_Name]
-		l_bSlotActive = g_SlotsTable[l_TableIndex][st_bIsActive]
+	-- g_ScorePartsTable={ScorePart_Number=1, ScorePart_Name=2, bIsActive=3, LongName=4}
+	for l_TableIndex = 1, #g_ScorePartsTable do
+		l_ScorePart_Number = g_ScorePartsTable[l_TableIndex][spt_ScorePart_Number]
+		l_ScorePart_Name = g_ScorePartsTable[l_TableIndex][spt_ScorePart_Name]
+		l_bScorePartIsActive = g_ScorePartsTable[l_TableIndex][spt_bScorePartIsActive]
+    
+    if l_ScorePart_Name == "loctotal" or
+       l_ScorePart_Name == 'Backbone' or
+       l_ScorePart_Name == 'Hiding' or
+       l_ScorePart_Name == 'Packing' then
+       l_ScorePart_Name = l_ScorePart_Name .. "*"
+    end    
+   
 		l_Ask[l_ScorePart_Name] =
-			dialog.AddCheckbox(l_SlotNumber .. " " .. l_ScorePart_Name, bSlotActive)
+			dialog.AddCheckbox(l_ScorePart_Number .. " " .. l_ScorePart_Name, l_bScorePartIsActive)
+    
 	end
+	l_Ask.l5 = dialog.AddLabel("* astericks indicates one of the top 4 scoring parts")
+
 	l_Ask.OK = dialog.AddButton("OK", 1)
 	l_Ask.Cancel = dialog.AddButton("Cancel", 0)
 
 	if dialog.Show(l_Ask) > 0 then
 
-		for l_TableIndex = 1, #g_SlotsTable do
-			l_ScorePart_Name = g_SlotsTable[l_TableIndex][st_ScorePart_Name]
-
-			-- Update the g_SlotsTable...
-			g_SlotsTable[l_TableIndex][st_bIsActive] = l_Ask[l_ScorePart_Name].value
+		for l_TableIndex = 1, #g_ScorePartsTable do
+			l_ScorePart_Name = g_ScorePartsTable[l_TableIndex][spt_ScorePart_Name]
+      if l_ScorePart_Name == "loctotal" or
+         l_ScorePart_Name == 'Backbone' or
+         l_ScorePart_Name == 'Hiding' or
+         l_ScorePart_Name == 'Packing' then
+         l_ScorePart_Name = l_ScorePart_Name .. "*"
+      end    
+      
+			-- Update the g_ScorePartsTable...
+			g_ScorePartsTable[l_TableIndex][spt_bScorePartIsActive] = l_Ask[l_ScorePart_Name].value
 		end
 
 	end
 
-end -- AskUserToSelectSlotsToWorkOn()
+end -- AskUserToSelectScorePartsToStabilize()
 
 -- Called from 1 place in bAskUserToSelectRebuildOptions()...
-function AskUserToSelectScorePartsToWorkOn()
+function AskUserToSelectScorePartsToIncludeWhenCalculatingWorseScoringSegments()
 
-	local l_title = "Select ScoreParts to work on"
+  local l_title = "Calculating worst scoring segments"
 
 	local l_Ask = dialog.CreateDialog(l_title)
-	l_Ask.l1 = dialog.AddLabel("Select ScoreParts:")
+	l_Ask.l1 = dialog.AddLabel("Select ScoreParts to include when calculating worst")
+	l_Ask.l2 = dialog.AddLabel("scoring segments:")
 	local l_ScorePart_Name
 
-	-- g_SlotsTable={SlotNumber=1, ScorePart_Name=2, bIsActive=3, LongName=4}
-	for l_TableIndex = 3, #g_SlotsTable do
-		l_ScorePart_Name = g_SlotsTable[l_TableIndex][st_ScorePart_Name]
+	-- g_ScorePartsTable={ScorePart_Number=1, ScorePart_Name=2, bIsActive=3, LongName=4}
+	for l_TableIndex = 3, #g_ScorePartsTable do
+		l_ScorePart_Name = g_ScorePartsTable[l_TableIndex][spt_ScorePart_Name]
+    
+     if l_ScorePart_Name == "loctotal" or
+       l_ScorePart_Name == 'Backbone' or
+       l_ScorePart_Name == 'Hiding' or
+       l_ScorePart_Name == 'Packing' then
+       l_ScorePart_Name = l_ScorePart_Name .. "*"
+    end    
+   
 		l_Ask[l_ScorePart_Name] = dialog.AddCheckbox(l_ScorePart_Name, false)
+    
 	end
+	l_Ask.l3 = dialog.AddLabel("* astericks indicates one of the top 4 scoring parts")
 
 	l_Ask.OK = dialog.AddButton("OK", 1)
 	l_Ask.Cancel = dialog.AddButton("Cancel", 0)
-	g_UserSelectedScorePartsToWorkOnTable = {}
+	g_UserSelectedScorePartsToIncludeWhenCalculatingWorseScoringSegments_Table = {}
 
 	if dialog.Show(l_Ask) > 0 then
 
-		for l_TableIndex = 3, #g_SlotsTable do
-			l_ScorePart_Name = g_SlotsTable[l_TableIndex][st_ScorePart_Name]
+		for l_TableIndex = 3, #g_ScorePartsTable do
+			l_ScorePart_Name = g_ScorePartsTable[l_TableIndex][spt_ScorePart_Name]
+      if l_ScorePart_Name == "loctotal" or
+         l_ScorePart_Name == 'Backbone' or
+         l_ScorePart_Name == 'Hiding' or
+         l_ScorePart_Name == 'Packing' then
+         l_ScorePart_Name = l_ScorePart_Name .. "*"
+      end    
 
 			if l_Ask[l_ScorePart_Name].value == true then
-				g_UserSelectedScorePartsToWorkOnTable[#g_UserSelectedScorePartsToWorkOnTable + 1] =
-					l_ScorePart_Name
+        local l_TableCount = #g_UserSelectedScorePartsToIncludeWhenCalculatingWorseScoringSegments_Table
+				g_UserSelectedScorePartsToIncludeWhenCalculatingWorseScoringSegments_Table[l_TableCount + 1] =
+					string.gsub(l_ScorePart_Name, "*", "")
+          
+          print("l_ScorePart_Name without asterisk:" .. l_ScorePart_Name)
 			end
 
 		end
 
 	end
 
-end -- AskUserToSelectScorePartsToWorkOn()
+end -- AskUserToSelectScorePartsToIncludeWhenCalculatingWorseScoringSegments()
 
 -- Called from 1 place in bAskUserToSelectRebuildOptions()...
 function AskUserToSelectSegmentsToRebuild()
@@ -3832,14 +3952,16 @@ function AskUserToSelectSegmentsToRebuild()
 				l_SelectionOptions.bIncludeLockedSegments = l_Ask.bIncludeLockedSegments.value
 			end
 			if l_SelectionOptions.bIncludeLockedSegments == false then -- never appears to be true.
-				l_SegmentRangesToRebuildTable = SegmentRangesMinus(l_SegmentRangesToRebuildTable, FindLockedSegmentRanges())
+				l_SegmentRangesToRebuildTable = 
+          SegmentRangesMinus(l_SegmentRangesToRebuildTable, FindLockedSegmentRanges())
 			end
 
 			if l_SelectionOptions.bAllowAskingToIncludeFrozenSegments == true then -- never appears to be true.
 				l_SelectionOptions.bIncludeFrozenSegments = l_Ask.bIncludeFrozenSegments.value
 			end
 			if l_SelectionOptions.bIncludeFrozenSegments == false then
-				l_SegmentRangesToRebuildTable = SegmentRangesMinus(l_SegmentRangesToRebuildTable, FindFrozenSegmentRanges())
+				l_SegmentRangesToRebuildTable = 
+          SegmentRangesMinus(l_SegmentRangesToRebuildTable, FindFrozenSegmentRanges())
 			end
 
 			if l_SelectionOptions.bAllowAskingToIncludeOnlySelectedSegments == true then
@@ -3886,7 +4008,7 @@ function bAskUserToSelectRebuildOptions()
 		local l_Ask = dialog.CreateDialog("Select Rebuild Options")
 
 		l_Ask.L1 =
-			dialog.AddLabel("Number of consecutive segments to rebuild")
+			dialog.AddLabel("Number of consecutive segments to rebuild:")
 		l_Ask.MinimunWorstSegmentOffset =
 			dialog.AddSlider("  Starting with:",
 				g_StartProcessingWithThisManyConsecutiveSegments, 1, 10, 0)
@@ -3903,37 +4025,41 @@ function bAskUserToSelectRebuildOptions()
 					g_SketchBookPuzzleMinimumGainForSave, 0, 100, 0)
 		end
 
-		l_Ask.L5 = dialog.AddLabel("Wiggle more when Clash Importance is maximum")
+		l_Ask.L5 = dialog.AddLabel("Wiggle more when Clash Importance is maximum:")
 		l_Ask.g_WiggleFactor = dialog.AddSlider("  WiggleFactor:", g_WiggleFactor, 1, 5, 0)
 
-		l_Ask.L6 = dialog.AddLabel("Slot selection, last choice counts")
-		l_Ask.bSelectAllSlotsToWorkOn = dialog.AddCheckbox("Work on all slots", g_bSelectAllSlotsToWorkOn)
-		l_Ask.bSelectMain4SlotsToWorkOn =
-			dialog.AddCheckbox("Select 4 main slots to work on (faster)", g_bSelectMain4SlotsToWorkOn)
-		l_Ask.bSelectSlotsToWorkOn = dialog.AddCheckbox("Select slots to work on", false)
+		l_Ask.L6 = dialog.AddLabel("Select ScoreParts to stabilize, last choice overrides:")
+		l_Ask.bSelectAllScorePartsToStabilize =
+      dialog.AddCheckbox("Select all ScoreParts", g_bSelectAllScorePartsToStabilize)
+		l_Ask.bSelectMain4ScorePartsToStabilize =
+			dialog.AddCheckbox("Select the top 4 scoring ScoreParts (faster)", g_bSelectMain4ScorePartsToStabilize)
+		l_Ask.bSelectScorePartsToStabilize =
+      dialog.AddCheckbox("Manully select ScoreParts from a list...", false)
 
-		l_Ask.L7 = dialog.AddLabel("Max number of full run cycles")
+		l_Ask.L7 = dialog.AddLabel("Maximum number of full cycles to run:")
 		l_Ask.NumberOfRunCycles = dialog.AddSlider("  Run cycles:", g_NumberOfRunCycles, 1, 40, 0)
 
-		l_Ask.L8 = dialog.AddLabel("Skip first X number of segments (crash resume)")
+		l_Ask.L8 = dialog.AddLabel("Skip the first X number of segments (crash resume)")
 		l_Ask.NumberOfSegmentsToSkip = dialog.AddSlider("  X segments:",
 				g_NumberOfSegmentsSkipping, 0, g_SegmentCountWithoutLigands, 0)
 
 		l_Ask.bUserWantsToSelectSegmentsToRebuild =
-			dialog.AddCheckbox("Select Segments to Rebuild", l_bUserWantsToSelectSegmentsToRebuild)
+			dialog.AddCheckbox("Select Segments to Rebuild...", l_bUserWantsToSelectSegmentsToRebuild)
 
 		if g_bProteinHasMutableSegments == true then
 			l_Ask.bUserWantsToSelectMutateOptions =
-				dialog.AddCheckbox("Select Mutate Options", l_bUserWantsToSelectMutateOptions)
+				dialog.AddCheckbox("Select Mutate Options...", l_bUserWantsToSelectMutateOptions)
 		end
 
 		l_Ask.bShake_And_Wiggle_OnlySelectedSegments =
 			dialog.AddCheckbox("Shake and Wiggle only selected segments",
 			g_bShake_And_Wiggle_OnlySelectedSegments)
 
-		l_Ask.bUserWantsToSelectScorePartsToWorkOn =
-			dialog.AddCheckbox("Select ScoreParts most needed to work on", false)
-
+		l_Ask.L81 = dialog.AddLabel("Select ScoreParts to include when calculating worst")
+		l_Ask.L82 = dialog.AddLabel("scoring segments:")
+		l_Ask.bUserWantsToSelectScorePartsToIncludeWhenCalculatingWorseScoringSegments =
+			dialog.AddCheckbox("Select worst scoring ScoreParts...", false)
+      
 		if g_OriginalNumberOfDisulfideBonds > 1 then
 			l_Ask.bUserWantsToKeepDisulfideBondsIntact = 
 				dialog.AddCheckbox("Keep sulfide bonds intact", g_bUserWantsToKeepDisulfideBondsIntact)
@@ -3975,87 +4101,88 @@ function bAskUserToSelectRebuildOptions()
 
 			g_WiggleFactor = l_Ask.g_WiggleFactor.value
 
-			local st_bIsActive = 3
+			local spt_bScorePartIsActive = 3
 
-			-- Check for changes to inluded/selected (activated) ScoreParts (slots)...
-			local l_bIncludedSlotsHasChanged = false
+			-- Check for changes to included/selected (activated) ScoreParts (slots)...
+			local l_bIncluded_WorstScoreParts_HasChanged = false
 
-			if g_bSelectAllSlotsToWorkOn ~= l_Ask.bSelectAllSlotsToWorkOn.value then
+			if g_bSelectAllScorePartsToStabilize ~= l_Ask.bSelectAllScorePartsToStabilize.value then
 
-				g_bSelectAllSlotsToWorkOn = l_Ask.bSelectAllSlotsToWorkOn.value
+				g_bSelectAllScorePartsToStabilize = l_Ask.bSelectAllScorePartsToStabilize.value
 
-				l_bIncludedSlotsHasChanged = true
+				l_bIncluded_WorstScoreParts_HasChanged = true
 
-				if g_bSelectAllSlotsToWorkOn == true then
-					-- User choose to include all ScoreParts (slots)...
+				if g_bSelectAllScorePartsToStabilize == true then
+					-- User chose to include all ScoreParts (slots)...
 
-					-- g_SlotsTable={SlotNumber=1, ScorePart_Name=2, bIsActive=3, LongName=4}
-					for l_SlotTableIndex=1, #g_SlotsTable do
-						-- Update the g_SlotsTable...
-						g_SlotsTable[l_SlotTableIndex][st_bIsActive] = true
+					-- g_ScorePartsTable={ScorePart_Number=1, ScorePart_Name=2, bIsActive=3, LongName=4}
+					for l_ScorePartsTableIndex=1, #g_ScorePartsTable do
+						-- Update the g_ScorePartsTable...
+						g_ScorePartsTable[l_ScorePartsTableIndex][spt_bScorePartIsActive] = true
 					end
 				end
 			end
 
-			if g_bSelectMain4SlotsToWorkOn ~= l_Ask.bSelectMain4SlotsToWorkOn.value then
+			if g_bSelectMain4ScorePartsToStabilize ~= l_Ask.bSelectMain4ScorePartsToStabilize.value then
 
-				g_bSelectMain4SlotsToWorkOn = l_Ask.bSelectMain4SlotsToWorkOn.value
+				g_bSelectMain4ScorePartsToStabilize = l_Ask.bSelectMain4ScorePartsToStabilize.value
 
-				l_bIncludedSlotsHasChanged = true
+				l_bIncluded_WorstScoreParts_HasChanged = true
 
-				if g_bSelectMain4SlotsToWorkOn == true then
+				if g_bSelectMain4ScorePartsToStabilize == true then
 
-					-- g_SlotsTable={SlotNumber=1, ScorePart_Name=2, bIsActive=3, LongName=4}
-					for l_SlotTableIndex = 1, #g_SlotsTable do
+					-- g_ScorePartsTable={ScorePart_Number=1, ScorePart_Name=2, bIsActive=3, LongName=4}
+					for l_ScorePartsTableIndex = 1, #g_ScorePartsTable do
 
-						local l_SlotNumber, l_ScorePart_Name
-						l_SlotNumber = g_SlotsTable[l_SlotTableIndex][st_SlotNumber]
-						l_ScorePart_Name = g_SlotsTable[l_SlotTableIndex][st_ScorePart_Name]
+						local l_ScorePart_Number, l_ScorePart_Name
+						l_ScorePart_Number = g_ScorePartsTable[l_ScorePartsTableIndex][spt_ScorePart_Number]
+						l_ScorePart_Name = g_ScorePartsTable[l_ScorePartsTableIndex][spt_ScorePart_Name]
 
-						-- Update the g_SlotsTable...
-						if l_SlotNumber == 4 or
+						-- Update the g_ScorePartsTable...
+						if l_ScorePart_Number == 4 or
 							 l_ScorePart_Name == 'Backbone' or
 							 l_ScorePart_Name == 'Hiding' or
 							 l_ScorePart_Name == 'Packing'
 							 then
-							g_SlotsTable[l_SlotTableIndex][st_bIsActive] = true
+							g_ScorePartsTable[l_ScorePartsTableIndex][spt_bScorePartIsActive] = true
 						else
-							g_SlotsTable[l_SlotTableIndex][st_bIsActive] = false
+							g_ScorePartsTable[l_ScorePartsTableIndex][spt_bScorePartIsActive] = false
 						end
 					end
 				end
 			end
 
-			if l_Ask.bSelectSlotsToWorkOn.value == true then
-				AskUserToSelectSlotsToWorkOn() -- perhaps return l_bIncludedSlotsHasChanged
-				l_bIncludedSlotsHasChanged = true
+			if l_Ask.bSelectScorePartsToStabilize.value == true then
+				AskUserToSelectScorePartsToStabilize() -- perhaps return l_bIncluded_WorstScoreParts_HasChanged
+				l_bIncluded_WorstScoreParts_HasChanged = true
 				if l_AskResult == 1 then -- 1 = OK
 					l_AskResult = 4 -- 4 = Go back to top menu
 				end
 			end
 
-			if l_Ask.bUserWantsToSelectScorePartsToWorkOn.value == true then
-				AskUserToSelectScorePartsToWorkOn() -- perhaps return l_bIncludedSlotsHasChanged
-				l_bIncludedSlotsHasChanged = true
+			if l_Ask.bUserWantsToSelectScorePartsToIncludeWhenCalculatingWorseScoringSegments.value == true then
+        
+				AskUserToSelectScorePartsToIncludeWhenCalculatingWorseScoringSegments()
+        -- ...perhaps should return l_bIncluded_WorstScoreParts_HasChanged.
+				l_bIncluded_WorstScoreParts_HasChanged = true
 				if l_AskResult == 1 then -- 1 = OK
 					l_AskResult = 4 -- 4 = Go back to top menu
 				end
 			end
 
-			if l_bIncludedSlotsHasChanged == true then
+			if l_bIncluded_WorstScoreParts_HasChanged == true then
 
-				-- Display which slots are active...
-				print("\nIncluded ScoreParts has changed...")
+				print("\nUser has selected the following ScoreParts to include when calculating worse scoring segments:")
 
-				local l_bSlotIsActive, l_SlotNumber, l_ScorePart_Name
+				local l_bScorePartIsActive, l_ScorePart_Number, l_ScorePart_Name
 
-				-- g_SlotsTable={SlotNumber=1, ScorePart_Name=2, bIsActive=3, LongName=4}
-				for l_SlotTableIndex = 1, #g_SlotsTable do
-					l_SlotNumber = g_SlotsTable[l_SlotTableIndex][st_SlotNumber]
-					l_ScorePart_Name = g_SlotsTable[l_SlotTableIndex][st_ScorePart_Name]
-					l_bSlotIsActive = g_SlotsTable[l_SlotTableIndex][st_bIsActive]
-					if l_bSlotIsActive == true then
-						print("  Active slot ".. l_SlotNumber .." (".. l_ScorePart_Name .. ")")
+				-- g_ScorePartsTable={ScorePart_Number=1, ScorePart_Name=2, bIsActive=3, LongName=4}
+				for l_ScorePartsTableIndex = 1, #g_ScorePartsTable do
+					l_ScorePart_Number = g_ScorePartsTable[l_ScorePartsTableIndex][spt_ScorePart_Number]
+					l_ScorePart_Name = g_ScorePartsTable[l_ScorePartsTableIndex][spt_ScorePart_Name]
+					l_bScorePartIsActive = g_ScorePartsTable[l_ScorePartsTableIndex][spt_bScorePartIsActive]
+					if l_bScorePartIsActive == true then
+						print("  Active ScorePart ".. l_ScorePart_Number .." (".. l_ScorePart_Name .. ")")
 					end
 				end
 
@@ -4065,8 +4192,8 @@ function bAskUserToSelectRebuildOptions()
 
 			if l_bUserWantsToSelectSegmentsToRebuild == true then
 
-				g_bSelectMain4SlotsToWorkOn = false
-				g_bSelectAllSlotsToWorkOn = false
+				g_bSelectMain4ScorePartsToStabilize = false
+				g_bSelectAllScorePartsToStabilize = false
 
 				-- l_SegmentRangesToRebuildTable={StartSegment=1, EndSegment=2}
 				local l_SegmentRangesToRebuildTable = {}
@@ -4180,8 +4307,8 @@ function DisplaySegmentRanges()
     end
     
 		l_ListOfSegmentRanges = l_ListOfSegmentRanges ..
-						g_SegmentRangesToRebuildTable[l_SegmentIndex][srt_StartSegment] .. "-" ..
-						g_SegmentRangesToRebuildTable[l_SegmentIndex][srt_EndSegment]
+						g_SegmentRangesToRebuildTable[l_SegmentIndex][srtrt_StartSegment] .. "-" ..
+						g_SegmentRangesToRebuildTable[l_SegmentIndex][srtrt_EndSegment]
 
 		--if l_SegmentIndex ~= l_MaxNumberOfSegmentRangesToDisplay then
 		--	-- If we are not at the end of the table, add a space...
@@ -4201,9 +4328,9 @@ function RebuildSelectedSegments()
 
 	local l_MaxIterations = 3
 
-	local l_FunctionStartPoseTotalScore = g_BestScore
-	local l_CheckPoseTotalScore = 0
-	local l_CurrentIteration = 0
+  local l_BestScoreBeforeRebuild = 0
+  local l_PointsGainedFromRebuild = 0
+  
   local l_NumberOfTimesBondsHaveBroken = 0
   local l_bBrokenBond = false
   
@@ -4214,25 +4341,31 @@ function RebuildSelectedSegments()
 	RememberSolutionWithDisulfideBondsIntact()
 
   for l_CurrentIteration = 1, l_MaxIterations do
-
+   
+    l_BestScoreBeforeRebuild = g_BestScore
+   
 		-- This is what you are looking for...
 		-- This is what you are looking for...
+    
 		structure.RebuildSelected(l_CurrentIteration)
+    
 		-- This is what you are looking for...
 		-- This is what you are looking for...
-	
-		l_CheckPoseTotalScore = GetPoseTotalScore()
-		if l_CheckPoseTotalScore ~= l_FunctionStartPoseTotalScore then
+	 
+    l_PointsGainedFromRebuild = GetPoseTotalScore() - l_BestScoreBeforeRebuild
+   
+    if l_PointsGainedFromRebuild > -20 then -- not sure what value to place here yet, if any.
       
       l_bBrokenBond = bOneOrMoreDisulfideBondsHaveBroken()
-    
+      
 			if l_bBrokenBond == true then
-        -- We never check the value of l_NumberOfTimesBondsHaveBroken, so...
-        -- the next line just provides a good place to set a breakpoint in the debuugger...
+        
+        -- We never check the value of l_NumberOfTimesBondsHaveBroken, so the next
+        -- line just provides a good place to set a breakpoint in the debuugger...
 				l_NumberOfTimesBondsHaveBroken = l_NumberOfTimesBondsHaveBroken + 1 
 				-- Try up to 3 times to succeed without breaking disulfide bonds...
 				--if l_NumberOfTimesBondsHaveBroken >= 3 then
-        --  break <-- this is already accounted for at the bottom of this "repeat...until" loop.
+        --  break <-- this is already accounted for with the for loop.
         --end
 			else
 				-- Yay, our score changed. I hope it increased instead of decreased.
@@ -4242,43 +4375,35 @@ function RebuildSelectedSegments()
         
 			end -- if bOneOrMoreDisulfideBondsHaveBroken() == true then
       
-		end -- if l_CheckPoseTotalScore ~= l_FunctionStartPoseTotalScore then
+		end -- if l_PointsGainedFromRebuild > -20 then 
     
   end -- for l_CurrentIteration = 1, l_MaxIterations do
+
+	CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
 
 	if g_bDisableBandsDuringRebuild == true then
 		band.EnableAll()
 	end
-
-	CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
-
-	local l_bDoneStatus = false
-	l_CheckPoseTotalScore = GetPoseTotalScore()
-	-- No! local l_ScoreDiff = l_CheckPoseTotalScore - l_FunctionStartPoseTotalScore
-	local l_ScoreDiff = math.abs(l_CheckPoseTotalScore - l_FunctionStartPoseTotalScore)
-	if l_ScoreDiff > 0.0001 then
-		-- The rebuild completed successfully, but we don't know if the score improved yet...
-    -- Even if the score decreased a little, there still might be a net gain after a shake and a wiggle...
-		l_bDoneStatus = true    
-	end
   
-	return l_bDoneStatus
+	return
 
 end -- RebuildSelectedSegments()
 
 -- Called from 1 place in RebuildManySegmentRanges()..
 function RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment)
 
-	PopulateGlobalSlotScoresTable()
+	PopulateGlobalScorePartScoresTable()
 
 	if l_StartSegment > l_EndSegment then
 		l_StartSegment, l_EndSegment = l_EndSegment, l_StartSegment
 	end --switch around if needed
 
-	local l_bRebuildSucceeded = true -- let's be optimistic
-	local l_NumberOfSuccessfulSegmentRangeRebuildAttempts = 0
-	local l_NumberOfFailedSegmentRangeRebuildAttempts = 0
-	local l_MaxFailedAttemptsAllowed = 10
+  local l_BestScoreBeforeRebuild = 0
+  local l_PointsGainedFromRebuild = 0
+  local l_PointsGainedFromOneRebuildAttempt = 0
+  local l_TotalPointsGainedFromAllRebuildAttempts = 0
+  local l_MaxStrikesInARow = 3
+  local l_StrikesInARow = 0
 	
 	local l_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle = 
 		g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle
@@ -4287,11 +4412,13 @@ function RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment)
 
 	for l_SegmentRangeRebuildAttempt = 1, l_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle do
 		-- Default g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle = 10
-
+   
+    l_PointsGainedFromOneRebuildAttempt = 0
+   
 		if g_bSketchBookPuzzle == true then 
 			save.Quickload(3)
 		end       
-
+   
 		selection.DeselectAll()
 		SetClashImportance(g_RebuildClashImportance)
 		selection.SelectRange(l_StartSegment, l_EndSegment)
@@ -4304,28 +4431,36 @@ function RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment)
 			" rebuild " .. l_SegmentRangeRebuildAttempt .. " of" .. 
 			" " .. g_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle .. "," ..
 			" Score: " .. PrettyNumber(g_BestScore) .. "")
-
+    
+    l_BestScoreBeforeRebuild = g_BestScore
+    
 		-- Here's what you are looking for...
 		-- Here's what you are looking for...
-		l_bRebuildSucceeded = RebuildSelectedSegments()
+    
+		RebuildSelectedSegments()
+    
 		-- Here's what you are looking for...
 		-- Here's what you are looking for...
-
-		SaveBest() -- Even if l_bRebuildSucceeded == false we still need to restore the best saved.
+    
+		SaveBest() -- updates g_BestScore if the score improved.
 		
-		if l_bRebuildSucceeded == true then
-			
-			l_NumberOfSuccessfulSegmentRangeRebuildAttempts =
-      l_NumberOfSuccessfulSegmentRangeRebuildAttempts + 1
-		
+    l_PointsGainedFromRebuild = g_BestScore - l_BestScoreBeforeRebuild
+    
+    if l_PointsGainedFromRebuild > -20 and  -- not sure what value to place here yet, if any.
+       l_PointsGainedFromRebuild ~= 0 then  -- if l_PointsGainedFromRebuild == 0 then we assume nothing changed.
+      
 			RememberSolutionWithDisulfideBondsIntact()
 			
+      local l_BestScoreBeforeLocalShakeWiggleAndMutate = 0
+      local l_PointsGainedFromLocalShakeWiggleAndMutate = 0
 			local l_Iterations = 1
 			local l_bShake_And_Wiggle_OnlySelectedSegments = true
-
+      
+      l_BestScoreBeforeLocalShakeWiggleAndMutate = g_BestScore
+     
 			if g_bShake_And_Wiggle_WithSideChainsAndBackbone_WithSelectedAndNearbySegments == true then
 				-- Very slow...
-
+       
 				local l_SphereRadius = 9 -- Angstroms
 				SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
 				
@@ -4341,61 +4476,83 @@ function RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment)
 				ShakeAndOrWiggle("WiggleBackbone", l_Iterations, l_bShake_And_Wiggle_OnlySelectedSegments)
 				
 				SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
-
+       
 			elseif g_bShake_And_Wiggle_WithSelectedSegments == true then
 				-- Not too slow...
-
+        
 				SetClashImportance(g_ShakeClashImportance)
 				
 				l_Iterations = 1
 				ShakeAndOrWiggle("ShakeAndWiggle", l_Iterations, l_bShake_And_Wiggle_OnlySelectedSegments)
 				
 			end -- if g_bShake_And_Wiggle_WithSideChainsAndBackbone_WithSelectedAndNearbySegments == true then
-
+     
 			CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
-
+     
 			if g_bMutateAfterRebuild == true then
 				-- Temporarily save the current solution, so we can see if a mutate will improve
-				-- our slot scores (why? why would we revert these changes after updating the slot scores?)...
+				-- our ScorePart scores...
 				SaveCurrentSolutionToQuickSaveStack()
 				MutateOneSegmentRange(l_StartSegment, l_EndSegment)
 			end
-
-			Update_SlotScoresTable_ScorePart_Score_And_SlotScore_Fields(l_StartSegment, l_EndSegment)
-       -- ...calls SaveBest(), which updates g_BestScore
-
+     
+   		SaveBest() -- updates g_BestScore if the score improved.
+     
+      -- Next, check for ScorePart improvements for this particular rebuild attempt.
+      -- For each ScorePart that improves, associate the current pose of the protein to 
+      -- that ScorePart. After all the rebuild attempts (with their local shakes, wiggles
+      -- and mutates) for this segment range, we will step through each of the saved best
+      -- ScorePart poses and regionally shake and wiggle them to see if we can further 
+      -- improve our score...
+			Update_ScorePartScoresTable_ScorePart_Score_And_PoseTotalScore_Fields(l_StartSegment, l_EndSegment)
+     
 			if g_bMutateAfterRebuild == true then
 				-- Return to the last saved solution before peforming the mutate. 
         -- Why? Why not keep the mutate changes? Shouldn't we at least check
         -- if the score improved, before reverting the change? I'm so confused...
 				LoadLastSavedSolutionFromQuickSaveStack()
 			end
-			
-		else  
       
-      -- Rebuild failed...
+      l_PointsGainedFromLocalShakeWiggleAndMutate = g_BestScore - l_BestScoreBeforeLocalShakeWiggleAndMutate
       
-			l_NumberOfFailedSegmentRangeRebuildAttempts = l_NumberOfFailedSegmentRangeRebuildAttempts + 1
-			if l_NumberOfFailedSegmentRangeRebuildAttempts >= l_MaxFailedAttemptsAllowed then
-				--nah... break
-			end
+      l_PointsGainedFromOneRebuildAttempt = l_PointsGainedFromRebuild +
+        l_PointsGainedFromLocalShakeWiggleAndMutate
       
-		end -- if l_bRebuildSucceeded == true then
+      if l_PointsGainedFromOneRebuildAttempt > 0 then
+        l_TotalPointsGainedFromAllRebuildAttempts = l_TotalPointsGainedFromAllRebuildAttempts +
+          l_PointsGainedFromOneRebuildAttempt
+   			l_StrikesInARow = 0 -- reset the StrikesInARow counter.
+      else
+        l_StrikesInARow = l_StrikesInARow + 1
+      end      
+      
+    else      
+      -- This rebuild did not gain us any more points. The rebuild either did not change 
+      -- our score or the rebuild lost more than 20 points. If the loss were less than 20 
+      -- points, then we could possibly regain those points with a shake and wiggle. But, 
+      -- a loss of more than 20 points would be difficult, if not impossible, to recover
+      -- from. If we fail to gain enough points 3 times in a row, we will stop trying with
+      -- this segment range, and move on to the next segment range...
+      l_StrikesInARow = l_StrikesInARow + 1
+     
+    end -- if l_PointsGainedFromRebuild > -20 then 
     
+    -- If we fail to gain enough points 3 times in a row, we will stop trying with this 
+    -- segment range, and move on to the next segment range...
+    if l_StrikesInARow >= l_MaxStrikesInARow then -- 3
+      print("\n  This segment range has failed to gain points after " .. l_MaxStrikesInARow .. 
+               " rebuilds in a row; therefore," ..
+            "\n  we will skip the following " .. 
+              l_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle - l_SegmentRangeRebuildAttempt ..
+              " rebuilds for this segment range and move on to the next segment range...")        
+      break
+    end   
+   
 	end -- for l_SegmentRangeRebuildAttempt = 1, l_NumberOf_RebuildOneSegmentRange_AttemptsPerRunCycle do
 	
-	--local l_SegmentRangeRebuildAttempts = l_NumberOfSuccessfulSegmentRangeRebuildAttempts +
-	--	l_NumberOfFailedSegmentRangeRebuildAttempts
-	--local l_s = "s"
-	--if l_NumberOfSuccessfulSegmentRangeRebuildAttempts == 1 then
-	--	l_s = ""
-	--end
-	--print("  " .. l_NumberOfSuccessfulSegmentRangeRebuildAttempts .. 
-	--  " of " .. l_SegmentRangeRebuildAttempts .. " successful attempts.")
-
 	SetClashImportance(1)
 
-	return l_NumberOfSuccessfulSegmentRangeRebuildAttempts
+	return l_TotalPointsGainedFromAllRebuildAttempts
 
 end -- RebuildOneSegmentRangeManyTimes()
 
@@ -4409,10 +4566,10 @@ function RebuildManySegmentRanges()
 	local l_StartSegmentRangePoseTotalScore = 0
 	local l_StartSegment = 0
 	local l_EndSegment = 0
-	local l_CurrentHighSlotNumber = 0
+	local l_CurrentHighScorePart_Number = 0
 	local l_DisplayGainFromThis = "" -- to report where gains came from
 	local l_CurrentHighScore = 0
-	local l_NumberOfSuccessfulSegmentRangeRebuildAttempts = 0
+	local l_PointsGainedFrom_RebuildOneSegmentRangeManyTimes = 0
 	local l_RecentBestScore = 0
 
 	if g_bConvertAllSegmentsToLoops == true then
@@ -4426,8 +4583,8 @@ function RebuildManySegmentRanges()
 	-- After laboriously determining which segment ranges to work on, we now finally work on them...
 
 	-- g_SegmentRangesToRebuildTable={StartSegment=1, EndSegment=2}
-	-- g_SlotsTable={SlotNumber=1, ScorePart_Name=2, bIsActive=3, LongName=4}
-	-- g_SlotScoresTable={SlotNumber=1, ScorePart_Score=2, SlotScore=3, SlotList=4, bToDo=5}
+	-- g_ScorePartsTable={ScorePart_Number=1, ScorePart_Name=2, bIsActive=3, LongName=4}
+	-- g_ScorePartScoresTable={ScorePart_Number=1, ScorePart_Score=2, PoseTotalScore=3, ScorePartsList=4, bToDo=5}
 	for l_SegmentRangeIndex = 1, #g_SegmentRangesToRebuildTable do
 
 		g_SegmentRangeIndex = l_SegmentRangeIndex
@@ -4436,9 +4593,9 @@ function RebuildManySegmentRanges()
     l_StartSegmentRangePoseTotalScore = g_BestScore
 
 		-- g_SegmentRangesToRebuildTable={StartSegment=1, EndSegment=2}
-		l_StartSegment = g_SegmentRangesToRebuildTable[l_SegmentRangeIndex][srt_StartSegment]
-		l_EndSegment = g_SegmentRangesToRebuildTable[l_SegmentRangeIndex][srt_EndSegment]
-		l_CurrentHighSlotNumber = 0
+		l_StartSegment = g_SegmentRangesToRebuildTable[l_SegmentRangeIndex][srtrt_StartSegment]
+		l_EndSegment = g_SegmentRangesToRebuildTable[l_SegmentRangeIndex][srtrt_EndSegment]
+		l_CurrentHighScorePart_Number = 0
 		l_DisplayGainFromThis = "" -- to report where gains came from
 		l_CurrentHighScore = -99999999
 		
@@ -4462,12 +4619,12 @@ function RebuildManySegmentRanges()
 
 			-- Here's what you are looking for!!!
 			-- Here's what you are looking for!!!
-			l_NumberOfSuccessfulSegmentRangeRebuildAttempts =
+			l_PointsGainedFrom_RebuildOneSegmentRangeManyTimes =
 				RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment)
 			-- Here's what you are looking for!!!
 			-- Here's what you are looking for!!!
 
-			if l_NumberOfSuccessfulSegmentRangeRebuildAttempts >= 1 then
+			if l_PointsGainedFrom_RebuildOneSegmentRangeManyTimes >= 0 then
 			
 				if g_bSketchBookPuzzle == false then
 
@@ -4517,36 +4674,43 @@ function RebuildManySegmentRanges()
                        " Old Best Score: " .. PrettyNumber(g_BestScore) .. "," ..
                        " gain: " .. PrettyNumber(l_CheckPoseTotalScore - g_BestScore) .. "," ..
                        " new best score: " .. PrettyNumber(l_CheckPoseTotalScore))
-							
-							Update_SlotScoresTable_ScorePart_Score_And_SlotScore_Fields(l_StartSegment,
-								l_EndSegment, 0) -- ...calls SaveBest(), which updates g_BestScore
-
+                     
+							SaveBest() -- updates g_BestScore if the score improved.
+							Update_ScorePartScoresTable_ScorePart_Score_And_PoseTotalScore_Fields(l_StartSegment,
+                l_EndSegment, 0)
 							
 						end -- if l_CheckPoseTotalScore > g_BestScore + 0.00001 then
 					end -- if l_RecentBestScore > g_BestScore then 
 				end -- if g_bSketchBookPuzzle == false then
-
-				Update_SlotScoresTable_ToDo_And_SlotList_Fields()
-
-				-- Process each row in the g_SlotScoresTable...
-
+        
+				Update_ScorePartScoresTable_ToDo_And_ScorePartsList_Fields()
+        
         print(" ") -- add blank line
         
-				--g_SlotScoresTable=
-					--  {SlotNumber=1, ScorePart_Score=2, SlotScore=3, SlotList=4, bToDo=5}
-				for l_SlotScoresTableIndex = 1, #g_SlotScoresTable do
-
-					if g_SlotScoresTable[l_SlotScoresTableIndex][sst_bToDo] == true then
-
-						local l_SlotNumber = g_SlotScoresTable[l_SlotScoresTableIndex][sst_SlotNumber]
-						save.Quickload(l_SlotNumber) -- Load
-
-						local l_SphereRadius = 12
-						SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
-						-- local shake after rebuild/remix
-
+        -- Let's see if we can gain more points by 
+        -- Shaking and Wiggling nearby segments...
+				local l_SphereRadius = 12
+				SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
+        
+        -- For each of the above rebuild attempts that successfully gained points, we 
+        -- saved the protein's pose (stucture) just after gaining the points. Now, we 
+        -- will step through each one of those poses for this segment range and see if 
+        -- regional shaking and wiggling will futher improve their score...
+        -- Process each row in the g_ScorePartScoresTable...
+        
+				--g_ScorePartScoresTable=
+        --  {ScorePart_Number=1, ScorePart_Score=2, PoseTotalScore=3, ScorePartsList=4, bToDo=5}
+				for l_ScorePartScoresTableIndex = 1, #g_ScorePartScoresTable do
+          
+					if g_ScorePartScoresTable[l_ScorePartScoresTableIndex][spst_bToDo] == true then
+            
+						local l_ScorePart_Number = g_ScorePartScoresTable[l_ScorePartScoresTableIndex][spst_ScorePart_Number]
+            
+            -- Reload the saved protein pose (protein shape)...
+						save.Quickload(l_ScorePart_Number) 
+            
 						RememberSolutionWithDisulfideBondsIntact()
-
+            
 						if g_bPerformNormalStabilization == true then
 							
 							PerformNormalStabilizationOnSegmentRange(l_StartSegment, l_EndSegment)
@@ -4565,50 +4729,53 @@ function RebuildManySegmentRanges()
 						end
 						
 						CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
-
+            
 						if g_bMutateAfterNormalStabilization == true then
 							MutateOneSegmentRange(l_StartSegment, l_EndSegment)
 						end
-
-						save.Quicksave(l_SlotNumber) -- Save
-
+            
+						save.Quicksave(l_ScorePart_Number) -- Save
+            
 						l_CheckPoseTotalScore = GetPoseTotalScore()
 						if l_CheckPoseTotalScore > l_CurrentHighScore then
-
-							l_CurrentHighSlotNumber = l_SlotNumber
+              
+              -- The current ScorePart gained us some points...
+              -- Let's keep track of which ScoreParts these score improvements came from...
+							l_CurrentHighScorePart_Number = l_ScorePart_Number
 							
-							 -- SlotList examples: "4", "5=7=12", "[6=9]", "[8=11=13]"
-							local l_SlotList = g_SlotScoresTable[l_SlotScoresTableIndex][sst_SlotList]
+							-- ScorePartsList examples: "4", "5=7=12", "[6=9]", "[8=11=13]"
+							local l_ScorePartsList = g_ScorePartScoresTable[l_ScorePartScoresTableIndex][spst_ScorePartsList]
 							
               if l_DisplayGainFromThis ~= "" then
                 l_DisplayGainFromThis = l_DisplayGainFromThis .. ", " 
               end
-							l_DisplayGainFromThis = l_DisplayGainFromThis .. l_SlotList
+							l_DisplayGainFromThis = l_DisplayGainFromThis .. l_ScorePartsList
 								
 							l_CurrentHighScore = l_CheckPoseTotalScore
-
+              
 						end
 						SaveBest()
-
-						-- g_SlotsTable  {1=SlotNumber, 2=ScorePart_Name, 3=bIsActive, 4=LongName}
+            
+						-- g_ScorePartsTable  {1=ScorePart_Number, 2=ScorePart_Name, 3=bIsActive, 4=LongName}
 						print("  Stabilized score: [" .. PrettyNumber(l_CheckPoseTotalScore) .. "]" ..
-							" from slot " .. g_SlotsTable[l_SlotNumber - 3][st_LongName])
-
-					end -- if g_SlotScoresTable[l_SlotScoresTableIndex][sst_bToDo] == true then
-
-				end -- for l_SlotScoresTableIndex = 1, #g_SlotScoresTable do
-
-				save.Quickload(l_CurrentHighSlotNumber) -- Load
-
+                  " from ScorePart " .. g_ScorePartsTable[l_ScorePart_Number - 3][spt_LongName])
+              
+					end -- if g_ScorePartScoresTable[l_ScorePartScoresTableIndex][spst_bToDo] == true then
+          
+				end -- for l_ScorePartScoresTableIndex = 1, #g_ScorePartScoresTable do
+        
+				save.Quickload(l_CurrentHighScorePart_Number) -- Load
+        
 				local l_PotentialPointsLoss = l_StartSegmentRangePoseTotalScore - l_CheckPoseTotalScore
 				local l_MaxLossAllowed = g_SkipFusingBestPositionIfLossIsGreaterThan * 
 																(l_EndSegment - l_StartSegment + 1) / 3
 				if g_bFuseBestPosition == true and 
 				   l_PotentialPointsLoss < l_MaxLossAllowed then
-
+          
 					print("\n  Fusing the best position of segment range (" .. 
-            l_StartSegment .. "-" .. l_EndSegment .. ") after " ..
-            l_NumberOfSuccessfulSegmentRangeRebuildAttempts .. " successful rebuilds...")
+            l_StartSegment .. "-" .. l_EndSegment .. ") after gaining " ..
+            PrettyNumber(l_PointsGainedFrom_RebuildOneSegmentRangeManyTimes) .. 
+            " points from just the rebuild step...")
 					
 					-- This checks for g_bMutateAfterNormalStabilization == false because if it were true, 
 					-- then we would have already performed the mutate above, after the stabilization. duh
@@ -4618,7 +4785,7 @@ function RebuildManySegmentRanges()
 						MutateOneSegmentRange(l_StartSegment, l_EndSegment)
 						
 					end
-
+          
 					save.Quicksave(4) -- Save
 					
 					if g_bUserWantsToKeepDisulfideBondsIntact == true then
@@ -4637,22 +4804,22 @@ function RebuildManySegmentRanges()
 					if g_bMutateAfterFuseBestPosition == true then
 						MutateOneSegmentRange(l_StartSegment, l_EndSegment)
 					end
-
+          
 				end -- if g_bFuseBestPosition == true and 
-
+        
 				SaveBest()
 				save.Quickload(3) -- Load
-
+        
 			else
-			
+        
 				-- l_bFoundOne is false at this point...
 				-- We did not find an improvement, so let's restore the last known good position...
 				save.Quickload(3) -- Load
 				
-			end -- if l_NumberOfSuccessfulSegmentRangeRebuildAttempts >= 1 then
-
+			end -- if l_PointsGainedFrom_RebuildOneSegmentRangeManyTimes > 0 then
+      
 		end -- if g_RunCycle > 0 then
-
+    
 		if g_bUserWantsToKeepDisulfideBondsIntact == true then
 			if bOneOrMoreDisulfideBondsHaveBroken() == true then
 				print("\nOne or more disulfide bonds have broken. This should never happen." ..
@@ -4671,15 +4838,15 @@ function RebuildManySegmentRanges()
 		else
 			CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
 		end
-
+    
 		SetSegmentsAlreadyRebuilt(l_StartSegment, l_EndSegment)
-
+    
 		local l_DeepRebuildGain = 0
 		l_DeepRebuildGain = g_BestScore - l_StartSegmentRangePoseTotalScore
-
+    
 		-- if l_CheckPoseTotalScore > l_StartSegmentRangePoseTotalScore + 0.00001 then
 		if l_DeepRebuildGain > 0 then
-			print("\n  Points gained from slots: [" .. l_DisplayGainFromThis .. "]," ..
+			print("\n  Points gained from ScoreParts: [" .. l_DisplayGainFromThis .. "]," ..
                " Old Best Score: " .. PrettyNumber(l_StartSegmentRangePoseTotalScore) .. "," ..
                " Gain: " .. PrettyNumber(l_DeepRebuildGain) .. "," .. 
                " New Best Score: " .. PrettyNumber(g_BestScore))
@@ -4688,7 +4855,7 @@ function RebuildManySegmentRanges()
 		end
     
     g_CurrentRebuildPointsGained = l_DeepRebuildGain -- this will be checked in bSegmentIsAllowedToBeRebuilt
-
+    
 		-- The default for g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan is 40 or less.
 		-- If we just gained more than g_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildGainsMoreThan, 
 		-- then we figure, that's good enough for now. It is now time to move on to more consecutive
@@ -4706,9 +4873,9 @@ function RebuildManySegmentRanges()
       
 			break -- for l_SegmentRangeIndex = 1, #g_SegmentRangesToRebuildTable do
 		end
-
+    
 	end -- for l_SegmentRangeIndex = 1, #g_SegmentRangesToRebuildTable do
-
+  
 	if g_bConvertAllSegmentsToLoops == true and g_bSavedSecondaryStructure == true then
 		save.LoadSecondaryStructure()
 	end
@@ -4788,8 +4955,8 @@ function PrepareToRebuildSegmentRanges(l_How)
 
 			l_CurrentSegmentRange = g_SegmentRangesToRebuildTable[l_TableIndex]
 
-			l_StartSegment = l_CurrentSegmentRange[srt_StartSegment] --start segment of worst area
-			l_EndSegment = l_CurrentSegmentRange[srt_EndSegment] --end segment of worst area
+			l_StartSegment = l_CurrentSegmentRange[srtrt_StartSegment] --start segment of worst area
+			l_EndSegment = l_CurrentSegmentRange[srtrt_EndSegment] --end segment of worst area
 
 			for l_SegmentIndex = l_StartSegment, l_EndSegment do
 
@@ -4866,7 +5033,7 @@ function main()
 	print("\n" .. g_ProgramName..g_ProgramVersion)
 	print("\n  Hello " .. user.GetPlayerName() .. "!")
 
-	PopulateGlobalSlotsTable()
+	PopulateGlobalScorePartsTable()
 
 	DisplayPuzzleProperties()
 
