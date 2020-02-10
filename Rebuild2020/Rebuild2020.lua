@@ -1,4 +1,5 @@
 
+
 function main()
   -- Called from 1 place in xpcall()...
   
@@ -103,57 +104,22 @@ function DefineGlobalVariables()
 	-- *** Start of Table Declarations...***
 	--
   
+  g_ActiveScorePartsTable = {}
   -- Used in Populate_g_ActiveScorePartsTable() and
   --         Populate_g_ScorePartsTable()..
-  g_ActiveScorePartsTable = {}
   --g_ActiveScorePartsTable = {ScorePart_Name}
   
+	g_CysteineSegmentsTable = {}
 	--  Used in CountDisulfideBonds(),
   --          Populate_g_CysteineSegmentsTable(), and
   --          DisplayPuzzleProperties()
-	g_CysteineSegmentsTable = {}
 	--g_CysteineSegmentsTable={SegmentIndex}
 
-	--  Used in Init_g_SegmentRangesTable_WithWorstScoring_SegmentRanges(), DefineGlobalVariables(),
-	--          Add_Loop_SegmentRange_To_SegmentRangesTable(),
-	--          Add_Loop_Plus_One_Other_Type_SegmentRange_To_SegmentRangesTable(), 
-  --          Display_SegmentRanges(), Display_SelectedOptions(), AskUserToSelect_Segments_ToRebuild(),
-  --          bAskUserToSelect_RebuildOptions(), RebuildSelectedSegments(), 
-  --          RebuildMany_SegmentRanges(), PrepareToRebuildSegmentRanges() and main()
-	g_SegmentRangesToRebuildTable = {}
-	-- g_SegmentRangesToRebuildTable={StartSegment, EndSegment}
-		srtrt_StartSegment = 1
-		srtrt_EndSegment = 2
-	-- g_SegmentRangesToRebuildTable initially includes all the segments in the main protein (ie; no ligands)
-
-	-- g_bSegmentsToRebuildBooleanTable:
-	--  Used in Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts(),
-	--          bSegmentIsAllowedToBeRebuilt() and
-  --          main()
-	g_bSegmentsToRebuildBooleanTable = {}
-	-- g_bSegmentsToRebuildBooleanTable={true/false}
-
-	--  Used in SetSegmentsAlreadyRebuilt(),
-  --          bSegmentIsAllowedToBeRebuilt(),
-  --          CheckIfAlreadyRebuiltSegmentsMustBeIncluded() and
-	--          ResetSegmentsAlreadyRebuiltTable()
-	g_SegmentsAlreadyRebuiltTable = {}
-	-- g_SegmentsAlreadyRebuiltTable={true/false}
-	-- g_SegmentsAlreadyRebuiltTable keeps track of which segments have already been processed...
-
+	g_ScorePart_Scores_Table = {}
 	--  Used in Populate_g_ScorePart_Scores_Table(),
 	--          Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields(),
-	--          Update_g_ScorePart_Scores_Table_SetOfScorePartsWithMatchingPoseTotalScore_And_FirstInASet_F...
+	--          Update_g_ScorePart_Scores_Table_SetOfScorePartsWithMatchingPoseTotalScore_And_FirstInASet_...
   --          and RebuildMany_SegmentRanges()
-  
-	--  Used in Get_ScorePart_Score() and
-  --          Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts()
-	g_SegmentScoresTable = {}
-	-- g_SegmentScoresTable={SegmentScore}
-	-- g_SegmentScoresTable is optimized for quickly searching for 
-	-- the worst scoring segments, so we can work on those first.
-
-	g_ScorePart_Scores_Table = {}
 	-- g_ScorePart_Scores_Table={ScorePart_Number=1, ScorePart_Score=2, PoseTotalScore=3,
   --                           SetOfScorePartsWithMatchingPoseTotalScore=4,
   --                           bFirstInASetOfScorePartsWithMatchingPoseTotalScore=5}
@@ -168,42 +134,77 @@ function DefineGlobalVariables()
     --                                                              ScoreParts with matching
     --                                                              PoseTotalScore's
 
+	g_ScorePartsTable = {}
 	--  Used in Populate_g_ScorePartsTable(), Populate_g_ScorePart_Scores_Table(),
 	--          Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields(),
 	--          AskUserToSelect_ScoreParts_ToStabilize(),
   --          AskUserToSelect_ScoreParts_ToIncludeWhenCalculatingWorseScoring_Segments(),
 	--          bAskUserToSelect_RebuildOptions() and RebuildMany_SegmentRanges()
-	g_ScorePartsTable = {}
 	-- g_ScorePartsTable={ScorePart_Number=1, ScorePart_Name=2, l_bScorePart_IsActive=3, LongName=4}
 		spt_ScorePart_Number = 1
 		spt_ScorePart_Name = 2 -- could have been called "SlotName", but since
                            -- most of the "slots" are ScoreParts...
 		spt_bScorePartIsActive = 3  -- User can change this to false
 		spt_LongName = 4
+  
+	g_SegmentRangesToRebuildTable = {}
+	--  Used in Init_g_SegmentRangesTable_WithWorstScoring_SegmentRanges(), DefineGlobalVariables(),
+	--          Add_Loop_SegmentRange_To_SegmentRangesTable(),
+	--          Add_Loop_Plus_One_Other_Type_SegmentRange_To_SegmentRangesTable(), 
+  --          Display_SegmentRanges(), Display_SelectedOptions(), AskUserToSelect_Segments_ToRebuild(),
+  --          bAskUserToSelect_RebuildOptions(), RebuildSelectedSegments(), 
+  --          RebuildMany_SegmentRanges(), PrepareToRebuildSegmentRanges() and main()
+	-- g_SegmentRangesToRebuildTable={StartSegment, EndSegment}
+		srtrt_StartSegment = 1
+		srtrt_EndSegment = 2
+	-- g_SegmentRangesToRebuildTable initially includes all the segments in the main protein (ie; no ligands)
 
+	g_SegmentsAlreadyRebuiltTable = {}
+	--  Used in SetSegmentsAlreadyRebuilt(),
+  --          bSegmentIsAllowedToBeRebuilt(),
+  --          CheckIfAlreadyRebuiltSegmentsMustBeIncluded() and
+	--          ResetSegmentsAlreadyRebuiltTable()
+	-- g_SegmentsAlreadyRebuiltTable={true/false}
+	-- g_SegmentsAlreadyRebuiltTable keeps track of which segments have already been processed...
+
+	g_SegmentScoresTable = {}
+	--  Used in Get_ScorePart_Score() and
+  --          Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts()
+	-- g_SegmentScoresTable={SegmentScore}
+	-- g_SegmentScoresTable is optimized for quickly searching for 
+	-- the worst scoring segments, so we can work on those first.
+  
+	g_bSegmentsToRebuildBooleanTable = {}
+	--  Used in Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts(),
+	--          bSegmentIsAllowedToBeRebuilt() and
+  --          main()
+	-- g_bSegmentsToRebuildBooleanTable={true/false}
+
+
+	g_UserSelected_ScoreParts_ToIncludeWhenCalculatingWorseScoring_Segments_Table = {}
 	--  Used by Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts(), and
 	--          AskUserToSelect_ScoreParts_ToIncludeWhenCalculatingWorseScoring_Segments()
-	g_UserSelected_ScoreParts_ToIncludeWhenCalculatingWorseScoring_Segments_Table = {}
 	--g_UserSelected_ScoreParts_ToIncludeWhenCalculatingWorseScoring_Segments_Table={ScorePart_Name}
 	--
 	-- ***...end of Table Declarations.***
   
-  --  Used in SaveBest() and others...
-	g_Score_ScriptBest = GetPoseTotalScore()
-	
+  
+  -- The following 2 global variables not not sorted alphabetically because they need to be set before
+  -- other global variables are set...
+  
+	g_SegmentCount_WithLigands = structure.GetCount()
 	--  Used in DefineGlobalVariables(), InvertSegmentRangesTable(),
 	--          ConvertSegmentRangesTableToSegmentsToRebuildBooleanTable(), FindSelectedSegments(),
 	--          Calculate_SegmentRange_Score(), Get_ScorePart_Score(), Populate_g_ActiveScorePartsTable(),
 	--          DisplayPuzzleProperties() and AskUserToSelect_Segments_ToRebuild()
-	g_SegmentCount_WithLigands = structure.GetCount()
 	-- g_SegmentCount_WithLigands = The number of segments (amino acids) in the
 	-- protein plus number of segments in ligand
 	-- print("structure.GetCount()=[" .. structure.GetCount() .. "]")
 
-	--  Used in 24 functions...
 	g_SegmentCount_WithoutLigands = g_SegmentCount_WithLigands -- minus ligand segments (see below)
+	--  Used in 24 functions...
 	-- g_SegmentCount_WithLigands = The number of segments (amino acids) in the protein plus the
-  --                             segments in any ligand
+  --                              segments in any ligands
 	-- g_SegmentCount_WithoutLigands = The number of segments without structure type="M" (ligands)
   
 	-- Now, subtract the ligand segments...
@@ -224,139 +225,223 @@ function DefineGlobalVariables()
 	g_SegmentRangesToRebuildTable = {{1, g_SegmentCount_WithoutLigands}} 
   -- ...Ligand segment numbers are always after the protein segment numbers.
 
-	--  Used in AskMoreOptions() and main()
-	g_UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle = 1
+  
+  -- The following non-UserSelectable boolean variables are sorted alphabetically as much as possible...
 	
-		--  Used in TemporarilyDisable_ConditionChecking() and ReEnable_NormalConditionChecking()...
 	g_bBetterRecentBest = false
+		--  Used in TemporarilyDisable_ConditionChecking() and ReEnable_NormalConditionChecking()...
 	
-	--  Used in Display_SelectedOptions(), bAskUserToSelect_RebuildOptions() and 
-	--          RebuildMany_SegmentRanges
-	g_bUserSelected_ConvertAllSegmentsToLoops = true -- Why is the default true?
-	
-	g_UserSelected_SketchBookPuzzle_MinimumGain_ForSave = 0
 	g_bFoundAHighGain = true
 	
-	--  Used in DisplayPuzzleProperties() -- for informational display to user only.
 	g_bFreeDesignPuzzle = false
+	--  Used in DisplayPuzzleProperties() -- for informational display to user only.
+		
+	g_bHasDensity = false
+	--  Used in CheckForLowStartingScore() and DisplayPuzzleProperties()
 	
+	g_bHasLigand = (g_SegmentCount_WithoutLigands < g_SegmentCount_WithLigands)
+	--  Used in Populate_g_ScorePartsTable(), 
+	
+	g_bMaxClashImportance = true
+	--  Used in SetClashImportance() and ShakeAndOrWiggle()
+	
+	g_bOnlyRebuildLoops = true -- only rebuild loop segments
+
+	g_bProbableSymmetryPuzzle = false
+  
+	g_bRebuildHelicesAndLoops = true 
+  -- Used in Add_Loop_Helix_And_Sheet_Segments_To_SegmentRangesTable and 
+  --         Add_Loop_Plus_One_Other_Type_SegmentRange_To_SegmentRangesTable
+  -- Rebuild helix segments + surrounding loop segments.
+  -- This is the only place g_bRebuildHelicesAndLoops is set.
+	
+  g_bRebuildSheetsAndLoops = false
+  -- Used in Add_Loop_Helix_And_Sheet_Segments_To_SegmentRangesTable() and
+  --         Add_Loop_Plus_One_Other_Type_SegmentRange_To_SegmentRangesTable()...
+  -- Rebuild sheet segments + surrounding loop segments.
+  -- This is the only place g_bRebuildSheetsAndLoops is set.
+  
+	g_bSavedSecondaryStructure = false
+  -- Used in RebuildMany_SegmentRanges(),
+  --         ConvertAllSegmentsToLoops() and
+  --         CleanUp()...
+  -- g_bSavedSecondaryStructure can only be set here and in ConvertAllSegmentsToLoops().
+  
+	g_bSketchBookPuzzle = false
+  local l_PuzzleName = puzzle.GetName()
+  if string.find(l_PuzzleName, "Sketchbook") then
+		print("Note: This is a Sketchbook Puzzle.")
+		g_bSketchBookPuzzle = true
+  end  
+  
+  
+  -- The following boolean UserSelectable variables are sorted alphabetically...
+    
+	g_bUserSelected_AlwaysAllowRebuildingAlreadyRebuilt_Segments = true
+  --  Used in 7 functions...
+	-- ...User can change this on the Select Rebuild Options page.
+  if g_bDebugMode == true then
+    g_bUserSelected_AlwaysAllowRebuildingAlreadyRebuilt_Segments = false
+  end
+
+	g_bUserSelected_ConvertAllSegmentsToLoops = true -- Why is the default true?
+	--  Used in Display_SelectedOptions(), bAskUserToSelect_RebuildOptions() and 
+	--          RebuildMany_SegmentRanges
+	
+  g_bUserSelected_FuseBestPosition = true
 	--  Used in CheckForLowStartingScore(), Display_SelectedOptions(), AskMoreOptions() and
 	--          RebuildMany_SegmentRanges()
-	g_bUserSelected_FuseBestPosition = true
-	
-	--  Used in CheckForLowStartingScore() and DisplayPuzzleProperties()
-	g_bHasDensity = false
-	
-	--  Used in Populate_g_ScorePartsTable(), 
-	g_bHasLigand = (g_SegmentCount_WithoutLigands < g_SegmentCount_WithLigands)
-	
-	--  Used in SetClashImportance() and ShakeAndOrWiggle()
-	g_bMaxClashImportance = true
-	
-	--  Used in DefineGlobalVariables(), AskUserForMutateOptions(), bAskUserToSelect_RebuildOptions() and
-	--          RebuildMany_SegmentRanges()
+  
 	g_bUserSelected_Mutate_After_FuseBestPosition = false
-
 	--  Used in DefineGlobalVariables(), AskUserForMutateOptions(), bAskUserToSelect_RebuildOptions() and
 	--          RebuildMany_SegmentRanges()
-	g_bUserSelected_Mutate_After_Stabilize = false
 
+	g_bUserSelected_Mutate_After_Stabilize = false
+	--  Used in DefineGlobalVariables(), AskUserForMutateOptions(), bAskUserToSelect_RebuildOptions() and
+	--          RebuildMany_SegmentRanges()
+
+	g_bUserSelected_Mutate_After_Rebuild = false
 	--  Used in AskUserForMutateOptions(), bAskUserToSelect_RebuildOptions(),
 	--          RebuildOneSegmentRangeManyTimes()
-	g_bUserSelected_Mutate_After_Rebuild = false
 
 	g_bUserSelected_Mutate_Before_FuseBestPosition = false
 	g_bUserSelected_Mutate_During_Stabilize = false
 	g_bUserSelected_Mutate_OnlySelected_Segments = false
 	g_bUserSelected_Mutate_SelectedAndNearby_Segments = false
-	g_bOnlyRebuildLoops = true -- only rebuild loop segments
-
-	--  Used in 7 functions...
-	g_bUserSelected_AlwaysAllowRebuildingAlreadyRebuilt_Segments = true
-  -- ...User can change this on the Select Rebuild Options page.
-  if g_bDebugMode == true then
-    g_bUserSelected_AlwaysAllowRebuildingAlreadyRebuilt_Segments = false
-  end
-
-	g_bUserSelected_PerformExtraStabilize = false
-	g_bUserSelected_Stabilize = true
-	g_bProbableSymmetryPuzzle = false
-	g_bRebuildHelicesAndLoops = true -- rebuild helix segments + surrounding loop segments
-	g_bRebuildSheetsAndLoops = false -- rebuild sheet segments + surrounding loop segments
-	g_bSavedSecondaryStructure = false
+  
+	g_bUserSelected_PerformExtraStabilize = false	
 	g_bUserSelected_SelectAllScorePartsToStabilize = true
 	g_bUserSelected_SelectMain4ScorePartsToStabilize = false
 	g_bUserSelected_ShakeAndWiggle_OnlySelectedSegments = true -- false = include nearby segments
 	g_bUserSelected_ShakeAndWiggle_WithSelected_Segments = true -- (after each rebuild) not too slow
 	g_bUserSelected_ShakeAndWiggle_WithSideChainsAndBackbone_WithSelectedAndNearby_Segments = false 
-  -- ...true = very slow.
+  g_bUserSelected_Stabilize = true
+   -- ...true = very slow.
 
+	g_bUserSelected_KeepDisulfideBonds_Intact = false
 	--  Used in bOneOrMoreDisulfideBondsHaveBroken(), RememberSolutionWithDisulfideBondsIntact(),
 	--          CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact(), DisplayPuzzleProperties(),
 	--          bAskUserToSelect_RebuildOptions(), RebuildSelectedSegments(),
 	--          RebuildOneSegmentRangeManyTimes() and RebuildMany_SegmentRanges()
-	g_bUserSelected_KeepDisulfideBonds_Intact = false
+  
+  
+  -- The following non-UserSelectable variables are sorted alphatecally...
 
+	g_PointsGained_Current_RebuildSegmentRange = 0
 	--  Used in bSegmentIsAllowedToBeRebuilt() and
 	--          RebuildMany_SegmentRanges()
-	g_PointsGained_Current_RebuildSegmentRange = 0
 
-	--  Used in CleanUp()...
-	g_Score_AtStartOf_Script = GetPoseTotalScore()
-
+	g_DensityWeight = 0
 	--  Used in Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts(),
 	--          CheckForLowStartingScore() and DisplayPuzzleProperties()
-	g_DensityWeight = 0
 
 	g_FirstRebuildSegment = 0
 	g_LastRebuildSegment = 0
 	g_LastSegmentScore = 0
-
-	--  Used in MutateSideChainsOfSelectedSegments() and 
-  --          AskUserForMutateOptions()
-	g_UserSelected_Mutate_ClashImportance = 0.9
-
-	--  Used in MutateSideChainsOfSelectedSegments(),
-  --          AskUserForMutateOptions() and 
-  --          AskUserToSelectRebuildOptions()
-	g_UserSelected_Mutate_SphereRadius = 8 -- Angstroms
-
+  
+  g_OriginalNumberOfDisulfideBonds = 0
 	--  Used in Populate_g_CysteineSegmentsTable(), bOneOrMoreDisulfideBondsHaveBroken(), 
 	--          Populate_g_ActiveScorePartsTable(), DisplayPuzzleProperties() and
 	--          AskUserToSelectRebuildOptions()
-	g_OriginalNumberOfDisulfideBonds = 0
 
-	--  Used in AskMoreOptions(), RebuildSelectedSegments() and RebuildOneSegmentRangeManyTimes()
-	g_UserSelected_NumberOfTimesToRebuildEach_SegmentRange_PerRunCycle = 10 -- set to at least 10
+	g_QuickSaveStackPosition = 60 -- Uses slot 60 and higher...
+  
+	g_RebuildClashImportance = 0 -- clash importance while rebuild
+	--  Used in RebuildOneSegmentRangeManyTimes()
+  
+	g_RunCycle = 0  
+ 	
+	g_Score_AtStartOf_Script = GetPoseTotalScore()
+	--  Used in CleanUp()...
+  
+  g_Score_ScriptBest = GetPoseTotalScore()
+  --  Used in SaveBest() and others...
+  
+	g_SegmentRangeIndex = 0
+  
+  -- The following UserSelected variables are sorted alphabetically as much as possible...
+  
+	g_UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle = 1
+	--  Used in AskMoreOptions() and main()
+    
+	local l_NumberOfBands = band.GetCount()
+	g_bUserSelected_Disable_Bands_DuringRebuild = l_NumberOfBands > 0
+	-- Used in bAskUserToSelect_RebuildOptions() and RebuildSelectedSegments()
+  -- ...sets default to true if there are any bands.
+  
+	g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan =
+		(g_SegmentCount_WithoutLigands - (g_SegmentCount_WithoutLigands % 4)) / 4
+	--  Used in DefineGlobalVariables(), AskMoreOptions() and RebuildMany_SegmentRanges()
+	-- Could someone please explain how this formula was determined?
+	-- Example:
+	--   g_SegmentCount_WithoutLigands = 135
+	--   g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan =
+	--    (135 - (135 % 4)) /4 = (135 - 3) / 4 = 135 / 4 = 33.75
+	if g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan < 10000 then -- was 40
+		g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan = 10000 -- was 40
+	end
+  --if g_bDebugMode == true then
+  --  g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan = 10000
+  --end
+  
+	g_UserSelected_Mutate_ClashImportance = 0.9
+	--  Used in MutateSideChainsOfSelectedSegments() and 
+  --          AskUserForMutateOptions()
 
+	g_UserSelected_Mutate_SphereRadius = 8 -- Angstroms
+	--  Used in MutateSideChainsOfSelectedSegments(),
+  --          AskUserForMutateOptions() and 
+  --          AskUserToSelectRebuildOptions()
+
+	g_UserSelected_NumberOf_SegmentRanges_ToSkip = 0 -- set to any value other than 0, to debug related code
+	--  Used in Display_SelectedOptions(), bAskUserToSelect_RebuildOptions() and main()
+  
+	g_UserSelected_NumberOfRunCycles = 40 -- Set it very high if you want to run forever
 	--  Used in bAskUserToSelect_RebuildOptions(), RebuildSelectedSegments(),
 	--          PrepareToRebuildSegmentRanges() and main()
-	g_UserSelected_NumberOfRunCycles = 40 -- Set it very high if you want to run forever
   if g_bDebugMode == true then
-    g_UserSelected_NumberOfRunCycles = 40 -- 5 is high enough for debug mode
+    g_UserSelected_NumberOfRunCycles = 10 -- 5 is high enough for debug mode
   end
 
-	--  Used in Display_SelectedOptions(), bAskUserToSelect_RebuildOptions() and main()
-	g_UserSelected_NumberOf_SegmentRanges_ToSkip = 0 -- set to 44, or any value other than 0, to debug
+	g_UserSelected_NumberOfTimesToRebuildEach_SegmentRange_PerRunCycle = 10 -- set to at least 10
+	--  Used in AskMoreOptions(), RebuildSelectedSegments() and RebuildOneSegmentRangeManyTimes()
 
-	--  Used in RebuildOneSegmentRangeManyTimes()
-	g_RebuildClashImportance = 0 -- clash importance while rebuild
-
-	g_RunCycle = 0
-	g_SegmentRangeIndex = 0
+	g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan = 
+    g_SegmentCount_WithLigands
+	-- Used in DefineGlobalVariables(),
+  --         bSegmentIsAllowedToBeRebuilt() and 
+  --         Display_SelectedOptions()
+	-- Default to one point per segment? Seems pretty arbitrary to me...
+  
+	-- "To Allow" or "To Force"?
+	-- Example:
+	-- g_SegmentCount_WithoutLigands = 135
+	-- g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan = 135
+  -- ...Pretty simple formula
+	if g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan > 500 then
+		g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan = 500
+	end
+  
+	g_UserSelected_ResetToStartValueAfterRebuildingWithThisMany_Consecutive_Segments = 4 
+	--  Used in bAskUserToSelect_RebuildOptions(), RebuildSelectedSegments() and 
+	--          PrepareToRebuildSegmentRanges()
+  -- ...any more than 4 consecutive segments does not appear to be fruitful;
+  -- Actually, 4 consecutive segments is not great.
+  -- And, 3 consecutive segments is barely better then 4.
+  -- Really, most of the gains are with just 2 consecutive segments!
+  
 	g_UserSelected_Shake_ClashImportance = 0.31 -- clash imortance while shaking
-	g_QuickSaveStackPosition = 60 -- Uses slot 60 and higher...
-	g_UserSelected_WiggleFactor = 1
+ 	g_UserSelected_SketchBookPuzzle_MinimumGain_ForSave = 0
 
+	g_UserSelected_StartingNumberOf_SegmentRanges_ToRebuild_PerRunCycle = 4
+	--  Used in DefineGlobalVariables(), AskMoreOptions(), PrepareToRebuildSegmentRanges() and main()
 	-- Increase g_UserSelected_MaxNumberOf_SegmentRanges_ToRebuild_ThisRunCycle by
 	--  g_UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle, after every run cycle...
 	-- This allows the worst scoring segments to get more rebuild time...
 	-- g_UserSelected_StartingNumberOf_SegmentRanges_ToRebuild_PerRunCycle:
-	--  Used in DefineGlobalVariables(), AskMoreOptions(), PrepareToRebuildSegmentRanges() and main()
-	g_UserSelected_StartingNumberOf_SegmentRanges_ToRebuild_PerRunCycle = 4
 	g_UserSelected_MaxNumberOf_SegmentRanges_ToRebuild_ThisRunCycle =
     g_UserSelected_StartingNumberOf_SegmentRanges_ToRebuild_PerRunCycle
-
+  
 	-- ConsecutiveSegments is the number of adjacent segments required per segment range.
 	-- Example:
 	--  If the entire protein's segments (amino acid sequence) are numbered like this:
@@ -378,97 +463,57 @@ function DefineGlobalVariables()
   --  this will be the final segment range configuration, and will look like this:
   --  {{1-4},{2-5},{3-6},{4-7} ... {132-135}}
 	
+	g_UserSelected_StartRebuildingWithThisMany_Consecutive_Segments = 2
 	--  Used in DefineGlobalVariables(), Add_Loop_SegmentRange_To_SegmentRangesTable(),
 	--          Add_Loop_Plus_One_Other_Type_SegmentRange_To_SegmentRangesTable(),
 	--          bAskUserToSelect_RebuildOptions() and PrepareToRebuildSegmentRanges()
-	g_UserSelected_StartRebuildingWithThisMany_Consecutive_Segments = 2
-  
-	--  Used in bAskUserToSelect_RebuildOptions(), RebuildSelectedSegments() and 
-	--          PrepareToRebuildSegmentRanges()
-	g_UserSelected_ResetToStartValueAfterRebuildingWithThisMany_Consecutive_Segments = 4 
-  -- ...any more than 4 consecutive segments does not appear to be fruitful;
-  -- Actually, 4 consecutive segments is not great.
-  -- And, 3 consecutive segments is barely better then 4.
-  -- Really, most of the gains are with just 2 consecutive segments!
-  
+	g_RequiredNumberOfConsecutiveSegments = g_UserSelected_StartRebuildingWithThisMany_Consecutive_Segments
 	--  Used in bAskUserToSelect_RebuildOptions(), RebuildSelectedSegments() and
 	--          PrepareToRebuildSegmentRanges()
-	g_RequiredNumberOfConsecutiveSegments = g_UserSelected_StartRebuildingWithThisMany_Consecutive_Segments
-
-	--  Used in DefineGlobalVariables(), AskMoreOptions() and RebuildMany_SegmentRanges()
-	g_UserSelected_MoveOnToMore_SegmentsPerRange_IfCurrentRebuild_GainsMoreThan =
-		(g_SegmentCount_WithoutLigands - (g_SegmentCount_WithoutLigands % 4)) / 4
-	-- Could someone please explain how this formula was determined?
-	-- Example:
-	--   g_SegmentCount_WithoutLigands = 135
-	--   g_UserSelected_MoveOnToMore_SegmentsPerRange_IfCurrentRebuild_GainsMoreThan =
-	--    (135 - (135 % 4)) /4 = (135 - 3) / 4 = 135 / 4 = 33.75
-	if g_UserSelected_MoveOnToMore_SegmentsPerRange_IfCurrentRebuild_GainsMoreThan < 40 then
-		g_UserSelected_MoveOnToMore_SegmentsPerRange_IfCurrentRebuild_GainsMoreThan = 40
-	end
-  if g_bDebugMode == true then
-    g_UserSelected_MoveOnToMore_SegmentsPerRange_IfCurrentRebuild_GainsMoreThan = 2000
-  end
-
-	g_bSketchBookPuzzle = false
-  local l_PuzzleName = puzzle.GetName()
-  if string.find(l_PuzzleName, "Sketchbook") then
-		print("Note: This is a Sketchbook Puzzle.")
-		g_bSketchBookPuzzle = true
-  end
-	
-	-- Default to one point per segment? Seems pretty arbitrary to me...
-	-- Used in DefineGlobalVariables(),
-  --         bSegmentIsAllowedToBeRebuilt() and 
-  --         Display_SelectedOptions()
-	g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan = 
-    g_SegmentCount_WithLigands
   
-	-- "To Allow" or "To Force"?
-	-- Example:
-	-- g_SegmentCount_WithoutLigands = 135
-	-- g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan = 135
-  -- ...Pretty simple formula
-	if g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan > 500 then
-		g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan = 500
-	end
+	g_UserSelected_WiggleFactor = 1
 
-	if g_bSketchBookPuzzle == true then
-	   g_bUserSelected_FuseBestPosition = false
-	   g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan = 500
-	   g_bUserSelected_ConvertAllSegmentsToLoops = false
-	end
+  -- ...end of UserSelected variables sorted alphabetically as much as possible.
 
-  if g_bDebugMode == true then
-    g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan = 50
-  end  
+  -- The following variables are not sorted alphabetically because they 
+  -- depend on above variables to be set first...
 
+	g_bProteinHasMutableSegments = false
 	-- Used in DefineGlobalVariables(),
   --         MutateSideChainsOfSelectedSegments(),
   --         DisplayPuzzleProperties() and 
 	--         bAskUserToSelect_RebuildOptions()
-	g_bProteinHasMutableSegments = false
-	local l_NumberOfMutableSegments
-	l_NumberOfMutableSegments = GetNumberOfMutableSegments()
+	local l_NumberOfMutableSegments = GetNumberOfMutableSegments()
 	if l_NumberOfMutableSegments > 0 then
 		g_bProteinHasMutableSegments = true
-	end
-
-	if g_bProteinHasMutableSegments == true then
 		g_bUserSelected_Mutate_After_FuseBestPosition = true
 		g_bUserSelected_Mutate_After_Stabilize = true
 		g_bUserSelected_Mutate_SelectedAndNearby_Segments = true
 	end
+  
+	if g_bSketchBookPuzzle == true then
+	   g_bUserSelected_ConvertAllSegmentsToLoops = false
+	   g_bUserSelected_FuseBestPosition = false
+	   g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan = 500
+	end
+  if g_bDebugMode == true then
+    g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan = 50
+  end  
 
-	local l_NumberOfBands = band.GetCount()
+	g_UserSelected_ClashImportanceFactor = behavior.GetClashImportance()
+	-- Used in DefineGlobalVariables(), SetClashImportance() and AskUserToCheck_ClashImportance()
+	-- Set Clash Importance Factor...
+	-- note: we don't actually have a g_ClashImportance variable,
+	--       we only have a g_UserSelected_ClashImportanceFactor variable.
+	--       we do, however, have an l_ClashImportance variable in function SetClashImportance() above.
+	-- print("behavior.GetClashImportance()=[" .. g_UserSelected_ClashImportanceFactor .. "].")
+	if g_UserSelected_ClashImportanceFactor < 0.99 then
+		AskUserToCheck_ClashImportance()
+	end
 
-	-- Used in bAskUserToSelect_RebuildOptions() and RebuildSelectedSegments()
-	g_bUserSelected_Disable_Bands_DuringRebuild = l_NumberOfBands > 0
-  -- ...sets default to true if there are any bands.
-
-	--  Used in DefineGlobalVariables(), AskMoreOptions() and RebuildMany_SegmentRanges()
 	g_UserSelected_SkipFusingBestPosition_IfCurrentRebuild_LosesMoreThan = 
 		(g_SegmentCount_WithoutLigands - (g_SegmentCount_WithoutLigands % 4)) / 4
+	--  Used in DefineGlobalVariables(), AskMoreOptions() and RebuildMany_SegmentRanges()
 	-- Could someone please explain how this formula was determined?
 	-- Example:
 	--   g_SegmentCount_WithoutLigands = 135
@@ -477,17 +522,10 @@ function DefineGlobalVariables()
 	if g_UserSelected_SkipFusingBestPosition_IfCurrentRebuild_LosesMoreThan < 30 then
 		g_UserSelected_SkipFusingBestPosition_IfCurrentRebuild_LosesMoreThan = 30
 	end
-
-	-- Set Clash Importance Factor...
-	-- note: we don't actually have a g_ClashImportance variable,
-	--       we only have a g_UserSelected_ClashImportanceFactor variable.
-	--       we do, however, have an l_ClashImportance variable in function SetClashImportance() above.
-	--  Used in DefineGlobalVariables(), SetClashImportance() and AskUserToCheck_ClashImportance()
-	g_UserSelected_ClashImportanceFactor = behavior.GetClashImportance()
-	-- print("behavior.GetClashImportance()=[" .. g_UserSelected_ClashImportanceFactor .. "].")
-	if g_UserSelected_ClashImportanceFactor < 0.99 then
-		AskUserToCheck_ClashImportance()
-	end
+  
+  
+  -- The remaining lines of this function are related to Condition Checking,
+  -- and are not sorted alphanetically...  
 
 	-- Start of Temporarily Disable Condition Checking module...
 	-- Temporarily disable condition checking...
@@ -512,21 +550,21 @@ function DefineGlobalVariables()
 	
 	local l_Score_WithNormalConditionChecking_Enabled = GetPoseTotalScore()
 		
-	-- Compute the maximum potential bonus points (not available in beginner puzzles)...
-	--  Used in DefineGlobalVariables() and 
-  --          DisplayPuzzleProperties()...
 	g_ComputedMaximumPotentialBonusPoints = 
     l_Score_WithConditionChecking_TemporarilyDisabled - l_Score_WithNormalConditionChecking_Enabled 
-
+  --  Used in DefineGlobalVariables() and 
+  --          DisplayPuzzleProperties()...
+  -- Compute the maximum potential bonus points (not available in beginner puzzles)...
+		
+  g_UserSelected_MaximumPotentialBonusPoints = g_ComputedMaximumPotentialBonusPoints
   --  Used in Ask_TemporarilyDisable_ConditionChecking_Options() and 
   --          SaveBest()...
-  g_UserSelected_MaximumPotentialBonusPoints = g_ComputedMaximumPotentialBonusPoints
 	
-	-- TemporarilyDisable_ConditionChecking (enables faster CPU processing, but
-  -- your score improvements will not be counted in foldit's Undo history)...
+	g_bUserSelected_TemporarilyDisable_ConditionChecking = false
 	--  Used in DefineGlobalVariables(), CleanUp(),
   --          Ask_TemporarilyDisable_ConditionChecking_Options() and SaveBest()
-	g_bUserSelected_TemporarilyDisable_ConditionChecking = false
+	-- TemporarilyDisable_ConditionChecking (enables faster CPU processing, but
+  -- your score improvements will not be counted in foldit's Undo history)...
   -- ...false means "Enable Normal Condition Checking".
   
   if math.abs(g_UserSelected_MaximumPotentialBonusPoints) > 0.1 then
@@ -2522,59 +2560,59 @@ function AskUserForMutateOptions()
 	local l_Ask = dialog.CreateDialog("Mutate Options")
 	
 	l_Ask.l1 = dialog.AddLabel("Mutate after rebuild:")
-	l_Ask.bUserSelected_Mutate_After_Rebuild =
+	l_Ask.g_bUserSelected_Mutate_After_Rebuild =
     dialog.AddCheckbox("After rebuild", g_bUserSelected_Mutate_After_Rebuild)
 	
 	l_Ask.l2 = dialog.AddLabel("Mutate during Stabilize:")
-	l_Ask.bUserSelected_Mutate_During_Stabilize =
+	l_Ask.g_bUserSelected_Mutate_During_Stabilize =
 		dialog.AddCheckbox("During Stabilize", g_bUserSelected_Mutate_During_Stabilize)
 		
 	l_Ask.l3 = dialog.AddLabel("Mutate after Stabilize:")
-	l_Ask.bUserSelected_Mutate_After_Stabilize =
+	l_Ask.g_bUserSelected_Mutate_After_Stabilize =
 		dialog.AddCheckbox("After Stabilize", g_bUserSelected_Mutate_After_Stabilize)
 		
 	l_Ask.l4 = dialog.AddLabel("Mutate before fuse best position:")
-	l_Ask.bUserSelected_Mutate_Before_FuseBestPosition =
+	l_Ask.g_bUserSelected_Mutate_Before_FuseBestPosition =
     dialog.AddCheckbox("Before fuse", g_bUserSelected_Mutate_Before_FuseBestPosition)
 	
 	l_Ask.l5 = dialog.AddLabel("Mutate after fuse best position:")
-	l_Ask.bUserSelected_Mutate_After_FuseBestPosition =
+	l_Ask.g_bUserSelected_Mutate_After_FuseBestPosition =
     dialog.AddCheckbox("After fuse", g_bUserSelected_Mutate_After_FuseBestPosition)
 
 	l_Ask.l6 = dialog.AddLabel("What to rebuild. Second option overrides first. ")
 	l_Ask.l7 = dialog.AddLabel("If neither option is checked then rebuild all segments.")
-	l_Ask.bUserSelected_Mutate_OnlySelected_Segments =
+	l_Ask.g_bUserSelected_Mutate_OnlySelected_Segments =
 		dialog.AddCheckbox("Only the selected segments", g_bUserSelected_Mutate_OnlySelected_Segments)
-	l_Ask.bUserSelected_Mutate_SelectedAndNearby_Segments =
+	l_Ask.g_bUserSelected_Mutate_SelectedAndNearby_Segments =
 		dialog.AddCheckbox("The selected and nearby segments",
       g_bUserSelected_Mutate_SelectedAndNearby_Segments)
 	l_Ask.l8 = dialog.AddLabel("Mutate sphere radius, Angstroms, for nearby segments")
-	l_Ask.UserSelected_Mutate_SphereRadius =
+	l_Ask.g_UserSelected_Mutate_SphereRadius =
 		dialog.AddSlider("  Sphere Radius:", g_UserSelected_Mutate_SphereRadius, 3, 15, 0)
     -- ...default is 8 Angstroms.
-	l_Ask.UserSelected_Mutate_ClashImportance =
+	l_Ask.g_UserSelected_Mutate_ClashImportance =
 		dialog.AddSlider("  Clash Importance:", g_UserSelected_Mutate_ClashImportance, 0.1, 1, 2)
 
 	l_Ask.OK = dialog.AddButton("OK", 1) l_Ask.Cancel = dialog.AddButton("Cancel", 0)
 	if dialog.Show(l_Ask) > 0 then
-		g_bUserSelected_Mutate_After_Rebuild = l_Ask.bUserSelected_Mutate_After_Rebuild.value
+		g_bUserSelected_Mutate_After_Rebuild = l_Ask.g_bUserSelected_Mutate_After_Rebuild.value
 		g_bUserSelected_Mutate_During_Stabilize =
-      l_Ask.bUserSelected_Mutate_During_Stabilize.value
+      l_Ask.g_bUserSelected_Mutate_During_Stabilize.value
 		g_bUserSelected_Mutate_After_Stabilize =
-      l_Ask.bUserSelected_Mutate_After_Stabilize.value
+      l_Ask.g_bUserSelected_Mutate_After_Stabilize.value
 		g_bUserSelected_Mutate_Before_FuseBestPosition =
-      l_Ask.bUserSelected_Mutate_Before_FuseBestPosition.value
-		g_bUserSelected_Mutate_After_FuseBestPosition = l_Ask.bUserSelected_Mutate_After_FuseBestPosition.value
-		g_bUserSelected_Mutate_OnlySelected_Segments = l_Ask.bUserSelected_Mutate_OnlySelected_Segments.value
+      l_Ask.g_bUserSelected_Mutate_Before_FuseBestPosition.value
+		g_bUserSelected_Mutate_After_FuseBestPosition = l_Ask.g_bUserSelected_Mutate_After_FuseBestPosition.value
+		g_bUserSelected_Mutate_OnlySelected_Segments = l_Ask.g_bUserSelected_Mutate_OnlySelected_Segments.value
 		g_bUserSelected_Mutate_SelectedAndNearby_Segments =
-      l_Ask.bUserSelected_Mutate_SelectedAndNearby_Segments.value
+      l_Ask.g_bUserSelected_Mutate_SelectedAndNearby_Segments.value
 		if g_bUserSelected_Mutate_SelectedAndNearby_Segments == true then
 			-- The g_bUserSelected_Mutate_SelectedAndNearby_Segments option 
       -- overrides the g_bUserSelected_Mutate_OnlySelected_Segments option...
 			g_bUserSelected_Mutate_OnlySelected_Segments = false
 		end
-		g_UserSelected_Mutate_SphereRadius = l_Ask.UserSelected_Mutate_SphereRadius.value
-		g_UserSelected_Mutate_ClashImportance = l_Ask.UserSelected_Mutate_ClashImportance.value
+		g_UserSelected_Mutate_SphereRadius = l_Ask.g_UserSelected_Mutate_SphereRadius.value
+		g_UserSelected_Mutate_ClashImportance = l_Ask.g_UserSelected_Mutate_ClashImportance.value
     
 	end
 
@@ -2585,103 +2623,103 @@ function AskMoreOptions()
 	local l_Ask = dialog.CreateDialog("More Options")
 
 	l_Ask.l_0 = dialog.AddLabel("Perform Extra Stabilize (shake and wiggle more)")
-	l_Ask.bUserSelected_PerformExtraStabilize =
+	l_Ask.g_bUserSelected_PerformExtraStabilize =
 		dialog.AddCheckbox("Extra", g_bUserSelected_PerformExtraStabilize) -- default is false
 
 	l_Ask.l_1 = dialog.AddLabel("Move on to more consecutive segments per")
 	l_Ask.l_2 = dialog.AddLabel("range if current rebuild gains more than:")
-	l_Ask.UserSelected_MoveOnToMore_SegmentsPerRange_IfCurrentRebuild_GainsMoreThan =
+	l_Ask.g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan =
 		dialog.AddSlider("  Points:",
-			g_UserSelected_MoveOnToMore_SegmentsPerRange_IfCurrentRebuild_GainsMoreThan, 0, 500, 0)
+			g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan, 0, 500, 0)
       -- ...default is 40 or less.
 
 	l_Ask.l_3 = dialog.AddLabel("Skip fusing best position if current rebuild loses")
 	l_Ask.l_4 = dialog.AddLabel("more than (Points * # of segments per range / 3):")
-	l_Ask.UserSelected_SkipFusingBestPosition_IfCurrentRebuild_LosesMoreThan = 
-		dialog.AddSlider("  Points:", g_UserSelected_SkipFusingBestPosition_IfCurrentRebuild_LosesMoreThan,
-      -5, 200, 0)
+	l_Ask.g_UserSelected_SkipFusingBestPosition_IfCurrentRebuild_LosesMoreThan = 
+		dialog.AddSlider("  Points:", 
+      g_UserSelected_SkipFusingBestPosition_IfCurrentRebuild_LosesMoreThan, -5, 200, 0)
 
 	l_Ask.l_7 = dialog.AddLabel("Only allow rebuilding already rebuilt segments")
 	l_Ask.l_9 = dialog.AddLabel("if current rebuild gains more than:")
-	l_Ask.UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan =
+	l_Ask.g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan =
 		dialog.AddSlider("  Points:",
 			g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan, 0, 500, 0) 
       -- ...default depends on number of segments.
 
 	l_Ask.l_10 = dialog.AddLabel("Number of times to rebuild each segment range")
 	l_Ask.l_11 = dialog.AddLabel("per run cycle:") -- default is 15 (or 10)
-	l_Ask.UserSelected_NumberOfTimesToRebuildEach_SegmentRange_PerRunCycle =
-		dialog.AddSlider("  Rebuilds:", g_UserSelected_NumberOfTimesToRebuildEach_SegmentRange_PerRunCycle,
-      1, 100, 0)
+	l_Ask.g_UserSelected_NumberOfTimesToRebuildEach_SegmentRange_PerRunCycle =
+		dialog.AddSlider("  Rebuilds:", 
+      g_UserSelected_NumberOfTimesToRebuildEach_SegmentRange_PerRunCycle, 1, 100, 0)
 
 	l_Ask.l_12 = dialog.AddLabel("Starting number of segment ranges to rebuild per")
 	l_Ask.l_13 = dialog.AddLabel("run cycle:")
-	l_Ask.UserSelected_StartingNumberOf_SegmentRanges_ToRebuild_PerRunCycle =
+	l_Ask.g_UserSelected_StartingNumberOf_SegmentRanges_ToRebuild_PerRunCycle =
 		dialog.AddSlider("  Ranges / cycle:",
 			g_UserSelected_StartingNumberOf_SegmentRanges_ToRebuild_PerRunCycle, 1,
       g_SegmentCount_WithoutLigands, 0)
 
 	l_Ask.l_14 = dialog.AddLabel("Additional number of segment ranges to rebuild per")
 	l_Ask.l_15 = dialog.AddLabel("run cycle to add after each run cycle completes:")
-	l_Ask.UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle =
+	l_Ask.g_UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle =
 		dialog.AddSlider("  Add ranges:",
 			g_UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle, 0, 4, 0)
 
 	l_Ask.l_16 = dialog.AddLabel("Shake and Wiggle (with SideChains and Backbone)")
 	l_Ask.l_17 = dialog.AddLabel("with selected and nearby segments after each rebuild")
 	l_Ask.l_18 = dialog.AddLabel("(with clash importance: 1)")
-	l_Ask.bUserSelected_ShakeAndWiggle_WithSideChainsAndBackbone_WithSelectedAndNearby_Segments =
+	l_Ask.g_bUserSelected_ShakeAndWiggle_WithSideChainsAndBackbone_WithSelectedAndNearby_Segments =
 		dialog.AddCheckbox("Very SLOW!",
 			g_bUserSelected_ShakeAndWiggle_WithSideChainsAndBackbone_WithSelectedAndNearby_Segments)
 		
 	l_Ask.l_19 = dialog.AddLabel("Shake and Wiggle with selected segments after")
 	l_Ask.l_20 = dialog.AddLabel("each rebuild.")
-	l_Ask.bUserSelected_ShakeAndWiggle_WithSelected_Segments = 
+	l_Ask.g_bUserSelected_ShakeAndWiggle_WithSelected_Segments = 
 		dialog.AddCheckbox("Not too slow", g_bUserSelected_ShakeAndWiggle_WithSelected_Segments)
 
 	l_Ask.l_21 = dialog.AddLabel("... with clash importance:")
-	l_Ask.UserSelected_Shake_ClashImportance = 
+	l_Ask.g_UserSelected_Shake_ClashImportance = 
     dialog.AddSlider(" CI:", g_UserSelected_Shake_ClashImportance, 0, 1, 2)
 	
 	l_Ask.l_22 = dialog.AddLabel("Stabilize instead of local shake")
 	l_Ask.l_23 = dialog.AddLabel("only:")
-	l_Ask.bUserSelected_Stabilize =
+	l_Ask.g_bUserSelected_Stabilize =
     dialog.AddCheckbox("Normal", g_bUserSelected_Stabilize)
-	l_Ask.bUserSelected_FuseBestPosition =
+	l_Ask.g_bUserSelected_FuseBestPosition =
     dialog.AddCheckbox("Fuse best position", g_bUserSelected_FuseBestPosition)
 	
 	l_Ask.OK = dialog.AddButton("OK", 1)
 	dialog.Show(l_Ask)
 
-	g_UserSelected_MoveOnToMore_SegmentsPerRange_IfCurrentRebuild_GainsMoreThan =
-		l_Ask.UserSelected_MoveOnToMore_SegmentsPerRange_IfCurrentRebuild_GainsMoreThan.value
+	g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan =
+		l_Ask.g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan.value
     -- ...default is 40 or less.
 	g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan =
-    l_Ask.UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan.value
+    l_Ask.g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan.value
 
-	g_bUserSelected_PerformExtraStabilize = l_Ask.bUserSelected_PerformExtraStabilize.value
+	g_bUserSelected_PerformExtraStabilize = l_Ask.g_bUserSelected_PerformExtraStabilize.value
   -- ...default is false.
   
 	g_UserSelected_SkipFusingBestPosition_IfCurrentRebuild_LosesMoreThan =
-    l_Ask.UserSelected_SkipFusingBestPosition_IfCurrentRebuild_LosesMoreThan.value
+    l_Ask.g_UserSelected_SkipFusingBestPosition_IfCurrentRebuild_LosesMoreThan.value
 
 	g_UserSelected_NumberOfTimesToRebuildEach_SegmentRange_PerRunCycle =
-		l_Ask.UserSelected_NumberOfTimesToRebuildEach_SegmentRange_PerRunCycle.value
+		l_Ask.g_UserSelected_NumberOfTimesToRebuildEach_SegmentRange_PerRunCycle.value
 
 	g_UserSelected_StartingNumberOf_SegmentRanges_ToRebuild_PerRunCycle =
-		l_Ask.UserSelected_StartingNumberOf_SegmentRanges_ToRebuild_PerRunCycle.value
+		l_Ask.g_UserSelected_StartingNumberOf_SegmentRanges_ToRebuild_PerRunCycle.value
 	g_UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle =
-		l_Ask.UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle.value
+		l_Ask.g_UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle.value
 	
 	g_bUserSelected_ShakeAndWiggle_WithSideChainsAndBackbone_WithSelectedAndNearby_Segments =
-		l_Ask.bUserSelected_ShakeAndWiggle_WithSideChainsAndBackbone_WithSelectedAndNearby_Segments.value
+		l_Ask.g_bUserSelected_ShakeAndWiggle_WithSideChainsAndBackbone_WithSelectedAndNearby_Segments.value
 	g_bUserSelected_ShakeAndWiggle_WithSelected_Segments =
-    l_Ask.bUserSelected_ShakeAndWiggle_WithSelected_Segments.value
+    l_Ask.g_bUserSelected_ShakeAndWiggle_WithSelected_Segments.value
 	
-	g_UserSelected_Shake_ClashImportance = l_Ask.UserSelected_Shake_ClashImportance.value
-	g_bUserSelected_Stabilize = l_Ask.bUserSelected_Stabilize.value
+	g_UserSelected_Shake_ClashImportance = l_Ask.g_UserSelected_Shake_ClashImportance.value
+	g_bUserSelected_Stabilize = l_Ask.g_bUserSelected_Stabilize.value
   
-	g_bUserSelected_FuseBestPosition = l_Ask.bUserSelected_FuseBestPosition.value
+	g_bUserSelected_FuseBestPosition = l_Ask.g_bUserSelected_FuseBestPosition.value
 
 end -- AskMoreOptions()
 function Display_SelectedOptions()
@@ -2938,7 +2976,8 @@ function PrepareToRebuildSegmentRanges(l_How)
 				if l_EndSegment <= g_SegmentCount_WithoutLigands then
           
 					-- g_SegmentRangesToRebuildTable = {StartSegment, EndSegment}
-					g_SegmentRangesToRebuildTable[#g_SegmentRangesToRebuildTable + 1] = {l_StartSegment, l_EndSegment}
+					g_SegmentRangesToRebuildTable[#g_SegmentRangesToRebuildTable + 1] = 
+            {l_StartSegment, l_EndSegment}
 				end
         
 			end
@@ -3155,7 +3194,7 @@ function CheckIfAlreadyRebuiltSegmentsMustBeIncluded()
     
 		if l_ConsecutiveSegmentsCounter >= g_RequiredNumberOfConsecutiveSegments then
       
-			-- Yeah, once more segment range with enough consecutive Segments to meet 
+			-- Yeah, another segment range with enough consecutive Segments to meet 
       -- the minimun required segments per segment range, despite having a bunch
       -- of already-rebuilt (or ineligable because they are frozen or locked) 
       -- segments in our way...
@@ -3771,20 +3810,20 @@ function RebuildMany_SegmentRanges()
      -- This will be checked in bSegmentIsAllowedToBeRebuilt...
     g_PointsGained_Current_RebuildSegmentRange = l_DeepRebuildGain
     
-		-- The default for g_UserSelected_MoveOnToMore_SegmentsPerRange_IfCurrentRebuild_GainsMoreThan
+		-- The default for g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan
     -- is 40 or less. If we just gained more than
-    -- g_UserSelected_MoveOnToMore_SegmentsPerRange_IfCurrentRebuild_GainsMoreThan, 
+    -- g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan, 
 		-- then we figure, that's good enough for now. It is now time to move on to 
 		-- more consecutive segments per segment range...But why such a low number?
     l_RemainingSegmentRanges = #g_SegmentRangesToRebuildTable - l_SegmentRangeIndex
     
-		if l_DeepRebuildGain > g_UserSelected_MoveOnToMore_SegmentsPerRange_IfCurrentRebuild_GainsMoreThan and 
+		if l_DeepRebuildGain > g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan and 
        l_RemainingSegmentRanges > 0 then
          
       print("\n  The rebuild gain of " .. PrettyNumber(l_DeepRebuildGain) .. " is greater than the" ..
               " 'Move on to more consecutive segments per range if current rebuild gains" ..
             "\n  more than' value of " ..
-                g_UserSelected_MoveOnToMore_SegmentsPerRange_IfCurrentRebuild_GainsMoreThan .. 
+                g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan .. 
                " points (this value can be changed on the 'More Options' page);" ..
                " therefore, we will now skip the" .. 
             "\n  remaining " .. l_RemainingSegmentRanges .. " segment ranges with " ..
@@ -4314,12 +4353,7 @@ function SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_Radius)
   
 end -- function SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_Radius)
 function ShakeAndOrWiggle(l_How, l_Iterations, l_bShake_And_Wiggle_OnlySelectedSegments)
-  -- Called from 1 place  in FuseBestPositionEnd(),
-  --             2 places in FuseBestPositionEnd(),
-  --             3 places in FuseBestPosition2(),
-  --             4 places in StabilizeSegmentRange(),
-  --             4 places in RebuildOneSegmentRangeManyTimes(), and
-  --             2 places in RebuildMany_SegmentRanges()...
+  -- Called from 5 functions...
   
 	if l_How == nil then -- l_How is optional; the default is "WiggleAll"
 		l_How = "WiggleAll"
@@ -4342,10 +4376,48 @@ function ShakeAndOrWiggle(l_How, l_Iterations, l_bShake_And_Wiggle_OnlySelectedS
 
 	if l_How == "ShakeAndWiggle" then
 		-- Shake is not considered to do much in second or more rounds
+    
 		if l_bShake_And_Wiggle_OnlySelectedSegments == true then
+      
+    RememberSolutionWithDisulfideBondsIntact()
+		-- This is what you are looking for...
+		-- This is what you are looking for...
+    
 			structure.ShakeSidechainsSelected(1)
+    
+		-- This is what you are looking for...
+		-- This is what you are looking for...
+    CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
+      
+    local l_Score_After_Shake = GetPoseTotalScore()
+    if l_Score_After_Shake > g_Score_ScriptBest then
+      SaveBest() -- <-- Updates g_Score_ScriptBest
+      print("Score: " .. PrettyNumber(g_Score_ScriptBest) .. "," ..
+        " after ShakeSidechainsSelected(1x)" ..
+        " round " .. l_Round .. " of " .. l_MaxRounds ..
+        " with segments " .. l_StartSegment .. "-" .. l_EndSegment)
+    elseif l_Score_After_Shake < g_Score_ScriptBest then
+      -- Should will undo our last change because it dropped our score...
+      recentbest.Restore()
+    end
+      
+      
+     
 		else
+      
+    RememberSolutionWithDisulfideBondsIntact()
+		-- This is what you are looking for...
+		-- This is what you are looking for...
+    
 			structure.ShakeSidechainsAll(1)
+    
+		-- This is what you are looking for...
+		-- This is what you are looking for...
+    CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
+      
+      
+      
+      
 		end
 	end
 	
@@ -4361,9 +4433,36 @@ function ShakeAndOrWiggle(l_How, l_Iterations, l_bShake_And_Wiggle_OnlySelectedS
 	l_Iterations = 2 * l_WiggleFactor * l_Iterations
 
 	if l_bShake_And_Wiggle_OnlySelectedSegments == true then
+    
+    RememberSolutionWithDisulfideBondsIntact()
+		-- This is what you are looking for...
+		-- This is what you are looking for...
+    
 		structure.WiggleSelected(l_Iterations, l_bWiggleBackbone, l_bWiggleSideChains)
+    
+		-- This is what you are looking for...
+		-- This is what you are looking for...
+    CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
+    
+    
+    
+    
+    
 	else
+    
+    RememberSolutionWithDisulfideBondsIntact()
+		-- This is what you are looking for...
+		-- This is what you are looking for...
+    
 		structure.WiggleAll(l_Iterations, l_bWiggleBackbone, l_bWiggleSideChains)
+    
+		-- This is what you are looking for...
+		-- This is what you are looking for...
+    CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
+    
+    
+    
+    
 	end
 
 end -- ShakeAndOrWiggle(l_How, l_Iterations, l_bShake_And_Wiggle_OnlySelectedSegments)
