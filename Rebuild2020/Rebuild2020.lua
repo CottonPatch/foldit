@@ -52,7 +52,7 @@ function main()
       
 		g_RunCycle = l_RunCycle
     
- 		print("\nScore: " .. PrettyNumber(g_Score_ScriptBest) .. "," ..
+ 		print("\nScore " .. PrettyNumber(g_Score_ScriptBest) ..
       " Start of Run " .. g_RunCycle .. " of " .. g_UserSelected_NumberOfRunCycles .. "," ..
       " Rebuilding the " .. g_UserSelected_MaxNumberOf_SegmentRanges_ToRebuild_ThisRunCycle .. 
       " worst scoring segment ranges," .. 
@@ -247,7 +247,7 @@ function DefineGlobalVariables()
 	-- Used in Populate_g_ScorePartsTable() and DisplayPuzzleProperties()
 	
 	g_bMaxClashImportance = true
-	-- Used in SetClashImportance() and ShakeAndOrWiggle()
+	-- Used in SetClashImportance() and WiggleSelected()
 	
 	g_bProbableSymmetryPuzzle = false
   -- Used in DisplayPuzzleProperties() -- for informational display in log file only.
@@ -292,7 +292,15 @@ function DefineGlobalVariables()
   -- The following boolean UserSelectable 
   -- variables are sorted alphabetically...
   ---------------------------------------------------------  
-    
+
+	g_bUserSelected_AfterRebuild_ShakeAndWiggle_OnlySelectedSegments = true 
+  -- Used in AskMoreOptions(), Display_SelectedOptions() and RebuildOneSegmentRangeManyTimes()
+  -- (after each rebuild) not too slow.
+  
+	g_bUserSelected_AfterRebuild_ShakeAndWiggle_SelectedAndNearbySegments = false
+  -- Used in AskMoreOptions(), Display_SelectedOptions() and RebuildOneSegmentRangeManyTimes()
+  -- If the value of this variable is true the rebuild process will be very slow!
+  
 	g_bUserSelected_AlwaysAllowRebuildingAlreadyRebuilt_Segments = true
   -- Used in 7 functions...
 	-- ...User can change this on the Select Rebuild Options page.
@@ -307,6 +315,10 @@ function DefineGlobalVariables()
 	g_bUserSelected_Disable_Bands_DuringRebuild = l_NumberOfBands > 0
 	-- Used in bAskUserToSelect_RebuildOptions() and RebuildSelectedSegments()
   -- Set default to true if there are any bands.
+  
+	g_bUserSelected_DuringFuseAndStabilize_ShakeAndWiggle_SelectedAndNearbySegments = false
+  -- Used in bAskUserToSelect_RebuildOptions(), RebuildMany_SegmentRanges() and StabilizeSegmentRange()
+  -- When set to false then include nearby segments.
   
   g_bUserSelected_FuseBestPosition = true
 	-- Used in CheckForLowStartingScore(), AskMoreOptions(), Display_SelectedOptions() and
@@ -356,18 +368,6 @@ function DefineGlobalVariables()
 	g_bUserSelected_SelectMain4ScorePartsToStabilize = false
   -- Used in bAskUserToSelect_RebuildOptions()  
   
-	g_bUserSelected_ShakeAndWiggle_OnlySelectedSegments = true
-  -- Used in bAskUserToSelect_RebuildOptions(), RebuildMany_SegmentRanges() and StabilizeSegmentRange()
-  -- When set to false then include nearby segments.
-  
-	g_bUserSelected_ShakeAndWiggle_WithSelected_Segments = true 
-  -- Used in AskMoreOptions(), Display_SelectedOptions() and RebuildOneSegmentRangeManyTimes()
-  -- (after each rebuild) not too slow.
-  
-	g_bUserSelected_ShakeAndWiggle_WithSideChainsAndBackbone_WithSelectedAndNearby_Segments = false
-  -- Used in AskMoreOptions(), Display_SelectedOptions() and RebuildOneSegmentRangeManyTimes()
-  -- If the value of this variable is true the rebuild process will be very slow!
-  
   g_bUserSelected_Stabilize = true
   --  Used in CheckForLowStartingScore(), AskMoreOptions(), Display_SelectedOptions(),
   --  RebuildMany_SegmentRanges() and SaveBest()
@@ -376,13 +376,6 @@ function DefineGlobalVariables()
   -- The following non-UserSelectable 
   -- variables are sorted alphabetically...
   ---------------------------------------------------------
-
-	g_with_segments_x-y = "" -- For log file reporting; Example: " with segments 1-3"
-  -- Used in RebuildMany_SegmentRanges(),
-  --         RebuildOneSegmentRangeManyTimes(),
-  --         RebuildSelectedSegments(), 
-  --         ShakeAndOrWiggle() and
-  --         MutateSideChainsOfSelectedSegments()
 
 	g_DensityWeight = 0
 	-- Used in Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts(),
@@ -409,7 +402,14 @@ function DefineGlobalVariables()
   -- Clash importance value to use during the rebuild step.
   -- Always set to 0, so we really don't need it. 
   
-	g_RunCycle = 0
+  g_round_x_of_y = "" -- For log file reporting; Example: " round 1 of 10"
+  -- Used in RebuildMany_SegmentRanges(),
+  --         RebuildOneSegmentRangeManyTimes(),
+  --         RebuildSelectedSegments(), 
+  --         ShakeSelected() and
+  --         MutateSideChainsOfSelectedSegments()
+
+  g_RunCycle = 0
   -- Used in main() and
   --         RebuildMany_SegmentRanges(),
  	
@@ -419,6 +419,14 @@ function DefineGlobalVariables()
   g_Score_ScriptBest = GetPoseTotalScore()
   -- Used in SaveBest() and many others...
   
+  g_ScorePartText = "" -- Example: " ScorePart 4 (total)", " ScorePart 6 (ligand) 6=7=11" 
+  
+	g_with_segments_x_thru_y = "" -- For log file reporting; Example: " with segments 1-3"
+  -- Used in RebuildMany_SegmentRanges(),
+  --         RebuildOneSegmentRangeManyTimes(),
+  --         RebuildSelectedSegments(), 
+  --         ShakeSelected() and
+  --         MutateSideChainsOfSelectedSegments()
   
   ---------------------------------------------------------
   -- The following UserSelectable variables are
@@ -427,6 +435,12 @@ function DefineGlobalVariables()
   
 	g_UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle = 1
 	-- Used in AskMoreOptions() and main()
+  
+	g_UserSelected_AfterRebuild_ShakeAndWiggle_OnlySelectedSegments_ClashImportance = 0.31
+  -- Used in AskMoreOptions(),
+  --         Display_SelectedOptions() and
+  --         RebuildOneSegmentRangeManyTimes()
+  -- Clash imortance to use while shaking
 
 	g_UserSelected_ClashImportanceFactor = behavior.GetClashImportance()
 	-- Used in DefineGlobalVariables(), SetClashImportance() and AskUserToCheck_ClashImportance()
@@ -505,12 +519,6 @@ function DefineGlobalVariables()
   -- And, 3 consecutive segments is barely better then 4.
   -- Really, most of the gains are with just 2 consecutive segments!
   
-	g_UserSelected_Shake_ClashImportance = 0.31
-  -- Used in AskMoreOptions(),
-  --         Display_SelectedOptions() and
-  --         RebuildOneSegmentRangeManyTimes()
-  -- Clash imortance to use while shaking
-  
  	g_UserSelected_SketchBookPuzzle_MinimumGain_ForSave = 0
   -- Used in bAskUserToSelect_RebuildOptions() and SaveBest()
 
@@ -556,7 +564,7 @@ function DefineGlobalVariables()
 	--         bAskUserToSelect_RebuildOptions() and PrepareToRebuildSegmentRanges()
   
 	g_UserSelected_WiggleFactor = 1
-  -- Used in bAskUserToSelect_RebuildOptions(), Display_SelectedOptions() and ShakeAndOrWiggle()
+  -- Used in bAskUserToSelect_RebuildOptions(), Display_SelectedOptions() and WiggleSelected()
 
   -- ...end of UserSelected variables sorted alphabetically as much as possible.
 
@@ -778,18 +786,28 @@ function SetupLocalDebugFuntions()
 		return l_BandCount
 	end
 	behavior = {}
+  g_Debug_ClashImportance = -1 -- -1 forces it to get a new (positive) value 
+  --                               at first call to behavior.GetClashImportance.
 	behavior.GetClashImportance = function()
+    
 		-- local l_ClashImportance = 1
-		local l_ClashImportance
-		l_ClashImportance = math.random()
-		if l_ClashImportance > .7 then
+    if g_Debug_ClashImportance >=0 then
+      return g_Debug_ClashImportance
+    end
+
+    -- Let first value be whatever...
+		g_Debug_ClashImportance = math.random()
+		if g_Debug_ClashImportance > .7 then
 			-- Give 1 a better chance...
-			l_ClashImportance = 1
+			g_Debug_ClashImportance = 1
 		end
 		
-		return l_ClashImportance
+		return g_Debug_ClashImportance
 	end
-	behavior.SetClashImportance = function(l_ClashImportance) return end
+	behavior.SetClashImportance = function(l_ClashImportance)
+    g_Debug_ClashImportance = l_ClashImportance
+    return
+  end
 	behavior.SetFiltersDisabled = function(l_TrueOrFalse) return end
   
   -- currently not used...
@@ -1473,7 +1491,7 @@ function Populate_g_ActiveScorePartsTable()
         -- 10 points; instead, we activate the ScorePart and break out of this inner loop to
         -- start evaluating the next ScorePart...
       
-        print("  Active ScorePart: " .. l_ScorePart_Name)
+        --print("  Active ScorePart: " .. l_ScorePart_Name)
         
         break
       
@@ -1552,8 +1570,8 @@ function DisplayPuzzleProperties()
 	-- Check if this is likely a symmetry puzzle...
 	if g_bHasDensity == false then    
 		local l_ComputedScore = math.abs(l_Current_PoseTotalScore - l_SegmentTotal - 8000) -- why?
-		-- print("PoseTotalScore: " .. PrettyNumber(l_Current_PoseTotalScore ) .. 
-    --      " ComputedScore: " .. PrettyNumber(l_ComputedScore) .. "")
+		-- print("PoseTotalScore " .. PrettyNumber(l_Current_PoseTotalScore ) .. 
+    --      " ComputedScore " .. PrettyNumber(l_ComputedScore) .. "")
 		g_bProbableSymmetryPuzzle = l_ComputedScore > 2
 		if g_bProbableSymmetryPuzzle == true then
 			print("  Puzzle is a symmetry puzzle or has bonuses")
@@ -1565,7 +1583,7 @@ function DisplayPuzzleProperties()
           " Ligand scoring is active in ScorePart (slot) 6.")
   end 
   
-  print("  Starting score: " .. PrettyNumber(l_Current_PoseTotalScore))
+  print("  Starting score " .. PrettyNumber(l_Current_PoseTotalScore))
 
 end -- DisplayPuzzleProperties()
 function Populate_g_CysteineSegmentsTable()
@@ -1736,19 +1754,19 @@ function bAskUserToSelect_RebuildOptions()
 				g_UserSelected_ResetToStartValueAfterRebuildingWithThisMany_Consecutive_Segments, 1, 10, 0)
       
 		if g_bSketchBookPuzzle == true then
-			l_Ask.L2 = dialog.AddLabel("For a sketch book puzzle:")
-			l_Ask.L3 = dialog.AddLabel("Save the current position if the")
-			l_Ask.L4 = dialog.AddLabel("current rebuild gain is more than:")
+			l_Ask.L10 = dialog.AddLabel("For a sketch book puzzle:")
+			l_Ask.L11 = dialog.AddLabel("Save the current position if the")
+			l_Ask.L12 = dialog.AddLabel("current rebuild gain is more than:")
 			l_Ask.g_UserSelected_SketchBookPuzzle_MinimumGain_ForSave =
 				dialog.AddSlider("  Points:",
 					g_UserSelected_SketchBookPuzzle_MinimumGain_ForSave, 0, 100, 0)
 		end
     
-		l_Ask.L5 = dialog.AddLabel("Wiggle more when Clash Importance is maximum:")
+		l_Ask.L20 = dialog.AddLabel("Wiggle more when Clash Importance is maximum:")
 		l_Ask.g_UserSelected_WiggleFactor = 
       dialog.AddSlider("  WiggleFactor:", g_UserSelected_WiggleFactor, 1, 5, 0)
     
-		l_Ask.L6 = dialog.AddLabel("Select ScoreParts to stabilize, last choice overrides:")
+		l_Ask.L30 = dialog.AddLabel("Select ScoreParts to stabilize, last choice overrides:")
 		l_Ask.g_bUserSelected_SelectAllScorePartsToStabilize =
       dialog.AddCheckbox("Select all ScoreParts", g_bUserSelected_SelectAllScorePartsToStabilize)
 		l_Ask.g_bUserSelected_SelectMain4ScorePartsToStabilize =
@@ -1757,13 +1775,13 @@ function bAskUserToSelect_RebuildOptions()
 		l_Ask.bSelectScorePartsToStabilize =
       dialog.AddCheckbox("Manully select ScoreParts from a list...", false)
       
-		l_Ask.L7 = dialog.AddLabel("Maximum number of full cycles to run:")
+		l_Ask.L40 = dialog.AddLabel("Maximum number of full cycles to run:")
 		l_Ask.g_UserSelected_NumberOfRunCycles = 
       dialog.AddSlider("  Run cycles:", g_UserSelected_NumberOfRunCycles, 1, 40, 0)
     
-		l_Ask.L8 = dialog.AddLabel("Skip the first X number of segments ranges. User")
-    l_Ask.L9 = dialog.AddLabel("usually sets this value after a script crashes, or")
-    l_Ask.L10 = dialog.AddLabel("the power goes out.")
+		l_Ask.L50 = dialog.AddLabel("Skip the first X number of segments ranges. User")
+    l_Ask.L51 = dialog.AddLabel("usually sets this value after a script crashes, or")
+    l_Ask.L52 = dialog.AddLabel("the power goes out.")
 		l_Ask.g_UserSelected_NumberOf_SegmentRanges_ToSkip = dialog.AddSlider("  X segments:",
 				g_UserSelected_NumberOf_SegmentRanges_ToSkip, 0, g_SegmentCount_WithoutLigands, 0)
       
@@ -1775,12 +1793,14 @@ function bAskUserToSelect_RebuildOptions()
 				dialog.AddCheckbox("Select Mutate Options...", l_bUserWantsToSelectMutateOptions)
 		end
     
-		l_Ask.g_bUserSelected_ShakeAndWiggle_OnlySelectedSegments =
-			dialog.AddCheckbox("Shake and Wiggle only selected segments",
-			g_bUserSelected_ShakeAndWiggle_OnlySelectedSegments)
+    l_Ask.L60 = dialog.AddLabel("During Fuse And Stabilize - Shake and Wiggle:")
+    l_Ask.L61 = dialog.AddLabel("... Selected AND Nearby Segments!")
+    l_Ask.g_bUserSelected_DuringFuseAndStabilize_ShakeAndWiggle_SelectedAndNearbySegments =
+      dialog.AddCheckbox("Very SLOW!",
+        g_bUserSelected_DuringFuseAndStabilize_ShakeAndWiggle_SelectedAndNearbySegments)
     
-		l_Ask.L11 = dialog.AddLabel("Select ScoreParts to include when calculating worst")
-		l_Ask.L12 = dialog.AddLabel("scoring segments:")
+		l_Ask.L70 = dialog.AddLabel("Select ScoreParts to include when calculating worst")
+		l_Ask.L71 = dialog.AddLabel("scoring segments:")
 		l_Ask.bUserWantsToSelectScorePartsToIncludeWhenCalculatingWorseScoringSegments =
 			dialog.AddCheckbox("Select worst scoring ScoreParts...", false)
       
@@ -1792,7 +1812,7 @@ function bAskUserToSelect_RebuildOptions()
 		l_Ask.g_bUserSelected_ConvertAllSegmentsToLoops =
 			dialog.AddCheckbox("Convert all segments to loops", g_bUserSelected_ConvertAllSegmentsToLoops)
       
-		l_Ask.L13 = dialog.AddLabel("Always allow rebuilding already rebuilt segments:")
+		l_Ask.L80 = dialog.AddLabel("Always allow rebuilding already rebuilt segments:")
 		l_Ask.g_bUserSelected_AlwaysAllowRebuildingAlreadyRebuilt_Segments = dialog.AddCheckbox("Always allow",
 			g_bUserSelected_AlwaysAllowRebuildingAlreadyRebuilt_Segments)
     
@@ -1993,8 +2013,8 @@ function bAskUserToSelect_RebuildOptions()
 				end
 			end
       
-			g_bUserSelected_ShakeAndWiggle_OnlySelectedSegments =
-        l_Ask.g_bUserSelected_ShakeAndWiggle_OnlySelectedSegments.value
+			g_bUserSelected_DuringFuseAndStabilize_ShakeAndWiggle_SelectedAndNearbySegments =
+        l_Ask.g_bUserSelected_DuringFuseAndStabilize_ShakeAndWiggle_SelectedAndNearbySegments.value
       
 			if g_OriginalNumberOfDisulfideBonds > 1 then
 				g_bUserSelected_KeepDisulfideBonds_Intact = l_Ask.g_bUserSelected_KeepDisulfideBonds_Intact.value
@@ -2697,67 +2717,68 @@ function AskMoreOptions()
 
 	local l_Ask = dialog.CreateDialog("More Options")
 
-	l_Ask.l_0 = dialog.AddLabel("Perform Extra Stabilize (shake and wiggle more)")
+	l_Ask.L0 = dialog.AddLabel("Perform Extra Stabilize (shake and wiggle more)")
 	l_Ask.g_bUserSelected_PerformExtraStabilize =
 		dialog.AddCheckbox("Extra", g_bUserSelected_PerformExtraStabilize) -- default is false
 
-	l_Ask.l_1 = dialog.AddLabel("Move on to more consecutive segments per")
-	l_Ask.l_2 = dialog.AddLabel("range if current rebuild gains more than:")
+	l_Ask.L1 = dialog.AddLabel("Move on to more consecutive segments per")
+	l_Ask.L2 = dialog.AddLabel("range if current rebuild gains more than:")
 	l_Ask.g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan =
 		dialog.AddSlider("  Points:",
-			g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan, 0, 500, 0)
+			g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan, 0, 10000, 0)
       -- ...default is 40 or less.
 
-	l_Ask.l_3 = dialog.AddLabel("Skip fusing best position if current rebuild loses")
-	l_Ask.l_4 = dialog.AddLabel("more than (Points * # of segments per range / 3):")
+	l_Ask.L10 = dialog.AddLabel("Skip fusing best position if current rebuild loses")
+	l_Ask.L11 = dialog.AddLabel("more than (Points * # of segments per range / 3):")
 	l_Ask.g_UserSelected_SkipFusingBestPosition_IfCurrentRebuild_LosesMoreThan = 
 		dialog.AddSlider("  Points:", 
       g_UserSelected_SkipFusingBestPosition_IfCurrentRebuild_LosesMoreThan, -5, 200, 0)
 
-	l_Ask.l_7 = dialog.AddLabel("Only allow rebuilding already rebuilt segments")
-	l_Ask.l_9 = dialog.AddLabel("if current rebuild gains more than:")
+	l_Ask.L20 = dialog.AddLabel("Only allow rebuilding already rebuilt segments")
+	l_Ask.L21 = dialog.AddLabel("if current rebuild gains more than:")
 	l_Ask.g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan =
 		dialog.AddSlider("  Points:",
 			g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan, 0, 500, 0) 
       -- ...default depends on number of segments.
 
-	l_Ask.l_10 = dialog.AddLabel("Number of times to rebuild each segment range")
-	l_Ask.l_11 = dialog.AddLabel("per run cycle:") -- default is 15 (or 10)
+	l_Ask.L30 = dialog.AddLabel("Number of times to rebuild each segment range")
+	l_Ask.L31 = dialog.AddLabel("per run cycle:") -- default is 15 (or 10)
 	l_Ask.g_UserSelected_NumberOfTimesToRebuildEach_SegmentRange_PerRunCycle =
 		dialog.AddSlider("  Rebuilds:", 
       g_UserSelected_NumberOfTimesToRebuildEach_SegmentRange_PerRunCycle, 1, 100, 0)
 
-	l_Ask.l_12 = dialog.AddLabel("Starting number of segment ranges to rebuild per")
-	l_Ask.l_13 = dialog.AddLabel("run cycle:")
+	l_Ask.L40 = dialog.AddLabel("Starting number of segment ranges to rebuild per")
+	l_Ask.L41 = dialog.AddLabel("run cycle:")
 	l_Ask.g_UserSelected_StartingNumberOf_SegmentRanges_ToRebuild_PerRunCycle =
 		dialog.AddSlider("  Ranges / cycle:",
 			g_UserSelected_StartingNumberOf_SegmentRanges_ToRebuild_PerRunCycle, 1,
       g_SegmentCount_WithoutLigands, 0)
 
-	l_Ask.l_14 = dialog.AddLabel("Additional number of segment ranges to rebuild per")
-	l_Ask.l_15 = dialog.AddLabel("run cycle to add after each run cycle completes:")
+	l_Ask.L50 = dialog.AddLabel("Additional number of segment ranges to rebuild per")
+	l_Ask.L51 = dialog.AddLabel("run cycle to add after each run cycle completes:")
 	l_Ask.g_UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle =
 		dialog.AddSlider("  Add ranges:",
 			g_UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle, 0, 4, 0)
 
-	l_Ask.l_16 = dialog.AddLabel("Shake and Wiggle (with SideChains and Backbone)")
-	l_Ask.l_17 = dialog.AddLabel("with selected and nearby segments after each rebuild")
-	l_Ask.l_18 = dialog.AddLabel("(with clash importance: 1)")
-	l_Ask.g_bUserSelected_ShakeAndWiggle_WithSideChainsAndBackbone_WithSelectedAndNearby_Segments =
+	l_Ask.L60 = dialog.AddLabel("After Each Rebuild - Shake and Wiggle:")
+  
+	l_Ask.L61 = dialog.AddLabel("... Only Selected Segments!")
+	l_Ask.L62 = dialog.AddLabel("... with clash importance:")
+	l_Ask.g_UserSelected_AfterRebuild_ShakeAndWiggle_OnlySelectedSegments_ClashImportance =
+    dialog.AddSlider("", 
+      g_UserSelected_AfterRebuild_ShakeAndWiggle_OnlySelectedSegments_ClashImportance, 0, 1, 2)
+	l_Ask.g_bUserSelected_AfterRebuild_ShakeAndWiggle_OnlySelectedSegments = 
+		dialog.AddCheckbox("Not too slow!",
+      g_bUserSelected_AfterRebuild_ShakeAndWiggle_OnlySelectedSegments)
+  
+	l_Ask.L70 = dialog.AddLabel("... or, Selected AND Nearby Segments!")
+	l_Ask.L71 = dialog.AddLabel("... w/SideChains w/Backbone w/ClashImportance=1")
+	l_Ask.g_bUserSelected_AfterRebuild_ShakeAndWiggle_SelectedAndNearbySegments =
 		dialog.AddCheckbox("Very SLOW!",
-			g_bUserSelected_ShakeAndWiggle_WithSideChainsAndBackbone_WithSelectedAndNearby_Segments)
-		
-	l_Ask.l_19 = dialog.AddLabel("Shake and Wiggle with selected segments after")
-	l_Ask.l_20 = dialog.AddLabel("each rebuild.")
-	l_Ask.g_bUserSelected_ShakeAndWiggle_WithSelected_Segments = 
-		dialog.AddCheckbox("Not too slow", g_bUserSelected_ShakeAndWiggle_WithSelected_Segments)
+			g_bUserSelected_AfterRebuild_ShakeAndWiggle_SelectedAndNearbySegments)
 
-	l_Ask.l_21 = dialog.AddLabel("... with clash importance:")
-	l_Ask.g_UserSelected_Shake_ClashImportance = 
-    dialog.AddSlider(" CI:", g_UserSelected_Shake_ClashImportance, 0, 1, 2)
-	
-	l_Ask.l_22 = dialog.AddLabel("Stabilize instead of local shake")
-	l_Ask.l_23 = dialog.AddLabel("only:")
+	l_Ask.L80 = dialog.AddLabel("Stabilize instead of local shake")
+	l_Ask.L81 = dialog.AddLabel("only:")
 	l_Ask.g_bUserSelected_Stabilize =
     dialog.AddCheckbox("Normal", g_bUserSelected_Stabilize)
 	l_Ask.g_bUserSelected_FuseBestPosition =
@@ -2786,13 +2807,17 @@ function AskMoreOptions()
 	g_UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle =
 		l_Ask.g_UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle.value
 	
-	g_bUserSelected_ShakeAndWiggle_WithSideChainsAndBackbone_WithSelectedAndNearby_Segments =
-		l_Ask.g_bUserSelected_ShakeAndWiggle_WithSideChainsAndBackbone_WithSelectedAndNearby_Segments.value
-	g_bUserSelected_ShakeAndWiggle_WithSelected_Segments =
-    l_Ask.g_bUserSelected_ShakeAndWiggle_WithSelected_Segments.value
+	g_UserSelected_AfterRebuild_ShakeAndWiggle_OnlySelectedSegments_ClashImportance =
+    l_Ask.g_UserSelected_AfterRebuild_ShakeAndWiggle_OnlySelectedSegments_ClashImportance.value
 	
-	g_UserSelected_Shake_ClashImportance = l_Ask.g_UserSelected_Shake_ClashImportance.value
-	g_bUserSelected_Stabilize = l_Ask.g_bUserSelected_Stabilize.value
+	g_bUserSelected_AfterRebuild_ShakeAndWiggle_OnlySelectedSegments =
+    l_Ask.g_bUserSelected_AfterRebuild_ShakeAndWiggle_OnlySelectedSegments.value
+    
+	g_bUserSelected_AfterRebuild_ShakeAndWiggle_SelectedAndNearbySegments =
+		l_Ask.g_bUserSelected_AfterRebuild_ShakeAndWiggle_SelectedAndNearbySegments.value
+    
+	g_bUserSelected_Stabilize = 
+    l_Ask.g_bUserSelected_Stabilize.value
   
 	g_bUserSelected_FuseBestPosition = l_Ask.g_bUserSelected_FuseBestPosition.value
 
@@ -2806,15 +2831,15 @@ function Display_SelectedOptions()
 	-- g_UserSelected_StartRebuildingWithThisMany_Consecutive_Segments = 2
 	-- g_UserSelected_ResetToStartValueAfterRebuildingWithThisMany_Consecutive_Segments = 4
 
-	--print("  Start Processing With This Many Consecutive Segments: [" ..
+	--print("  Start Rebuilding With This Many Consecutive Segments: [" ..
 	--	g_UserSelected_StartRebuildingWithThisMany_Consecutive_Segments .. "]")
-	--print("  Stop After Processing With This Many Consecutive Segments: [" ..
+	--print("  Reset To Start Value After Processing With This Many Consecutive Segments: [" ..
 	--	g_UserSelected_ResetToStartValueAfterRebuildingWithThisMany_Consecutive_Segments .. "]")
 
 	print("  Segments to work on: [" ..
 		ConvertSegmentRangesTableToListOfSegmentRanges(g_SegmentRangesToRebuildTable) .. "]")
 
-	--print("  Number of rebuild-one-segment-range attempts per run cycle: [" ..
+	--print("  Number of times to rebuild each segment range per run cycle: [" ..
 	--	g_UserSelected_NumberOfTimesToRebuildEach_SegmentRange_PerRunCycle .. "]")
 
 	if g_UserSelected_WiggleFactor > 1 then
@@ -2825,14 +2850,24 @@ function Display_SelectedOptions()
 		print("  Converting all segments to loops...")
 	end
 
-	if g_bUserSelected_ShakeAndWiggle_WithSideChainsAndBackbone_WithSelectedAndNearby_Segments == true then
-		print("  Shake and Wiggle (with SideChains and Backbone)" ..
-           " with selected and nearby segments after each rebuild" ..
-          " (with clash importance = 1.0)")
-	elseif g_bUserSelected_ShakeAndWiggle_WithSelected_Segments == true then
-		print("  Shake and Wiggle selected segments after each rebuild" ..
-          " (with clash importance: " .. g_UserSelected_Shake_ClashImportance .. ")")
+	if g_bUserSelected_AfterRebuild_ShakeAndWiggle_OnlySelectedSegments == true then
+  
+		print("  After Each Rebuild - Shake and Wiggle: Only Selected Segments!" ..
+          " (with clash importance: " .. 
+          g_UserSelected_AfterRebuild_ShakeAndWiggle_OnlySelectedSegments_ClashImportance .. ")")
+        
+	elseif g_bUserSelected_AfterRebuild_ShakeAndWiggle_SelectedAndNearbySegments == true then
+    
+		print("  After Each Rebuild - Shake and Wiggle: Selected AND Nearby Segments!" ..
+          " (w/SideChains w/Backbone w/Clash Importance = 1.0)")    
 	end
+  
+  if g_bUserSelected_DuringFuseAndStabilize_ShakeAndWiggle_SelectedAndNearbySegments == false then
+    
+		print("  During Fuse and Stabilize - Shake and Wiggle: Only Selected Segments!")        
+  else
+		print("  During Fuse and Stabilize - Shake and Wiggle: Selected AND Nearby Segments!")        
+  end
 
 	if g_bUserSelected_Stabilize == false then
     print("  Skip Stabilize. Instead, perform local shake.")
@@ -2975,12 +3010,6 @@ function PrepareToRebuildSegmentRanges(l_How)
 			
 			Populate_g_SegmentRangesTable_WithWorstScoring_SegmentRanges()
 			
-			--print("\nRun " .. g_RunCycle .. " of " .. g_UserSelected_NumberOfRunCycles .. "," ..
-			--  " " .. g_RequiredNumberOfConsecutiveSegments .. " of " .. 
-			--  g_UserSelected_ResetToStartValueAfterRebuildingWithThisMany_Consecutive_Segments ..
-      --  " consecutive segments," ..
-			--	" Current score: " .. PrettyNumber(l_Current_PoseTotalScore) .. "")
-      
 			-- Here's what you are looking for...
 			-- Here's what you are looking for...
 			RebuildMany_SegmentRanges()
@@ -3300,11 +3329,12 @@ end -- CheckIfAlreadyRebuiltSegmentsMustBeIncluded()
 function bSegmentIsAllowedToBeRebuilt(l_SegmentIndex)
   -- Called from bSegmentRangeIsAllowedToBeRebuilt()...
 
-  -- Normally all worst scoring segment ranges are selected to be rebuilt.
-  -- They can only be removed on the "Select Segments to Rebuild" page...
+  -- Normally all worst scoring segment are selected to be rebuilt,
+  -- unless they are frozen or locked.
+  -- However, segments can also be unselected on the "Select Segments to Rebuild" page.
   -- g_bSegmentsToRebuildBooleanTable is populated in main()
   if g_bSegmentsToRebuildBooleanTable[l_SegmentIndex] == false then
-			return false -- note how this option overrides the below options.
+			return false -- Note: this option overrides the below options.
 	end
 
   if g_bUserSelected_AlwaysAllowRebuildingAlreadyRebuilt_Segments == true then
@@ -3322,7 +3352,7 @@ function bSegmentIsAllowedToBeRebuilt(l_SegmentIndex)
   end
   
   -- This segment has not already been rebuilt and
-  -- the user did not unselect the segment range...
+  -- the user did not unselect it...
   return true
   
 end -- function bSegmentIsAllowedToBeRebuilt(l_SegmentIndex)
@@ -3500,12 +3530,6 @@ function RebuildMany_SegmentRanges()
 
 	Display_SegmentRanges()
 
-	local l_Current_PoseTotalScore = 0
-	local l_DeepRebuildGain = 0
-	local l_Score_Before_SeveralChangesToSegmentRange = 0
-	local l_DisplayGainFromThis = "" -- to report where gains came from
-	local l_CurrentHighScore = 0
-  
 	if g_bUserSelected_ConvertAllSegmentsToLoops == true then
 		ConvertAllSegmentsToLoops()  -- why?
 	end
@@ -3524,17 +3548,13 @@ function RebuildMany_SegmentRanges()
   --                           bFirstInASetOfScorePartsWithMatchingPoseTotalScore=5}
 	for l_SegmentRangeIndex = 1, #g_SegmentRangesToRebuildTable do
     
-		l_Score_Before_SeveralChangesToSegmentRange = g_Score_ScriptBest
+		local l_Score_Before_SeveralChangesToSegmentRange = g_Score_ScriptBest
     
 		-- g_SegmentRangesToRebuildTable={StartSegment=1, EndSegment=2}
 		l_StartSegment = g_SegmentRangesToRebuildTable[l_SegmentRangeIndex][srtrt_StartSegment]
 		l_EndSegment = g_SegmentRangesToRebuildTable[l_SegmentRangeIndex][srtrt_EndSegment]
     
-		l_DisplayGainFromThis = "" -- to report where gains came from
-		l_CurrentHighScore = -99999999
-    
-		
-    g_with_segments_x-y = " with segments " .. l_StartSegment .. "-" .. l_EndSegment
+    g_with_segments_x_thru_y = " with segments " .. l_StartSegment .. "-" .. l_EndSegment
 		
 		RememberSolutionWithDisulfideBondsIntact()
     
@@ -3542,326 +3562,214 @@ function RebuildMany_SegmentRanges()
 			g_bFoundAHighGain = false
 		end
    
-    local l_Points_Before_RebuildOneSegmentRangeManyTimes = 0
-    local l_Points_After_RebuildOneSegmentRangeManyTimes = 0
-    
-    l_Points_Before_RebuildOneSegmentRangeManyTimes = g_Score_ScriptBest
-    
     -- Here's what you are looking for!!!
     -- Here's what you are looking for!!!
     RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment)
     -- Here's what you are looking for!!!
     -- Here's what you are looking for!!!
     
-    l_Points_After_RebuildOneSegmentRangeManyTimes = GetPoseTotalScore()
-
-    if l_Points_After_RebuildOneSegmentRangeManyTimes > 
-       l_Points_Before_RebuildOneSegmentRangeManyTimes then
-         
-      if g_bSketchBookPuzzle == false then
-        
-        -- We just performed several rebuild attempts on one segment range.
-        -- Each of those rebuilt solutions was saved to foldit's undo history.
-        -- We now need to restore the best one of those recently saved solutions
-        -- as the current solution...
-        local l_Score_Before_RecentBestRestore = 0
-        local l_Score_After_RecentBestRestore = 0
-        
-        local l_GetRecentBestScore = 0
-        l_GetRecentBestScore = GetRecentBestScore() -- <<<--- This is semi important!
-        
-        if l_GetRecentBestScore > g_Score_ScriptBest then
-          
-          l_Score_Before_RecentBestRestore = g_Score_ScriptBest
-          
-          -- Save the current solution just in case we break any disufide
-          -- bonds while restoring the recentbest solution...
-          RememberSolutionWithDisulfideBondsIntact()
-          
-          -- Restore the recentbest solution, from foldit's undo history...
-          recentbest.Restore() -- <<<--- This is important!
-          
-          -- Make sure the restored solution didn't break any disulfide bonds.
-          -- If it did, then undo the restore...
-          CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
-          
-          l_Score_After_RecentBestRestore = GetPoseTotalScore()
-          -- Get the updated Pose Total Score from the restored solution...
-          -- Or, if a disulfide bond was broken by the restore, then we get
-          -- the score of the solution as it was just before the restore.
-          
-          if l_Score_After_RecentBestRestore > l_Score_Before_RecentBestRestore then
-            
-            SaveBest() -- <-- Updates g_Score_ScriptBest
-            
-            print("Score: " .. PrettyNumber(g_Score_ScriptBest) .. "," ..
-              " after Restore Recent Best" ..
-              g_with_segments_x-y)
-            
-            -- Note: This is only one of the two places where we call
-            --       Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields.
-            --       The other call to
-            --       Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields
-            --       is in RebuildOneSegmentRangeManyTimes(), about 200 lines up from here...
-            Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields(l_StartSegment,
-              l_EndSegment, 0)
-            
-          end -- if l_Score_After_RecentBestRestore > l_Score_Before_RecentBestRestore then
-        end -- if l_GetRecentBestScore > l_Current_PoseTotalScore then 
-      end -- if g_bSketchBookPuzzle == false then
-      
-      -- We just rebuilt one segment range many times. Now we are going to 
-      -- look at ScorePart score immprovements...
-      Update_g_ScorePart_Scores_Table_SetOfScorePartsWithMatchingPoseTotalScore_And_FirstInASet_Fields()
-      
-      --never! print(" ") -- add blank line
-      
-      -- Let's see if we can gain more points by 
-      -- Shaking and Wiggling nearby segments...
-      local l_SphereRadius = 12
-      SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
-      
-      -- For each one of the above segment range rebuild attempts that successfully 
-      -- gained points, we saved and associated the protein's pose (stucture) and 
-      -- PoseTotalScore with the ScoreParts that also improved during the same rebuild. 
-      -- Now, we will step through each one of improved ScoreParts poses for this
-      -- segment range and see if regional shaking and wiggling will futher improve our
-      -- score...
-      -- The ScorePart_Number is not only just a number associated with a ScorePart_Name,
-      -- it's also the foldit Undo history slot number where the protein's best-scoring- 
-      -- ScorePart pose was stored.
-      
-      local l_Score_Before_Stabilize = 0
-      local l_Score_After_Stabilize = 0      
-      local l_Score_Before_Regional_ShakeAndWiggle = 0
-      local l_Score_After_Regional_ShakeAndWiggle = 0
-      local l_CurrentHighestScoring_ScorePart_Number = 3 
-      -- ...set to 3 just in case it does not get set below, because, because, whatever.
-
-      --g_ScorePart_Scores_Table={ScorePart_Number=1, ScorePart_Score=2, PoseTotalScore=3,
-      --                          SetOfScorePartsWithMatchingPoseTotalScore=4,
-      --                          bFirstInASetOfScorePartsWithMatchingPoseTotalScore=5}
-      for l_ScorePart_Scores_TableIndex = 1, #g_ScorePart_Scores_Table do
-        
-        if g_ScorePart_Scores_Table[l_ScorePart_Scores_TableIndex]
-          [spst_bFirstInASetOfScorePartsWithMatchingPoseTotalScore] == true then
-          
-          local l_ScorePart_Number =
-            g_ScorePart_Scores_Table[l_ScorePart_Scores_TableIndex][spst_ScorePart_Number]
-          local l_SetOfScorePartsWithMatchingPoseTotalScore = 
-            g_ScorePart_Scores_Table[l_ScorePart_Scores_TableIndex]
-                                    [spst_SetOfScorePartsWithMatchingPoseTotalScore]
-          if string.len(l_SetOfScorePartsWithMatchingPoseTotalScore) <= 2 then
-            l_SetOfScorePartsWithMatchingPoseTotalScore = ""
-          else
-            l_SetOfScorePartsWithMatchingPoseTotalScore = " " .. 
-              l_SetOfScorePartsWithMatchingPoseTotalScore 
-          end
-          
-          local l_ScorePartText = ", ScorePart " ..
-                g_ScorePartsTable[l_ScorePart_Number - 3][spt_LongName] ..
-                l_SetOfScorePartsWithMatchingPoseTotalScore
-          
-          -- Reload the saved protein pose (protein shape)...
-          save.Quickload(l_ScorePart_Number) -- ScorePart_Number is being used as a Slot number here.
-          
-          RememberSolutionWithDisulfideBondsIntact()
-          
-          if g_bUserSelected_Stabilize == true then
-            
-            l_Score_Before_Stabilize = g_Score_ScriptBest
-            
-            -- Here's what you are looking for!!!
-            -- Here's what you are looking for!!!
-            StabilizeSegmentRange(l_StartSegment, l_EndSegment)
-            -- Here's what you are looking for!!!
-            -- Here's what you are looking for!!!
-            
-            CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
-            
-            l_Score_After_Stabilize = GetPoseTotalScore()
-            
-            if l_Score_After_Stabilize > l_Score_Before_Stabilize then
-              
-              l_CurrentHighestScoring_ScorePart_Number = l_ScorePart_Number
-              
-              if g_bUserSelected_PerformExtraStabilize == true then -- default is false
-                l_FunctionName = "Extra Stabilize"
-              else
-                l_FunctionName = "Stabilize"
-              end
-              
-              SaveBest() -- <-- Updates g_Score_ScriptBest
-              
-              -- g_ScorePartsTable{ScorePart_Number=1, ScorePart_Name=2, bScorePart_IsActive=3, LongName=4}
-              print("Score: " .. PrettyNumber(g_Score_ScriptBest) .. "," ..
-                " after " .. l_FunctionName .. " ScorePart " ..
-                g_ScorePartsTable[l_ScorePart_Number - 3][spt_LongName] ..
-                l_SetOfScorePartsWithMatchingPoseTotalScore ..
-                g_with_segments_x-y)
-              -- SetOfScorePartsWithMatchingPoseTotalScore examples: "4", "5=7=12", "[6=9]", "[8=11=13]"
-            
-            end -- if l_Score_After_Stabilize > l_Score_Before_Stabilize then
-            
-          else -- g_bUserSelected_Stabilize == false
-            
-            -- Perform local ShakeAndWiggle w/SideChains instead...
-            
-            local l_Iterations = 1
-            local l_bShake_And_Wiggle_OnlySelectedSegments = true
-            
-            SetClashImportance(1)
-            
-            l_Score_Before_Regional_ShakeAndWiggle = g_Score_ScriptBest
-            
-            -- Here's what you are looking for!!!
-            -- Here's what you are looking for!!!
-            ShakeAndOrWiggle("ShakeAndWiggle", l_Iterations, l_bShake_And_Wiggle_OnlySelectedSegments)
-            ShakeAndOrWiggle("WiggleSideChains", l_Iterations, l_bShake_And_Wiggle_OnlySelectedSegments)
-            -- Here's what you are looking for!!!
-            -- Here's what you are looking for!!!
-            
-            CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
-            l_Score_After_Regional_ShakeAndWiggle = GetPoseTotalScore()
-            
-            if l_Score_After_Regional_ShakeAndWiggle > l_Score_Before_Regional_ShakeAndWiggle then
-              
-              l_CurrentHighestScoring_ScorePart_Number = l_ScorePart_Number
-                
-              SaveBest() -- <-- Updates g_Score_ScriptBest
-              
-              -- g_ScorePartsTable{ScorePart_Number=1, ScorePart_Name=2, bScorePart_IsActive=3, LongName=4}
-              print("Score: " .. PrettyNumber(g_Score_ScriptBest) .. "," ..
-                " after Regional ShakeAndWiggle w/Sidechains ScorePart " ..
-                g_ScorePartsTable[l_ScorePart_Number - 3][spt_LongName] ..
-                l_SetOfScorePartsWithMatchingPoseTotalScore ..
-                g_with_segments_x-y)
-              -- SetOfScorePartsWithMatchingPoseTotalScore examples: "4", "5=7=12", "[6=9]", "[8=11=13]"
-            
-            end -- if l_Score_After_Regional_ShakeAndWiggle > l_Score_Before_Regional_ShakeAndWiggle then
-            
-          end -- if g_bUserSelected_Stabilize == true then          
-          
-          if g_bUserSelected_Mutate_After_Stabilize == true then
-            
-            -- Here's what you are looking for!!!
-            -- Here's what you are looking for!!!
-            MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, "", l_ScorePartText)
-            -- Here's what you are looking for!!!
-            -- Here's what you are looking for!!!
-
-          end -- if g_bUserSelected_Mutate_After_Stabilize == true then
-          
-          save.Quicksave(l_ScorePart_Number) -- Save          
-            
-        end -- if g_ScorePart_Scores_Table[l_ScorePart_Scores_TableIndex][spst_bFirstInASetOfScorePartsW...
-        
-      end -- for l_ScorePart_Scores_TableIndex = 1, #g_ScorePart_Scores_Table do
-      
-      -- Load the best ScorePart pose...
-      save.Quickload(l_CurrentHighestScoring_ScorePart_Number)
-      
-      local l_Score_After_SeveralChangesToSegmentRange = 0
-      l_Score_After_SeveralChangesToSegmentRange = GetPoseTotalScore()
-      
-      local l_PotentialPointLoss = l_Score_Before_SeveralChangesToSegmentRange - 
-                                   l_Score_After_SeveralChangesToSegmentRange
-                                    
-      local l_MaxLossAllowed = g_UserSelected_SkipFusingBestPosition_IfCurrentRebuild_LosesMoreThan * 
-                              (l_EndSegment - l_StartSegment + 1) / 3
-                              
-      if g_bUserSelected_FuseBestPosition == true and 
-         l_PotentialPointLoss < l_MaxLossAllowed then
-        
-        -- This checks for g_bUserSelected_Mutate_After_Stabilize == false because
-        -- if it were true, then we would have already performed the mutate above, after the
-        -- Stabilize. duh
-        if g_bUserSelected_Mutate_Before_FuseBestPosition == true and
-           g_bUserSelected_Mutate_After_Stabilize == false then
-             
-          -- Here's what you are looking for!!!
-          -- Here's what you are looking for!!!
-            MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, "", "")
-          -- Here's what you are looking for!!!
-          -- Here's what you are looking for!!!
-          
-        end -- if g_bUserSelected_Mutate_Before_FuseBestPosition == true and g_bUserSelected_Mutate_Af...
-        
-        save.Quicksave(4) -- Save        
-        
-        local l_Score_Before_FuseBestPosition = 0
-        local l_Score_After_FuseBestPosition = 0
-        
-        l_Score_Before_FuseBestPosition = g_Score_ScriptBest
-
-        if g_bUserSelected_KeepDisulfideBonds_Intact == true then
-          
-          -- Here's what you are looking for!!!
-          -- Here's what you are looking for!!!
-          -- note: using the global value for 4th parameter here...
-          FuseBestPosition(4, RememberSolutionWithDisulfideBondsIntact,
-            CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact,
-            g_bUserSelected_ShakeAndWiggle_OnlySelectedSegments)
-          -- Here's what you are looking for!!!
-          -- Here's what you are looking for!!!
-          
-        else
-          
-          -- Here's what you are looking for!!!
-          -- Here's what you are looking for!!!
-          FuseBestPosition(4, nil, nil, g_bUserSelected_ShakeAndWiggle_OnlySelectedSegments)
-          -- Here's what you are looking for!!!          
-          -- Here's what you are looking for!!!          
-        
-        end
-        
-        l_Score_After_FuseBestPosition = GetPoseTotalScore()
-        
-        if l_Score_After_FuseBestPosition > l_Score_Before_FuseBestPosition then 
-          
-          SaveBest() -- <-- Updates g_Score_ScriptBest
-          
-          print("Score: " .. PrettyNumber(g_Score_ScriptBest) .. "," ..
-            " after FuseBestPosition" ..
-            g_with_segments_x-y)
-        
-        end       
-        
-        if g_bUserSelected_Mutate_After_FuseBestPosition == true then
-          
-          -- Here's what you are looking for!!!
-          -- Here's what you are looking for!!!
-          MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, "", "")
-          -- Here's what you are looking for!!!
-          -- Here's what you are looking for!!!
-          
-        end
-        
-      end -- if g_bUserSelected_FuseBestPosition == true and 
-      
-      save.Quickload(3) -- Load (Best pose is always stored in slot 3)
-      
-    else  -- if l_Points_After_RebuildOneSegmentRangeManyTimes > l_Points_Before_RebuildOneSegmentRange...
-      
-      -- We did not find an improvement, so let's restore the last known good position...
-      save.Quickload(3) -- Load (Best pose is always stored in slot 3)
-      
-    end -- if l_Points_After_RebuildOneSegmentRangeManyTimes > l_Points_Before_RebuildOneSegmentRangeMan...
+    -- We just rebuilt one segment range many times. 
+    -- Now let's look for ScorePart score improvements...
+    Update_g_ScorePart_Scores_Table_SetOfScorePartsWithMatchingPoseTotalScore_And_FirstInASet_Fields()
     
+    -- For each one of the above segment range rebuild attempts that successfully 
+    -- gained points, we saved and associated the protein's pose (stucture) and 
+    -- PoseTotalScore with the ScoreParts that also improved during the same rebuild. 
+    -- Now, we will step through each one of improved ScoreParts poses for this
+    -- segment range and see if regional shaking and wiggling will futher improve our
+    -- score...
+    -- The ScorePart_Number is not only just a number associated with a ScorePart_Name,
+    -- it's also the foldit Undo history slot number where the protein's best-scoring- 
+    -- ScorePart pose was stored.
+    
+    local l_CurrentHighestScoring_ScorePart_Number = 3 
+    -- ...set to 3 just in case it does not get set below, because, because, whatever.
+
+    --g_ScorePart_Scores_Table={ScorePart_Number=1, ScorePart_Score=2, PoseTotalScore=3,
+    --                          SetOfScorePartsWithMatchingPoseTotalScore=4,
+    --                          bFirstInASetOfScorePartsWithMatchingPoseTotalScore=5}
+    for l_ScorePart_Scores_TableIndex = 1, #g_ScorePart_Scores_Table do
+      
+      if g_ScorePart_Scores_Table[l_ScorePart_Scores_TableIndex]
+        [spst_bFirstInASetOfScorePartsWithMatchingPoseTotalScore] == true then
+        
+        local l_ScorePart_Number =
+          g_ScorePart_Scores_Table[l_ScorePart_Scores_TableIndex][spst_ScorePart_Number]
+        local l_SetOfScorePartsWithMatchingPoseTotalScore = 
+          g_ScorePart_Scores_Table[l_ScorePart_Scores_TableIndex]
+                                  [spst_SetOfScorePartsWithMatchingPoseTotalScore]
+        if string.len(l_SetOfScorePartsWithMatchingPoseTotalScore) <= 2 then
+          l_SetOfScorePartsWithMatchingPoseTotalScore = ""
+        else
+          l_SetOfScorePartsWithMatchingPoseTotalScore = " " .. 
+            l_SetOfScorePartsWithMatchingPoseTotalScore 
+        end
+        
+        -- g_ScorePartsTable{ScorePart_Number=1, ScorePart_Name=2, bScorePart_IsActive=3, LongName=4}
+        g_ScorePartText = " ScorePart " ..
+          g_ScorePartsTable[l_ScorePart_Number - 3][spt_LongName] ..
+          l_SetOfScorePartsWithMatchingPoseTotalScore
+        -- g_ScorePartText examples: " ScorePart 4 (total)", " ScorePart 6 (ligand) 6=7=11"
+        -- SetOfScorePartsWithMatchingPoseTotalScore examples: "4", "5=7=12", "[6=9]", "[8=11=13]"
+        
+        -- Reload the saved protein pose (protein shape)...
+        save.Quickload(l_ScorePart_Number) -- ScorePart_Number is being used as a Slot number here.
+        
+        --if g_bUserSelected_DuringFuseAndStabilize_ShakeAndWiggle_SelectedAndNearbySegments == true then
+            
+        local l_SphereRadius = 12
+        SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
+        g_with_segments_x_thru_y = " within " .. l_SphereRadius .. " angstroms of" ..
+          " segments " .. l_StartSegment .. "-" .. l_EndSegment
+            
+        --else
+        --  
+        --  selection.DeselectAll()
+        --  selection.SelectRange(l_StartSegment, l_EndSegment)            
+        --  g_with_segments_x_thru_y = " with segments " .. l_StartSegment .. "-" .. l_EndSegment
+        --  
+        --end
+
+        local l_Score_Before_StabilizeOrLocalShakeAndWiggle = GetPoseTotalScore()
+        
+        if g_bUserSelected_Stabilize == true then          
+          
+          -- Here's what you are looking for!!!
+          -- Here's what you are looking for!!!
+          StabilizeSegmentRange(l_StartSegment, l_EndSegment)
+          -- Here's what you are looking for!!!
+          -- Here's what you are looking for!!!
+          
+        else -- g_bUserSelected_Stabilize == false
+          
+          -- Perform local ShakeAndWiggle w/SideChains instead of StabilizeSegmentRange()...
+          
+          SetClashImportance(1)
+          
+          selection.DeselectAll()
+          selection.SelectRange(l_StartSegment, l_EndSegment)          
+          g_with_segments_x_thru_y = " with segments " .. l_StartSegment .. "-" .. l_EndSegment          
+          
+          -- Here's what you are looking for!!!
+          -- Here's what you are looking for!!!
+          ShakeSelected("QuickStabilize")  -- FromWhere
+          WiggleSelected(1, false, true, "QuickStabilize") -- Iterations,bWBackbone,bWSideChains,FromWhere
+
+          -- Here's what you are looking for!!!
+          -- Here's what you are looking for!!!
+          
+        end -- if g_bUserSelected_Stabilize == true then          
+        
+        local l_Score_After_StabilizeOrLocalShakeAndWiggle = GetPoseTotalScore()
+        if l_Score_After_StabilizeOrLocalShakeAndWiggle > 
+           l_Score_Before_StabilizeOrLocalShakeAndWiggle then
+             
+          -- We will reload this highest scoring pose from all score parts
+          -- after we finish checking the scores from each score part...
+          l_CurrentHighestScoring_ScorePart_Number = l_ScorePart_Number
+             
+        end        
+        
+        if g_bUserSelected_Mutate_After_Stabilize == true then
+          
+          -- Here's what you are looking for!!!
+          -- Here's what you are looking for!!!
+          MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment)
+          -- Here's what you are looking for!!!
+          -- Here's what you are looking for!!!
+
+        end -- if g_bUserSelected_Mutate_After_Stabilize == true then
+        
+        save.Quicksave(l_ScorePart_Number) -- Save          
+          
+      end -- if g_ScorePart_Scores_Table[l_ScorePart_Scores_TableIndex][spst_bFirstInASetOfScorePartsW...
+      
+    end -- for l_ScorePart_Scores_TableIndex = 1, #g_ScorePart_Scores_Table do    
+  
+    -- g_ScorePartText = "" -- This can stay set for the next bit of code. Don't worry, 
+    --                         g_ScorePartText gets cleared near the end of this function.
+    
+    -- Load the best ScorePart pose...
+    save.Quickload(l_CurrentHighestScoring_ScorePart_Number)
+    
+    local l_Score_After_SeveralChangesToSegmentRange = GetPoseTotalScore()
+    
+    local l_PotentialPointLoss = l_Score_Before_SeveralChangesToSegmentRange - 
+                                 l_Score_After_SeveralChangesToSegmentRange
+                                  
+    local l_MaxLossAllowed = g_UserSelected_SkipFusingBestPosition_IfCurrentRebuild_LosesMoreThan * 
+                            (l_EndSegment - l_StartSegment + 1) / 3
+                            
+    if g_bUserSelected_FuseBestPosition == true and 
+       l_PotentialPointLoss < l_MaxLossAllowed then
+      
+      -- This following checks if g_bUserSelected_Mutate_After_Stabilize == false because
+      -- if it were true, then we would have already performed the mutate above, after the
+      -- Stabilize. duh
+      if g_bUserSelected_Mutate_Before_FuseBestPosition == true and
+         g_bUserSelected_Mutate_After_Stabilize == false then
+           
+        -- Here's what you are looking for!!!
+        -- Here's what you are looking for!!!
+          MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, "", "")
+        -- Here's what you are looking for!!!
+        -- Here's what you are looking for!!!
+        
+      end -- if g_bUserSelected_Mutate_Before_FuseBestPosition == true and g_bUserSelected_Mutate_Af...
+      
+      -- Prepare to Fuse...
+      save.Quicksave(4) -- Save        
+      
+      --if g_bUserSelected_DuringFuseAndStabilize_ShakeAndWiggle_SelectedAndNearbySegments == true then
+        
+      --  local l_SphereRadius = 12
+      --  SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
+      --  g_with_segments_x_thru_y = " within " .. l_SphereRadius .. " angstroms of" ..
+      --    " segments " .. l_StartSegment .. "-" .. l_EndSegment
+          
+      --else
+        
+      --  selection.DeselectAll()
+      --  selection.SelectRange(l_StartSegment, l_EndSegment)            
+      --  g_with_segments_x_thru_y = " with segments " .. l_StartSegment .. "-" .. l_EndSegment
+        
+      --end
+
+      -- Here's what you are looking for!!!
+      -- Here's what you are looking for!!!
+      --"Selected"
+      --"All"
+      --local l_SelectedOrAll
+      FuseBestScorePartPosition()
+      -- Here's what you are looking for!!!
+      -- Here's what you are looking for!!!        
+      
+      if g_bUserSelected_Mutate_After_FuseBestPosition == true then
+        
+        -- Here's what you are looking for!!!
+        -- Here's what you are looking for!!!
+        MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, "")
+        -- Here's what you are looking for!!!
+        -- Here's what you are looking for!!!        
+      end
+      
+    end -- if g_bUserSelected_FuseBestPosition == true and l_PotentialPointLoss < l_MaxLossAllowed then
+      
     local l_bBondsBroke = bOneOrMoreDisulfideBondsHaveBroken()
     
 		if g_bUserSelected_KeepDisulfideBonds_Intact == true and l_bBondsBroke == true then
         
-				print("\nOne or more disulfide bonds have broken. This should never happen." ..
-              "\nPlease report this to someone (who? Foldit? or the maker of this script?)." ..
+				print("\nOne or more disulfide bonds are broken at a point where they should not be." ..
+              "\nNormally this should never happen because we should be calling" ..
+               " RememberSolutionWithDisulfideBondsIntact() before any rebuild, mutate, shake or" ..
+               " wiggle." ..
+               "\nAnd we should be calling CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()" ..
+               " after any rebuild, mutate, shake or wiggle." ..
+              "\nIf you are getting this message in the log file, then check the code to" ..
+               " make sure the above mentioned calls are being made as required." ..
               "\nDiscarding score gains and restoring last known vaild protein pose.\n")
 				CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
         
-        -- I don't like this call to SaveBest() here. Perhaps move it into 
-        -- CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact() if it makes 
-        -- sense; otherwise, just remove it from here...
-        SaveBest() -- <-- Updates g_Score_ScriptBest
-      
 		end
     
 		SetSegmentsAlreadyRebuilt(l_StartSegment, l_EndSegment) -- <<-- This is important.
@@ -3874,14 +3782,14 @@ function RebuildMany_SegmentRanges()
     -- really good rebuild prospects of segment ranges with fewer consecutive segments...
     -- We need indisputable comparison data to prove this is a good idea...
     -- Comparison data should include many puzzle types, with score and time elapsed comparisons.
-    local l_Score_After_SeveralChangesToSegmentRange = GetPoseTotalScore()
+    local l_Score_After_SeveralMoreChangesToSegmentRange = GetPoseTotalScore()
     
-		local l_DeepRebuildGain = 0
-		l_DeepRebuildGain = l_Score_After_SeveralChangesToSegmentRange -
-                        l_Score_Before_SeveralChangesToSegmentRange
+		local l_DeepRebuildGain = l_Score_After_SeveralMoreChangesToSegmentRange -
+                              l_Score_Before_SeveralChangesToSegmentRange
     
-     -- This will be checked in bSegmentIsAllowedToBeRebuilt...
     g_PointsGained_Current_RebuildSegmentRange = l_DeepRebuildGain
+     -- This value of g_PointsGained_Current_RebuildSegmentRange is checked in 
+     -- the function bSegmentIsAllowedToBeRebuilt().
     
 		-- The default for g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan
     -- is 40 or less. If we just gained more than
@@ -3911,7 +3819,9 @@ function RebuildMany_SegmentRanges()
 	end -- for l_SegmentRangeIndex = 1, #g_SegmentRangesToRebuildTable do
   
   -- This is basically the end of the Run X of Y. Let's get ready to start the next Run...
-  g_with_segments_x-y = ""
+  g_with_segments_x_thru_y = ""
+  g_ScorePartText = "" -- if you don't clear this here, you will end up with the last g_ScorePartText
+  --                      in the log file for every subsequent non-ScorePart related ShakeAndWiggle
   
 	if g_bUserSelected_ConvertAllSegmentsToLoops == true and g_bSavedSecondaryStructure == true then
     
@@ -3924,7 +3834,7 @@ function RebuildMany_SegmentRanges()
     -- secondary structure at all? Doesn't that just denature the protein? I am soo confused.
     
 	end
-
+  
 end -- RebuildMany_SegmentRanges()
 function Display_SegmentRanges()
   -- Called from RebuildMany_SegmentRanges()...
@@ -3950,7 +3860,7 @@ function Display_SegmentRanges()
             
 	end -- for l_SegmentIndex = 1, l_MaxNumberOfSegmentRangesToDisplay do
 
-  l_ListOfSegmentRanges = "Score: " .. PrettyNumber(g_Score_ScriptBest) .. "," ..
+  l_ListOfSegmentRanges = "Score " .. PrettyNumber(g_Score_ScriptBest) ..
     " Segment ranges: " .. l_ListOfSegmentRanges
       
     -- #g_SegmentRangesToRebuildTable 
@@ -4033,113 +3943,62 @@ function RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment)
     
 	for l_Round = 1, l_MaxRounds do
    
+    g_round_x_of_y = " " .. l_Round .. " of " .. l_MaxRounds
+   
 		if g_bSketchBookPuzzle == true then 
-			save.Quickload(3)
+			save.Quickload(3) -- I doubt this is needed!
 		end       
    
 		-- Here's what you are looking for...
 		-- Here's what you are looking for...
     
-		RebuildSelectedSegments(l_StartSegment, l_EndSegment, l_Round, l_MaxRounds)
+		RebuildSelectedSegments(l_StartSegment, l_EndSegment)
     
 		-- Here's what you are looking for...
 		-- Here's what you are looking for...
     
-    
-    
-    
-    RememberSolutionWithDisulfideBondsIntact()
-    
-    local l_Iterations = 1
-    local l_bShake_And_Wiggle_OnlySelectedSegments = true
-    
-    if g_bUserSelected_ShakeAndWiggle_WithSideChainsAndBackbone_WithSelectedAndNearby_Segments == true then
-      
-      -- Very slow!!!
-     
-      local l_SphereRadius = 9 -- Angstroms
-      SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
-      
-      SetClashImportance(1)
-      
-      local l_Score_Before_ShakeAndWiggle = 0
-      local l_Score_After_ShakeAndWiggle = 0
-      
-      l_Score_Before_ShakeAndWiggle = g_Score_ScriptBest
-      
-      -- Here's what you are looking for...
-      -- Here's what you are looking for...
-      l_Iterations = 1
-      ShakeAndOrWiggle("ShakeAndWiggle", l_Iterations, l_bShake_And_Wiggle_OnlySelectedSegments)
-      l_Iterations = 2
-      ShakeAndOrWiggle("WiggleSideChains", l_Iterations, l_bShake_And_Wiggle_OnlySelectedSegments)
-      selection.DeselectAll()
-      selection.SelectRange(l_StartSegment, l_EndSegment)
-      l_Iterations = 4
-      ShakeAndOrWiggle("WiggleBackbone", l_Iterations, l_bShake_And_Wiggle_OnlySelectedSegments)
-      -- Here's what you are looking for...
-      -- Here's what you are looking for...      
-      
-      -- why call this again here...
-      SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
-     
-      l_Score_After_ShakeAndWiggle = GetPoseTotalScore()
-      
-      if l_Score_After_ShakeAndWiggle > l_Score_Before_ShakeAndWiggle then
-        
-        SaveBest() -- <-- Updates g_Score_ScriptBest
-        
-        print("Score: " .. PrettyNumber(g_Score_ScriptBest) .. "," ..
-          " after regional ShakeAndWiggle w/2xSideChains & 4xBackbone, "..
-          l_Round .. " of " .. 
-          l_MaxRounds ..
-          g_with_segments_x-y)
-      
-      end -- if l_Score_After_LocalShakeAndWiggle > l_Score_Before_LocalShakeAndWiggle then
-      
-    elseif g_bUserSelected_ShakeAndWiggle_WithSelected_Segments == true then
+    if g_bUserSelected_AfterRebuild_ShakeAndWiggle_OnlySelectedSegments == true then
       
       -- Not too slow...
       
-      SetClashImportance(g_UserSelected_Shake_ClashImportance)
-      
-      l_Iterations = 1
-      
-      local l_Score_Before_LocalShakeAndWiggle = 0
-      local l_Score_After_LocalShakeAndWiggle = 0
-      
-      l_Score_Before_LocalShakeAndWiggle = g_Score_ScriptBest
+      l_ClashImportance = g_UserSelected_AfterRebuild_ShakeAndWiggle_OnlySelectedSegments_ClashImportance
+      SetClashImportance(l_ClashImportance)
       
       -- Here's what you are looking for...
       -- Here's what you are looking for...
-      ShakeAndOrWiggle("ShakeAndWiggle", l_Iterations, l_bShake_And_Wiggle_OnlySelectedSegments)        
+      ShakeSelected("AfterRebuild") -- FromWhere
       -- Here's what you are looking for...
       -- Here's what you are looking for...
       
-      l_Score_After_LocalShakeAndWiggle = GetPoseTotalScore()
+    elseif g_bUserSelected_AfterRebuild_ShakeAndWiggle_SelectedAndNearbySegments == true then
       
-      if l_Score_After_LocalShakeAndWiggle > l_Score_Before_LocalShakeAndWiggle then
-        
-        SaveBest() -- <-- Updates g_Score_ScriptBest
-        
-        print("Score: " .. PrettyNumber(g_Score_ScriptBest) .. "," ..
-          " after local ShakeAndWiggle, " .. l_Round .. " of " .. 
-          l_MaxRounds ..
-          g_with_segments_x-y)
+      -- Very slow!!!
       
-      end
+      SetClashImportance(1)
       
-    end -- if g_bUserSelected_ShakeAndWiggle_WithSideChainsAndBackbone_WithSelectedAndNearby_Segments ==...
-   
-    CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
-    
-    local l_RoundXofYText = " round " .. l_Round .. " of " .. l_MaxRounds
+      local l_SphereRadius = 9 -- Angstroms --<<<---This needs to be recorded in the log file for these shakes and wiggles
+      SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)            
+      
+      -- Here's what you are looking for...
+      -- Here's what you are looking for...
+      ShakeSelected("AfterRebuild") -- FromWhere
+      
+      WiggleSelected(2, false, true, "After Rebuild") -- Iterations, bWBackbone, bWSideChains, FromWhere
+      
+      selection.DeselectAll()
+      selection.SelectRange(l_StartSegment, l_EndSegment)
+      
+      WiggleSelected(4, true, false, "After Rebuild") -- Iterations, bWBackbone, bWSideChains, FromWhere
+      -- Here's what you are looking for...
+      -- Here's what you are looking for...      
+      
+    end -- if g_bUserSelected_AfterRebuild_ShakeAndWiggle_SelectedAndNearbySegments ==...
    
     if g_bUserSelected_Mutate_After_Rebuild == true then
       
       -- Here's what you are looking for...
       -- Here's what you are looking for...
-      MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, l_RoundXofYText, "")
+      MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, "")
       -- Here's what you are looking for...
       -- Here's what you are looking for...
       
@@ -4211,12 +4070,10 @@ function SetClashImportance(l_ClashImportance)
 	behavior.SetClashImportance(l_ClashImportance * g_UserSelected_ClashImportanceFactor)
   
 end -- function SetClashImportance(l_ClashImportance)
-function RebuildSelectedSegments(l_StartSegment, l_EndSegment, l_Round, l_MaxRounds)
+function RebuildSelectedSegments(l_StartSegment, l_EndSegment)
   -- Called from RebuildOneSegmentRangeManyTimes()...
 
-	local l_MaxIterations = 3
-
-  -- We have to set clash importance and select segment range every time this function is 
+	-- We have to set clash importance and select segment range every time this function is 
   -- called (each rebuild round) because shakes, wiggles and mutates will change these values...
 	SetClashImportance(g_RebuildClashImportance) -- g_RebuildClashImportance is always 0, so what's the point
 	selection.DeselectAll()
@@ -4226,6 +4083,7 @@ function RebuildSelectedSegments(l_StartSegment, l_EndSegment, l_Round, l_MaxRou
 		band.DisableAll() -- will re-enable after rebuild.
 	end
 
+  local l_MaxIterations = 3 -- the original code used l_Round here (from RebuildOneSegmentRangeManyTimes)
   for l_CurrentIteration = 1, l_MaxIterations do
     
     RememberSolutionWithDisulfideBondsIntact()
@@ -4241,12 +4099,16 @@ function RebuildSelectedSegments(l_StartSegment, l_EndSegment, l_Round, l_MaxRou
     l_Score_After_Rebuild = GetPoseTotalScore()
     if l_Score_After_Rebuild > g_Score_ScriptBest then
       SaveBest() -- <-- Updates g_Score_ScriptBest
-      print("Score: " .. PrettyNumber(g_Score_ScriptBest) .. "," ..
-        " after RebuildSelected(" .. l_CurrentIteration .. "x)" ..
-        " round " .. l_Round .. " of " .. l_MaxRounds ..
-        g_with_segments_x-y)
+      print("Score " .. PrettyNumber(g_Score_ScriptBest) .. 
+           " after RebuildSelected(" .. l_CurrentIteration .. "x)" ..
+            g_round_x_of_y ..
+            g_with_segments_x_thru_y)
+      -- the original code would break here and return done=true at the end of this function
     elseif l_Score_After_Rebuild < g_Score_ScriptBest then
-      -- Should will undo our last change because it dropped our score...
+      -- the original code would break here and return done=true at the end of this function
+      -- the original code did not call recentbest.Restore()
+      -- Should we undo our last change because it caused a drop in our score?
+      -- Maybe not. We might allow a small drop with the hope to recover points with a shake and wiggle...
       recentbest.Restore()
     end
 
@@ -4320,9 +4182,7 @@ function RemoveLastSavedSolutionFromQuickSaveStack()
   
 end -- function RemoveLastSavedSolutionFromQuickSaveStack()
 function SaveBest() -- <-- Updates g_Score_ScriptBest
-  -- Called from 1 place in FuseBestPositionEnd(), 
-  --             4 times in FuseBestPosition(),
-  --             1 time  in Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields(),
+  -- Called from 1 time  in Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields(),
   --             1 time  in RebuildOneSegmentRangeManyTimes(), and 
   --             2 times in RebuildMany_SegmentRanges()...
   
@@ -4413,7 +4273,9 @@ function ReEnable_NormalConditionChecking()
   
 end -- function ReEnable_NormalConditionChecking()
 function SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_Radius)
-  -- Called from 3 functions...
+  -- Called from MutateSideChainsOfSelectedSegments(),
+  --             RebuildMany_SegmentRanges() and
+  --             RebuildOneSegmentRangeManyTimes()...
 	selection.DeselectAll()
 
 	for l_SegmentIndex = 1, g_SegmentCount_WithoutLigands do
@@ -4426,122 +4288,130 @@ function SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_Radius)
 	end
   
 end -- function SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_Radius)
-function ShakeAndOrWiggle(l_How, l_Iterations, l_bShake_And_Wiggle_OnlySelectedSegments)
+function ShakeSelected(l_FromWhere)
+  -- Called from 5 functions...
+      
+  local l_ClashImportance = behavior.GetClashImportance()
+  local l_ClashImportanceText = " ClashImprtn " .. PrettyNumber(l_ClashImportance)
+
+		-- Shake is not considered to do much in second or more rounds
+    
+  RememberSolutionWithDisulfideBondsIntact()
+  -- This is what you are looking for...
+  -- This is what you are looking for...
+  
+    structure.ShakeSidechainsSelected(1)
+  
+  -- This is what you are looking for...
+  -- This is what you are looking for...
+  CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
+    
+  local l_Score_After_Shake = GetPoseTotalScore()
+  if l_Score_After_Shake > g_Score_ScriptBest then
+    SaveBest() -- <-- Updates g_Score_ScriptBest
+    print("Score " .. PrettyNumber(g_Score_ScriptBest) ..
+         " " .. l_FromWhere ..
+         " after ShakeSidechainsSelected(1x)" ..
+          g_round_x_of_y ..
+          g_with_segments_x_thru_y ..
+          g_ScorePartText ..
+          l_ClashImportanceText)
+  elseif l_Score_After_Shake < g_Score_ScriptBest then
+    -- Should will undo our last change because it dropped our score...
+    recentbest.Restore()
+  end
+   
+end -- ShakeSelected(l_How, l_Iterations, l_SelectedOrAll)
+function WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_FromWhere)
   -- Called from 5 functions...
   
-	if l_How == nil then -- l_How is optional; the default is "WiggleAll"
-		l_How = "WiggleAll"
-	end
-	if l_Iterations == nil then -- l_Iterations is optional; the default is 3 iterations
-		l_Iterations = 3
-	end
-	if l_bShake_And_Wiggle_OnlySelectedSegments == nil then
-		-- l_bShake_And_Wiggle_OnlySelectedSegments is optional; the default is to do all segments
-		l_bShake_And_Wiggle_OnlySelectedSegments = false
-	end
+  local l_ClashImportance = behavior.GetClashImportance()
+  local l_ClashImportanceText = " ClashImprtn " .. PrettyNumber(l_ClashImportance)
 
+	-- Lets amplify the iterations for a bigger effect...
 	local l_WiggleFactor = 1
 	if g_bMaxClashImportance == true then
 		l_WiggleFactor = g_UserSelected_WiggleFactor
 	end
+	local l_WF_Iterations = 2 * l_WiggleFactor * l_Iterations
 
+  RememberSolutionWithDisulfideBondsIntact()
+  -- This is what you are looking for...
+  -- This is what you are looking for...
+  
+  structure.WiggleSelected(l_WF_Iterations, l_bWBackbone, l_bWSideChains)
+  
+  -- This is what you are looking for...
+  -- This is what you are looking for...
+  CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
+  
+  local l_Score_After_Wiggle = GetPoseTotalScore()
+  if l_Score_After_Wiggle > g_Score_ScriptBest then
+    SaveBest() -- <-- Updates g_Score_ScriptBest
+    print("Score " .. PrettyNumber(g_Score_ScriptBest) ..
+         " " .. l_FromWhere ..
+         " after WiggleSelected(" .. l_WF_Iterations .. "x," ..
+         " w/Bb=" .. tostring(l_bWBackbone) .. "," ..
+         " w/SC=" .. tostring(l_bWSideChains) .. ")" ..
+          g_round_x_of_y ..
+          g_with_segments_x_thru_y ..
+          g_ScorePartText ..
+          l_ClashImportanceText)
+  elseif l_Score_After_Wiggle < g_Score_ScriptBest then
+    -- Should will undo our last change because it dropped our score...
+    recentbest.Restore()
+  end
+    
+end -- WiggleSelected(l_ClashImportance, l_FromWhere)
+
+function WiggleAll(l_Iterations, l_FromWhere)
+  -- Called from 5 functions...
+  
+  local l_ClashImportance = behavior.GetClashImportance()
+  local l_ClashImportanceText = " ClashImprtn " .. PrettyNumber(l_ClashImportance)
+  
+	-- Lets amplify the iterations for a bigger effect...
+	local l_WiggleFactor = 1
+	if g_bMaxClashImportance == true then
+		l_WiggleFactor = g_UserSelected_WiggleFactor
+	end
+	l_Iterations = 2 * l_WiggleFactor * l_Iterations
+  
 	l_bWiggleBackbone  = true
 	l_bWiggleSideChains = true
 
-	if l_How == "ShakeAndWiggle" then
-		-- Shake is not considered to do much in second or more rounds
-    
-		if l_bShake_And_Wiggle_OnlySelectedSegments == true then
-      
-    RememberSolutionWithDisulfideBondsIntact()
-		-- This is what you are looking for...
-		-- This is what you are looking for...
-    
-			structure.ShakeSidechainsSelected(1)
-    
-		-- This is what you are looking for...
-		-- This is what you are looking for...
-    CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
-      
-    local l_Score_After_Shake = GetPoseTotalScore()
-    if l_Score_After_Shake > g_Score_ScriptBest then
-      SaveBest() -- <-- Updates g_Score_ScriptBest
-      print("Score: " .. PrettyNumber(g_Score_ScriptBest) .. "," ..
-        " after ShakeSidechainsSelected(1x)" ..
-        " round " .. l_Round .. " of " .. l_MaxRounds ..
-        g_with_segments_x-y)
-    elseif l_Score_After_Shake < g_Score_ScriptBest then
-      -- Should will undo our last change because it dropped our score...
-      recentbest.Restore()
-    end
-      
-      
-     
-		else
-      
-    RememberSolutionWithDisulfideBondsIntact()
-		-- This is what you are looking for...
-		-- This is what you are looking for...
-    
-			structure.ShakeSidechainsAll(1)
-    
-		-- This is what you are looking for...
-		-- This is what you are looking for...
-    CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
-      
-      
-      
-      
-		end
-	end
-	
-	if l_How == "WiggleBackbone" then -- only wiggle backbone, do not wiggle side chains
-		l_bWiggleSideChains = false
-	end
+  RememberSolutionWithDisulfideBondsIntact()
+  -- This is what you are looking for...
+  -- This is what you are looking for...
+  
+  structure.WiggleAll(l_Iterations, l_bWiggleBackbone, l_bWiggleSideChains)
+  
+  -- This is what you are looking for...
+  -- This is what you are looking for...
+  CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
+  
+  local l_Score_After_Wiggle = GetPoseTotalScore()
+  if l_Score_After_Wiggle > g_Score_ScriptBest then
+    SaveBest() -- <-- Updates g_Score_ScriptBest
+    print("Score " .. PrettyNumber(g_Score_ScriptBest) ..
+         " " .. l_FromWhere ..
+         " after WiggleAll(" .. l_Iterations .. "x" ..
+         " w/Backbone:" .. tostring(l_bWiggleBackbone) .. "," ..
+         " w/SideChains:" .. tostring(l_bWiggleSideChains) .. ")" ..
+         g_round_x_of_y ..
+         " with all segments" ..
+      --g_with_segments_x_thru_y .. -- display segment values here just as a reference to where we are.
+         g_ScorePartText ..
+         l_ClashImportanceText)
+  elseif l_Score_After_Wiggle < g_Score_ScriptBest then
+    -- Undo this wiggle because it decreased our score...
+    recentbest.Restore()
+  end
 
-	if l_How == "WiggleSideChains" then -- ws = only wiggle side chains, do not wiggle backbone
-		l_bWiggleBackbone = false
-	end
+  SetClashImportance(1)
 
-	-- Lets amplify the iterations for a bigger effect...
-	l_Iterations = 2 * l_WiggleFactor * l_Iterations
-
-	if l_bShake_And_Wiggle_OnlySelectedSegments == true then
-    
-    RememberSolutionWithDisulfideBondsIntact()
-		-- This is what you are looking for...
-		-- This is what you are looking for...
-    
-		structure.WiggleSelected(l_Iterations, l_bWiggleBackbone, l_bWiggleSideChains)
-    
-		-- This is what you are looking for...
-		-- This is what you are looking for...
-    CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
-    
-    
-    
-    
-    
-	else
-    
-    RememberSolutionWithDisulfideBondsIntact()
-		-- This is what you are looking for...
-		-- This is what you are looking for...
-    
-		structure.WiggleAll(l_Iterations, l_bWiggleBackbone, l_bWiggleSideChains)
-    
-		-- This is what you are looking for...
-		-- This is what you are looking for...
-    CheckIfWeNeedToRestoreSolutionWithDisulfideBondsIntact()
-    
-    
-    
-    
-	end
-
-end -- ShakeAndOrWiggle(l_How, l_Iterations, l_bShake_And_Wiggle_OnlySelectedSegments)
-function MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, l_RoundXofYText,
-                                            l_ScorePartText)
+end -- function WiggleAll(l_ClashImportance, l_Iterations)
+function MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment)
   -- Called from RebuildOneSegmentRangeManyTimes(),
   --             StabilizeSegmentRange() and
   --             3 places in RebuildMany_SegmentRanges()...
@@ -4574,11 +4444,11 @@ function MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, l_Roun
     l_Score_After_Mutate = GetPoseTotalScore()
     if l_Score_After_Mutate > g_Score_ScriptBest then
       SaveBest() -- <-- Updates g_Score_ScriptBest
-      print("Score: " .. PrettyNumber(g_Score_ScriptBest) .. "," ..
-        " after MutateSidechainsSelected(2x)" ..
-        l_RoundXofYText ..
-        g_with_segments_x-y ..
-        l_ScorePartText)
+      print("Score " .. PrettyNumber(g_Score_ScriptBest) ..
+           " after MutateSidechainsSelected(2x)" ..
+        g_round_x_of_y ..
+        g_with_segments_x_thru_y ..
+        g_ScorePartText)
     elseif l_Score_After_Mutate < g_Score_ScriptBest then
       recentbest.Restore()
     end
@@ -4600,12 +4470,12 @@ function MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, l_Roun
     l_Score_After_Mutate = GetPoseTotalScore()
     if l_Score_After_Mutate > g_Score_ScriptBest then
       SaveBest() -- <-- Updates g_Score_ScriptBest
-      print("Score: " .. PrettyNumber(g_Score_ScriptBest) .. "," ..
-        " after MutateSidechainsSelected(2x)" ..
-        l_RoundXofYText ..
-        " within " .. g_UserSelected_Mutate_SphereRadius .. " angstroms of" ..
-        " segments " .. l_StartSegment .. "-" .. l_EndSegment ..
-        l_ScorePartText)
+      print("Score " .. PrettyNumber(g_Score_ScriptBest) ..
+           " after MutateSidechainsSelected(2x)" ..
+            g_round_x_of_y ..
+           " within " .. g_UserSelected_Mutate_SphereRadius .. " angstroms of" ..
+           " segments " .. l_StartSegment .. "-" .. l_EndSegment ..
+            g_ScorePartText)
     elseif l_Score_After_Mutate < g_Score_ScriptBest then
       recentbest.Restore()
     end
@@ -4628,11 +4498,11 @@ function MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, l_Roun
     l_Score_After_Mutate = GetPoseTotalScore()
     if l_Score_After_Mutate > g_Score_ScriptBest then        
       SaveBest() -- <-- Updates g_Score_ScriptBest
-      print("Score: " .. PrettyNumber(g_Score_ScriptBest) .. "," ..
-        l_RoundXofYText ..
-        " after MutateSidechainsAll(2x)" ..
-        " with all segments" ..
-        l_ScorePartText)
+      print("Score " .. PrettyNumber(g_Score_ScriptBest) ..
+           " after MutateSidechainsAll(2x)" ..
+            g_round_x_of_y ..
+           " with all segments" ..
+            g_ScorePartText)
     elseif l_Score_After_Mutate < g_Score_ScriptBest then
       recentbest.Restore()
     end
@@ -4829,258 +4699,64 @@ end -- Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields
 function StabilizeSegmentRange(l_StartSegment, l_EndSegment)
   -- Called from 1 place in RebuildMany_SegmentRanges()...
 
---This is next place i need to work on......
-	local l_Iterations = 1
-	local l_bShake_And_Wiggle_OnlySelectedSegments = true -- note, this is true this time...
-
-	-- Do not accept Stabilize losses...
-	local l_Score_FunctionBest = g_Score_ScriptBest -- No! GetPoseTotalScore()
-	
-	-- As a precaution, let's save our current solution... If the next build
-	-- decreases our score, then we will revert back to this solution...
-	SaveCurrentSolutionToQuickSaveStack()
-	
 	SetClashImportance(0.1)
-  
-	l_bShake_And_Wiggle_OnlySelectedSegments = true -- note, this is true this time...
-	ShakeAndOrWiggle("ShakeAndWiggle", l_Iterations, l_bShake_And_Wiggle_OnlySelectedSegments)
+	ShakeSelected("Stabilize")
 	
 	if g_bUserSelected_Mutate_During_Stabilize == true then
 		SetClashImportance(1)
-		MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, "", "")
+		MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, "")
 	end
 	
-	if g_bUserSelected_PerformExtraStabilize == true then -- default is false
+	--if g_bUserSelected_PerformExtraStabilize == true then -- default is false
     
-		SetClashImportance(0.4)
-    
-		l_bShake_And_Wiggle_OnlySelectedSegments = false -- and it's false this time...
-		ShakeAndOrWiggle("WiggleAll", l_Iterations, l_bShake_And_Wiggle_OnlySelectedSegments)
-    
-		SetClashImportance(1)
+    SetClashImportance(0.4)
+    WiggleAll(1, "ExtraStabilize") -- Iterations, FromWhere
     
 		-- Note the third parameter uses the global value instead of the local value here...
-		ShakeAndOrWiggle("ShakeAndWiggle", l_Iterations, g_bUserSelected_ShakeAndWiggle_OnlySelectedSegments)
-	end
+    SetClashImportance(1)
+		ShakeSelected("ExtraStabilize")
+
+	--end
 	
 	SetClashImportance(1)
-	
-	recentbest.Save() -- Save the current pose as the recentbest pose.  
-	l_Iterations = 3
+  WiggleAll(3, "Stabilize") -- Iterations, FromWhere
   
-	l_bShake_And_Wiggle_OnlySelectedSegments = false -- and it's false this time, too...
-	ShakeAndOrWiggle("ShakeAndWiggle", l_Iterations, l_bShake_And_Wiggle_OnlySelectedSegments)
-  
-	recentbest.Restore()-- Keep the current pose if it's better; otherwise, restore the recentbest pose.
-	
-	local l_Score_After_ShakeAndWiggle = GetPoseTotalScore()
-  
-	if l_Score_After_ShakeAndWiggle > l_Score_FunctionBest then
-    
-    l_Score_FunctionBest = l_Score_After_ShakeAndWiggle --<-- Pointless, right?
-    -- Should we call SaveBest() here? nah, the calling function already calls SaveBest()
-
-		-- Keep the current solution and remove the last saved solution from the Quicksave stack...
-		RemoveLastSavedSolutionFromQuickSaveStack()
-	else
-		-- This build was a failure, so load the last saved solution from the Quicksave stack...
-		LoadLastSavedSolutionFromQuickSaveStack()
-	end
-	
 end -- function StabilizeSegmentRange(l_StartSegment, l_EndSegment)
-function FuseBestPosition(l_SlotNumber, l_DoPreFunction, l_DoPostFunction,
-                          l_bShake_And_Wiggle_OnlySelectedSegments)
+function FuseBestScorePartPosition()
   -- Called from 2 places in RebuildMany_SegmentRanges()...
 
-	local l_Current_PoseTotalScore = GetPoseTotalScore()
+	Fuse1(0.3, 0.6) -- ClashImp_Before, ClashImp_After
+  WiggleAll(3, "Fuse") -- Iterations, FromWhere
+	Fuse2(0.3, 1) -- ClashImportance_Before, ClashImportance_After
+	Fuse1(0.05, 1) -- ClashImp_Before, ClashImp_After
+	Fuse2(0.7, 0.5) -- ClashImportance_Before, ClashImportance_After
+  WiggleAll(3, "Fuse") -- Iterations, FromWhere
+	Fuse1(0.07, 1) -- ClashImp_Before, ClashImp_After
 	
-	if l_SlotNumber == nil then
-		l_SlotNumber = 4
-		save.Quicksave(l_SlotNumber) -- Save
-	end
+end -- function FuseBestScorePartPosition(l_SelectedOrAll)
+function Fuse1(l_ClashImportanceBefore, l_ClashImportanceAfter)
+  -- Called from 3 places in FuseBestScorePartPosition()...
 
-	recentbest.Save() -- Save the current pose as the recentbest pose.  
-	
-	FuseBestPosition1(0.3, 0.6, l_DoPreFunction, l_DoPostFunction, l_bShake_And_Wiggle_OnlySelectedSegments)
-	FuseBestPositionEnd(l_DoPreFunction, l_DoPostFunction)
-	l_Current_PoseTotalScore = reFuseBestPosition(l_Current_PoseTotalScore, l_SlotNumber)
-
-	FuseBestPosition2(0.3, 1, l_DoPreFunction, l_DoPostFunction)
-	-- Keep the current pose if it's better; otherwise, restore the recentbest pose...
-	GetRecentBest(l_DoPreFunction, l_DoPostFunction)
-	SaveBest() -- <-- Updates g_Score_ScriptBest; does the call to FuseBestPosition not already do this?
-	l_Current_PoseTotalScore = reFuseBestPosition(l_Current_PoseTotalScore, l_SlotNumber)
-
-	FuseBestPosition1(0.05, 1, l_DoPreFunction, l_DoPostFunction, l_bShake_And_Wiggle_OnlySelectedSegments)
-	GetRecentBest(l_DoPreFunction, l_DoPostFunction)
-	SaveBest() -- <-- Updates g_Score_ScriptBest
-	l_Current_PoseTotalScore = reFuseBestPosition(l_Current_PoseTotalScore, l_SlotNumber)
-
-	FuseBestPosition2(0.7, 0.5, l_DoPreFunction, l_DoPostFunction)
-	FuseBestPositionEnd()
-	l_Current_PoseTotalScore = reFuseBestPosition(l_Current_PoseTotalScore, l_SlotNumber)
-
-	FuseBestPosition1(0.07, 1, l_DoPreFunction, l_DoPostFunction, l_bShake_And_Wiggle_OnlySelectedSegments)
-	GetRecentBest(l_DoPreFunction, l_DoPostFunction)
-	SaveBest() -- <-- Updates g_Score_ScriptBest
-	
-	reFuseBestPosition(l_Current_PoseTotalScore, l_SlotNumber)
-	GetRecentBest(l_DoPreFunction, l_DoPostFunction)
-	SaveBest() -- <-- Updates g_Score_ScriptBest
-
-end -- function FuseBestPosition(l_SlotNumber, l_DoPreFunction, l_DoPostFunction, l_bShake_And_Wiggle_Onl...
-function FuseBestPosition1(l_ClashImportanceBefore, l_ClashImportanceAfter, l_DoPreFunction,
-		l_DoPostFunction, l_bShake_And_Wiggle_OnlySelectedSegments)
-  -- Called from 3 places in FuseBestPosition()...
-
-	if l_DoPreFunction ~= nil then
-		l_DoPreFunction()
-	end
-	
-	if l_bShake_And_Wiggle_OnlySelectedSegments == nil then
-		l_bShake_And_Wiggle_OnlySelectedSegments = true
-	end
-	
-	local l_Iterations = 1
-	
 	SetClashImportance(l_ClashImportanceBefore)
-	ShakeAndOrWiggle("ShakeAndWiggle", l_Iterations, l_bShake_And_Wiggle_OnlySelectedSegments)
+	ShakeSelected("Fuse1")
 	
-	l_bShake_And_Wiggle_OnlySelectedSegments = false
+  SetClashImportance(l_ClashImportanceAfter)
+  WiggleAll(1, "Fuse1") -- Iterations, FromWhere
+	
+end -- function Fuse1(l_ClashImportanceBefore, l_ClashImportanceAfter)
+function Fuse2(l_ClashImportance_Before, l_ClashImportance_After)
+  -- Called from 2 places in FuseBestScorePartPosition()...
 
-	SetClashImportance(l_ClashImportanceAfter)
-	ShakeAndOrWiggle("WiggleAll", l_Iterations, l_bShake_And_Wiggle_OnlySelectedSegments)
+	SetClashImportance(l_ClashImportance_Before)
+  WiggleAll(1, "Fuse2") -- Iterations, FromWhere
 	
-	if l_DoPostFunction ~= nil then
-		l_DoPostFunction()    
-	end
+  SetClashImportance(1)
+  WiggleAll(1, "Fuse2") -- Iterations, FromWhere
 	
-end -- function FuseBestPosition1(l_ClashImportanceBefore, l_ClashImportanceAfter, l_DoPreFunction...
-function FuseBestPositionEnd(l_DoPreFunction, l_DoPostFunction)
-  -- Called from 2 places in FuseBestPosition()...
+  SetClashImportance(l_ClashImportance_After)
+  WiggleAll(1, "Fuse2") -- Iterations, FromWhere
 	
-	if l_DoPreFunction ~= nil then
-		l_DoPreFunction()
-	end
-	
-	local l_Iterations = 1
-	local l_bShake_And_Wiggle_OnlySelectedSegments = false
-	l_Iterations = 3 -- why 3 here?
-
-	SetClashImportance(1)
-	ShakeAndOrWiggle("WiggleAll", l_Iterations, l_bShake_And_Wiggle_OnlySelectedSegments)
-	
-	GetRecentBest(l_DoPreFunction, l_DoPostFunction)
-	
-	if l_DoPostFunction ~= nil then
-		l_DoPostFunction()
-	end
-	
-	SaveBest() -- <-- Updates g_Score_ScriptBest
-  
-end -- function FuseBestPositionEnd(l_DoPreFunction, l_DoPostFunction)
-function GetRecentBest(l_DoPreFunction, l_DoPostFunction)
-  -- Called from FuseBestPositionEnd() and
-  --             4 places in FuseBestPosition()...
-  
-	-- Keep the current pose if it's as good as or better than
-  -- recent best; otherwise, restore the recentbest pose.
-  
-	local l_RecentBest_PoseTotalScore = GetRecentBestScore()
-	local l_Current_PoseTotalScore = GetPoseTotalScore()
-  
-	if l_Current_PoseTotalScore >= l_RecentBest_PoseTotalScore  then
-    return
-  end
-    
-  if l_DoPreFunction ~= nil then
-    l_DoPreFunction()
-  end
-  
-  recentbest.Restore() -- Keep the current pose if it's better; otherwise, restore the recentbest pose.
-  
-  if l_DoPostFunction ~= nil then
-    l_DoPostFunction()
-  end
-  
-  -- No need to call SaveBest here, because g_Score_ScriptBest
-  -- would have already seen this high score...recently :-)    
-  
-end -- function GetRecentBest(l_DoPreFunction, l_DoPostFunction)
-function GetRecentBestScore()
-  -- Called from GetRecentBest() and 
-  --             RebuildMany_SegmentRanges()...
-  
-	l_RecentBest_PoseTotalScore = GetPoseTotalScore(recentbest) --...the class "recentbest".
-  
-	return l_RecentBest_PoseTotalScore
-  
-end
-function FuseBestPosition2(l_ClashImportanceBefore, l_ClashImportanceAfter, l_DoPreFunction,
-		l_DoPostFunction)
-  -- Called from 2 places in FuseBestPosition()...
-
-	if l_DoPreFunction ~= nil then
-		l_DoPreFunction()
-	end
-		
-	local l_Iterations = 1
-	local l_bShake_And_Wiggle_OnlySelectedSegments = false
-	
-	SetClashImportance(l_ClashImportanceBefore)
-	ShakeAndOrWiggle("WiggleAll", l_Iterations, l_bShake_And_Wiggle_OnlySelectedSegments)
-	
-	SetClashImportance(1)
-	ShakeAndOrWiggle("WiggleAll", l_Iterations, l_bShake_And_Wiggle_OnlySelectedSegments)
-	
-	SetClashImportance(l_ClashImportanceAfter)
-	ShakeAndOrWiggle("WiggleAll", l_Iterations, l_bShake_And_Wiggle_OnlySelectedSegments)
-	
-	if l_DoPostFunction ~= nil then
-		l_DoPostFunction()
-	end
-	
-end -- function FuseBestPosition2(l_ClashImportanceBefore, l_ClashImportanceAfter, l_DoPreFunction...
-function reFuseBestPosition(l_Score_Before_FuseBestPosition, l_SlotNumber)
-  -- Called from 5 places in FuseBestPosition()...
-  
-  -- I think this function should somehow be merged with SaveBest(), because they
-  -- both do very similar things...
-  -- Also, I don't think we need to have the value of l_Score_Before_FuseBestPosition
-  -- passed in. We could just use a global variable like g_Score_ScriptBest to remember
-  -- the last best position, like SaveBest() does. Okay, Okay, I don't really love
-  -- global variables, but I am all about consistancy in code...
-  -- Also, why use Slot 4 here? Why not just stick with slot 3?? I mean really, why?
-  
-	--local l_Score_Before_FuseBestPosition -- see input parameter 1 above  
-  local l_Score_After_FuseBestPosition = GetPoseTotalScore() -- <- "After" here is correct! Not Before!
-  local l_ReturnTheBetterScore = 0
-	
-	if l_Score_After_FuseBestPosition > l_Score_Before_FuseBestPosition then
-    
-		-- The new score is better, so save the
-    -- current position, and return the new score...
-    -- not sure if I should call SaveBest() here yet. See discussion with myself below...
-		save.Quicksave(l_SlotNumber)
-		l_ReturnTheBetterScore = l_Score_After_FuseBestPosition
-    
-    -- Should we call SaveBest() here? No? Because SaveBest() always saves to 
-    -- slot 3? But would it hurt to store the current pose in slots 4 and 3? hmm?
-    -- Why does this use slot 4, anyway? hmm?
-    -- What's so special about Fusing that requires it to have its own slot?
-    
-	elseif l_Score_After_FuseBestPosition < l_Score_Before_FuseBestPosition then
-    
-		-- The new score is not as good, so load the,
-    -- previous position and return the previous score...
-		save.Quickload(l_SlotNumber)
-    l_ReturnTheBetterScore = l_Score_Before_FuseBestPosition
-    
-	end
-	
-	return l_ReturnTheBetterScore
-	
-end -- function reFuseBestPosition(l_Score_Before_FuseBestPosition, l_SlotNumber)	
+end -- function Fuse2(l_ClashImportanceBefore, l_ClashImportanceAfter)
 function Add_Loop_Helix_And_Sheet_Segments_To_SegmentRangesTable()
   -- Called from PrepareToRebuildSegmentRanges() when l_How = 'segments'
   
@@ -5379,7 +5055,7 @@ function ScriptDocumentation()
 	1. Can be used in design puzzles, has mutate options for that.
 	2. For each selected segment range, the script will only "recompute the next" (attempt another?) rebuild if there has been enough gain. Is this true? What exactly does this mean?
 	3. It will not atttempt to rebuild the exact same selected segments a second time. Really?
-	4. It will not try a FuseBestPosition if the loss is too great depending on the size of the rebuild.
+	4. It will not try a FuseBestScorePartPosition if the loss is too great depending on the size of the rebuild.
 	5. It will not attempt to rebuild frozen or locked segments.
 	6. User can specify what segments of the protein to work on.
 	7. User can select to keep intact or ignore disulfide bonds (thanks Brow42).
@@ -5388,7 +5064,7 @@ function ScriptDocumentation()
 	10. User can skip X number of worst scoring segment ranges (handy after a crash).
 	11. It breaks off rebuild attempts if no chance of success.
 	12. It works on puzzles even if the score is < -1000000 (but will be slower).
-	13. FuseBestPosition and Stabilize can be suppressed (this is the default, if the score is negative from the start)
+	13. FuseBestScorePartPosition and Stabilize can be suppressed (this is the default, if the score is negative from the start)
 	14. User can specify to disable bands when rebuilding and enable them afterwards.
 	NEW in version 2
 	15. User can choose which ScoreParts will be stabilized.
@@ -5407,7 +5083,7 @@ function ScriptDocumentation()
 				Resets the original structure if mutated after rebuild for the next rebuild,
 				Set default mutate settings if a design puzzle.
 	2.4.1 Added WiggleFactor, removed reference as a ScorePart.
-	2.5.0 Added g_bUserSelected_ShakeAndWiggle_OnlySelectedSegments option. Thanks Susume.
+	2.5.0 Added g_bUserSelected_DuringFuseAndStabilize_ShakeAndWiggle_SelectedAndNearbySegments option. Thanks Susume.
 	2.5.1 Added finding wins during Stabilize wiggle.
 	2.6.0 Changed defaults and user interface.
 	2.7.0 Added option to disable slow filters on design puzzles.
