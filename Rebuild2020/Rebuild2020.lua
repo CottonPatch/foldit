@@ -38,7 +38,7 @@ function DefineGlobalVariables()
   --         DisplayPuzzleProperties()
 	-- g_CysteineSegmentsTable={SegmentIndex}
   
-  g_FrozenLockedOrLigandSegments = {} -- formerly (the inverse of) WORKON/WORKONbool
+  g_FrozenLockedOrLigandSegmentsTable = {} -- formerly (the inverse of) WORKON/WORKONbool
 
 	g_ScorePart_Scores_Table = {} -- formerly Scores[]
 	-- Used in Populate_g_ScorePart_Scores_Table(),
@@ -74,7 +74,7 @@ function DefineGlobalVariables()
 		spt_bScorePartIsActive = 3  -- User can change this to false
 		spt_LongName = 4
 
-	g_SegmentRangesToRebuildTable = {} -- formerly WORKON[] or areas[]?
+	g_SegmentRangesToRebuildTable = {} -- formerly WORKON[] + areas[]
 	-- Used in DefineGlobalVariables(),
   --         bAskUserToSelect_RebuildOptions(),
   --         AskUserToSelectSegmentsRangesToRebuild(),
@@ -556,7 +556,7 @@ function DefineGlobalVariables()
 	--  Used in bAskUserToSelect_RebuildOptions(), RebuildSelectedSegments() and
 	--          PrepareToRebuildSegmentRanges()
   
-	g_SegmentRangesToRebuildTable = {{1, g_SegmentCount_WithoutLigands}}
+	g_SegmentRangesToRebuildTable = {{1, g_SegmentCount_WithoutLigands}} -- formerly WORKON[] + areas[]
   -- See usage above in table definition section.
   
   ---------------------------------------------------------
@@ -853,14 +853,14 @@ function SetupLocalDebugFuntions()
 	freeze.IsFrozen = function(l_SegmentIndex)
    local l_bBackboneIsFrozen
     if g_Debug_bBackboneIsFrozen[l_SegmentIndex] == nil then
-      l_bBackboneIsFrozen = math.random(2) == 1
+      l_bBackboneIsFrozen = math.random(10) == 1 -- 1 in 10 random chance of being frozen
       g_Debug_bBackboneIsFrozen[l_SegmentIndex] = l_bBackboneIsFrozen
     else
       l_bBackboneIsFrozen = g_Debug_bBackboneIsFrozen[l_SegmentIndex]
     end
    local l_bSideChainIsFrozen
     if g_Debug_bSideChainIsFrozen[l_SegmentIndex] == nil then
-      l_bSideChainIsFrozen = math.random(2) == 1
+      l_bSideChainIsFrozen = math.random(10) == 1 -- 1 in 10 random chance of being frozen
       g_Debug_bSideChainIsFrozen[l_SegmentIndex] = l_bSideChainIsFrozen
     else
       l_bSideChainIsFrozen = g_Debug_bSideChainIsFrozen[l_SegmentIndex]
@@ -957,7 +957,7 @@ function SetupLocalDebugFuntions()
 		local l_bIsSelected
     if g_Debug_bIsSelected[l_SegmentIndex] == nil then
       -- if not already set, then set it to a random value...
-      l_bIsSelected = math.random(2) == 1
+      l_bIsSelected = math.random(10) == 1 -- 1 in 10 random chance of being selected
       g_Debug_bIsSelected[l_SegmentIndex] = l_bIsSelected
     else
       -- if it's already set, then just return its value...
@@ -996,7 +996,7 @@ function SetupLocalDebugFuntions()
 		
     local l_RandomSecondaryStructure
     if g_Debug_GetSecondaryStructure[l_SegmentIndex] == nil then
-      l_SecondaryStructures = 'HELM' -- H=Helix, E=Sheet, L=Loop, M=Ligand
+      l_SecondaryStructures = 'HELLLLLLLLM' -- H=Helix, E=Sheet, L=Loop, M=Ligand, 1 in 10 change of Ligand
       l_RandomSecondaryStructure = RandomCharOfString(l_SecondaryStructures)
       g_Debug_GetSecondaryStructure[l_SegmentIndex] = l_RandomSecondaryStructure
     else
@@ -1009,7 +1009,7 @@ function SetupLocalDebugFuntions()
  	structure.IsLocked = function(l_SegmentIndex)
     local l_bIsLocked
     if g_Debug_bIsLocked[l_SegmentIndex] == nil then
-      l_bIsLocked = math.random(2) == 1
+      l_bIsLocked = math.random(10) == 1 -- 1 in 10 random chance of being locked
       g_Debug_bIsLocked[l_SegmentIndex] = l_bIsLocked
     else
       l_bIsLocked = g_Debug_bIsLocked[l_SegmentIndex]
@@ -1021,7 +1021,7 @@ function SetupLocalDebugFuntions()
 	structure.IsMutable = function(l_SegmentIndex)
     local l_bIsMutated
     if g_Debug_bIsMutated[l_SegmentIndex] == nil then
-      l_bIsMutated = math.random(2) == 1
+      l_bIsMutated = math.random(10) == 1 -- 1 in 10 random chance of being mutable
       g_Debug_bIsMutated[l_SegmentIndex] = l_bIsMutated
     else
       l_bIsMutated = g_Debug_bIsMutated[l_SegmentIndex]
@@ -1458,11 +1458,11 @@ function AskUserToSelectSegmentsRangesToRebuild() -- formerly AskForSelections()
 
 	title = "Select Segment Ranges To Rebuild"
 
-	-- g_SegmentRangesToRebuildTable={StartSegment, EndSegment}
+	-- g_SegmentRangesToRebuildTable={StartSegment, EndSegment} -- formerly WORKON[] + areas[]
 	l_ListOfSegmentRanges = ConvertSegmentRangesTableToListOfSegmentRanges(g_SegmentRangesToRebuildTable)
   -- e.g.;  "1-3 2-4 6-8 10-11 13-15 20-24" 
 	
-	local l_SegmentRangesToRebuildTable = g_SegmentRangesToRebuildTable
+	local l_SegmentRangesToRebuildTable = g_SegmentRangesToRebuildTable -- formerly WORKON[] + areas[]
 
 	if l_SelectionOptions == nil then l_SelectionOptions = {} end
 
@@ -1848,7 +1848,7 @@ function bAskUserToSelect_RebuildOptions() -- formerly AskDRWOptions()
 				l_SegmentRangesToRebuildTable = 
           AskUserToSelectSegmentsRangesToRebuild() -- formerly AskForSelections()
 				if l_SegmentRangesToRebuildTable ~= nil and #l_SegmentRangesToRebuildTable ~= 0 then
-					g_SegmentRangesToRebuildTable = -- formerly WORKON[] 
+					g_SegmentRangesToRebuildTable = -- formerly WORKON[] + areas[]
             l_SegmentRangesToRebuildTable
 				end
         
@@ -2385,8 +2385,9 @@ function Add_Loop_Plus_One_Other_Type_SegmentRange_To_SegmentRangesTable(l_Start
 	if l_NumberofConsecutiveSegments >= g_UserSelected_StartRebuildingWithThisManyConsecutiveSegments then
 		-- Not sure why we are using g_UserSelected_StartRebuildingWithThisManyConsecutiveSegments here
 		-- instead of g_RequiredNumberOfConsecutiveSegments. Things that make you go hmmm.
-		-- g_SegmentRangesToRebuildTable={StartSegment=1, EndSegment=2}
+		-- g_SegmentRangesToRebuildTable={StartSegment=1, EndSegment=2} -- formerly WORKON[] + areas[]
 
+    -- I don't think using g_SegmentRangesToRebuildTable here really works. It used to use areas[].
 		-- Add one row to the g_SegmentRangesToRebuildTable...
 		g_SegmentRangesToRebuildTable[#g_SegmentRangesToRebuildTable + 1] = {l_StartSegment, l_EndSegment}
 	end
@@ -2419,6 +2420,7 @@ function Add_Loop_SegmentRange_To_SegmentRangesTable(l_StartSegment) -- formerly
 	if l_RequiredNumberOfConsecutiveSegments >=
     g_UserSelected_StartRebuildingWithThisManyConsecutiveSegments then
     
+    -- I don't think using g_SegmentRangesToRebuildTable here really works. It used to use areas[].
 		if g_bRebuildLoopsOnly == true then
 			-- g_SegmentRangesToRebuildTable={StartSegment=1, EndSegment=2}
 			g_SegmentRangesToRebuildTable[#g_SegmentRangesToRebuildTable + 1] = {l_StartSegment, l_EndSegment}
@@ -2527,10 +2529,12 @@ function bSegmentIsAllowedToBeRebuilt(l_SegmentIndex)
     return false
   end
   
-  -- g_bSegmentsToRebuildBooleanTable is populated in main() from g_SegmentRangesToRebuildTable
+  -- g_bSegmentsToRebuildBooleanTable is populated in main() from g_SegmentRangesToRebuildTable[]
   -- This one check combines all of the above checks for Frozen, Locked and Ligand...
-  if g_bSegmentsToRebuildBooleanTable[l_SegmentIndex] == false then
-			return false -- Note: this option overrides the below options.
+  if g_bSegmentsToRebuildBooleanTable[l_SegmentIndex] == false then -- formerly WORKONbool[]
+  
+  --if g_FrozenLockedOrLigandSegmentsTable[l_SegmentIndex] == true then
+		return false -- Note: this option overrides the below options.
 	end
 
   if g_bUserSelected_AlwaysAllowRebuildingAlreadyRebuilt_Segments == true then
@@ -3122,7 +3126,7 @@ function GetNumberOfMutableSegments()
 
 	for l_SegmentIndex = 1, g_SegmentCount_WithoutLigands do
     
-		if structure.IsMutable(l_SegmentIndex) then
+		if structure.IsMutable(l_SegmentIndex) == true then
       
 			l_GetNumberOfMutableSegments = l_GetNumberOfMutableSegments + 1
       
@@ -3400,20 +3404,23 @@ function Populate_g_SegmentRangesTable_WithWorstScoringSegmentRanges(l_Recursion
   --       " worst scoring segment ranges (each range containing " ..
   --        g_RequiredNumberOfConsecutiveSegments .. " consecutive segments)...")
 
-  CheckIfAlreadyRebuiltSegmentsMustBeIncluded() -- formerly ChkDisjunctList()
-  
-	-- l_WorstScoringSegmentRangesTable={Segment Score, StartSegment}
-	l_WorstScoringSegmentRangesTable = {}
+  CheckIfAlreadyRebuiltSegmentsMustBeIncluded() -- formerly ChkDisjunctList()  
 
 	-- g_SegmentScoresTable = {SegmentScore}
 	Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts() -- formerly GetSegmentScores()
 
-	local l_SkipTheseSegments = ""
-	local l_NumberOfSegmentsSkipping = 0
+	local l_ToBeSortedSegmentRangeScoreTable = {} -- {Segment Score, StartSegment}
+  local l_BottomXSortedSegmentRangeScoreTable = {}
+  
+	local l_SkipTheseSegmentRanges = ""
+	local l_NumberOfSegmentRangesSkipping = 0
 	local l_StartSegment, l_EndSegment
 
-	local l_FirstPossibleSegmentThatCanStartARangeOfSegments = 1
-
+	local l_bSegmentIsAllowedToBeRebuilt = true
+	local l_bSegmentRangeIsAllowedToBeRebuilt = true
+	local l_SegmentRangeScore = 0
+  
+  local l_FirstPossibleSegmentThatCanStartARangeOfSegments = 1
 	local l_LastPossibleSegmentThatCanStartARangeOfSegments =
 		g_SegmentCount_WithoutLigands - g_RequiredNumberOfConsecutiveSegments + 1
 	-- An example:
@@ -3421,84 +3428,76 @@ function Populate_g_SegmentRangesTable_WithWorstScoringSegmentRanges(l_Recursion
 	-- g_RequiredNumberOfConsecutiveSegments = 3  -- we must have this many segments
                                                 -- in our segment range
 	-- l_LastPossibleSegmentThatCanStartARangeOfSegments = 5 - 3 + 1 = 3
-	-- So our last possible segment range would be {2, 3, 4}
+	-- So our last possible segment range would be {3, 4, 5}
 
-	local l_CurrentWorseScoringSegment
-	local l_bSegmentIsAllowedToBeRebuilt
-	local l_bSegmentRangeIsAllowedToBeRebuilt
-	local l_bSegmentRangeToWorkOn
-	local l_SegmentScore
-  
-	for l_CurrentWorseScoringSegment =
+	for l_StartSegment =
 		l_FirstPossibleSegmentThatCanStartARangeOfSegments,
 		l_LastPossibleSegmentThatCanStartARangeOfSegments do
       
-    l_bSegmentIsAllowedToBeRebuilt = bSegmentIsAllowedToBeRebuilt(l_CurrentWorseScoringSegment)
+    l_StartSegment = l_StartSegment
+    l_EndSegment = l_StartSegment + g_RequiredNumberOfConsecutiveSegments - 1
+    -- An Example:
+    -- l_StartSegment = 1
+    -- l_EndSegment = 1 + 3 - 1 = 3
+    -- SegmentRange = {1-3}
+    
+    l_bSegmentIsAllowedToBeRebuilt = bSegmentIsAllowedToBeRebuilt(l_StartSegment)
     if l_bSegmentIsAllowedToBeRebuilt == true then
       
-      l_StartSegment = l_CurrentWorseScoringSegment
-      l_EndSegment = l_CurrentWorseScoringSegment + g_RequiredNumberOfConsecutiveSegments - 1
-      -- An Example:
-      -- l_StartSegment = 1
-      -- l_EndSegment = 1 + 3 - 1 = 3
-      -- SegmentRange = {1, 2, 3}
-      
       l_bSegmentRangeIsAllowedToBeRebuilt = bSegmentRangeIsAllowedToBeRebuilt(l_StartSegment, l_EndSegment)
-      -- bSegmentRangeIsAllowedToBeRebuilt() formerly MustWorkon()
+      -- ...formerly MustWorkon()
       
       if l_bSegmentRangeIsAllowedToBeRebuilt == true then
         
         local l_ScorePart_Name = nil
-        l_SegmentScore = Get_ScorePart_Score(l_ScorePart_Name, l_StartSegment, l_EndSegment) 
+        l_SegmentRangeScore = Get_ScorePart_Score(l_ScorePart_Name, l_StartSegment, l_EndSegment) 
         -- ...formerly getPartscore()
         
-        -- Add a row to the l_WorstScoringSegmentRangesTable which will be used
-        -- below to populate the g_SegmentRangesToRebuildTable...
-        -- Note: The only reason we add the l_SegmentScore as the first field
-        --       in the l_WorstScoringSegmentRangesTable, is so we can sort the table from
+        -- Note: Add a row to l_ToBeSortedSegmentRangeScoreTable, which will be
+        --       used below to populate the g_SegmentRangesToRebuildTable...
+        -- Note: The only reason we add the l_SegmentRangeScore as the first field
+        --       in the l_ToBeSortedSegmentRangeScoreTable, is so we can sort the table from
         --       lowest to highest Segment Scores.
         -- Note: Although we are only placing the l_StartSegment in this table, and
         --       not the l_EndSegment, this is still a segment *range* table. We just
         --       don't need the l_EndSegment in this table, because we will calculate
         --       it later as l_StartSegment + g_RequiredNumberOfConsecutiveSegments - 1
         --       Also, we don't want the l_EndSegment is this table because it would
-        --       break the SortBySegmentScore() function used below...
-        l_WorstScoringSegmentRangesTable[#l_WorstScoringSegmentRangesTable + 1] = -- formerly wrst[]
-          {l_SegmentScore, l_StartSegment}
+        --       break the SortBottemXAscendingBySegmentRangeScore() function used below...
+        l_ToBeSortedSegmentRangeScoreTable[#l_ToBeSortedSegmentRangeScoreTable + 1] = -- formerly wrst[]
+          {l_SegmentRangeScore, l_StartSegment}
           
       end
       
 		else -- l_bSegmentIsAllowedToBeRebuilt ~= true
       
-      l_NumberOfSegmentsSkipping = l_NumberOfSegmentsSkipping + 1
+      l_NumberOfSegmentRangesSkipping = l_NumberOfSegmentRangesSkipping + 1
       
-      if l_SkipTheseSegments ~= "" then
-        l_SkipTheseSegments = l_SkipTheseSegments .. ", "
+      if l_SkipTheseSegmentRanges ~= "" then
+        l_SkipTheseSegmentRanges = l_SkipTheseSegmentRanges .. ","
       end
-      l_SkipTheseSegments = l_SkipTheseSegments .. l_CurrentWorseScoringSegment
+      l_SkipTheseSegmentRanges = l_SkipTheseSegmentRanges .. l_StartSegment .. "-" .. l_EndSegment
       
 		end -- if l_bSegmentIsAllowedToBeRebuilt == true then
     
 	end
   
-	if l_NumberOfSegmentsSkipping > 0 then
+	if l_NumberOfSegmentRangesSkipping > 0 then
     
-		 --too much noise...print("\n  Skipping the following " .. l_NumberOfSegmentsSkipping ..
-     --      " already rebuilt (or unselected) segments: [" .. l_SkipTheseSegments .. "]")
+		 --too much noise...print("\n  Skipping the following " .. l_NumberOfSegmentRangesSkipping ..
+     --      " already rebuilt (or unselected) segments: [" .. l_SkipTheseSegmentRanges .. "]")
 	end
 
-	-- Note: The only reason we add the l_SegmentScore as the first field
-	--       in the l_WorstScoringSegmentRangesTable, is so we can sort the table from
+	-- Note: The only reason we add the l_SegmentRangeScore as the first field in the 
+	--       l_ToBeSortedSegmentRangeScoreTable, is so we can sort the table from
 	--       lowest to highest Segment Score.
-	-- Please Remember!! This is one row per *segment*, not one row per segment range!
-	--        So, if there are 135 non-ligand segments, this table
-	--        will have 135 rows, every time this function is called!
+	-- Please Remember! This is one row per *segment range*, not one row per segment!
   
   --- This is what you are looking for!!!
   --- This is what you are looking for!!!
-	l_WorstScoringSegmentRangesTable =
+	l_BottomXSortedSegmentRangeScoreTable =
   
-		SortBySegmentScore(l_WorstScoringSegmentRangesTable, -- <<<--- formerly Sort()
+		SortBottemXAscendingBySegmentRangeScore(l_ToBeSortedSegmentRangeScoreTable, -- <<<--- formerly Sort()
       
       g_UserSelected_MaxNumberOf_SegmentRanges_ToRebuild_ThisRunCycle)
   --- This is what you are looking for!!!
@@ -3507,7 +3506,7 @@ function Populate_g_SegmentRangesTable_WithWorstScoringSegmentRanges(l_Recursion
 	-- Example table entries {{50.111, 1}, {20.32, 2}, {0.234, 3}, {30.5, 6}, {10.3, 7}},
 	-- would be sorted as {{0.234, 3}, {10.3, 7}, {20.32, 2}, {30.5, 6}, {50.111, 1}}
 
-	local l_NumberOfSegmentRangesToProcessThisRunCycle = #l_WorstScoringSegmentRangesTable
+	local l_NumberOfSegmentRangesToProcessThisRunCycle = #l_BottomXSortedSegmentRangeScoreTable
 
 	if l_NumberOfSegmentRangesToProcessThisRunCycle > 
      g_UserSelected_MaxNumberOf_SegmentRanges_ToRebuild_ThisRunCycle then
@@ -3518,27 +3517,27 @@ function Populate_g_SegmentRangesTable_WithWorstScoringSegmentRanges(l_Recursion
 	 -- l_WorstScoringSegmentRangesTable={SegmentScore=1, StartSegment=2}
 	local wst_SegmentScore = 1
 	local wst_StartSegment = 2
-	local l_WorstSegmentTableRow = {}
+	local l_SegmentRangeScoreRow = {}
 
 	-- Finally populate the g_SegmentRangesToRebuildTable[] -- formerly areas[]
-  
+  --g_XLowestScoringSegmentRangesTable
 	g_SegmentRangesToRebuildTable = {}  -- formerly areas[]
 
 	-- Note: In the for loop below, we increment l_WorstScoringSegmentsTableIndex by 1,
-	-- instead of by g_RequiredNumberOfConsecutiveSegments. That's because we want a rolling
-	-- list of segment ranges. This gives us lots of possible segment combinations to
-	-- work on...
+	--       instead of by g_RequiredNumberOfConsecutiveSegments. That's because we want
+	--       a rolling list of segment ranges. This gives us lots of possible segment
+	--       combinations to work on...
 	-- Example:
-	--   Segment list = 1,2,3,4,5,6
-	--   We want 3 consecutive segments per segment range
-	--   Resulting segment ranges: {1,2,3},{2,3,4},{3,4,5},{4,5,6}
-	for l_WorstScoringSegmentsTableIndex = 1, l_NumberOfSegmentRangesToProcessThisRunCycle do
+	--       Segment list = 1,2,3,4,5,6
+	--       We want 3 consecutive segments per segment range:
+	--       Resulting segment ranges: {1,2,3},{2,3,4},{3,4,5},{4,5,6}
+	for l_TableIndex = 1, l_NumberOfSegmentRangesToProcessThisRunCycle do
     
-		l_WorstSegmentTableRow = l_WorstScoringSegmentRangesTable[l_WorstScoringSegmentsTableIndex]
-    -- Example table row entries {0.234, 3}, where the first field is the
-    -- SegmentScore and the second field is the SegmentIndex.
+		l_SegmentRangeScoreRow = l_BottomXSortedSegmentRangeScoreTable[l_TableIndex]
+    -- Note: Example table row entries {0.234, 3}, where the first field
+    --       is the SegmentScore and the second field is the SegmentIndex.
     
-		l_StartSegment = l_WorstSegmentTableRow[wst_StartSegment] -- remember, this is the second field
+		l_StartSegment = l_SegmentRangeScoreRow[wst_StartSegment] -- remember, this is the second field
     
 		l_EndSegment = l_StartSegment + g_RequiredNumberOfConsecutiveSegments - 1
     
@@ -3549,7 +3548,7 @@ function Populate_g_SegmentRangesTable_WithWorstScoringSegmentRanges(l_Recursion
     
 	end
 
-	if l_RecursionLevel == 1 and #l_WorstScoringSegmentRangesTable == 0 then
+	if l_RecursionLevel == 1 and #l_BottomXSortedSegmentRangeScoreTable == 0 then
     
     -- The next two lines get called from two places:
     -- 1) Populate_g_SegmentRangesTable_WithWorstScoringSegmentRanges() -- Here, in this fuction.
@@ -3587,6 +3586,8 @@ function Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts() -- forme
 
 	for l_SegmentIndex = 1, g_SegmentCount_WithoutLigands do
     
+    -- make sure this is not a frozen, locked or ligand segment, and make sure the user
+    -- has selected it to be worked on...
 		if g_bSegmentsToRebuildBooleanTable[l_SegmentIndex] == true then -- formerly WORKONbool[]
       
 			if #g_UserSelected_ScorePartsForCalculatingWorseScoringSegmentsTable == 0 then -- formerly scrPart[]
@@ -3614,12 +3615,16 @@ function Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts() -- forme
             l_SegmentIndex, l_SegmentIndex)
 			end
       
-      -- The first time this function is called we add one row per segment of the protein
-      -- to the g_SegmentScoresTable. On subsequent calls we simply update each row, because
-      -- the number of segments never changes. No need to delete the table and recreate it 
-      -- each time this function is called...
+      -- The first time this function is called we add one row per non-frozen-locked-or-ligand
+      -- segment of the protein to the g_SegmentScoresTable. On subsequent calls we simply update
+      -- each row, because the number of segments never changes. No need to delete the table and 
+      -- recreate it each time this function is called...
 			-- This is the only place where this table is populated and updated...
-      -- Note: l_SegmentIndex is always sequential from 1 to g_SegmentCount_WithoutLigands...
+      -- Note: l_SegmentIndex is sequential from 1 to g_SegmentCount_WithoutLigands with gaps
+      -- for frozen, locked or ligand segments...
+      -- g_SegmentScoresTable is only used by Get_ScorePart_Score() which is used by
+      -- Populate_g_SegmentRangesTable_WithWorstScoringSegmentRanges() and 
+      -- Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()
 			g_SegmentScoresTable[l_SegmentIndex] = l_SegmentScore
       
     end -- If g_bSegmentsToRebuildBooleanTable[l_SegmentIndex] == true then
@@ -3768,7 +3773,7 @@ function SetSegmentsAlreadyRebuilt(l_StartSegment, l_EndSegment) -- formerly Add
   end
 
 end -- SetSegmentsAlreadyRebuilt(l_StartSegment, l_EndSegment)
-function SortBySegmentScore(l_Table, l_NumberOfItems)
+function SortBottemXAscendingBySegmentRangeScore(l_Table, l_NumberOfItems)
 
   -- Called from Populate_g_SegmentRangesTable_WithWorstScoringSegmentRanges()...
 	-- Backward bubble sorting, lowest on top, only needed l_NumberOfItems
@@ -3782,7 +3787,7 @@ function SortBySegmentScore(l_Table, l_NumberOfItems)
   
 	return l_Table
   
-end -- function SortBySegmentScore(l_Table, l_NumberOfItems)
+end -- function SortBottemXAscendingBySegmentRangeScore(l_Table, l_NumberOfItems)
 function TemporarilyDisable_ConditionChecking()
   -- Called from SaveBest() and 
   --             DefineGlobalVariables()...
@@ -4022,17 +4027,29 @@ function Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTot
 end -- Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTotalScore_And_FirstInString()
 -- ...end of Support Functions.
 -- Start of My Favorite Functions...
-function Populate_g_FrozenLockedOrLigandSegments()
+function Populate_g_FrozenLockedOrLigandSegments() -- formerly (now inverted) InitWORKONbool()
   
-  g_FrozenLockedOrLigandSegments = {}
+  g_FrozenLockedOrLigandSegmentsTable = {}
+  l_FrozenLockedOrLigandSegmentsTable = {}
   
   for l_SegmentIndex = 1, g_SegmentCount_WithLigands  do
     
     if bCheckIfFrozenLockedOrLigandSegment(l_SegmentIndex) == true then
-        g_FrozenLockedOrLigandSegments[l_SegmentIndex]  = true
+        g_FrozenLockedOrLigandSegmentsTable[l_SegmentIndex]  = true
+        l_FrozenLockedOrLigandSegmentsTable[#l_FrozenLockedOrLigandSegmentsTable + 1] = l_SegmentIndex
     end
     
   end
+  
+  local l_FrozenLockedOrLigandSegmentRangesTable =
+    ConvertSegmentsTableToSegmentRangesTable(l_FrozenLockedOrLigandSegmentsTable)
+  
+  local l_ListOfFrozenLockedOrLigandSegmentRanges = 
+    ConvertSegmentRangesTableToListOfSegmentRanges(l_FrozenLockedOrLigandSegmentRangesTable)
+    
+  print("Frozen Locked or  Ligand SegmentRanges: " ..
+    l_ListOfFrozenLockedOrLigandSegmentRanges)  
+  
 end
 
  function bCheckIfFrozenLockedOrLigandSegment(l_SegmentIndex)
