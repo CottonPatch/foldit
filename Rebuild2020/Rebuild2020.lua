@@ -76,7 +76,7 @@ function DefineGlobalVariables()
 
 	g_SegmentScoresTable = {}
 	-- Used in Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts() and
-  --         Get_ScorePart_Score()
+  --         Calculate_ScorePart_Score()
 	-- g_SegmentScoresTable={SegmentScore}
 	-- g_SegmentScoresTable is optimized for quickly searching for 
 	-- the lowest scoring segments, so we can work on those first.
@@ -2557,6 +2557,203 @@ function bSegmentRangeIsAllowedToBeRebuilt(l_StartSegment, l_EndSegment) -- form
   return true
   
 end -- function bSegmentRangeIsAllowedToBeRebuilt(l_StartSegment, l_EndSegment)
+function Calculate_ScorePart_Score(l_ScorePart_Name, l_StartSegment, l_EndSegment) -- formerly getPartscore
+  -- Called from Populate_g_XLowestScoringSegmentRangesTable() and
+  --             Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()...
+  
+  -- I think this function could/should be merged into the more frequently used
+  -- Calculate_SegmentRange_Score() function. No, don't do that. They each serve
+  -- a different purpose. Just look at their names to see what each one does. And
+  -- does well. Okay, sure calling: 
+  --     Calculate_ScorePart_Score(nil, l_StartSegment, l_EndSegment), 
+  --          which uses g_SegmentScoresTable[l_SegmentIndex]
+  -- might get the same result as calling:
+  --     Calculate_SegmentRange_Score(nil, l_StartSegment, l_EndSegment),
+  --          which uses current.GetSegmentEnergyScore(l_SegmentIndex)
+  -- And calling:
+  --    Calculate_ScorePart_Score("loctotal", l_StartSegment, l_EndSegment)
+  -- is the same as calling...
+  --    Calculate_SegmentRange_Score(nil, l_StartSegment, l_EndSegment)
+  -- And calling:
+  --    Calculate_ScorePart_Score("total", l_StartSegment, l_EndSegment)
+  -- is the same as calling...
+  --    Calculate_SegmentRange_Score(nil, nil, nil)
+  -- And pretty much any call to Calculate_ScorePart_Score() with a ScorePart_Name
+  -- other than 'total', 'loctotal' and 'ligand', would be same as
+  -- calling Calculate_SegmentRange_Score() with the same ScorePart_Name.
+
+	local l_ScorePart_Score = 0
+    
+	if l_ScorePart_Name == nil then
+    
+		-- Note: This "if" case is only called from 
+    --       Populate_g_XLowestScoringSegmentRangesTable,
+    --       and is only called with a very small range of segments, like 
+    --       1-3, 2-4, 3-5 in the first run, then
+    --       1-4, 2-5, 3-6 in the second run, and so on...
+    
+		for l_SegmentIndex = l_StartSegment, l_EndSegment do
+      
+			-- g_SegmentScoresTable = {SegmentScore}
+			-- The only place that reads g_SegmentScoresTable is this function.
+      -- The only place that updates g_SegmentScoresTable is 
+      --    Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts.
+      --
+      -- Note: This is different than calling GetPoseTotalScore() because
+      --       this is only for a small range of segments, not all segments...
+			l_ScorePart_Score = l_ScorePart_Score + g_SegmentScoresTable[l_SegmentIndex]
+		end
+    
+    return l_ScorePart_Score    
+  end
+
+	if l_ScorePart_Name == 'total' then
+    
+    -- Example usage: from Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields,
+    --                when stepping through each ScorePart to update the ScorePart_Scores field...
+		l_ScorePart_Score = GetPoseTotalScore()
+    return l_ScorePart_Score    
+    
+  end
+  
+  if l_ScorePart_Name == 'loctotal' then --total segment scores
+    -- Note: Calling...
+    --        Calculate_ScorePart_Score("loctotal", l_StartSegment, l_EndSegment)
+    --       is the same as calling...
+    --        Calculate_SegmentRange_Score(nil, l_StartSegment, l_EndSegment)
+    
+		l_ScorePart_Score = Calculate_SegmentRange_Score(nil, l_StartSegment, l_EndSegment)
+    return l_ScorePart_Score    
+    
+  end
+    
+  if l_ScorePart_Name == 'ligand' then --ligand score
+    
+		for l_SegmentIndex = g_SegmentCount_WithoutLigands + 1, g_SegmentCount_WithLigands do -- w/ligands!
+			l_ScorePart_Score = l_ScorePart_Score + current.GetSegmentEnergyScore(l_SegmentIndex)
+		end
+    return l_ScorePart_Score    
+    
+	end 
+  
+  -- Example usage:
+  -- 1) from Calculate_ScorePart_Score() with l_ScorePart_Name == 'Clashing' from
+  --    Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()
+  --    when stepping through each ScorePart to update the ScorePart_Scores field...
+  -- Geez, why didn't you just call Calculate_SegmentRange_Score directly? Well, we
+  -- could have, but then Calculate_SegmentRange_Score would need to handle the
+  -- above 'total', 'loctotal' and 'ligand' cases above. That would be easy to do.
+  -- Just move those cases into Calculate_SegmentRange_Score, after the line that
+  -- reads 'l_ScorePart_Name = l_ScorePart_NameOrTable'!!!
+  -- Geez Calculate_SegmentRange_Score() could probably handle the one remaining
+  -- case in this function where l_ScorePart_Name is nil. We just need to make sure
+  -- 'g_SegmentScoresTable[l_SegmentIndex]' and 
+  -- 'current.GetSegmentEnergyScore(l_SegmentIndex)' return the same value!
+  l_ScorePart_Score = Calculate_SegmentRange_Score(l_ScorePart_Name, l_StartSegment, l_EndSegment)
+	return l_ScorePart_Score
+
+end
+function Calculate_SegmentRange_Score(l_ScorePart_NameOrTable, l_StartSegment, l_EndSegment) -- GetSubScore
+  -- formerly GetSubscore()
+  -- Called from 1 place recursively in Calculate_SegmentRange_Score(),
+  --             2 places inDisplayPuzzleProperties(),
+  --             2 places in Calculate_ScorePart_Score(), 
+  --             1 place in Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts() and 
+  --             1 place in CheckForLowStartingScore()...
+
+	-- Note: l_ScorePart_NameOrTable is optional, if it's nil we use
+	--       GetSegmentEnergyScore instead of GetSegmentEnergySubscore.
+
+	-- Note: l_ScorePart_NameOrTable can be either a single string, or a table of strings.
+
+	-- Note: Each Segment can have up to 20 named ScoreParts.
+	--       e.g.; 1=Clashing, 2=Pairwise, 3=Packing, Hiding, Bonding, Ideality, Backbone,
+	--             Sidechain, Reference...
+
+	local l_ScoreTotal = 0
+	local l_ScorePart_Score = 0
+	local l_ScorePart_Name = ""
+  
+  -- A table of ScoreParts was passed in...
+	if type(l_ScorePart_NameOrTable) == "table" then
+    -- Calculate the total score of a segment range, but
+    -- only include the ScoreParts of the passed in list of ScoreParts...
+		for l_ScorePart_NameOrTableIndex = 1, #l_ScorePart_NameOrTable do
+			-- recursion...
+			-- Call back with each ScorePart in the ScorePart_NameOrTable...
+			l_ScorePart_Name = l_ScorePart_NameOrTable[l_ScorePart_NameOrTableIndex]
+			l_ScorePart_Score = Calculate_SegmentRange_Score(l_ScorePart_Name, l_StartSegment, 
+                                                       l_EndSegment)
+			l_ScoreTotal = l_ScoreTotal + l_ScorePart_Score      
+		end
+    return l_ScoreTotal
+  end 
+  
+  -- Nothing was passed in...
+	if l_ScorePart_NameOrTable == nil and l_StartSegment == nil and l_EndSegment == nil then            
+    -- Calculate the total score of all segment ranges and include all ScoreParts...
+    -- I suspect if you ended up here, it was by accident (i.e., a coding error),
+    -- because you should have just called GetPoseTotalScore(l_pose) directly instead!
+    local l_Current_PoseTotalScore = GetPoseTotalScore(l_pose)
+    return l_Current_PoseTotalScore
+  end 
+  
+  if l_StartSegment == nil then
+    -- Example usage: from DisplayPuzzleProperties() to calulate
+    --                l_DensityTotal, where ScorePart_Name = "density"...
+    l_StartSegment = 1
+  end
+  
+  if l_EndSegment == nil then
+    -- Example usage: from DisplayPuzzleProperties() to calulate
+    --                l_DensityTotal, where ScorePart_Name = "density"...
+    l_EndSegment = g_SegmentCount_WithLigands -- why w/ligands? Because, although we can't modify the
+    --                                           ligand segments, we can and do get points from them.
+  end
+  
+  if l_StartSegment > l_EndSegment then
+    l_StartSegment, l_EndSegment = l_EndSegment, l_StartSegment
+  end
+  
+  -- Only a segment range was passed in (no ScorePart)...
+  if l_ScorePart_NameOrTable == nil then
+    -- Examples usage:
+    -- 1) from DisplayPuzzleProperties() to calculate:
+    --    a) l__Score_TotalOfAllSegmentsIncludingLigands, which 
+    --       is then used to compute g_DensityWeight, and
+    --    b) l_ComputedScore, which is used to determine g_bProbableSymmetryPuzzle
+    -- 2) from Calculate_ScorePart_Score() with l_ScorePart_Name == 'loctotal' from
+    --    Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()
+    --    when stepping through each ScorePart to update the ScorePart_Scores field...
+    for l_SegmentIndex = l_StartSegment, l_EndSegment do
+      local l_SegmentEnergyScore = current.GetSegmentEnergyScore(l_SegmentIndex)
+      l_ScoreTotal = l_ScoreTotal + l_SegmentEnergyScore
+      -- print("current.GetSegmentEnergyScore(" .. l_SegmentIndex .. ")=[" ..
+      --  current.GetSegmentEnergyScore(l_SegmentIndex) .. "]")
+    end
+    return l_ScoreTotal
+  end
+  
+  -- Hopefully a ScorePart was passed in...
+  l_ScorePart_Name = l_ScorePart_NameOrTable
+  -- This time l_ScorePart_Name is not actually a table; 
+  -- rather, it's just a single ScorePart_Name...
+  -- Example usage:
+  -- 1) from DisplayPuzzleProperties() to calulate
+  --    l_DensityTotal, where ScorePart_Name = "density"...
+  -- 2) from Calculate_ScorePart_Score() with l_ScorePart_Name == 'Clashing' from
+  --    Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()
+  --    when stepping through each ScorePart to update the ScorePart_Scores field...
+  for l_SegmentIndex = l_StartSegment, l_EndSegment do
+    l_ScorePart_Score = current.GetSegmentEnergySubscore(l_SegmentIndex, l_ScorePart_Name)
+    l_ScoreTotal = l_ScoreTotal + l_ScorePart_Score
+    -- print("current.GetSegmentEnergySubscore(" .. l_SegmentIndex .. "," .. l_ScorePart_Name .. ")=["
+    --  .. current.GetSegmentEnergySubscore(l_SegmentIndex, l_ScorePart_Name) .. "]")
+  end
+  
+	return l_ScoreTotal
+
+end -- Calculate_SegmentRange_Score(l_ScorePart_NameOrTable, l_StartSegment, l_EndSegment)
 function CheckForLowStartingScore()
   -- Called from main()...
 
@@ -2649,6 +2846,30 @@ function CheckIfAlreadyRebuiltSegmentsMustBeIncluded() -- formerly ChkDisjunctLi
   ResetSegmentsAlreadyRebuiltTable()
        
 end -- CheckIfAlreadyRebuiltSegmentsMustBeIncluded()
+function bCheckIfFrozenLockedOrLigandSegment(l_SegmentIndex)
+      
+  -- Check if Frozen
+  local l_bBackboneIsFrozen
+  local l_bSideChainIsFrozen
+  l_bBackboneIsFrozen, l_bSideChainIsFrozen = freeze.IsFrozen(l_SegmentIndex)
+  
+  if l_bBackboneIsFrozen == true or l_bSideChainIsFrozen == true then
+    return true
+  end
+  
+  -- Check if this is a Locked segment (the easiest to check)...
+  if structure.IsLocked(l_SegmentIndex) == true then
+    return true
+  end
+
+  -- Check if this is a Ligand segment...
+	local l_GetSecondaryStructureType = structure.GetSecondaryStructure(l_SegmentIndex)  --eg L,E,H,M
+	if l_GetSecondaryStructureType == "M" then -- "M" for Molecule
+    return true
+  end
+  
+end -- function bCheckIfFrozenLockedOrLigandSegment(l_SegmentIndex)
+
 function CleanUpSegmentRangesTable(l_SegmentRangesTable)
   -- Called from AskUserToSelectSegmentsRangesToRebuild()...
   
@@ -3361,6 +3582,31 @@ function Populate_g_CysteineSegmentsTable()
 	g_OriginalNumberOfDisulfideBonds = DisulfideBonds_GetCount()
   
 end -- function Populate_g_CysteineSegmentsTable()
+function Populate_g_FrozenLockedOrLigandSegments() -- formerly (now inverted) InitWORKONbool()
+  
+  g_FrozenLockedOrLigandSegmentsTable = {}
+  l_FrozenLockedOrLigandSegmentsTable = {}
+  
+  for l_SegmentIndex = 1, g_SegmentCount_WithLigands  do
+    
+    if bCheckIfFrozenLockedOrLigandSegment(l_SegmentIndex) == true then
+        g_FrozenLockedOrLigandSegmentsTable[l_SegmentIndex]  = true
+        l_FrozenLockedOrLigandSegmentsTable[#l_FrozenLockedOrLigandSegmentsTable + 1] = l_SegmentIndex
+    end
+    
+  end
+  
+  local l_FrozenLockedOrLigandSegmentRangesTable =
+    ConvertSegmentsTableToSegmentRangesTable(l_FrozenLockedOrLigandSegmentsTable)
+  
+  local l_ListOfFrozenLockedOrLigandSegmentRanges = 
+    ConvertSegmentRangesTableToListOfSegmentRanges(l_FrozenLockedOrLigandSegmentRangesTable)
+    
+  print("  Frozen Locked or Ligand SegmentRanges: " ..
+    l_ListOfFrozenLockedOrLigandSegmentRanges)  
+  
+end
+
 function Populate_g_ScorePart_Scores_Table() -- Formerly ClearScores()
   -- Called from RebuildOneSegmentRangeManyTimes()...
 
@@ -3519,7 +3765,7 @@ function Populate_g_XLowestScoringSegmentRangesTable(l_RecursionLevel) -- FindWo
       if l_bSegmentRangeIsAllowedToBeRebuilt == true then
         
         local l_ScorePart_Name = nil
-        l_SegmentRangeScore = Get_ScorePart_Score(l_ScorePart_Name, l_StartSegment, l_EndSegment) 
+        l_SegmentRangeScore = Calculate_ScorePart_Score(l_ScorePart_Name, l_StartSegment, l_EndSegment) 
         -- ...formerly getPartscore()
         
         -- Note: Add a row to l_ToBeSortedSegmentRangeScoreTable, which will be
@@ -3696,7 +3942,7 @@ function Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts() -- forme
 			-- This is the only place where this table is populated and updated...
       -- Note: l_SegmentIndex is sequential from 1 to g_SegmentCount_WithoutLigands with gaps
       -- for frozen, locked or ligand segments...
-      -- g_SegmentScoresTable is only used by Get_ScorePart_Score() which is used by
+      -- g_SegmentScoresTable is only used by Calculate_ScorePart_Score() which is used by
       -- Populate_g_XLowestScoringSegmentRangesTable() and 
       -- Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()
 			g_SegmentScoresTable[l_SegmentIndex] = l_SegmentScore
@@ -3782,6 +4028,79 @@ function RoundTo(l_DirtyFloat, l_RoundTo)
   return l_MaybeDirtyFloat
   
 end -- function RoundTo(l_DirtyFloat, l_RoundTo)
+function SaveBest() -- <-- Updates g_Score_ScriptBest
+  -- Called from 1 time  in Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields(),
+  --             1 time  in RebuildOneSegmentRangeManyTimes(), and 
+  --             2 times in RebuildManySegmentRanges()...
+  
+  -- Note 1: As long as you call SaveBest() after every rebuild, shake, wiggle and mutate, then
+  --         g_Score_ScriptBest will always have the best score ever encounter during the script run.
+  -- Note 2: The value of GetPoseTotalScore() can go up and down drastically after any call to rebuild,
+  --         shake, wiggle or mutate; therefore, you cannot always expect to find the best score by calling
+  --         GetPoseTotalScore().
+  
+  if g_bUserSelected_NormalConditionChecking_TemporarilyDisable == true then
+    
+   	local l_PoseTotalScore_WithConditionChecking_Disabled = GetPoseTotalScore()
+  	local l_PotentialScore_IfAllConditionsAreMet = 
+          l_PoseTotalScore_WithConditionChecking_Disabled + g_UserSelected_MaximumPotentialBonusPoints
+    
+    if (l_PotentialScore_IfAllConditionsAreMet <= g_Score_ScriptBest) then
+      return
+    end
+    
+    -- Do not attempt to improve g_Score_ScriptBest if:
+    -- 1) Normal condition checking is temporarily disabled, and
+    -- 2) Reenabling normal condition checking would not likely improve our g_Score_ScriptBest.
+    
+    -- When normal condition checking is disabled, our scores are only potential scores; that is,
+    -- if all conditions are met. We won't know if all conditions are met until we re-enable
+    -- normal condition checking. We only temporarily disable normal condition checking to speed
+    -- up the rebuild process, and only when there are potential bonus points to be earned.
+  end
+  
+  if g_bUserSelected_NormalConditionChecking_TemporarilyDisable == true then
+    -- Temporarily re-enable normal condition checking, so we
+    -- can look at real scores instead of potential scores...
+    NormalConditionChecking_ReEnable()
+  end
+  
+  -- With normal condition checking re-enabled, a call to GetPoseTotalScore()
+  -- will return an actual, real, counted, foldit-saved, current pose total score...
+  local l_Current_PoseTotalScore = GetPoseTotalScore()
+  local l_Real_PointsGained = l_Current_PoseTotalScore - g_Score_ScriptBest  
+  
+  local l_MinimumGain_ForSave = 0.001
+  if g_bSketchBookPuzzle == true then
+    l_MinimumGain_ForSave = g_UserSelected_SketchBookPuzzle_MinimumGainForSave
+  end
+  
+  if l_Real_PointsGained >= l_MinimumGain_ForSave or 
+    (l_Real_PointsGained >= 0.001 and g_bFoundAHighGain == true) then
+    
+    -- Important !!!
+    -- Important !!!
+    g_Score_ScriptBest = l_Current_PoseTotalScore  -- <<<--- This is what you are looking for!!!
+    -- Important !!!
+    -- Important !!!
+    
+    if g_bUserSelected_FuseBestScorePartPose == false and g_Score_ScriptBest > 0 then
+      print("\nNow that the total score is positive, we will switch back on: " ..
+            "'normal stabilize' and 'fuse best score part position'.\n")
+      g_bUserSelected_FuseBestScorePartPose = true
+      g_bUserSelected_NormalStabilize = true
+    end
+    
+    save.Quicksave(3) -- Save -- Slot 3 always contains the best scoring pose!
+    g_bFoundAHighGain = true -- not exactly sure how this one works yet.
+  end
+  
+  if g_bUserSelected_NormalConditionChecking_TemporarilyDisable == true then
+    -- Disable condition checking again (re-enable fast CPU processing)...
+    NormalConditionChecking_TemporarilyDisable()
+  end
+
+end -- SaveBest()
 function SegmentRangesMinus(l_SegmentRangesTable1, l_SegmentRangesTable2)
   -- Called from 6 places in AskUserToSelectSegmentsRangesToRebuild() and
   --             3 places in AskUserToSelectRebuildOptions()...
@@ -3877,7 +4196,7 @@ function Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fiel
   -- {14,    0.2095337681,-5500.1149833617,"",false}}
   
 	-- Create a new list of active ScoreParts, then call
-	-- Get_ScorePart_Score() to get each ScorePart's scores...
+	-- Calculate_ScorePart_Score() to get each ScorePart's scores...
 	local l_ActiveScorePartsScoreTable = {} -- {1=ScorePart_Number, 2=ScorePart_Score}
 	local l_ScorePart_Number, l_ScoreType, l_bScorePart_IsActive, l_ScorePart_Score
   
@@ -3890,7 +4209,7 @@ function Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fiel
 		if l_bScorePart_IsActive == true then
       
 			-- Here is where we are getting the actual score to save...
-			l_ScorePart_Score = Get_ScorePart_Score(l_ScorePart_Name, l_StartSegment, l_EndSegment)
+			l_ScorePart_Score = Calculate_ScorePart_Score(l_ScorePart_Name, l_StartSegment, l_EndSegment)
 			l_ActiveScorePartsScoreTable[#l_ActiveScorePartsScoreTable + 1] = 
                                                                     {l_ScorePart_Number, l_ScorePart_Score}
 		end
@@ -4051,55 +4370,6 @@ function Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTot
 end -- Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTotalScore_And_FirstInString()
 -- ...end of Support Functions.
 -- Start of My Favorite Functions...
-function Populate_g_FrozenLockedOrLigandSegments() -- formerly (now inverted) InitWORKONbool()
-  
-  g_FrozenLockedOrLigandSegmentsTable = {}
-  l_FrozenLockedOrLigandSegmentsTable = {}
-  
-  for l_SegmentIndex = 1, g_SegmentCount_WithLigands  do
-    
-    if bCheckIfFrozenLockedOrLigandSegment(l_SegmentIndex) == true then
-        g_FrozenLockedOrLigandSegmentsTable[l_SegmentIndex]  = true
-        l_FrozenLockedOrLigandSegmentsTable[#l_FrozenLockedOrLigandSegmentsTable + 1] = l_SegmentIndex
-    end
-    
-  end
-  
-  local l_FrozenLockedOrLigandSegmentRangesTable =
-    ConvertSegmentsTableToSegmentRangesTable(l_FrozenLockedOrLigandSegmentsTable)
-  
-  local l_ListOfFrozenLockedOrLigandSegmentRanges = 
-    ConvertSegmentRangesTableToListOfSegmentRanges(l_FrozenLockedOrLigandSegmentRangesTable)
-    
-  print("  Frozen Locked or Ligand SegmentRanges: " ..
-    l_ListOfFrozenLockedOrLigandSegmentRanges)  
-  
-end
-
-function bCheckIfFrozenLockedOrLigandSegment(l_SegmentIndex)
-      
-  -- Check if Frozen
-  local l_bBackboneIsFrozen
-  local l_bSideChainIsFrozen
-  l_bBackboneIsFrozen, l_bSideChainIsFrozen = freeze.IsFrozen(l_SegmentIndex)
-  
-  if l_bBackboneIsFrozen == true or l_bSideChainIsFrozen == true then
-    return true
-  end
-  
-  -- Check if this is a Locked segment (the easiest to check)...
-  if structure.IsLocked(l_SegmentIndex) == true then
-    return true
-  end
-
-  -- Check if this is a Ligand segment...
-	local l_GetSecondaryStructureType = structure.GetSecondaryStructure(l_SegmentIndex)  --eg L,E,H,M
-	if l_GetSecondaryStructureType == "M" then -- "M" for Molecule
-    return true
-  end
-  
-end -- function bCheckIfFrozenLockedOrLigandSegment(l_SegmentIndex)
-
 function main() -- formerly DRW()
   -- Called from 1 place in xpcall()...
   -- Calls PrepareToRebuildSegmentRanges() formerly DRcall()
@@ -5431,276 +5701,6 @@ function Fuse2(l_ClashImportance_Before, l_ClashImportance_After)
   WiggleAll(1, "Fuse2") -- Iterations, FromWhere
 	
 end -- function Fuse2(l_ClashImportanceBefore, l_ClashImportanceAfter)
-function SaveBest() -- <-- Updates g_Score_ScriptBest
-  -- Called from 1 time  in Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields(),
-  --             1 time  in RebuildOneSegmentRangeManyTimes(), and 
-  --             2 times in RebuildManySegmentRanges()...
-  
-  -- Note 1: As long as you call SaveBest() after every rebuild, shake, wiggle and mutate, then
-  --         g_Score_ScriptBest will always have the best score ever encounter during the script run.
-  -- Note 2: The value of GetPoseTotalScore() can go up and down drastically after any call to rebuild,
-  --         shake, wiggle or mutate; therefore, you cannot always expect to find the best score by calling
-  --         GetPoseTotalScore().
-  
-  if g_bUserSelected_NormalConditionChecking_TemporarilyDisable == true then
-    
-   	local l_PoseTotalScore_WithConditionChecking_Disabled = GetPoseTotalScore()
-  	local l_PotentialScore_IfAllConditionsAreMet = 
-          l_PoseTotalScore_WithConditionChecking_Disabled + g_UserSelected_MaximumPotentialBonusPoints
-    
-    if (l_PotentialScore_IfAllConditionsAreMet <= g_Score_ScriptBest) then
-      return
-    end
-    
-    -- Do not attempt to improve g_Score_ScriptBest if:
-    -- 1) Normal condition checking is temporarily disabled, and
-    -- 2) Reenabling normal condition checking would not likely improve our g_Score_ScriptBest.
-    
-    -- When normal condition checking is disabled, our scores are only potential scores; that is,
-    -- if all conditions are met. We won't know if all conditions are met until we re-enable
-    -- normal condition checking. We only temporarily disable normal condition checking to speed
-    -- up the rebuild process, and only when there are potential bonus points to be earned.
-  end
-  
-  if g_bUserSelected_NormalConditionChecking_TemporarilyDisable == true then
-    -- Temporarily re-enable normal condition checking, so we
-    -- can look at real scores instead of potential scores...
-    NormalConditionChecking_ReEnable()
-  end
-  
-  -- With normal condition checking re-enabled, a call to GetPoseTotalScore()
-  -- will return an actual, real, counted, foldit-saved, current pose total score...
-  local l_Current_PoseTotalScore = GetPoseTotalScore()
-  local l_Real_PointsGained = l_Current_PoseTotalScore - g_Score_ScriptBest  
-  
-  local l_MinimumGain_ForSave = 0.001
-  if g_bSketchBookPuzzle == true then
-    l_MinimumGain_ForSave = g_UserSelected_SketchBookPuzzle_MinimumGainForSave
-  end
-  
-  if l_Real_PointsGained >= l_MinimumGain_ForSave or 
-    (l_Real_PointsGained >= 0.001 and g_bFoundAHighGain == true) then
-    
-    -- Important !!!
-    -- Important !!!
-    g_Score_ScriptBest = l_Current_PoseTotalScore  -- <<<--- This is what you are looking for!!!
-    -- Important !!!
-    -- Important !!!
-    
-    if g_bUserSelected_FuseBestScorePartPose == false and g_Score_ScriptBest > 0 then
-      print("\nNow that the total score is positive, we will switch back on: " ..
-            "'normal stabilize' and 'fuse best score part position'.\n")
-      g_bUserSelected_FuseBestScorePartPose = true
-      g_bUserSelected_NormalStabilize = true
-    end
-    
-    save.Quicksave(3) -- Save -- Slot 3 always contains the best scoring pose!
-    g_bFoundAHighGain = true -- not exactly sure how this one works yet.
-  end
-  
-  if g_bUserSelected_NormalConditionChecking_TemporarilyDisable == true then
-    -- Disable condition checking again (re-enable fast CPU processing)...
-    NormalConditionChecking_TemporarilyDisable()
-  end
-
-end -- SaveBest()
-function Get_ScorePart_Score(l_ScorePart_Name, l_StartSegment, l_EndSegment) -- formerly getPartscore()
-  -- Called from Populate_g_XLowestScoringSegmentRangesTable() and
-  --             Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()...
-  
-  -- I think this function could/should be merged into the more frequently used
-  -- Calculate_SegmentRange_Score() function. No, don't do that. They each serve
-  -- a different purpose. Just look at their names to see what each one does. And
-  -- does well. Okay, sure calling: 
-  --     Get_ScorePart_Score(nil, l_StartSegment, l_EndSegment), 
-  --          which uses g_SegmentScoresTable[l_SegmentIndex]
-  -- might get the same result as calling:
-  --     Calculate_SegmentRange_Score(nil, l_StartSegment, l_EndSegment),
-  --          which uses current.GetSegmentEnergyScore(l_SegmentIndex)
-  -- And calling:
-  --    Get_ScorePart_Score("loctotal", l_StartSegment, l_EndSegment)
-  -- is the same as calling...
-  --    Calculate_SegmentRange_Score(nil, l_StartSegment, l_EndSegment)
-  -- And calling:
-  --    Get_ScorePart_Score("total", l_StartSegment, l_EndSegment)
-  -- is the same as calling...
-  --    Calculate_SegmentRange_Score(nil, nil, nil)
-  -- And pretty much any call to Get_ScorePart_Score() with a ScorePart_Name
-  -- other than 'total', 'loctotal' and 'ligand', would be same as
-  -- calling Calculate_SegmentRange_Score() with the same ScorePart_Name.
-
-	local l_ScorePart_Score = 0
-    
-	if l_ScorePart_Name == nil then
-    
-		-- Note: This "if" case is only called from 
-    --       Populate_g_XLowestScoringSegmentRangesTable,
-    --       and is only called with a very small range of segments, like 
-    --       1-3, 2-4, 3-5 in the first run, then
-    --       1-4, 2-5, 3-6 in the second run, and so on...
-    
-		for l_SegmentIndex = l_StartSegment, l_EndSegment do
-      
-			-- g_SegmentScoresTable = {SegmentScore}
-			-- The only place that reads g_SegmentScoresTable is this function.
-      -- The only place that updates g_SegmentScoresTable is 
-      --    Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts.
-      --
-      -- Note: This is different than calling GetPoseTotalScore() because
-      --       this is only for a small range of segments, not all segments...
-			l_ScorePart_Score = l_ScorePart_Score + g_SegmentScoresTable[l_SegmentIndex]
-		end
-    
-    return l_ScorePart_Score    
-  end
-
-	if l_ScorePart_Name == 'total' then
-    
-    -- Example usage: from Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields,
-    --                when stepping through each ScorePart to update the ScorePart_Scores field...
-		l_ScorePart_Score = GetPoseTotalScore()
-    return l_ScorePart_Score    
-    
-  end
-  
-  if l_ScorePart_Name == 'loctotal' then --total segment scores
-    -- Note: Calling...
-    --        Get_ScorePart_Score("loctotal", l_StartSegment, l_EndSegment)
-    --       is the same as calling...
-    --        Calculate_SegmentRange_Score(nil, l_StartSegment, l_EndSegment)
-    
-		l_ScorePart_Score = Calculate_SegmentRange_Score(nil, l_StartSegment, l_EndSegment)
-    return l_ScorePart_Score    
-    
-  end
-    
-  if l_ScorePart_Name == 'ligand' then --ligand score
-    
-		for l_SegmentIndex = g_SegmentCount_WithoutLigands + 1, g_SegmentCount_WithLigands do -- w/ligands!
-			l_ScorePart_Score = l_ScorePart_Score + current.GetSegmentEnergyScore(l_SegmentIndex)
-		end
-    return l_ScorePart_Score    
-    
-	end 
-  
-  -- Example usage:
-  -- 1) from Get_ScorePart_Score() with l_ScorePart_Name == 'Clashing' from
-  --    Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()
-  --    when stepping through each ScorePart to update the ScorePart_Scores field...
-  -- Geez, why didn't you just call Calculate_SegmentRange_Score directly? Well, we
-  -- could have, but then Calculate_SegmentRange_Score would need to handle the
-  -- above 'total', 'loctotal' and 'ligand' cases above. That would be easy to do.
-  -- Just move those cases into Calculate_SegmentRange_Score, after the line that
-  -- reads 'l_ScorePart_Name = l_ScorePart_NameOrTable'!!!
-  -- Geez Calculate_SegmentRange_Score() could probably handle the one remaining
-  -- case in this function where l_ScorePart_Name is nil. We just need to make sure
-  -- 'g_SegmentScoresTable[l_SegmentIndex]' and 
-  -- 'current.GetSegmentEnergyScore(l_SegmentIndex)' return the same value!
-  l_ScorePart_Score = Calculate_SegmentRange_Score(l_ScorePart_Name, l_StartSegment, l_EndSegment)
-	return l_ScorePart_Score
-
-end
-function Calculate_SegmentRange_Score(l_ScorePart_NameOrTable, l_StartSegment, l_EndSegment) -- GetSubScore
-  -- formerly GetSubscore()
-  -- Called from 1 place recursively in Calculate_SegmentRange_Score(),
-  --             2 places inDisplayPuzzleProperties(),
-  --             2 places in Get_ScorePart_Score(), 
-  --             1 place in Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts() and 
-  --             1 place in CheckForLowStartingScore()...
-
-	-- Note: l_ScorePart_NameOrTable is optional, if it's nil we use
-	--       GetSegmentEnergyScore instead of GetSegmentEnergySubscore.
-
-	-- Note: l_ScorePart_NameOrTable can be either a single string, or a table of strings.
-
-	-- Note: Each Segment can have up to 20 named ScoreParts.
-	--       e.g.; 1=Clashing, 2=Pairwise, 3=Packing, Hiding, Bonding, Ideality, Backbone,
-	--             Sidechain, Reference...
-
-	local l_ScoreTotal = 0
-	local l_ScorePart_Score = 0
-	local l_ScorePart_Name = ""
-  
-  -- A table of ScoreParts was passed in...
-	if type(l_ScorePart_NameOrTable) == "table" then
-    -- Calculate the total score of a segment range, but
-    -- only include the ScoreParts of the passed in list of ScoreParts...
-		for l_ScorePart_NameOrTableIndex = 1, #l_ScorePart_NameOrTable do
-			-- recursion...
-			-- Call back with each ScorePart in the ScorePart_NameOrTable...
-			l_ScorePart_Name = l_ScorePart_NameOrTable[l_ScorePart_NameOrTableIndex]
-			l_ScorePart_Score = Calculate_SegmentRange_Score(l_ScorePart_Name, l_StartSegment, 
-                                                       l_EndSegment)
-			l_ScoreTotal = l_ScoreTotal + l_ScorePart_Score      
-		end
-    return l_ScoreTotal
-  end 
-  
-  -- Nothing was passed in...
-	if l_ScorePart_NameOrTable == nil and l_StartSegment == nil and l_EndSegment == nil then            
-    -- Calculate the total score of all segment ranges and include all ScoreParts...
-    -- I suspect if you ended up here, it was by accident (i.e., a coding error),
-    -- because you should have just called GetPoseTotalScore(l_pose) directly instead!
-    local l_Current_PoseTotalScore = GetPoseTotalScore(l_pose)
-    return l_Current_PoseTotalScore
-  end 
-  
-  if l_StartSegment == nil then
-    -- Example usage: from DisplayPuzzleProperties() to calulate
-    --                l_DensityTotal, where ScorePart_Name = "density"...
-    l_StartSegment = 1
-  end
-  
-  if l_EndSegment == nil then
-    -- Example usage: from DisplayPuzzleProperties() to calulate
-    --                l_DensityTotal, where ScorePart_Name = "density"...
-    l_EndSegment = g_SegmentCount_WithLigands -- why w/ligands? Because, although we can't modify the
-    --                                           ligand segments, we can and do get points from them.
-  end
-  
-  if l_StartSegment > l_EndSegment then
-    l_StartSegment, l_EndSegment = l_EndSegment, l_StartSegment
-  end
-  
-  -- Only a segment range was passed in (no ScorePart)...
-  if l_ScorePart_NameOrTable == nil then
-    -- Examples usage:
-    -- 1) from DisplayPuzzleProperties() to calculate:
-    --    a) l__Score_TotalOfAllSegmentsIncludingLigands, which 
-    --       is then used to compute g_DensityWeight, and
-    --    b) l_ComputedScore, which is used to determine g_bProbableSymmetryPuzzle
-    -- 2) from Get_ScorePart_Score() with l_ScorePart_Name == 'loctotal' from
-    --    Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()
-    --    when stepping through each ScorePart to update the ScorePart_Scores field...
-    for l_SegmentIndex = l_StartSegment, l_EndSegment do
-      local l_SegmentEnergyScore = current.GetSegmentEnergyScore(l_SegmentIndex)
-      l_ScoreTotal = l_ScoreTotal + l_SegmentEnergyScore
-      -- print("current.GetSegmentEnergyScore(" .. l_SegmentIndex .. ")=[" ..
-      --  current.GetSegmentEnergyScore(l_SegmentIndex) .. "]")
-    end
-    return l_ScoreTotal
-  end
-  
-  -- Hopefully a ScorePart was passed in...
-  l_ScorePart_Name = l_ScorePart_NameOrTable
-  -- This time l_ScorePart_Name is not actually a table; 
-  -- rather, it's just a single ScorePart_Name...
-  -- Example usage:
-  -- 1) from DisplayPuzzleProperties() to calulate
-  --    l_DensityTotal, where ScorePart_Name = "density"...
-  -- 2) from Get_ScorePart_Score() with l_ScorePart_Name == 'Clashing' from
-  --    Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()
-  --    when stepping through each ScorePart to update the ScorePart_Scores field...
-  for l_SegmentIndex = l_StartSegment, l_EndSegment do
-    l_ScorePart_Score = current.GetSegmentEnergySubscore(l_SegmentIndex, l_ScorePart_Name)
-    l_ScoreTotal = l_ScoreTotal + l_ScorePart_Score
-    -- print("current.GetSegmentEnergySubscore(" .. l_SegmentIndex .. "," .. l_ScorePart_Name .. ")=["
-    --  .. current.GetSegmentEnergySubscore(l_SegmentIndex, l_ScorePart_Name) .. "]")
-  end
-  
-	return l_ScoreTotal
-
-end -- Calculate_SegmentRange_Score(l_ScorePart_NameOrTable, l_StartSegment, l_EndSegment)
 -- ...end of My Favorite Functions.
 -- Start of Clean Up functions...
 function CleanUp(l_ErrorMessage)
