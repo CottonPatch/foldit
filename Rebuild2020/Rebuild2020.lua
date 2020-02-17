@@ -18,12 +18,6 @@ function DefineGlobalVariables()
   --         Populate_g_ActiveScorePartsTable()
   --g_ActiveScorePartsTable = {ScorePart_Name}
   
-	g_bSegmentsAllowedToBeRebuiltTable = {} -- formerly WORKONbool[]
-	-- Used in Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts(),
-	--         bSegmentIsAllowedToBeRebuilt() and
-  --         main()
-	-- g_bSegmentsAllowedToBeRebuiltTable={true/false}
-
 	g_bSegmentsAlreadyRebuiltTable = {} -- formerly disj[]
 	-- Used in CheckIfAlreadyRebuiltSegmentsMustBeIncluded(),
   --         bSegmentIsAllowedToBeRebuilt(),
@@ -32,6 +26,11 @@ function DefineGlobalVariables()
 	-- g_bSegmentsAlreadyRebuiltTable={true/false}
 	-- g_bSegmentsAlreadyRebuiltTable keeps track of which segments have already been processed...
   
+	g_bUserSelectd_SegmentsAllowedToBeRebuiltTable = {} -- formerly WORKONbool[]
+	-- Used in Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts(),
+	--         bSegmentIsAllowedToBeRebuilt() and main()
+	-- g_bUserSelectd_SegmentsAllowedToBeRebuiltTable={true/false}
+
 	g_CysteineSegmentsTable = {}
 	-- Used in Populate_g_CysteineSegmentsTable(),
   --         DisulfideBonds_GetCount() and
@@ -86,14 +85,15 @@ function DefineGlobalVariables()
   --         Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts(), and
 	-- g_UserSelected_ScorePartsForCalculatingLowestScoringSegmentsTable={ScorePart_Name}
 
-  g_UserSelected_SegmentRangesToRebuildTable = {} -- formerly WORKON[]
-	-- g_UserSelected_SegmentRangesToRebuildTable initially includes all the
-  -- segments in the main protein, i.e.: {{1, g_SegmentCount_WithoutLigands}}
-  -- IMPORTANT...
-  -- After the user has had the chance to modify the selected segment ranges to
-  -- rebuild, we remove all frozen and locked segments! This is important because
-  -- we don't want to waste any time attempting to rebuild, mutate, shake or wiggle
-  -- segments that are not allowed to do so.
+  g_UserSelected_SegmentRangesAllowedToBeRebuiltTable = {} -- formerly WORKON[]
+	-- g_UserSelected_SegmentRangesAllowedToBeRebuiltTable is initiallly 
+  -- set to {1, g_SegmentCount_WithoutLigands} (i.e., all the segments
+  -- in the main protein) in DefineGlobalVariables() then the user can
+  -- change this value in AskUserToSelectSegmentsRangesToRebuild() plus
+  -- AskUserToSelectRebuildOptions() and finally we remove all frozen,
+  -- locked and ligand segments in main(). This is important because we
+  -- don't want to waste any time attempting to rebuild, mutate, shake
+  -- or wiggle any segments that are not allowed to do so.
 
 	g_XLowestScoringSegmentRangesTable = {} -- formerly areas[]
 	-- Used in DefineGlobalVariables(),
@@ -148,8 +148,8 @@ function DefineGlobalVariables()
   -- ...Ligand segment numbers are always after the protein segment numbers.
 
   ---------------------------------------------------------
-  -- The following non-UserSelectable boolean variables
-  -- are sorted alphabetically as much as possible...
+  -- The following variables are sorted
+  -- alphabetically as much as possible...
   ---------------------------------------------------------
   
 	g_bBetterRecentBest = false
@@ -302,7 +302,7 @@ function DefineGlobalVariables()
 	--         AskUserToSelectRebuildOptions(), DisplayPuzzleProperties() and
 	--         DisulfideBonds_DidAnyOfThemBreak()
 
-	g_PointsGained_Current_RebuildSegmentRange = 0
+	g_CurrentRebuildPointsGained = 0
 	-- Used in bSegmentIsAllowedToBeRebuilt() and RebuildManySegmentRanges()
   
 	g_QuickSaveStackPosition = 60 -- Uses slot 60 and higher...
@@ -333,6 +333,20 @@ function DefineGlobalVariables()
   -- Used in SaveBest() and many others...
   
   g_ScorePartText = "" -- Example: " ScorePart 4 (total)", " ScorePart 6 (ligand) 6=7=11" 
+  
+  g_Stats_Run_TotalSecondsUsed_RebuildSelected = 0
+  g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected = 0
+  g_Stats_Run_TotalSecondsUsed_WiggleSelected = 0
+  g_Stats_Run_TotalSecondsUsed_WiggleAll = 0
+  g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected = 0
+  g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll = 0
+
+  g_Stats_Script_TotalSecondsUsed_RebuildSelected = 0
+  g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected = 0
+  g_Stats_Script_TotalSecondsUsed_WiggleSelected = 0
+  g_Stats_Script_TotalSecondsUsed_WiggleAll = 0
+  g_Stats_Script_TotalSecondsUsed_MutateSidechainsSelected = 0
+  g_Stats_Script_TotalSecondsUsed_MutateSidechainsAll = 0
   
   g_Stats_Run_TotalPointsGained_RebuildSelected = 0
   g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected = 0
@@ -399,19 +413,19 @@ function DefineGlobalVariables()
   -- CheckIfAlreadyRebuiltSegmentsMustBeIncluded()
 	-- Yah, not really convinced this one helps yet.
   
-	g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan =
+	g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan =
 		(g_SegmentCount_WithoutLigands - (g_SegmentCount_WithoutLigands % 4)) / 4
 	-- Used in DefineGlobalVariables(), AskUserToSelectMoreOptions() and RebuildManySegmentRanges()
 	-- Could someone please explain how this formula was determined?
 	-- Example:
 	--   g_SegmentCount_WithoutLigands = 135
-	--   g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan =
+	--   g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan =
 	--    (135 - (135 % 4)) /4 = (135 - 3) / 4 = 135 / 4 = 33.75
-	if g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan < 10000 then -- was 40
-		g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan = 10000 -- was 40
+	if g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan < 10000 then
+		g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan = 10000 -- was 40
 	end
   --if g_bDebugMode == true then
-  --  g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan = 10000
+  --  g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan = 10000
   --end
   
 	g_UserSelected_Mutate_ClashImportance = 0.9
@@ -437,20 +451,17 @@ function DefineGlobalVariables()
 	g_UserSelected_NumberOfTimesToRebuildEach_SegmentRange_PerRunCycle = 10 -- set to at least 10
 	-- Used in AskUserToSelectMoreOptions(), RebuildSelectedSegments() and RebuildOneSegmentRangeManyTimes()
 
-	g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan = 
+	g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan = 
     g_SegmentCount_WithLigands
-	-- Used in DefineGlobalVariables(),
-  --         bSegmentIsAllowedToBeRebuilt() and 
-  --         DisplayUserSelectedOptions()
+	-- Used in DefineGlobalVariables(), bSegmentIsAllowedToBeRebuilt() and DisplayUserSelectedOptions()
 	-- Default to one point per segment? Seems pretty arbitrary to me...
-  
-	-- "To Allow" or "To Force"?
 	-- Example:
 	-- g_SegmentCount_WithoutLigands = 135
-	-- g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan = 135
+	-- g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan = 135
   -- ...Pretty simple formula
-	if g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan > 500 then
-		g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan = 500
+	if g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan >
+    500 then
+		g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan = 500
 	end
   
 	g_UserSelected_ResetToStartValueAfterRebuildingWithThisManyConsecutiveSegments = 4 
@@ -532,11 +543,11 @@ function DefineGlobalVariables()
 	if g_bSketchBookPuzzle == true then
 	   g_bUserSelected_ConvertAllSegmentsToLoops = false -- was set to true by default above
 	   g_bUserSelected_FuseBestScorePartPose = false -- was set to true by default above
-	   g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan = 500
+	   g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan = 500
     -- ... was set to g_SegmentCount_WithLigands by default above
 	end
   if g_bDebugMode == true then
-    g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan = 50
+    g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan = 50
   end  
   
 	g_RequiredNumberOfConsecutiveSegments = 
@@ -544,10 +555,11 @@ function DefineGlobalVariables()
 	--  Used in AskUserToSelectRebuildOptions(), RebuildSelectedSegments() and
 	--          PrepareToRebuildSegmentRanges()
   
-	--g_UserSelected_SegmentRangesToRebuildTable = {{1, g_SegmentCount_WithoutLigands}} -- formerly WORKON[]
+	g_UserSelected_SegmentRangesAllowedToBeRebuiltTable = {{1, g_SegmentCount_WithoutLigands}}
+  -- ...formerly WORKON[]
   -- testing...
-  g_UserSelected_SegmentRangesToRebuildTable = {{1, g_SegmentCount_WithLigands}}
-    -- See usage above in table definition section.
+  -- g_UserSelected_SegmentRangesAllowedToBeRebuiltTable = {{1, g_SegmentCount_WithLigands}}
+    -- See usage of g_UserSelected_SegmentRangesAllowedToBeRebuiltTable above in table definition section.
   
   ------------------------------------------------------------
   -- The remaining lines of this function are related to 
@@ -1160,18 +1172,19 @@ function AskUserToSelectMoreOptions()
 		dialog.AddSlider("  Points:", 
       g_UserSelected_SkipFuseBestScorePartPose_IfCurrentRebuild_LosesMoreThan, -5, 200, 0)
 
-	l_Ask.L1 = dialog.AddLabel("Move on to more consecutive segments per")
-	l_Ask.L2 = dialog.AddLabel("range if current rebuild gains more than:")
-	l_Ask.g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan =
+	l_Ask.L1 = dialog.AddLabel("Move on to more consecutive segments per range")
+	l_Ask.L2 = dialog.AddLabel("if current rebuild points gained is more than:")
+	l_Ask.g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan =
 		dialog.AddSlider("  Points:",
-			g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan, 0, 10000, 0)
+			g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan, 0, 10000, 0)
       -- ...default is 40 or less.
 
 	l_Ask.L20 = dialog.AddLabel("Only allow rebuilding already rebuilt segments")
-	l_Ask.L21 = dialog.AddLabel("if current rebuild gains more than:")
-	l_Ask.g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan =
+	l_Ask.L21 = dialog.AddLabel("if current rebuild gain is more than:")
+	l_Ask.g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan =
 		dialog.AddSlider("  Points:",
-			g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan, 0, 500, 0) 
+			g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan, 0,
+        500, 0) 
       -- ...default depends on number of segments.
 
 	l_Ask.OK = dialog.AddButton("OK", 1)
@@ -1201,11 +1214,12 @@ function AskUserToSelectMoreOptions()
   
 	g_bUserSelected_FuseBestScorePartPose = l_Ask.g_bUserSelected_FuseBestScorePartPose.value
 
-	g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan =
-		l_Ask.g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan.value
+	g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan =
+		l_Ask.g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan.value
     -- ...default is 40 or less.
-	g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan =
-    l_Ask.g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan.value
+    
+	g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan =
+  l_Ask.g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan.value
 
 end -- AskUserToSelectMoreOptions()
 function AskUserToSelectMutateOptions()
@@ -1392,28 +1406,30 @@ function AskUserToSelectRebuildOptions() -- formerly AskDRWOptions()
 			g_UserSelected_ResetToStartValueAfterRebuildingWithThisManyConsecutiveSegments =
         l_Ask.g_UserSelected_ResetToStartValueAfterRebuildingWithThisManyConsecutiveSegments.value
         
-      -- User wants to select segments to rebuild...
-      -- User wants to select segments to rebuild...
-      -- User wants to select segments to rebuild...
       l_bUserWantsToSelectSegmentsToRebuild = l_Ask.l_bUserWantsToSelectSegmentsToRebuild.value
-      -- User wants to select segments to rebuild...
-      -- User wants to select segments to rebuild...
-      -- User wants to select segments to rebuild...
       
 			if l_bUserWantsToSelectSegmentsToRebuild == true then
         
 				-- l_SegmentRangesToRebuildTable={StartSegment=1, EndSegment=2}
 				local l_SegmentRangesToRebuildTable = {}
 				l_SegmentRangesToRebuildTable = 
+        
+      -- User wants to select segments to rebuild...
+      -- User wants to select segments to rebuild...
+      -- User wants to select segments to rebuild...
           AskUserToSelectSegmentsRangesToRebuild() -- formerly AskForSelections()
+      -- User wants to select segments to rebuild...
+      -- User wants to select segments to rebuild...
+      -- User wants to select segments to rebuild...          
+          
 				if l_SegmentRangesToRebuildTable ~= nil and #l_SegmentRangesToRebuildTable ~= 0 then
-					g_UserSelected_SegmentRangesToRebuildTable = -- formerly WORKON[]
-            l_SegmentRangesToRebuildTable
+					g_UserSelected_SegmentRangesAllowedToBeRebuiltTable = l_SegmentRangesToRebuildTable
+           -- ...formerly WORKON[]
 				end
         
 				print("  User Selected Segment Ranges: [" ..
-					ConvertSegmentRangesTableToListOfSegmentRanges(g_UserSelected_SegmentRangesToRebuildTable) ..
-          "]")
+          ConvertSegmentRangesTableToListOfSegmentRanges(
+          g_UserSelected_SegmentRangesAllowedToBeRebuiltTable) .. "]")
         
 				l_bUserWantsToSelectSegmentsToRebuild = false -- this will turn off the check box on the top menu
 				if l_AskResult == 1 then -- 1 = OK
@@ -1702,10 +1718,11 @@ function AskUserToSelectSegmentsRangesToRebuild() -- formerly AskForSelections()
 
 	-- g_XLowestScoringSegmentRangesTable={StartSegment, EndSegment} -- formerly WORKON[]
 	l_ListOfSegmentRanges = 
-    ConvertSegmentRangesTableToListOfSegmentRanges(g_UserSelected_SegmentRangesToRebuildTable)
+    ConvertSegmentRangesTableToListOfSegmentRanges(g_UserSelected_SegmentRangesAllowedToBeRebuiltTable)
   -- e.g.;  "1-3 2-4 6-8 10-11 13-15 20-24" 
 	
-	local l_SegmentRangesToRebuildTable = g_UserSelected_SegmentRangesToRebuildTable -- formerly WORKON[]
+	local l_SegmentRangesToRebuildTable = g_UserSelected_SegmentRangesAllowedToBeRebuiltTable
+  -- ...formerly WORKON[]
 
 	if l_SelectionOptions == nil then l_SelectionOptions = {} end
 
@@ -2241,8 +2258,9 @@ function DisplayUserSelectedOptions() -- formerly printOptions()
            " without regard to number of points gained from rebuild.")
 	else
 		print("  User selected to only allow rebuilding already rebuilt segments" ..
-					 " if current rebuild points gained is more than: " ..
-             g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan)
+					" if current rebuild pointed gained is more than " ..
+          g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan ..
+          "")
 	end
 
 end -- DisplayUserSelectedOptions()
@@ -2492,34 +2510,14 @@ end -- function bIsSegmentIndexInSegmentRangesTable(l_SegmentIndex, l_SegmentRan
 function bSegmentIsAllowedToBeRebuilt(l_SegmentIndex)
   -- Called from bSegmentRangeIsAllowedToBeRebuilt()...
 
-  -- Normally all worst scoring segment are selected to be rebuilt,
-  -- unless they are frozen or locked.
-  -- However, segments can also be unselected on the "Select Segments to Rebuild" page.
-  
-  local l_bBackboneIsFrozen
-  local l_bSideChainIsFrozen
-	l_bBackboneIsFrozen, l_bSideChainIsFrozen = freeze.IsFrozen(l_SegmentIndex)
-  if l_bBackboneIsFrozen == true or l_bSideChainIsFrozen then
-    return false
-  end
-  
-  local l_bIsLocked
-  l_bIsLocked = structure.IsLocked(l_SegmentIndex)
-  if l_bIsLocked == true then
-    return false
-  end
-
-  local l_GetSecondaryStructureType = structure.GetSecondaryStructure(l_SegmentIndex)  --eg L,E,H,M
-	if l_GetSecondaryStructureType == "M" then
-    return false
-  end
-  
-  -- g_bSegmentsAllowedToBeRebuiltTable is populated in main() from
-  -- g_UserSelected_SegmentRangesToRebuildTable[]
-  -- This one check combines all of the above checks for Frozen, Locked and Ligand...
-  if g_bSegmentsAllowedToBeRebuiltTable[l_SegmentIndex] == false then -- formerly WORKONbool[]
-  
-  --if g_FrozenLockedOrLigandSegmentsTable[l_SegmentIndex] == true then
+  -- g_bUserSelectd_SegmentsAllowedToBeRebuiltTable[] is populated in main() from 
+  -- g_UserSelected_SegmentRangesAllowedToBeRebuiltTable[] which is is initially
+  -- set to {{1, g_SegmentCount_WithoutLigands}} in DefineGlobalVariables() then
+  -- the user can change this value in AskUserToSelectSegmentsRangesToRebuild()
+  -- plus AskUserToSelectRebuildOptions(), and finally we remove all frozen,
+  -- locked and ligand segments in main()...
+  if g_bUserSelectd_SegmentsAllowedToBeRebuiltTable[l_SegmentIndex] == false then -- formerly WORKONbool[]
+    --if g_FrozenLockedOrLigandSegmentsTable[l_SegmentIndex] == true then
 		return false -- Note: this option overrides the below options.
 	end
 
@@ -2527,18 +2525,20 @@ function bSegmentIsAllowedToBeRebuilt(l_SegmentIndex)
 		return true
 	end
   
-  -- g_PointsGained_Current_RebuildSegmentRange is set in RebuildManySegmentRanges()...
-  if g_PointsGained_Current_RebuildSegmentRange > 
-    g_UserSelected_OnlyAllowRebuildingAlreadyRebuilt_Segments_IfCurrentRebuild_GainsMoreThan then
+  if g_CurrentRebuildPointsGained > -- set in RebuildManySegmentRanges()
+    g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan then
     return true
   end
   
   if g_bSegmentsAlreadyRebuiltTable[l_SegmentIndex] == true then -- formerly Disj[]
+    -- Don't rebuild already rebuilt segments until we run out of segments to
+    -- rebuild. When we run out of segments to rebuild we will reset all segments
+    -- in the g_bSegmentsAlreadyRebuiltTable to false.
     return false
   end
   
-  -- This segment has not already been rebuilt and
-  -- the user did not unselect it...
+  -- This segment has not already been rebuilt and the user did
+  -- not remove it on the "Select Segments to Rebuild" page...
   return true
   
 end -- function bSegmentIsAllowedToBeRebuilt(l_SegmentIndex)
@@ -3705,6 +3705,71 @@ function Populate_g_ScorePartsTable() -- formerly in global code
 	end
 
 end -- Populate_g_ScorePartsTable()
+function Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts() -- formerly GetSegmentScores()
+  -- Called from Populate_g_XLowestScoringSegmentRangesTable() -- formerly FindWorst()
+
+	if GetPoseTotalScore() == g_LastSegmentScore then
+    -- If PoseTotalScore has not changed since the last time we set Segment Scores,
+    -- then we assume the segment scores also have not changed. So we leave them alone.
+    -- Is this a fallacy?
+		return 
+	end
+
+	local l_SegmentScore, l_Reference_ScorePart, l_Density_ScorePart
+
+	-- Fortunately this is the only function that sets and checks g_LastSegmentScore...  
+	g_LastSegmentScore = GetPoseTotalScore()
+
+	for l_SegmentIndex = 1, g_SegmentCount_WithoutLigands do
+    
+    -- Make sure the user has selected this segment to be rebuilt and
+    -- make sure this is not a frozen, locked or ligand segment...
+		if g_bUserSelectd_SegmentsAllowedToBeRebuiltTable[l_SegmentIndex] == true then -- formerly WORKONbool[]
+      
+			if #g_UserSelected_ScorePartsForCalculatingLowestScoringSegmentsTable == 0 then -- formerly scrPart[]
+				-- If the user did not select ScoreParts for calculating worst
+        -- scoring segments, the default calculation for segment score is:
+				-- l_SegmentScore = SegmentEnergyScore - Reference_ScorePart +
+        --                  weighted Density_ScorePart
+				l_SegmentScore = current.GetSegmentEnergyScore(l_SegmentIndex)
+					-- If this segment is not a Mutable, then
+					-- subtract back out (of the SegmentScore) the Reference_ScorePart...
+				local l_bThisSegmentIsMutable = structure.IsMutable(l_SegmentIndex)
+				if l_bThisSegmentIsMutable == false then
+					l_Reference_ScorePart = current.GetSegmentEnergySubscore(l_SegmentIndex, 'Reference')
+					l_SegmentScore = l_SegmentScore - l_Reference_ScorePart
+				end
+				-- If a Density component exists, add extra points to the SegmentScore...
+				if math.abs(g_DensityWeight) > 0 then --the Density component has extra weighted points
+					l_Density_ScorePart = current.GetSegmentEnergySubscore(l_SegmentIndex, 'Density')
+					l_SegmentScore = l_SegmentScore + g_DensityWeight * l_Density_ScorePart
+				end
+			else
+				l_SegmentScore = 
+          Calculate_SegmentRange_Score( -- formerly GetSubscore()
+            g_UserSelected_ScorePartsForCalculatingLowestScoringSegmentsTable, -- formerly scrPart[]
+            l_SegmentIndex, l_SegmentIndex)
+			end
+      
+      -- The first time this function is called we add one row per user
+      -- selected non-frozen-locked-or-ligand segment of the protein to
+      -- the g_SegmentScoresTable. On subsequent calls we simply update
+      -- each row, because the number of segments never changes. No need
+      -- to delete the table and recreate it each time this function is
+      -- called.
+			-- This is the only place where this table is populated and updated.
+      -- l_SegmentIndex is sequential from 1 to g_SegmentCount_WithoutLigands
+      -- with gaps for user non-selected, frozen, locked and ligand segments.
+      -- g_SegmentScoresTable is only used by Calculate_ScorePart_Score(),
+      -- which is used by both Populate_g_XLowestScoringSegmentRangesTable() and
+      -- Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()
+			g_SegmentScoresTable[l_SegmentIndex] = l_SegmentScore
+      
+    end -- If g_bUserSelectd_SegmentsAllowedToBeRebuiltTable[l_SegmentIndex] == true then
+    
+	end -- for l_SegmentIndex = 1, g_SegmentCount_WithoutLigands do
+
+end -- Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts()
 function Populate_g_XLowestScoringSegmentRangesTable(l_RecursionLevel) -- FindWorst()
   -- Called from 3 places in PrepareToRebuildSegmentRanges() and 
   --             1 place  recursively below...
@@ -3756,7 +3821,7 @@ function Populate_g_XLowestScoringSegmentRangesTable(l_RecursionLevel) -- FindWo
     -- l_EndSegment = 1 + 3 - 1 = 3
     -- SegmentRange = {1-3}
     
-    l_bSegmentIsAllowedToBeRebuilt = bSegmentIsAllowedToBeRebuilt(l_StartSegment)
+    l_bSegmentIsAllowedToBeRebuilt = bSegmentIsAllowedToBeRebuilt(l_StartSegment) -- checks several things
     if l_bSegmentIsAllowedToBeRebuilt == true then
       
       l_bSegmentRangeIsAllowedToBeRebuilt = bSegmentRangeIsAllowedToBeRebuilt(l_StartSegment, l_EndSegment)
@@ -3889,69 +3954,6 @@ function Populate_g_XLowestScoringSegmentRangesTable(l_RecursionLevel) -- FindWo
 	end
 
 end -- Populate_g_XLowestScoringSegmentRangesTable() -- formerly FindWorst()
-function Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts() -- formerly GetSegmentScores()
-  -- Called from Populate_g_XLowestScoringSegmentRangesTable() -- formerly FindWorst()
-
-	if GetPoseTotalScore() == g_LastSegmentScore then
-    -- If PoseTotalScore has not changed since the last time we set Segment Scores,
-    -- then we assume the segment scores also have not changed. So we leave them alone.
-    -- Is this a fallacy?
-		return 
-	end
-
-	local l_SegmentScore, l_Reference_ScorePart, l_Density_ScorePart
-
-	-- Fortunately this is the only function that sets and checks g_LastSegmentScore...  
-	g_LastSegmentScore = GetPoseTotalScore()
-
-	for l_SegmentIndex = 1, g_SegmentCount_WithoutLigands do
-    
-    -- make sure this is not a frozen, locked or ligand segment, and make sure the user
-    -- has selected it to be worked on...
-		if g_bSegmentsAllowedToBeRebuiltTable[l_SegmentIndex] == true then -- formerly WORKONbool[]
-      
-			if #g_UserSelected_ScorePartsForCalculatingLowestScoringSegmentsTable == 0 then -- formerly scrPart[]
-				-- If the user did not select ScoreParts for calculating worst
-        -- scoring segments, the default calculation for segment score is:
-				-- l_SegmentScore = SegmentEnergyScore - Reference_ScorePart +
-        --                  weighted Density_ScorePart
-				l_SegmentScore = current.GetSegmentEnergyScore(l_SegmentIndex)
-					-- If this segment is not a Mutable, then
-					-- subtract back out (of the SegmentScore) the Reference_ScorePart...
-				local l_bThisSegmentIsMutable = structure.IsMutable(l_SegmentIndex)
-				if l_bThisSegmentIsMutable == false then
-					l_Reference_ScorePart = current.GetSegmentEnergySubscore(l_SegmentIndex, 'Reference')
-					l_SegmentScore = l_SegmentScore - l_Reference_ScorePart
-				end
-				-- If a Density component exists, add extra points to the SegmentScore...
-				if math.abs(g_DensityWeight) > 0 then --the Density component has extra weighted points
-					l_Density_ScorePart = current.GetSegmentEnergySubscore(l_SegmentIndex, 'Density')
-					l_SegmentScore = l_SegmentScore + g_DensityWeight * l_Density_ScorePart
-				end
-			else
-				l_SegmentScore = 
-          Calculate_SegmentRange_Score( -- formerly GetSubscore()
-            g_UserSelected_ScorePartsForCalculatingLowestScoringSegmentsTable, -- formerly scrPart[]
-            l_SegmentIndex, l_SegmentIndex)
-			end
-      
-      -- The first time this function is called we add one row per non-frozen-locked-or-ligand
-      -- segment of the protein to the g_SegmentScoresTable. On subsequent calls we simply update
-      -- each row, because the number of segments never changes. No need to delete the table and 
-      -- recreate it each time this function is called...
-			-- This is the only place where this table is populated and updated...
-      -- Note: l_SegmentIndex is sequential from 1 to g_SegmentCount_WithoutLigands with gaps
-      -- for frozen, locked or ligand segments...
-      -- g_SegmentScoresTable is only used by Calculate_ScorePart_Score() which is used by
-      -- Populate_g_XLowestScoringSegmentRangesTable() and 
-      -- Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()
-			g_SegmentScoresTable[l_SegmentIndex] = l_SegmentScore
-      
-    end -- If g_bSegmentsAllowedToBeRebuiltTable[l_SegmentIndex] == true then
-    
-	end -- for l_SegmentIndex = 1, g_SegmentCount_WithoutLigands do
-
-end -- Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts()
 function PrettyNumber(l_DirtyFloat)
   -- Called from DefineGlobalVariables(), 
   --             DisplayPuzzleProperties(),
@@ -4416,8 +4418,8 @@ function main() -- formerly DRW()
     l_ListOfFrozenBackboneSegmentRanges = "none"
   end
   print("\n  Frozen Backbone Segment Ranges: " .. l_ListOfFrozenBackboneSegmentRanges)
-  g_UserSelected_SegmentRangesToRebuildTable =  -- formerly WORKON[]
-    SegmentRangesMinus(g_UserSelected_SegmentRangesToRebuildTable, l_FrozenBackboneSegmentRanges)
+  g_UserSelected_SegmentRangesAllowedToBeRebuiltTable =  -- formerly WORKON[]
+    SegmentRangesMinus(g_UserSelected_SegmentRangesAllowedToBeRebuiltTable, l_FrozenBackboneSegmentRanges)
   
   -- Always remove Frozen SideChain segments...
   local l_ListOfFrozenSideChainSegmentRanges =
@@ -4426,8 +4428,8 @@ function main() -- formerly DRW()
     l_ListOfFrozenSideChainSegmentRanges = "none"
   end
   print("  Frozen SideChain Segment Ranges: " .. l_ListOfFrozenSideChainSegmentRanges)  
-  g_UserSelected_SegmentRangesToRebuildTable =
-    SegmentRangesMinus(g_UserSelected_SegmentRangesToRebuildTable, l_FrozenSideChainSegmentRanges)
+  g_UserSelected_SegmentRangesAllowedToBeRebuiltTable =
+    SegmentRangesMinus(g_UserSelected_SegmentRangesAllowedToBeRebuiltTable, l_FrozenSideChainSegmentRanges)
   
   -- Always remove Locked segments...
   local l_LockedSegmentRanges
@@ -4438,8 +4440,8 @@ function main() -- formerly DRW()
     l_ListOfLockedSegmentRanges = "none"
   end
   print("  Locked Segment Ranges: " .. l_ListOfLockedSegmentRanges)
-  g_UserSelected_SegmentRangesToRebuildTable =
-    SegmentRangesMinus(g_UserSelected_SegmentRangesToRebuildTable, l_LockedSegmentRanges)
+  g_UserSelected_SegmentRangesAllowedToBeRebuiltTable =
+    SegmentRangesMinus(g_UserSelected_SegmentRangesAllowedToBeRebuiltTable, l_LockedSegmentRanges)
   
   -- Always remove Ligand segments...
   -- This should not be needed, because they were not added in the first place,
@@ -4452,21 +4454,22 @@ function main() -- formerly DRW()
     l_ListOfLigandSegmentRanges = "none"
   end  
   print("  Ligand Segment Ranges: " .. l_ListOfLigandSegmentRanges)
-  g_UserSelected_SegmentRangesToRebuildTable =
-    SegmentRangesMinus(g_UserSelected_SegmentRangesToRebuildTable, l_LigandSegmentRanges) -- "M" = Molecule
+  g_UserSelected_SegmentRangesAllowedToBeRebuiltTable =
+    SegmentRangesMinus(g_UserSelected_SegmentRangesAllowedToBeRebuiltTable,
+      l_LigandSegmentRanges) -- "M" = Molecule
   
   -- Super important...        
   -- Super important...        
-	g_bSegmentsAllowedToBeRebuiltTable =  -- formerly WORKONbool[]
+	g_bUserSelectd_SegmentsAllowedToBeRebuiltTable =  -- formerly WORKONbool[]
   
 		ConvertSegmentRangesTableToSegmentsBooleanTable( -- formerly SegmentSetToBool()
       
-      g_UserSelected_SegmentRangesToRebuildTable) -- formerly WORKON[]
+      g_UserSelected_SegmentRangesAllowedToBeRebuiltTable) -- formerly WORKON[]
   -- Super important...        
   -- Super important...        
   
-	print("\n  User selected (and script filtered) segment ranges to rebuild: " ..
-		ConvertSegmentRangesTableToListOfSegmentRanges(g_UserSelected_SegmentRangesToRebuildTable))
+	print("\n  User selected segment ranges to rebuild: " ..
+		ConvertSegmentRangesTableToListOfSegmentRanges(g_UserSelected_SegmentRangesAllowedToBeRebuiltTable))
 
 	g_UserSelected_MaxNumberOf_SegmentRanges_ToRebuild_ThisRunCycle =
     g_UserSelected_StartingNumberOf_SegmentRanges_ToRebuild_PerRunCycle
@@ -4514,6 +4517,14 @@ function main() -- formerly DRW()
 		-- PrepareToRebuildSegmentRanges("areas")
 		-- PrepareToRebuildSegmentRanges("fj")
 		-- PrepareToRebuildSegmentRanges("simple")
+
+    g_Stats_Run_TotalSecondsUsed_Total = 
+      g_Stats_Run_TotalSecondsUsed_RebuildSelected +
+      g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected +
+      g_Stats_Run_TotalSecondsUsed_WiggleSelected +
+      g_Stats_Run_TotalSecondsUsed_WiggleAll +
+      g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected +
+      g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll
     
     g_Stats_Run_TotalPointsGained_Total = 
       g_Stats_Run_TotalPointsGained_RebuildSelected +
@@ -4543,52 +4554,142 @@ function main() -- formerly DRW()
     print("End of run " .. g_RunCycle .. " Stats:")
     print("------------------------ ---------  -------  -------  ------------")
     print("From:                       Points  Seconds  Points/  Success")
-    print("                            Gained  Spent    Second   Rate")
+    print("                            Gained  Used     Second   Rate")
                                           
     print("RebuildSelected          " .. 
       PaddedNumber(g_Stats_Run_TotalPointsGained_RebuildSelected, 9) ..
-      "                    " .. g_Stats_Run_SuccessfulAttempts_RebuildSelected ..
-      "/" .. g_Stats_Run_NumberOfAttempts_RebuildSelected ..
+      "  " .. g_Stats_Run_TotalSecondsUsed_RebuildSelected ..
+      "              " .. g_Stats_Run_SuccessfulAttempts_RebuildSelected ..
+      "/" ..  g_Stats_Run_NumberOfAttempts_RebuildSelected ..
       " (" .. PrettyNumber(g_Stats_Run_SuccessfulAttempts_RebuildSelected /
-      g_Stats_Run_NumberOfAttempts_RebuildSelected) * 100 .. "%)")
+              g_Stats_Run_NumberOfAttempts_RebuildSelected * 100) .. "%)")
     print("ShakeSidechainsSelected  " ..
       PaddedNumber(g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected, 9) ..
+      "  " .. g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected ..      
       "                    " .. g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected ..
-      "/" .. g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected ..
+      "/" ..  g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected ..
       " (" .. PrettyNumber(g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected /
-      g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected) * 100 .. "%)")
+              g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected * 100) .. "%)")
     print("WiggleSelected           " .. 
       PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleSelected, 9) ..
+      "  " .. g_Stats_Run_TotalSecondsUsed_WiggleSelected ..
       "                    " .. g_Stats_Run_SuccessfulAttempts_WiggleSelected ..
       "/" .. g_Stats_Run_NumberOfAttempts_WiggleSelected ..
       " (" .. PrettyNumber(g_Stats_Run_SuccessfulAttempts_WiggleSelected /
-      g_Stats_Run_NumberOfAttempts_WiggleSelected) * 100 .. "%)")
+              g_Stats_Run_NumberOfAttempts_WiggleSelected * 100) .. "%)")
     print("WiggleAll                " .. 
       PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleAll, 9) ..
+      "  " .. g_Stats_Run_TotalSecondsUsed_WiggleAll ..      
       "                    " .. g_Stats_Run_SuccessfulAttempts_WiggleAll ..
-      "/" .. g_Stats_Run_NumberOfAttempts_WiggleAll ..
+      "/" ..  g_Stats_Run_NumberOfAttempts_WiggleAll ..
       " (" .. PrettyNumber(g_Stats_Run_SuccessfulAttempts_WiggleAll /
-      g_Stats_Run_NumberOfAttempts_WiggleAll) * 100 .. "%)")
+              g_Stats_Run_NumberOfAttempts_WiggleAll * 100) .. "%)")
     print("MutateSidechainsSelected " ..
       PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsSelected, 9) ..
+      "  " .. g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected ..      
       "                    " .. g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected ..
-      "/" .. g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected ..
+      "/" ..  g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected ..
       " (" .. PrettyNumber(g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected /
-      g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected) * 100 .. "%)")
+              g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected * 100) .. "%)")
     print("MutateSidechainsAll      " .. 
       PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsAll, 9) ..
+      "  " .. g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll ..      
       "                    " .. g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll ..
-      "/" .. g_Stats_Run_NumberOfAttempts_MutateSidechainsAll ..
+      "/" ..  g_Stats_Run_NumberOfAttempts_MutateSidechainsAll ..
       " (" .. PrettyNumber(g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll /
-      g_Stats_Run_NumberOfAttempts_MutateSidechainsAll) * 100 .. "%)")
+              g_Stats_Run_NumberOfAttempts_MutateSidechainsAll * 100) .. "%)")
     print("------------------------ ---------  -------  -------  ------------")
     print("Run total                " .. 
       PaddedNumber(g_Stats_Run_TotalPointsGained_Total, 9) ..
+      "  " .. g_Stats_Run_TotalSecondsUsed_Total ..      
       "                    " .. g_Stats_Run_SuccessfulAttempts_Total ..
-      "/" .. g_Stats_Run_NumberOfAttempts_Total .. 
+      "/" ..  g_Stats_Run_NumberOfAttempts_Total .. 
       " (" .. PrettyNumber(g_Stats_Run_SuccessfulAttempts_Total /
-      g_Stats_Run_NumberOfAttempts_Total) * 100 .. "%)")
+              g_Stats_Run_NumberOfAttempts_Total * 100) .. "%)")
     print("------------------------ ---------  -------  -------  ------------")
+    
+    g_Stats_Script_TotalSecondsUsed_RebuildSelected = 
+    g_Stats_Script_TotalSecondsUsed_RebuildSelected +
+       g_Stats_Run_TotalSecondsUsed_RebuildSelected
+    g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected =
+    g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected +
+       g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected
+    g_Stats_Script_TotalSecondsUsed_WiggleSelected =
+    g_Stats_Script_TotalSecondsUsed_WiggleSelected +
+       g_Stats_Run_TotalSecondsUsed_WiggleSelected
+    g_Stats_Script_TotalSecondsUsed_WiggleAll =
+    g_Stats_Script_TotalSecondsUsed_WiggleAll +
+       g_Stats_Run_TotalSecondsUsed_WiggleAll
+    g_Stats_Script_TotalSecondsUsed_MutateSidechainsSelected =
+    g_Stats_Script_TotalSecondsUsed_MutateSidechainsSelected +
+       g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected
+    g_Stats_Script_TotalSecondsUsed_MutateSidechainsAll =
+    g_Stats_Script_TotalSecondsUsed_MutateSidechainsAll +
+       g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll
+    
+    g_Stats_Script_TotalPointsGained_RebuildSelected = 
+    g_Stats_Script_TotalPointsGained_RebuildSelected +
+       g_Stats_Run_TotalPointsGained_RebuildSelected
+    g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected =
+    g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected +
+       g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected
+    g_Stats_Script_TotalPointsGained_WiggleSelected =
+    g_Stats_Script_TotalPointsGained_WiggleSelected +
+       g_Stats_Run_TotalPointsGained_WiggleSelected
+    g_Stats_Script_TotalPointsGained_WiggleAll =
+    g_Stats_Script_TotalPointsGained_WiggleAll +
+       g_Stats_Run_TotalPointsGained_WiggleAll
+    g_Stats_Script_TotalPointsGained_MutateSidechainsSelected =
+    g_Stats_Script_TotalPointsGained_MutateSidechainsSelected +
+       g_Stats_Run_TotalPointsGained_MutateSidechainsSelected
+    g_Stats_Script_TotalPointsGained_MutateSidechainsAll =
+    g_Stats_Script_TotalPointsGained_MutateSidechainsAll +
+       g_Stats_Run_TotalPointsGained_MutateSidechainsAll
+    
+    g_Stats_Script_SuccessfulAttempts_RebuildSelected = 
+    g_Stats_Script_SuccessfulAttempts_RebuildSelected +
+       g_Stats_Run_SuccessfulAttempts_RebuildSelected
+    g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected =
+    g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected +
+       g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected
+    g_Stats_Script_SuccessfulAttempts_WiggleSelected =
+    g_Stats_Script_SuccessfulAttempts_WiggleSelected +
+       g_Stats_Run_SuccessfulAttempts_WiggleSelected
+    g_Stats_Script_SuccessfulAttempts_WiggleAll =
+    g_Stats_Script_SuccessfulAttempts_WiggleAll +
+       g_Stats_Run_SuccessfulAttempts_WiggleAll
+    g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected =
+    g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected +
+       g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected
+    g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll =
+    g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll +
+       g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll
+    
+    g_Stats_Script_NumberOfAttempts_RebuildSelected = 
+    g_Stats_Script_NumberOfAttempts_RebuildSelected +
+       g_Stats_Run_NumberOfAttempts_RebuildSelected
+    g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected =
+    g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected +
+       g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected
+    g_Stats_Script_NumberOfAttempts_WiggleSelected =
+    g_Stats_Script_NumberOfAttempts_WiggleSelected +
+       g_Stats_Run_NumberOfAttempts_WiggleSelected
+    g_Stats_Script_NumberOfAttempts_WiggleAll =
+    g_Stats_Script_NumberOfAttempts_WiggleAll +
+       g_Stats_Run_NumberOfAttempts_WiggleAll
+    g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected =
+    g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected +
+       g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected
+    g_Stats_Script_NumberOfAttempts_MutateSidechainsAll =
+    g_Stats_Script_NumberOfAttempts_MutateSidechainsAll +
+       g_Stats_Run_NumberOfAttempts_MutateSidechainsAll
+    
+    g_Stats_Run_TotalSecondsUsed_RebuildSelected = 0
+    g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected = 0
+    g_Stats_Run_TotalSecondsUsed_WiggleSelected = 0
+    g_Stats_Run_TotalSecondsUsed_WiggleAll = 0
+    g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected = 0
+    g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll = 0
     
     g_Stats_Run_TotalPointsGained_RebuildSelected = 0
     g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected = 0
@@ -4598,17 +4699,19 @@ function main() -- formerly DRW()
     g_Stats_Run_TotalPointsGained_MutateSidechainsAll = 0
     
     g_Stats_Run_SuccessfulAttempts_RebuildSelected = 0
-    g_Stats_Run_NumberOfAttempts_RebuildSelected = 0
     g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected = 0
-    g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected = 0
     g_Stats_Run_SuccessfulAttempts_WiggleSelected = 0
-    g_Stats_Run_NumberOfAttempts_WiggleSelected = 0
     g_Stats_Run_SuccessfulAttempts_WiggleAll = 0
-    g_Stats_Run_NumberOfAttempts_WiggleAll = 0
     g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected = 0
-    g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected = 0
     g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll = 0
+    
+    g_Stats_Run_NumberOfAttempts_RebuildSelected = 0
+    g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected = 0
+    g_Stats_Run_NumberOfAttempts_WiggleSelected = 0
+    g_Stats_Run_NumberOfAttempts_WiggleAll = 0
+    g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected = 0
     g_Stats_Run_NumberOfAttempts_MutateSidechainsAll = 0
+    
     
 		g_UserSelected_MaxNumberOf_SegmentRanges_ToRebuild_ThisRunCycle =
       g_UserSelected_MaxNumberOf_SegmentRanges_ToRebuild_ThisRunCycle +
@@ -5114,27 +5217,25 @@ function RebuildManySegmentRanges() -- formerly DeepRebuild()
     -- Comparison data should include many puzzle types, with score and time elapsed comparisons.
     local l_Score_After_SeveralMoreChangesToSegmentRange = GetPoseTotalScore()
     
-		local l_DeepRebuildGain = l_Score_After_SeveralMoreChangesToSegmentRange -
-                              l_Score_Before_SeveralChangesToSegmentRange
+		local g_CurrentRebuildPointsGained = l_Score_After_SeveralMoreChangesToSegmentRange -
+                                         l_Score_Before_SeveralChangesToSegmentRange
+     -- g_CurrentRebuildPointsGained is checked in bSegmentIsAllowedToBeRebuilt().
     
-    g_PointsGained_Current_RebuildSegmentRange = l_DeepRebuildGain
-     -- This value of g_PointsGained_Current_RebuildSegmentRange is checked in 
-     -- the function bSegmentIsAllowedToBeRebuilt().
-    
-		-- The default for g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan
+		-- The default for g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan
     -- is 40 or less. If we just gained more than
-    -- g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan, 
+    -- g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan, 
 		-- then we figure, that's good enough for now. It is now time to move on to 
 		-- more consecutive segments per segment range...But why such a low number?
     l_RemainingSegmentRanges = #g_XLowestScoringSegmentRangesTable - l_SegmentRangeIndex
     
-		if (l_DeepRebuildGain - g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan) >
-        0.001 and l_RemainingSegmentRanges > 0 then
+		if (g_CurrentRebuildPointsGained - 
+      g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan) > 0.001 and
+      l_RemainingSegmentRanges > 0 then
          
-      print("\n  The rebuild gain of " .. PrettyNumber(l_DeepRebuildGain) .. " is greater than the" ..
-              " 'Move on to more consecutive segments per range if current rebuild gains" ..
-            "\n  more than' value of " ..
-                g_UserSelected_MoveOnToMoreSegmentsPerRange_IfCurrentRebuild_GainsMoreThan .. 
+      print("\n  The current rebuild gain of " .. PrettyNumber(g_CurrentRebuildPointsGained) ..
+               " is greater than the 'Move on to more consecutive segments per range if " ..
+               " current rebuild points gained is more than' value of " ..
+                g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan .. 
                " points (this value can be changed on the 'More Options' page);" ..
                " therefore, we will now skip the" .. 
             "\n  remaining " .. l_RemainingSegmentRanges .. " segment ranges with " ..
@@ -5304,16 +5405,14 @@ function RebuildSelectedSegments(l_StartSegment, l_EndSegment) -- formerly local
            " " .. l_CurrentIteration .. "xRebuildSelected" ..
             g_round_x_of_y ..
             g_with_segments_x_thru_y)
+          
+      local l_SecondsUsed = 0
       g_Stats_Run_TotalPointsGained_RebuildSelected =
-        g_Stats_Run_TotalPointsGained_RebuildSelected +
-        l_ScoreImprovement
-      g_Stats_Script_TotalPointsGained_RebuildSelected =
-        g_Stats_Script_TotalPointsGained_RebuildSelected +
-        l_ScoreImprovement
+      g_Stats_Run_TotalPointsGained_RebuildSelected + l_ScoreImprovement
+      g_Stats_Run_TotalSecondsUsed_RebuildSelected = 
+      g_Stats_Run_TotalSecondsUsed_RebuildSelected + l_SecondsUsed
       g_Stats_Run_SuccessfulAttempts_RebuildSelected = 
-        g_Stats_Run_SuccessfulAttempts_RebuildSelected + 1
-      g_Stats_Script_SuccessfulAttempts_RebuildSelected = 
-        g_Stats_Script_SuccessfulAttempts_RebuildSelected + 1
+      g_Stats_Run_SuccessfulAttempts_RebuildSelected + 1
       SaveBest() -- <-- Updates g_Score_ScriptBest      
       -- the original code would break here and return done=true at the end of this function
 
@@ -5326,9 +5425,7 @@ function RebuildSelectedSegments(l_StartSegment, l_EndSegment) -- formerly local
       recentbest.Restore()
     end
     g_Stats_Run_NumberOfAttempts_RebuildSelected = 
-      g_Stats_Run_NumberOfAttempts_RebuildSelected + 1
-    g_Stats_Script_NumberOfAttempts_RebuildSelected = 
-      g_Stats_Script_NumberOfAttempts_RebuildSelected + 1
+    g_Stats_Run_NumberOfAttempts_RebuildSelected + 1
 
   end -- for l_CurrentIteration = 1, l_MaxIterations do
 
@@ -5365,25 +5462,21 @@ function ShakeSelected(l_FromWhere)
           g_with_segments_x_thru_y ..
           g_ScorePartText ..
           l_ClashImportanceText)
+        
+    local l_SecondsUsed = 0
     g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected =
-      g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected +
-      l_ScoreImprovement
-    g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected =
-      g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected +
-      l_ScoreImprovement
+    g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected + l_ScoreImprovement
+    g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected =
+    g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected + l_SecondsUsed
     g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected =
-      g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected + 1
-    g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected =
-      g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected + 1
+    g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected + 1
     SaveBest() -- <-- Updates g_Score_ScriptBest
   elseif l_Score_After_Shake < g_Score_ScriptBest then
     -- Should will undo our last change because it dropped our score...
     recentbest.Restore()
   end
   g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected =
-    g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected + 1 
-  g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected =
-    g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected + 1 
+  g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected + 1 
    
 end -- ShakeSelected(l_FromWhere)
 function WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_FromWhere)
@@ -5421,25 +5514,21 @@ function WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_FromWhere)
           g_with_segments_x_thru_y ..
           g_ScorePartText ..
           l_ClashImportanceText)
+        
+    local l_SecondsUsed = 0
     g_Stats_Run_TotalPointsGained_WiggleSelected =
-      g_Stats_Run_TotalPointsGained_WiggleSelected +
-      l_ScoreImprovement
-    g_Stats_Script_TotalPointsGained_WiggleSelected =
-      g_Stats_Script_TotalPointsGained_WiggleSelected +
-      l_ScoreImprovement
+    g_Stats_Run_TotalPointsGained_WiggleSelected + l_ScoreImprovement
+    g_Stats_Run_TotalSecondsUsed_WiggleSelected =
+    g_Stats_Run_TotalSecondsUsed_WiggleSelected + l_SecondsUsed
     g_Stats_Run_SuccessfulAttempts_WiggleSelected =
-      g_Stats_Run_SuccessfulAttempts_WiggleSelected + 1
-    g_Stats_Script_SuccessfulAttempts_WiggleSelected =
-      g_Stats_Script_SuccessfulAttempts_WiggleSelected + 1
+    g_Stats_Run_SuccessfulAttempts_WiggleSelected + 1
     SaveBest() -- <-- Updates g_Score_ScriptBest
   elseif l_Score_After_Wiggle < g_Score_ScriptBest then
     -- Should will undo our last change because it dropped our score...
     recentbest.Restore()
   end
   g_Stats_Run_NumberOfAttempts_WiggleSelected =
-    g_Stats_Run_NumberOfAttempts_WiggleSelected + 1
-  g_Stats_Script_NumberOfAttempts_WiggleSelected =
-    g_Stats_Script_NumberOfAttempts_WiggleSelected + 1
+  g_Stats_Run_NumberOfAttempts_WiggleSelected + 1
     
 end -- WiggleSelected(l_ClashImportance, l_FromWhere)
 
@@ -5487,16 +5576,14 @@ function WiggleAll(l_Iterations, l_FromWhere)
         --g_with_segments_x_thru_y .. -- display segment values here just as a reference to where we are.
          g_ScorePartText ..
          l_ClashImportanceText)
+       
+    local l_SecondsUsed = 0
     g_Stats_Run_TotalPointsGained_WiggleAll =
-      g_Stats_Run_TotalPointsGained_WiggleAll +
-      l_ScoreImprovement
-    g_Stats_Script_TotalPointsGained_WiggleAll =
-      g_Stats_Script_TotalPointsGained_WiggleAll +
-      l_ScoreImprovement
+    g_Stats_Run_TotalPointsGained_WiggleAll + l_ScoreImprovement
+    g_Stats_Run_TotalSecondsUsed_WiggleAll =
+    g_Stats_Run_TotalSecondsUsed_WiggleAll + l_SecondsUsed
     g_Stats_Run_SuccessfulAttempts_WiggleAll =
-      g_Stats_Run_SuccessfulAttempts_WiggleAll + 1
-    g_Stats_Script_SuccessfulAttempts_WiggleAll =
-      g_Stats_Script_SuccessfulAttempts_WiggleAll + 1
+    g_Stats_Run_SuccessfulAttempts_WiggleAll + 1
     SaveBest() -- <-- Updates g_Score_ScriptBest
     
   elseif l_Score_After_Wiggle < g_Score_ScriptBest then
@@ -5504,9 +5591,7 @@ function WiggleAll(l_Iterations, l_FromWhere)
     recentbest.Restore()
   end
   g_Stats_Run_NumberOfAttempts_WiggleAll =
-    g_Stats_Run_NumberOfAttempts_WiggleAll + 1
-  g_Stats_Script_NumberOfAttempts_WiggleAll =
-    g_Stats_Script_NumberOfAttempts_WiggleAll + 1
+  g_Stats_Run_NumberOfAttempts_WiggleAll + 1
 
   SetClashImportance(1) --<--we almost always set clash importance before calling any rebuild,
   --                         mutate, shake or wiggle. So, you would think that setting clash
@@ -5570,24 +5655,20 @@ function MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, l_From
       g_round_x_of_y ..
       g_with_segments_x_thru_y ..
       g_ScorePartText)
+    
+    local l_SecondsUsed = 0
     g_Stats_Run_TotalPointsGained_MutateSidechainsSelected =
-      g_Stats_Run_TotalPointsGained_MutateSidechainsSelected +
-      l_ScoreImprovement
-    g_Stats_Script_TotalPointsGained_MutateSidechainsSelected =
-      g_Stats_Script_TotalPointsGained_MutateSidechainsSelected +
-      l_ScoreImprovement
+    g_Stats_Run_TotalPointsGained_MutateSidechainsSelected + l_ScoreImprovement
+    g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected =
+    g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected + l_SecondsUsed
     g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected =
       g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected + 1
-    g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected =
-      g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected + 1
     SaveBest() -- <-- Updates g_Score_ScriptBest
   elseif l_Score_After_Mutate < g_Score_ScriptBest then
     recentbest.Restore()
   end
   g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected =
-    g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected + 1
-  g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected =
-    g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected + 1
+  g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected + 1
 
 end -- MutateSideChainsOfSelectedSegments()
 function MutateSideChainsAll(l_FromWhere)
@@ -5597,6 +5678,8 @@ function MutateSideChainsAll(l_FromWhere)
 		return
 	end
 
+  local l_TimeBefore = os.clock()
+  
   selection.SelectAll() -- is this needed, when calling structure.MutateSideChainsAll? Probably!
 	SetClashImportance(g_UserSelected_Mutate_ClashImportance) -- default is 0.9 (close to 1)
 	local l_MaxIterations = 2  
@@ -5620,24 +5703,23 @@ function MutateSideChainsAll(l_FromWhere)
       ":2xMutateSidechainsAll" ..
       g_round_x_of_y ..
       g_ScorePartText)
+    
+    --local l_TimeAfter = os.time()
+    local l_TimeAfter = os.clock()
+    local l_SecondsUsed = l_TimeAfter - l_TimeBefore
+    --local l_SecondsUsed2 = os.difftime(l_TimeBefore, l_TimeAfter)
     g_Stats_Run_TotalPointsGained_MutateSidechainsAll =
-      g_Stats_Run_TotalPointsGained_MutateSidechainsAll +
-      l_ScoreImprovement
-    g_Stats_Script_TotalPointsGained_MutateSidechainsAll =
-      g_Stats_Script_TotalPointsGained_MutateSidechainsAll +
-      l_ScoreImprovement
+    g_Stats_Run_TotalPointsGained_MutateSidechainsAll + l_ScoreImprovement
+    g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll =
+    g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll + l_SecondsUsed
     g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll =
-      g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll + 1
-    g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll =
-      g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll + 1
+    g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll + 1
     SaveBest() -- <-- Updates g_Score_ScriptBest
   elseif l_Score_After_Mutate < g_Score_ScriptBest then
     recentbest.Restore()
   end
   g_Stats_Run_NumberOfAttempts_MutateSidechainsAll =
-    g_Stats_Run_NumberOfAttempts_MutateSidechainsAll + 1    
-  g_Stats_Script_NumberOfAttempts_MutateSidechainsAll =
-    g_Stats_Script_NumberOfAttempts_MutateSidechainsAll + 1    
+  g_Stats_Run_NumberOfAttempts_MutateSidechainsAll + 1    
   
 end -- MutateSideChainsAll(l_FromWhere)
 function StabilizeSegmentRange(l_StartSegment, l_EndSegment) -- formerly qStab()
@@ -5761,48 +5843,47 @@ function CleanUp(l_ErrorMessage)
   print("RebuildSelected          " .. 
     PaddedNumber(g_Stats_Script_TotalPointsGained_RebuildSelected, 9) ..
     "                    " .. g_Stats_Script_SuccessfulAttempts_RebuildSelected ..
-    "/" .. g_Stats_Script_NumberOfAttempts_RebuildSelected ..
+    "/" ..  g_Stats_Script_NumberOfAttempts_RebuildSelected ..
     " (" .. PrettyNumber(g_Stats_Script_SuccessfulAttempts_RebuildSelected /
-    g_Stats_Script_NumberOfAttempts_RebuildSelected) * 100 .. "%)")
+            g_Stats_Script_NumberOfAttempts_RebuildSelected * 100) .. "%)")
   print("ShakeSidechainsSelected  " ..
     PaddedNumber(g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected, 9) ..
     "                    " .. g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected ..
-    "/" .. g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected ..
+    "/" ..  g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected ..
     " (" .. PrettyNumber(g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected /
-    g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected) * 100 .. "%)")
+            g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected * 100) .. "%)")
   print("WiggleSelected           " .. 
     PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleSelected, 9) ..
     "                    " .. g_Stats_Script_SuccessfulAttempts_WiggleSelected ..
-    "/" .. g_Stats_Script_NumberOfAttempts_WiggleSelected ..
+    "/" ..  g_Stats_Script_NumberOfAttempts_WiggleSelected ..
     " (" .. PrettyNumber(g_Stats_Script_SuccessfulAttempts_WiggleSelected /
-    g_Stats_Script_NumberOfAttempts_WiggleSelected) * 100 .. "%)")
+            g_Stats_Script_NumberOfAttempts_WiggleSelected * 100) .. "%)")
   print("WiggleAll                " .. 
     PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleAll, 9) ..
     "                    " .. g_Stats_Script_SuccessfulAttempts_WiggleAll ..
-    "/" .. g_Stats_Script_NumberOfAttempts_WiggleAll ..
+    "/" ..  g_Stats_Script_NumberOfAttempts_WiggleAll ..
     " (" .. PrettyNumber(g_Stats_Script_SuccessfulAttempts_WiggleAll /
-    g_Stats_Script_NumberOfAttempts_WiggleAll) * 100 .. "%)")
+            g_Stats_Script_NumberOfAttempts_WiggleAll * 100) .. "%)")
   print("MutateSidechainsSelected " ..
     PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsSelected, 9) ..
     "                    " .. g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected ..
-    "/" .. g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected ..
+    "/" ..  g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected ..
     " (" .. PrettyNumber(g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected /
-    g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected) * 100 .. "%)")
+            g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected * 100) .. "%)")
   print("MutateSidechainsAll      " .. 
     PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsAll, 9) ..
     "                    " .. g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll ..
-    "/" .. g_Stats_Script_NumberOfAttempts_MutateSidechainsAll ..
+    "/" ..  g_Stats_Script_NumberOfAttempts_MutateSidechainsAll ..
     " (" .. PrettyNumber(g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll /
-    g_Stats_Script_NumberOfAttempts_MutateSidechainsAll) * 100 .. "%)")
+            g_Stats_Script_NumberOfAttempts_MutateSidechainsAll * 100) .. "%)")
   print("------------------------ ---------  -------  -------  ---------------")
   print("Script total             " .. 
     PaddedNumber(g_Stats_Script_TotalPointsGained_Total, 9) ..
     "                    " .. g_Stats_Script_SuccessfulAttempts_Total ..
-    "/" .. g_Stats_Script_NumberOfAttempts_Total .. 
+    "/" ..  g_Stats_Script_NumberOfAttempts_Total .. 
     " (" .. PrettyNumber(g_Stats_Script_SuccessfulAttempts_Total /
-    g_Stats_Script_NumberOfAttempts_Total) * 100 .. "%)")
+            g_Stats_Script_NumberOfAttempts_Total * 100) .. "%)")
   print("------------------------ ---------  -------  -------  ---------------")
-
   
   local l_Score_AtEndOf_Script = g_Score_ScriptBest
 	print("\nStarting Score: " .. PrettyNumber(g_Score_AtStartOf_Script) ..
