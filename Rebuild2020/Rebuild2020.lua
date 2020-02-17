@@ -334,12 +334,12 @@ function DefineGlobalVariables()
   
   g_ScorePartText = "" -- Example: " ScorePart 4 (total)", " ScorePart 6 (ligand) 6=7=11" 
   
-  g_Stats_Run_TotalSecondsUsed_RebuildSelected = 0
-  g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected = 0
-  g_Stats_Run_TotalSecondsUsed_WiggleSelected = 0
-  g_Stats_Run_TotalSecondsUsed_WiggleAll = 0
-  g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected = 0
-  g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll = 0
+  g_Stats_Run_TotalSecondsUsed_RebuildSelected = 0.0001 -- prevent divide by zero error
+  g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected = 0.0001
+  g_Stats_Run_TotalSecondsUsed_WiggleSelected = 0.0001
+  g_Stats_Run_TotalSecondsUsed_WiggleAll = 0.0001
+  g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected = 0.0001
+  g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll = 0.0001
 
   g_Stats_Script_TotalSecondsUsed_RebuildSelected = 0
   g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected = 0
@@ -360,32 +360,34 @@ function DefineGlobalVariables()
   g_Stats_Script_TotalPointsGained_WiggleSelected = 0
   g_Stats_Script_TotalPointsGained_WiggleAll = 0
   g_Stats_Script_TotalPointsGained_MutateSidechainsSelected = 0
-  g_Stats_Script_TotalPointsGained_MutateSidechainsAll = 0
+  g_Stats_Script_TotalPointsGained_MutateSidechainsAll = 0  
   
   g_Stats_Run_SuccessfulAttempts_RebuildSelected = 0
-  g_Stats_Run_NumberOfAttempts_RebuildSelected = 0
   g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected = 0
-  g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected = 0
   g_Stats_Run_SuccessfulAttempts_WiggleSelected = 0
-  g_Stats_Run_NumberOfAttempts_WiggleSelected = 0
   g_Stats_Run_SuccessfulAttempts_WiggleAll = 0
-  g_Stats_Run_NumberOfAttempts_WiggleAll = 0
   g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected = 0
-  g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected = 0
   g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll = 0
-  g_Stats_Run_NumberOfAttempts_MutateSidechainsAll = 0
-	
+  
   g_Stats_Script_SuccessfulAttempts_RebuildSelected = 0
-  g_Stats_Script_NumberOfAttempts_RebuildSelected = 0
   g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected = 0
-  g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected = 0
   g_Stats_Script_SuccessfulAttempts_WiggleSelected = 0
-  g_Stats_Script_NumberOfAttempts_WiggleSelected = 0
   g_Stats_Script_SuccessfulAttempts_WiggleAll = 0
-  g_Stats_Script_NumberOfAttempts_WiggleAll = 0
   g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected = 0
-  g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected = 0
   g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll = 0
+  
+  g_Stats_Run_NumberOfAttempts_RebuildSelected = 0.1 -- prevent divide by zero error
+  g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected = 0.1
+  g_Stats_Run_NumberOfAttempts_WiggleSelected = 0.1
+  g_Stats_Run_NumberOfAttempts_WiggleAll = 0.1
+  g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected = 0.1
+  g_Stats_Run_NumberOfAttempts_MutateSidechainsAll = 0.1    
+	
+  g_Stats_Script_NumberOfAttempts_RebuildSelected = 0
+  g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected = 0
+  g_Stats_Script_NumberOfAttempts_WiggleSelected = 0
+  g_Stats_Script_NumberOfAttempts_WiggleAll = 0
+  g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected = 0
   g_Stats_Script_NumberOfAttempts_MutateSidechainsAll = 0
   
 	g_UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle = 1
@@ -930,14 +932,19 @@ function SetupLocalDebugFuntions()
 	--   puzzle.GetExpirationTime,
 	--   puzzle.GetStructureName
 	--   puzzle.StartOver -- cound be useful!
-
 	--   recipe.CompareNumbers -- might be useful, if it's what I think it is. Reliably work w/floats?
 	--   recipe.GetRandomSeed -- does not work properly on Windows OS
-	--   recipe.ReportStatus -- Could be helpful, but does not allow capturing the results, only prints it
-	--   recipe.SectionEnd
-	--   recipe.SectionStart -- Count be helpful, but...
 	--   rotamer.GetCount
 	--   rotamer.SetRotamer
+  
+	--   recipe.ReportStatus -- Does not allow capturing the results, only prints it; doesn't include time
+	--   recipe.SectionEnd
+	--   recipe.SectionStart
+  recipe = {}
+  recipe.SectionStart = function () end
+  recipe.ReportStatus = function () end
+  recipe.SectionEnd = function () end
+  
 
 	save = {}
    -- Called from 11 places...
@@ -3504,14 +3511,21 @@ function NormalConditionChecking_TemporarilyDisable()
 	end
   
 end -- function NormalConditionChecking_TemporarilyDisable()
-function PaddedNumber(l_DirtyFloat, l_PadWidth)
+function PaddedNumber(l_DirtyFloat, l_PadWidth, l_AfterDecimal)
   -- Called from ()...
   
-  local l_PrettyString = string.format("%" .. l_PadWidth .. ".3f", l_DirtyFloat)
-  
+  local l_PrettyString = string.format("%" .. l_PadWidth .. "." .. l_AfterDecimal .. "f", l_DirtyFloat)  
   return l_PrettyString
   
 end -- function PrettyNumber(l_DirtyFloat)
+function PaddedString(l_String, l_PadWidth)
+  -- Called from ()...
+  
+  local l_PrettyString = string.format("%" .. l_PadWidth .. "s", l_String)
+  
+  return l_PrettyString
+  
+end -- function PaddedString(l_String, l_PadWidth)
 function Populate_g_ActiveScorePartsTable() -- Formerly FindActiveSubscores()
   -- Called from Populate_g_ScorePartsTable()...
 
@@ -4488,7 +4502,7 @@ function main() -- formerly DRW()
 		g_UserSelected_NumberOfSegmentRangesToSkip = 0
 		g_UserSelected_MaxNumberOf_SegmentRanges_ToRebuild_ThisRunCycle = l_RememberThisValue
     
-	end
+	end -- if g_UserSelected_NumberOfSegmentRangesToSkip > 0 then
   
   for l_RunCycle = 1, g_UserSelected_NumberOfRunCycles do
       
@@ -4501,7 +4515,11 @@ function main() -- formerly DRW()
       " w/" .. g_UserSelected_StartRebuildingWithThisManyConsecutiveSegments .. 
       "-" .. g_UserSelected_ResetToStartValueAfterRebuildingWithThisManyConsecutiveSegments ..
       " consecutive segments:")
-
+    
+    -- The following built-in foldit stat functions are useless because they do not
+    -- include time spent values...
+    recipe.SectionStart("Start of Run " .. g_RunCycle) -- start level 1 (run-level)
+    recipe.ReportStatus() -- start level 1 (run-level)
     
     -- Here's what you are looking for!!!
 		-- Here's what you are looking for!!!
@@ -4517,6 +4535,9 @@ function main() -- formerly DRW()
 		-- PrepareToRebuildSegmentRanges("areas")
 		-- PrepareToRebuildSegmentRanges("fj")
 		-- PrepareToRebuildSegmentRanges("simple")
+    
+    recipe.ReportStatus() -- end level 1 (run-level)
+    recipe.SectionEnd() -- end level 1 (run-level)
 
     g_Stats_Run_TotalSecondsUsed_Total = 
       g_Stats_Run_TotalSecondsUsed_RebuildSelected +
@@ -4550,63 +4571,77 @@ function main() -- formerly DRW()
       g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected +
       g_Stats_Run_NumberOfAttempts_MutateSidechainsAll
     
-    print("------------------------ ---------  -------  -------  ------------")
+    print("------------------------ ---------  -------  -------  ------------------")
     print("End of run " .. g_RunCycle .. " Stats:")
-    print("------------------------ ---------  -------  -------  ------------")
-    print("From:                       Points  Seconds  Points/  Success")
-    print("                            Gained  Used     Second   Rate")
+    print("------------------------ ---------  -------  -------  ------------------")
+    print("From:                       Points  Seconds  Points/     ")
+    print("                            Gained     Used  Second      Success Rate:")
                                           
     print("RebuildSelected          " .. 
-      PaddedNumber(g_Stats_Run_TotalPointsGained_RebuildSelected, 9) ..
-      "  " .. g_Stats_Run_TotalSecondsUsed_RebuildSelected ..
-      "              " .. g_Stats_Run_SuccessfulAttempts_RebuildSelected ..
-      "/" ..  g_Stats_Run_NumberOfAttempts_RebuildSelected ..
-      " (" .. PrettyNumber(g_Stats_Run_SuccessfulAttempts_RebuildSelected /
-              g_Stats_Run_NumberOfAttempts_RebuildSelected * 100) .. "%)")
+      PaddedNumber(g_Stats_Run_TotalPointsGained_RebuildSelected, 9, 3) .. "  " .. 
+      PaddedNumber(g_Stats_Run_TotalSecondsUsed_RebuildSelected, 7, 3) .. "  " ..
+      PaddedNumber(g_Stats_Run_TotalPointsGained_RebuildSelected /
+                   g_Stats_Run_TotalSecondsUsed_RebuildSelected * 1, 7, 0) .. "  " ..
+      PaddedString(g_Stats_Run_SuccessfulAttempts_RebuildSelected .. "/" ..
+      PaddedNumber(g_Stats_Run_NumberOfAttempts_RebuildSelected, 0, 0), 9) .. PaddedString(" (" ..
+      PrettyNumber2(g_Stats_Run_SuccessfulAttempts_RebuildSelected /
+                   g_Stats_Run_NumberOfAttempts_RebuildSelected * 100) .. "%)", 9))
     print("ShakeSidechainsSelected  " ..
-      PaddedNumber(g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected, 9) ..
-      "  " .. g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected ..      
-      "                    " .. g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected ..
-      "/" ..  g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected ..
-      " (" .. PrettyNumber(g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected /
-              g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected * 100) .. "%)")
+      PaddedNumber(g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected, 9, 3) .. "  " ..
+      PaddedNumber(g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected, 7, 3) .. "  " ..
+      PaddedNumber(g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected /
+                   g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected * 1, 7, 0) .. "  " ..
+      PaddedString(g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected .. "/" ..
+      PaddedNumber(g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected, 0, 0), 9) .. PaddedString(" (" ..
+      PrettyNumber2(g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected /
+                   g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected * 100) .. "%)", 9))
     print("WiggleSelected           " .. 
-      PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleSelected, 9) ..
-      "  " .. g_Stats_Run_TotalSecondsUsed_WiggleSelected ..
-      "                    " .. g_Stats_Run_SuccessfulAttempts_WiggleSelected ..
-      "/" .. g_Stats_Run_NumberOfAttempts_WiggleSelected ..
-      " (" .. PrettyNumber(g_Stats_Run_SuccessfulAttempts_WiggleSelected /
-              g_Stats_Run_NumberOfAttempts_WiggleSelected * 100) .. "%)")
+      PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleSelected, 9, 3) .. "  " ..
+      PaddedNumber(g_Stats_Run_TotalSecondsUsed_WiggleSelected, 7, 3) .. "  " ..
+      PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleSelected /
+                   g_Stats_Run_TotalSecondsUsed_WiggleSelected * 1, 7, 0) .. "  " ..
+      PaddedString(g_Stats_Run_SuccessfulAttempts_WiggleSelected .. "/" ..
+      PaddedNumber(g_Stats_Run_NumberOfAttempts_WiggleSelected, 0, 0), 9) .. PaddedString(" (" ..
+      PrettyNumber2(g_Stats_Run_SuccessfulAttempts_WiggleSelected /
+                   g_Stats_Run_NumberOfAttempts_WiggleSelected * 100) .. "%)", 9))
     print("WiggleAll                " .. 
-      PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleAll, 9) ..
-      "  " .. g_Stats_Run_TotalSecondsUsed_WiggleAll ..      
-      "                    " .. g_Stats_Run_SuccessfulAttempts_WiggleAll ..
-      "/" ..  g_Stats_Run_NumberOfAttempts_WiggleAll ..
-      " (" .. PrettyNumber(g_Stats_Run_SuccessfulAttempts_WiggleAll /
-              g_Stats_Run_NumberOfAttempts_WiggleAll * 100) .. "%)")
+      PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleAll, 9, 3) .. "  " ..
+      PaddedNumber(g_Stats_Run_TotalSecondsUsed_WiggleAll, 7, 3) .. "  " ..
+      PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleAll /
+                   g_Stats_Run_TotalSecondsUsed_WiggleAll * 1, 7, 0) .. "  " ..
+      PaddedString(g_Stats_Run_SuccessfulAttempts_WiggleAll .. "/" ..  
+      PaddedNumber(g_Stats_Run_NumberOfAttempts_WiggleAll, 0, 0), 9) .. PaddedString(" (" ..
+      PrettyNumber2(g_Stats_Run_SuccessfulAttempts_WiggleAll /
+                   g_Stats_Run_NumberOfAttempts_WiggleAll * 100) .. "%)", 9))
     print("MutateSidechainsSelected " ..
-      PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsSelected, 9) ..
-      "  " .. g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected ..      
-      "                    " .. g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected ..
-      "/" ..  g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected ..
-      " (" .. PrettyNumber(g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected /
-              g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected * 100) .. "%)")
+      PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsSelected, 9, 3) .. "  " ..
+      PaddedNumber(g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected, 7, 3) .. "  " ..
+      PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsSelected /
+                   g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected * 1, 7, 0) .. "  " ..
+      PaddedString(g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected .. "/" ..
+      PaddedNumber(g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected, 0, 0), 9) .. PaddedString(" (" ..
+      PrettyNumber2(g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected /
+                   g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected * 100) .. "%)", 9))
     print("MutateSidechainsAll      " .. 
-      PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsAll, 9) ..
-      "  " .. g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll ..      
-      "                    " .. g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll ..
-      "/" ..  g_Stats_Run_NumberOfAttempts_MutateSidechainsAll ..
-      " (" .. PrettyNumber(g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll /
-              g_Stats_Run_NumberOfAttempts_MutateSidechainsAll * 100) .. "%)")
-    print("------------------------ ---------  -------  -------  ------------")
+      PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsAll, 9, 3) .. "  " ..
+      PaddedNumber(g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll, 7, 3) .. "  " ..
+      PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsAll /
+                   g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll * 1, 7, 0) .. "  " ..
+      PaddedString(g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll .. "/" ..
+      PaddedNumber(g_Stats_Run_NumberOfAttempts_MutateSidechainsAll, 0, 0), 9) .. PaddedString(" (" ..
+      PrettyNumber2(g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll /
+                   g_Stats_Run_NumberOfAttempts_MutateSidechainsAll * 100) .. "%)", 9))
+    print("------------------------ ---------  -------  -------  ------------------")
     print("Run total                " .. 
-      PaddedNumber(g_Stats_Run_TotalPointsGained_Total, 9) ..
-      "  " .. g_Stats_Run_TotalSecondsUsed_Total ..      
-      "                    " .. g_Stats_Run_SuccessfulAttempts_Total ..
-      "/" ..  g_Stats_Run_NumberOfAttempts_Total .. 
-      " (" .. PrettyNumber(g_Stats_Run_SuccessfulAttempts_Total /
-              g_Stats_Run_NumberOfAttempts_Total * 100) .. "%)")
-    print("------------------------ ---------  -------  -------  ------------")
+      PaddedNumber(g_Stats_Run_TotalPointsGained_Total, 9, 3) .. "  " ..
+      PaddedNumber(g_Stats_Run_TotalSecondsUsed_Total, 7, 3) .. "  " ..
+      PaddedNumber(g_Stats_Run_TotalPointsGained_Total /
+                   g_Stats_Run_TotalSecondsUsed_Total * 1, 7, 0) .. "  " ..
+      PaddedString(g_Stats_Run_SuccessfulAttempts_Total .. "/" ..
+      PaddedNumber(g_Stats_Run_NumberOfAttempts_Total, 0, 0), 9) .. PaddedString(" (" ..
+      PrettyNumber2(g_Stats_Run_SuccessfulAttempts_Total /
+                   g_Stats_Run_NumberOfAttempts_Total * 100) .. "%)", 9))
+    print("------------------------ ---------  -------  -------  ------------------")
     
     g_Stats_Script_TotalSecondsUsed_RebuildSelected = 
     g_Stats_Script_TotalSecondsUsed_RebuildSelected +
@@ -4684,12 +4719,12 @@ function main() -- formerly DRW()
     g_Stats_Script_NumberOfAttempts_MutateSidechainsAll +
        g_Stats_Run_NumberOfAttempts_MutateSidechainsAll
     
-    g_Stats_Run_TotalSecondsUsed_RebuildSelected = 0
-    g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected = 0
-    g_Stats_Run_TotalSecondsUsed_WiggleSelected = 0
-    g_Stats_Run_TotalSecondsUsed_WiggleAll = 0
-    g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected = 0
-    g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll = 0
+    g_Stats_Run_TotalSecondsUsed_RebuildSelected = 0.0001 -- prevent divide by zero
+    g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected = 0.0001
+    g_Stats_Run_TotalSecondsUsed_WiggleSelected = 0.0001
+    g_Stats_Run_TotalSecondsUsed_WiggleAll = 0.0001
+    g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected = 0.0001
+    g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll = 0.0001
     
     g_Stats_Run_TotalPointsGained_RebuildSelected = 0
     g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected = 0
@@ -4705,19 +4740,18 @@ function main() -- formerly DRW()
     g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected = 0
     g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll = 0
     
-    g_Stats_Run_NumberOfAttempts_RebuildSelected = 0
-    g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected = 0
-    g_Stats_Run_NumberOfAttempts_WiggleSelected = 0
-    g_Stats_Run_NumberOfAttempts_WiggleAll = 0
-    g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected = 0
-    g_Stats_Run_NumberOfAttempts_MutateSidechainsAll = 0
-    
+    g_Stats_Run_NumberOfAttempts_RebuildSelected = 0.1 -- prevent divide by zero
+    g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected = 0.1
+    g_Stats_Run_NumberOfAttempts_WiggleSelected = 0.1
+    g_Stats_Run_NumberOfAttempts_WiggleAll = 0.1
+    g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected = 0.1
+    g_Stats_Run_NumberOfAttempts_MutateSidechainsAll = 0.1
     
 		g_UserSelected_MaxNumberOf_SegmentRanges_ToRebuild_ThisRunCycle =
       g_UserSelected_MaxNumberOf_SegmentRanges_ToRebuild_ThisRunCycle +
 			g_UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle
     
-	end
+	end -- for l_RunCycle = 1, g_UserSelected_NumberOfRunCycles do
 
 	CleanUp()
 
@@ -4893,11 +4927,14 @@ function RebuildManySegmentRanges() -- formerly DeepRebuild()
   --                           bFirstInStringOfScorePartNumbersWithSamePoseTotalScore=5}
 	for l_SegmentRangeIndex = 1, #g_XLowestScoringSegmentRangesTable do -- formerly areas[]
     
+    
 		local l_Score_Before_SeveralChangesToSegmentRange = g_Score_ScriptBest
     
 		-- g_XLowestScoringSegmentRangesTable={StartSegment=1, EndSegment=2}
 		l_StartSegment = g_XLowestScoringSegmentRangesTable[l_SegmentRangeIndex][srtrt_StartSegment]
 		l_EndSegment = g_XLowestScoringSegmentRangesTable[l_SegmentRangeIndex][srtrt_EndSegment]
+    
+    recipe.SectionStart("Rebuild segment range " .. l_StartSegment .. "-" .. l_EndSegment) -- start level 2
     
 		-- DisulfideBonds_RememberSolutionWithThemIntact() -- only call this just before calling one of foldit's
     --                                               rebuild, mutate, shake or wiggle functions.
@@ -5246,7 +5283,9 @@ function RebuildManySegmentRanges() -- formerly DeepRebuild()
 			break -- for l_SegmentRangeIndex = 1, #g_XLowestScoringSegmentRangesTable do
       
 		end
-    
+  
+    recipe.SectionEnd() -- end level 2 -- end rebuld segment range x-y
+
 	end -- for l_SegmentRangeIndex = 1, #g_XLowestScoringSegmentRangesTable do
   
   -- This is basically the end of the Run A of B. Let's get ready to start the next Run...
@@ -5374,6 +5413,8 @@ function RebuildSelectedSegments(l_StartSegment, l_EndSegment) -- formerly local
   -- Called from RebuildOneSegmentRangeManyTimes() formerly Rebuild()
   -- Calls structure.RebuildSelected()
 
+  local l_TimeBefore = os.clock()
+  
 	-- We have to set clash importance and select segment range every time this function is 
   -- called (each rebuild round) because shakes, wiggles and mutates will change these values...
 	SetClashImportance(g_RebuildClashImportance) -- g_RebuildClashImportance is always 0, so what's the point
@@ -5401,20 +5442,18 @@ function RebuildSelectedSegments(l_StartSegment, l_EndSegment) -- formerly local
     l_Score_After_Rebuild = GetPoseTotalScore()
     local l_ScoreImprovement = l_Score_After_Rebuild - g_Score_ScriptBest
     if l_ScoreImprovement > 0.001 then
-      print(PrettyNumber(g_Score_ScriptBest) .. " + " .. PaddedNumber(l_ScoreImprovement, 6) ..
+      print(PrettyNumber(g_Score_ScriptBest) .. " + " .. PaddedNumber(l_ScoreImprovement, 6, 3) ..
            " " .. l_CurrentIteration .. "xRebuildSelected" ..
             g_round_x_of_y ..
             g_with_segments_x_thru_y)
           
-      local l_SecondsUsed = 0
       g_Stats_Run_TotalPointsGained_RebuildSelected =
       g_Stats_Run_TotalPointsGained_RebuildSelected + l_ScoreImprovement
-      g_Stats_Run_TotalSecondsUsed_RebuildSelected = 
-      g_Stats_Run_TotalSecondsUsed_RebuildSelected + l_SecondsUsed
       g_Stats_Run_SuccessfulAttempts_RebuildSelected = 
       g_Stats_Run_SuccessfulAttempts_RebuildSelected + 1
       SaveBest() -- <-- Updates g_Score_ScriptBest      
       -- the original code would break here and return done=true at the end of this function
+      recipe.ReportStatus() -- total crap!
 
     elseif l_Score_After_Rebuild < g_Score_ScriptBest then
       -- the original code would break here and return done=true at the end of this function
@@ -5424,19 +5463,25 @@ function RebuildSelectedSegments(l_StartSegment, l_EndSegment) -- formerly local
       -- recover points with a mutate, shake and wiggle...
       recentbest.Restore()
     end
+    local l_TimeAfter = os.clock()
+    local l_SecondsUsed = l_TimeAfter - l_TimeBefore
+    g_Stats_Run_TotalSecondsUsed_RebuildSelected = 
+    g_Stats_Run_TotalSecondsUsed_RebuildSelected + l_SecondsUsed
     g_Stats_Run_NumberOfAttempts_RebuildSelected = 
     g_Stats_Run_NumberOfAttempts_RebuildSelected + 1
-
+  
   end -- for l_CurrentIteration = 1, l_MaxIterations do
 
 	if g_bUserSelected_DisableBandsDuringRebuild == true then
 		band.EnableAll()
-	end
+	end  
 
 end -- RebuildSelectedSegments() -- formerly localRebuild()
 function ShakeSelected(l_FromWhere)
   -- Called from 5 functions...
       
+  local l_TimeBefore = os.clock()
+  
   local l_ClashImportance = behavior.GetClashImportance()
   local l_ClashImportanceText = " ClashImp " .. PrettyNumber2(l_ClashImportance)
 
@@ -5455,7 +5500,7 @@ function ShakeSelected(l_FromWhere)
   local l_Score_After_Shake = GetPoseTotalScore()
   local l_ScoreImprovement = l_Score_After_Shake - g_Score_ScriptBest
   if l_ScoreImprovement > 0.001 then
-    print(PrettyNumber(g_Score_ScriptBest) .. " + " .. PaddedNumber(l_ScoreImprovement, 6) ..
+    print(PrettyNumber(g_Score_ScriptBest) .. " + " .. PaddedNumber(l_ScoreImprovement, 6, 3) ..
           " " .. l_FromWhere ..
           ":1xShakeSidechainsSelected" ..
           g_round_x_of_y ..
@@ -5463,24 +5508,28 @@ function ShakeSelected(l_FromWhere)
           g_ScorePartText ..
           l_ClashImportanceText)
         
-    local l_SecondsUsed = 0
     g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected =
     g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected + l_ScoreImprovement
-    g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected =
-    g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected + l_SecondsUsed
     g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected =
     g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected + 1
     SaveBest() -- <-- Updates g_Score_ScriptBest
+    recipe.ReportStatus() -- total crap!
   elseif l_Score_After_Shake < g_Score_ScriptBest then
     -- Should will undo our last change because it dropped our score...
     recentbest.Restore()
   end
+  local l_TimeAfter = os.clock()
+  local l_SecondsUsed = l_TimeAfter - l_TimeBefore
+  g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected =
+  g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected + l_SecondsUsed
   g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected =
   g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected + 1 
    
 end -- ShakeSelected(l_FromWhere)
 function WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_FromWhere)
   -- Called from 5 functions...
+  
+  local l_TimeBefore = os.clock()
   
   local l_ClashImportance = behavior.GetClashImportance()
   local l_ClashImportanceText = " ClashImp " .. PrettyNumber2(l_ClashImportance)
@@ -5505,7 +5554,7 @@ function WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_FromWhere)
   local l_Score_After_Wiggle = GetPoseTotalScore()
   local l_ScoreImprovement = l_Score_After_Wiggle - g_Score_ScriptBest
   if l_ScoreImprovement > 0.001 then
-    print(PrettyNumber(g_Score_ScriptBest) .. " + " .. PaddedNumber(l_ScoreImprovement, 6) ..
+    print(PrettyNumber(g_Score_ScriptBest) .. " + " .. PaddedNumber(l_ScoreImprovement, 6, 3) ..
           " " .. l_FromWhere ..
           ":" .. l_WF_Iterations .. "xWiggleSelected(" ..
           "Bb=" .. tostring(l_bWBackbone) .. "," ..
@@ -5515,18 +5564,20 @@ function WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_FromWhere)
           g_ScorePartText ..
           l_ClashImportanceText)
         
-    local l_SecondsUsed = 0
     g_Stats_Run_TotalPointsGained_WiggleSelected =
     g_Stats_Run_TotalPointsGained_WiggleSelected + l_ScoreImprovement
-    g_Stats_Run_TotalSecondsUsed_WiggleSelected =
-    g_Stats_Run_TotalSecondsUsed_WiggleSelected + l_SecondsUsed
     g_Stats_Run_SuccessfulAttempts_WiggleSelected =
     g_Stats_Run_SuccessfulAttempts_WiggleSelected + 1
     SaveBest() -- <-- Updates g_Score_ScriptBest
+    recipe.ReportStatus() -- total crap!
   elseif l_Score_After_Wiggle < g_Score_ScriptBest then
     -- Should will undo our last change because it dropped our score...
     recentbest.Restore()
   end
+  local l_TimeAfter = os.clock()
+  local l_SecondsUsed = l_TimeAfter - l_TimeBefore
+  g_Stats_Run_TotalSecondsUsed_WiggleSelected =
+  g_Stats_Run_TotalSecondsUsed_WiggleSelected + l_SecondsUsed
   g_Stats_Run_NumberOfAttempts_WiggleSelected =
   g_Stats_Run_NumberOfAttempts_WiggleSelected + 1
     
@@ -5534,6 +5585,8 @@ end -- WiggleSelected(l_ClashImportance, l_FromWhere)
 
 function WiggleAll(l_Iterations, l_FromWhere)
   -- Called from 5 functions...
+  
+  local l_TimeBefore = os.clock()
   
   selection.SelectAll() -- is this needed, when calling structure.WiggleAll? Probably!
   local l_ClashImportance = behavior.GetClashImportance()
@@ -5568,7 +5621,7 @@ function WiggleAll(l_Iterations, l_FromWhere)
   local l_Score_After_Wiggle = GetPoseTotalScore()
   local l_ScoreImprovement = l_Score_After_Wiggle - g_Score_ScriptBest
   if l_ScoreImprovement > 0.001 then
-    print(PrettyNumber(g_Score_ScriptBest) .. " + " .. PaddedNumber(l_ScoreImprovement, 6) ..
+    print(PrettyNumber(g_Score_ScriptBest) .. " + " .. PaddedNumber(l_ScoreImprovement, 6, 3) ..
           " " .. l_FromWhere ..
           ":" .. l_Iterations .. "xWiggleAll(Bb,SC)" ..
          g_round_x_of_y ..
@@ -5580,16 +5633,19 @@ function WiggleAll(l_Iterations, l_FromWhere)
     local l_SecondsUsed = 0
     g_Stats_Run_TotalPointsGained_WiggleAll =
     g_Stats_Run_TotalPointsGained_WiggleAll + l_ScoreImprovement
-    g_Stats_Run_TotalSecondsUsed_WiggleAll =
-    g_Stats_Run_TotalSecondsUsed_WiggleAll + l_SecondsUsed
     g_Stats_Run_SuccessfulAttempts_WiggleAll =
     g_Stats_Run_SuccessfulAttempts_WiggleAll + 1
     SaveBest() -- <-- Updates g_Score_ScriptBest
+    recipe.ReportStatus() -- total crap!
     
   elseif l_Score_After_Wiggle < g_Score_ScriptBest then
     -- Undo this wiggle because it decreased our score...
     recentbest.Restore()
   end
+  local l_TimeAfter = os.clock()
+  local l_SecondsUsed = l_TimeAfter - l_TimeBefore
+  g_Stats_Run_TotalSecondsUsed_WiggleAll =
+  g_Stats_Run_TotalSecondsUsed_WiggleAll + l_SecondsUsed
   g_Stats_Run_NumberOfAttempts_WiggleAll =
   g_Stats_Run_NumberOfAttempts_WiggleAll + 1
 
@@ -5621,6 +5677,8 @@ function MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, l_From
     return MutateSideChainsAll(l_FromWhere)
   end  
   
+  local l_TimeBefore = os.clock()
+  
 	-- Mutate what user selected to do...
 	if g_bUserSelected_Mutate_OnlySelected_Segments == true then
     
@@ -5649,24 +5707,27 @@ function MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, l_From
   l_Score_After_Mutate = GetPoseTotalScore()
   local l_ScoreImprovement = l_Score_After_Mutate - g_Score_ScriptBest
   if l_ScoreImprovement > 0.001 then
-    print(PrettyNumber(g_Score_ScriptBest) .. " + " .. PaddedNumber(l_ScoreImprovement, 6) ..
+    print(PrettyNumber(g_Score_ScriptBest) .. " + " .. PaddedNumber(l_ScoreImprovement, 6, 3) ..
       " " .. l_FromWhere ..
       ":2xMutateSidechainsSelected" ..
       g_round_x_of_y ..
       g_with_segments_x_thru_y ..
       g_ScorePartText)
     
-    local l_SecondsUsed = 0
     g_Stats_Run_TotalPointsGained_MutateSidechainsSelected =
     g_Stats_Run_TotalPointsGained_MutateSidechainsSelected + l_ScoreImprovement
-    g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected =
-    g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected + l_SecondsUsed
     g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected =
       g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected + 1
     SaveBest() -- <-- Updates g_Score_ScriptBest
+    recipe.ReportStatus() -- total crap!
+  
   elseif l_Score_After_Mutate < g_Score_ScriptBest then
     recentbest.Restore()
   end
+  local l_TimeAfter = os.clock()
+  local l_SecondsUsed = l_TimeAfter - l_TimeBefore
+  g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected =
+  g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected + l_SecondsUsed
   g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected =
   g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected + 1
 
@@ -5698,26 +5759,28 @@ function MutateSideChainsAll(l_FromWhere)
   l_Score_After_Mutate = GetPoseTotalScore()
   local l_ScoreImprovement = l_Score_After_Mutate - g_Score_ScriptBest
   if l_ScoreImprovement > 0.001 then
-    print(PrettyNumber(g_Score_ScriptBest) .. " + " .. PaddedNumber(l_ScoreImprovement, 6) ..
+    print(PrettyNumber(g_Score_ScriptBest) .. " + " .. PaddedNumber(l_ScoreImprovement, 6, 3) ..
       " " .. l_FromWhere ..
       ":2xMutateSidechainsAll" ..
       g_round_x_of_y ..
       g_ScorePartText)
     
-    --local l_TimeAfter = os.time()
-    local l_TimeAfter = os.clock()
-    local l_SecondsUsed = l_TimeAfter - l_TimeBefore
-    --local l_SecondsUsed2 = os.difftime(l_TimeBefore, l_TimeAfter)
     g_Stats_Run_TotalPointsGained_MutateSidechainsAll =
     g_Stats_Run_TotalPointsGained_MutateSidechainsAll + l_ScoreImprovement
-    g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll =
-    g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll + l_SecondsUsed
     g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll =
     g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll + 1
     SaveBest() -- <-- Updates g_Score_ScriptBest
+    recipe.ReportStatus() -- total crap!
+    
   elseif l_Score_After_Mutate < g_Score_ScriptBest then
     recentbest.Restore()
   end
+  --local l_TimeAfter = os.time()
+  local l_TimeAfter = os.clock()
+  local l_SecondsUsed = l_TimeAfter - l_TimeBefore
+  --local l_SecondsUsed = os.difftime(l_TimeBefore, l_TimeAfter)
+  g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll =
+  g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll + l_SecondsUsed
   g_Stats_Run_NumberOfAttempts_MutateSidechainsAll =
   g_Stats_Run_NumberOfAttempts_MutateSidechainsAll + 1    
   
@@ -5819,6 +5882,14 @@ function CleanUp(l_ErrorMessage)
     g_Stats_Script_TotalPointsGained_MutateSidechainsSelected +
     g_Stats_Script_TotalPointsGained_MutateSidechainsAll
   
+  g_Stats_Script_TotalSecondsUsed_Total = 
+    g_Stats_Script_TotalSecondsUsed_RebuildSelected +
+    g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected +
+    g_Stats_Script_TotalSecondsUsed_WiggleSelected +
+    g_Stats_Script_TotalSecondsUsed_WiggleAll +
+    g_Stats_Script_TotalSecondsUsed_MutateSidechainsSelected +
+    g_Stats_Script_TotalSecondsUsed_MutateSidechainsAll
+  
   g_Stats_Script_SuccessfulAttempts_Total = 
     g_Stats_Script_SuccessfulAttempts_RebuildSelected +
     g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected +
@@ -5834,63 +5905,85 @@ function CleanUp(l_ErrorMessage)
     g_Stats_Script_NumberOfAttempts_WiggleAll +
     g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected +
     g_Stats_Script_NumberOfAttempts_MutateSidechainsAll
-
-  print("----------------------- ----------  -------  -------  ---------------")
-  print("End of script stats:")
-  print("----------------------- ----------  -------  -------  ---------------")
-  print("From:                       Points  Seconds  Points/  Success")
-  print("                            Gained  Spent    Second   Rate")
-  print("RebuildSelected          " .. 
-    PaddedNumber(g_Stats_Script_TotalPointsGained_RebuildSelected, 9) ..
-    "                    " .. g_Stats_Script_SuccessfulAttempts_RebuildSelected ..
-    "/" ..  g_Stats_Script_NumberOfAttempts_RebuildSelected ..
-    " (" .. PrettyNumber(g_Stats_Script_SuccessfulAttempts_RebuildSelected /
-            g_Stats_Script_NumberOfAttempts_RebuildSelected * 100) .. "%)")
-  print("ShakeSidechainsSelected  " ..
-    PaddedNumber(g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected, 9) ..
-    "                    " .. g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected ..
-    "/" ..  g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected ..
-    " (" .. PrettyNumber(g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected /
-            g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected * 100) .. "%)")
-  print("WiggleSelected           " .. 
-    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleSelected, 9) ..
-    "                    " .. g_Stats_Script_SuccessfulAttempts_WiggleSelected ..
-    "/" ..  g_Stats_Script_NumberOfAttempts_WiggleSelected ..
-    " (" .. PrettyNumber(g_Stats_Script_SuccessfulAttempts_WiggleSelected /
-            g_Stats_Script_NumberOfAttempts_WiggleSelected * 100) .. "%)")
-  print("WiggleAll                " .. 
-    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleAll, 9) ..
-    "                    " .. g_Stats_Script_SuccessfulAttempts_WiggleAll ..
-    "/" ..  g_Stats_Script_NumberOfAttempts_WiggleAll ..
-    " (" .. PrettyNumber(g_Stats_Script_SuccessfulAttempts_WiggleAll /
-            g_Stats_Script_NumberOfAttempts_WiggleAll * 100) .. "%)")
-  print("MutateSidechainsSelected " ..
-    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsSelected, 9) ..
-    "                    " .. g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected ..
-    "/" ..  g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected ..
-    " (" .. PrettyNumber(g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected /
-            g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected * 100) .. "%)")
-  print("MutateSidechainsAll      " .. 
-    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsAll, 9) ..
-    "                    " .. g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll ..
-    "/" ..  g_Stats_Script_NumberOfAttempts_MutateSidechainsAll ..
-    " (" .. PrettyNumber(g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll /
-            g_Stats_Script_NumberOfAttempts_MutateSidechainsAll * 100) .. "%)")
-  print("------------------------ ---------  -------  -------  ---------------")
-  print("Script total             " .. 
-    PaddedNumber(g_Stats_Script_TotalPointsGained_Total, 9) ..
-    "                    " .. g_Stats_Script_SuccessfulAttempts_Total ..
-    "/" ..  g_Stats_Script_NumberOfAttempts_Total .. 
-    " (" .. PrettyNumber(g_Stats_Script_SuccessfulAttempts_Total /
-            g_Stats_Script_NumberOfAttempts_Total * 100) .. "%)")
-  print("------------------------ ---------  -------  -------  ---------------")
   
+  print("------------------------ ---------  -------  -------  ------------------")
+  print("End of Script Stats:")
+  print("------------------------ ---------  -------  -------  ------------------")
+  print("From:                       Points  Seconds  Points/     ")
+  print("                            Gained     Used  Second      Success Rate:")
+                                        
+  print("RebuildSelected          " .. 
+    PaddedNumber(g_Stats_Script_TotalPointsGained_RebuildSelected, 9, 3) .. "  " .. 
+    PaddedNumber(g_Stats_Script_TotalSecondsUsed_RebuildSelected, 7, 3) .. "  " ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_RebuildSelected /
+                 g_Stats_Script_TotalSecondsUsed_RebuildSelected * 1, 7, 0) .. "  " ..
+    PaddedString(g_Stats_Script_SuccessfulAttempts_RebuildSelected .. "/" ..
+    PaddedNumber(g_Stats_Script_NumberOfAttempts_RebuildSelected, 0, 0), 9) .. PaddedString(" (" ..
+    PrettyNumber2(g_Stats_Script_SuccessfulAttempts_RebuildSelected /
+                 g_Stats_Script_NumberOfAttempts_RebuildSelected * 100) .. "%)", 9))
+  print("ShakeSidechainsSelected  " ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected, 9, 3) .. "  " ..
+    PaddedNumber(g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected, 7, 3) .. "  " ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected /
+                 g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected * 1, 7, 0) .. "  " ..
+    PaddedString(g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected .. "/" ..
+    PaddedNumber(g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected, 0, 0), 9) .. PaddedString(" (" ..
+    PrettyNumber2(g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected /
+                 g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected * 100) .. "%)", 9))
+  print("WiggleSelected           " .. 
+    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleSelected, 9, 3) .. "  " ..
+    PaddedNumber(g_Stats_Script_TotalSecondsUsed_WiggleSelected, 7, 3) .. "  " ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleSelected /
+                 g_Stats_Script_TotalSecondsUsed_WiggleSelected * 1, 7, 0) .. "  " ..
+    PaddedString(g_Stats_Script_SuccessfulAttempts_WiggleSelected .. "/" ..
+    PaddedNumber(g_Stats_Script_NumberOfAttempts_WiggleSelected, 0, 0), 9) .. PaddedString(" (" ..
+    PrettyNumber2(g_Stats_Script_SuccessfulAttempts_WiggleSelected /
+                 g_Stats_Script_NumberOfAttempts_WiggleSelected * 100) .. "%)", 9))
+  print("WiggleAll                " .. 
+    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleAll, 9, 3) .. "  " ..
+    PaddedNumber(g_Stats_Script_TotalSecondsUsed_WiggleAll, 7, 3) .. "  " ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleAll /
+                 g_Stats_Script_TotalSecondsUsed_WiggleAll * 1, 7, 0) .. "  " ..
+    PaddedString(g_Stats_Script_SuccessfulAttempts_WiggleAll .. "/" ..  
+    PaddedNumber(g_Stats_Script_NumberOfAttempts_WiggleAll, 0, 0), 9) .. PaddedString(" (" ..
+    PrettyNumber2(g_Stats_Script_SuccessfulAttempts_WiggleAll /
+                 g_Stats_Script_NumberOfAttempts_WiggleAll * 100) .. "%)", 9))
+  print("MutateSidechainsSelected " ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsSelected, 9, 3) .. "  " ..
+    PaddedNumber(g_Stats_Script_TotalSecondsUsed_MutateSidechainsSelected, 7, 3) .. "  " ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsSelected /
+                 g_Stats_Script_TotalSecondsUsed_MutateSidechainsSelected * 1, 7, 0) .. "  " ..
+    PaddedString(g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected .. "/" ..
+    PaddedNumber(g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected, 0, 0), 9) .. PaddedString(" (" ..
+    PrettyNumber2(g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected /
+                 g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected * 100) .. "%)", 9))
+  print("MutateSidechainsAll      " .. 
+    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsAll, 9, 3) .. "  " ..
+    PaddedNumber(g_Stats_Script_TotalSecondsUsed_MutateSidechainsAll, 7, 3) .. "  " ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsAll /
+                 g_Stats_Script_TotalSecondsUsed_MutateSidechainsAll * 1, 7, 0) .. "  " ..
+    PaddedString(g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll .. "/" ..
+    PaddedNumber(g_Stats_Script_NumberOfAttempts_MutateSidechainsAll, 0, 0), 9) .. PaddedString(" (" ..
+    PrettyNumber2(g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll /
+                 g_Stats_Script_NumberOfAttempts_MutateSidechainsAll * 100) .. "%)", 9))
+  print("------------------------ ---------  -------  -------  ------------------")
+  print("Run total                " .. 
+    PaddedNumber(g_Stats_Script_TotalPointsGained_Total, 9, 3) .. "  " ..
+    PaddedNumber(g_Stats_Script_TotalSecondsUsed_Total, 7, 3) .. "  " ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_Total /
+                 g_Stats_Script_TotalSecondsUsed_Total * 1, 7, 0) .. "  " ..
+    PaddedString(g_Stats_Script_SuccessfulAttempts_Total .. "/" ..
+    PaddedNumber(g_Stats_Script_NumberOfAttempts_Total, 0, 0), 9) .. PaddedString(" (" ..
+    PrettyNumber2(g_Stats_Script_SuccessfulAttempts_Total /
+                 g_Stats_Script_NumberOfAttempts_Total * 100) .. "%)", 9))
+  print("------------------------ ---------  -------  -------  ------------------")
+
   local l_Score_AtEndOf_Script = g_Score_ScriptBest
 	print("\nStarting Score: " .. PrettyNumber(g_Score_AtStartOf_Script) ..
         "\nPoints Gained: " .. PrettyNumber(l_Score_AtEndOf_Script - g_Score_AtStartOf_Script) ..
         "\nFinal Score: " .. PrettyNumber(l_Score_AtEndOf_Script) ..
         "\n")
-      
+
 end -- function CleanUp(l_ErrorMessage)
 function CleanUpSelectedSegmentRanges(l_SegmentRangesTable) -- formerly SetSelection()
   -- Called from CleanUp()...
