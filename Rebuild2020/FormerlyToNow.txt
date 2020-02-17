@@ -1,0 +1,7 @@
+-- formerly InitWORKONbool() --> -- now in main()
+-- formerly MustWorkon() --> -- now bSegmentRangeIsAllowedToBeRebuilt() + bSegmentIsAllowedToBeRebuilt()
+-- formerly SegmentSetToBool() --> -- now ConvertSegmentRangesTableToSegmentsToRebuildBooleanTable()
+-- formerly WORKON[] --> -- now g_SegmentRangesToRebuildTable[]
+-- formerly WORKONbool[] --> -- now g_bSegmentsToRebuildBooleanTable []
+-- formerly AlreadyDone() --> bSegmentIsAllowedToBeRebuilt()
+-- formerly disj[] --> g_bSegmentsAlreadyRebuiltTable[]

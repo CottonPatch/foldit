@@ -465,7 +465,7 @@ end
 
 -- Module to compute subscores
 -- TvdL, 14-12-2012
-function GetSubscore(types,seg1,seg2,pose)
+function GetSubscore(types,seg1,seg2,pose) -- now Calculate_SegmentRange_Score()
     local result=0
     if type(types) == "table" then
         for i=1,#types do result=result+GetSubscore(types[i],seg1,seg2,pose) end
@@ -484,12 +484,12 @@ function GetSubscore(types,seg1,seg2,pose)
     if normal then return result else return result*pose.GetExplorationMultiplier() end
 end
 
-function FindActiveSubscores(show)
+function FindActiveSubscores(show) -- now Populate_g_ActiveScorePartsTable()
     local result={}
     local Subs=puzzle.GetPuzzleSubscoreNames()
     local Showlist ="Computing Active Subscores"
     if show then print(Showlist) end
-    for i=1,#Subs do
+    for i=1,#Subs do -- now l_ScorePart_NamesTable[]
         local total=0
         for j=1,segCnt do
             if Subs[i] == 'disulfides' and nrofbridges>0 then total=11 end
@@ -647,7 +647,7 @@ SetPuzzleProperties()
 -- Standard Fuze module
 -- Picks up all gains by using recentbest
 
-function GetRB(prefun,postfun)
+function GetRB(prefun,postfun) -- get recent best pose
     if RBScore()> Score() then
         if prefun ~= nil then prefun() end
         recentbest.Restore()
@@ -726,14 +726,14 @@ end
 
 -- Module setsegmentset
 -- Tvdl, 11-05-2012 Free to use for noncommercial purposes
-function SetSelection(set)
+function SetSelection(set) -- now CleanUpSelectedSegmentRanges()
     selection.DeselectAll()
     if set ~= nil then for i=1,#set do
         selection.SelectRange(set[i][1],set[i][2])
     end end
 end
 
-function SelectAround(ss,se,radius,nodeselect)
+function SelectAround(ss,se,radius,nodeselect) -- now SelectSegmentsNearSegmentRange()
     if nodeselect~=true then selection.DeselectAll() end
     for i=1, segCnt2 do
         for x=ss,se do
@@ -751,7 +751,8 @@ end
 
 -- Module AllLoop
 SAVEDstructs=false
-function AllLoop() --turning entire structure to loops
+function AllLoop() -- ConvertAllSegmentsToLoops()
+  --turning entire structure to loops
     local anychange=false
     for i=1,segCnt2 do
         if structure.GetSecondaryStructure(i)~="L" then
@@ -767,7 +768,7 @@ function AllLoop() --turning entire structure to loops
     end
 end
 
-function qStab()
+function qStab() -- StabilizeSegmentRange
     -- Do not accept qstab losses
     local curscore=Score()
     PushPosition()
@@ -804,7 +805,7 @@ end
 
 -- Module AskSelections
 -- 02-05-2012 Timo van der Laan, Free to use for non commercial purposes
-function AskForSelections(title,mode)
+function AskForSelections(title,mode) -- AskUserToSelectSegmentsRangesToRebuild()
     local result={{1,structure.GetCount()}} -- All segments
     if mode == nil then mode={} end
     if mode.askloops==nil then mode.askloops=true end
@@ -951,7 +952,8 @@ end
 
 progname="DRW "
 action="rebuild"
-function Sort(tab,items) --BACWARD bubble sorting - lowest on top, only needed items
+function Sort(tab,items) -- SortBySegmentScore()
+  --BACWARD bubble sorting - lowest on top, only needed items
     for x=1,items do --items do
         for y=x+1,#tab do
             if tab[x][1]>tab[y][1] then
@@ -962,7 +964,7 @@ function Sort(tab,items) --BACWARD bubble sorting - lowest on top, only needed i
     return tab
 end
 
-function AddDone(first,last)
+function AddDone(first,last) -- SetSegmentsAlreadyRebuilt()
     if donotrevisit then
         Donepart[first+(last-first)*segCnt2]=true
         Blocked[#Blocked+1]=first+(last-first)*segCnt2
@@ -972,52 +974,62 @@ function AddDone(first,last)
     end
 end
 
-function CheckDone(first,last)
+function CheckDone(first,last) -- bSegmentRangeIsAllowedToBeRebuilt
     if not donotrevisit then return false end
-    local result=Donepart[first+(last-first)*segCnt2]
+    local result=
+      Donepart[first+(last-first)*segCnt2] -- now deprecated
     if disjunct then
-        for i=first,last do if Disj[i] then result=true end end
+        for i=first,last do 
+          if Disj[i] then -- now g_bSegmentsAlreadyRebuiltTable[]
+          result=true end end
     end
     return result
 end
 
-function ChkDisjunctList(n)
+function ChkDisjunctList(n) -- now CheckIfAlreadyRebuiltSegmentsMustBeIncluded()
     if not disjunct then return end
     local maxlen=0
     for i=1,segCnt2 do
-        if Disj[i] then maxlen=0 else maxlen=maxlen+1 end
+        if Disj[i] then -- now g_bSegmentsAlreadyRebuiltTable[]
+          maxlen=0 else maxlen=maxlen+1 end
         if maxlen == n then return end
     end
     -- No part is big enough so clear Disjunctlist
     print("Clearing disjunct list")
     for i=1,segCnt2 do
-        Disj[i]=false
+        Disj[i]=false -- now g_bSegmentsAlreadyRebuiltTable[]
     end
 end
 
-function ClearDoneList()
-    --clear donelist
-    for i=1,#Blocked do Donepart[Blocked[i]]=false end
+function ClearDoneList() -- now ResetSegmentsAlreadyRebuiltTable()
+
+    for i=1,#Blocked do 
+      Donepart[Blocked[i]]=false -- now deprecated
+    end
     if disjunct then
         --clear disjunctlist also
-        for i=1,segCnt2 do Disj[i]=false end
+        for i=1,segCnt2 do 
+        Disj[i]=false -- now g_bSegmentsAlreadyRebuiltTable[]
+        end
     end
     Blocked={}
     curclrscore=Score()
 end
 
-function ChkDoneList()
+function ChkDoneList() -- now CheckIfAlreadyRebuiltSegmentsMustBeIncluded()
     if not donotrevisit and not disjunt then return end
     if Score() > curclrscore+clrdonelistgain then
-        if donotrevisit then ClearDoneList() end
+        if donotrevisit then 
+          ClearDoneList() -- now ResetSegmentsAlreadyRebuiltTable()
+        end
     end
 end
 --end of administration part
 
-function FindWorst(firsttime)
+function FindWorst(firsttime) -- now Populate_g_SegmentRangesTable_WithWorstScoringSegmentRanges
     print("Searching worst scoring parts of len "..len)
     ChkDisjunctList(len)
-    wrst={}
+    wrst={} -- now l_WorstScoringSegmentRangesTable[]
     GetSegmentScores()
     local skiplist=""
     local nrskip=0
@@ -1025,7 +1037,7 @@ function FindWorst(firsttime)
         if not CheckDone(i,i+len-1) and MustWorkon(i,i+len-1)
         then
             local s=getPartscore(i,i+len-1)
-            wrst[#wrst+1]={s,i}
+            wrst[#wrst+1]={s,i} -- now l_WorstScoringSegmentRangesTable[]
         else
             if CheckDone(i,i+len-1)
             then
@@ -1041,24 +1053,24 @@ function FindWorst(firsttime)
     end
     if nrskip%7 ~= 0 then print(skiplist) end
     if nrskip > 0 then print("Number of skips: "..nrskip) end
-    wrst=Sort(wrst,reBuild)
-    areas={}
+    wrst=Sort(wrst,reBuild) -- now l_XLowestScoringSegmentRangesTable[]
+    areas={} -- now g_XLowestScoringSegmentRangesTable[]
     local rb=reBuild
-    if rb>#wrst then rb=#wrst end
+    if rb>#wrst then rb=#wrst end -- now l_XLowestScoringSegmentRangesTable[]
     for i=1,rb do
-        local w=wrst[i]
+        local w=wrst[i] -- now l_XLowestScoringSegmentRangesTable[]
         local ss=w[2]
-        areas[#areas+1]={ss,ss+len-1}
+        areas[#areas+1]={ss,ss+len-1} -- now g_XLowestScoringSegmentRangesTable[]
     end
-    if firsttime and #wrst == 0 then
+    if firsttime and #wrst == 0 then -- now l_XLowestScoringSegmentRangesTable[]
         print("No possibilities left so clearing Done list")
         ClearDoneList()
-        FindWorst(false)
+        FindWorst(false) -- recursion
     end
-end
+end -- FindWorst()
 
 -- Rebuild section
-function localRebuild(maxiters)
+function localRebuild(maxiters) -- now RebuildSelectedSegments()
     if maxiters==nil then maxiters=3 end
     local s=Score()
     local i=0
@@ -1074,7 +1086,7 @@ function localRebuild(maxiters)
     if Score()~=s then return true else return false end
 end
 
-function ReBuild(ss,se,tries)
+function ReBuild(ss,se,tries) -- now RebuildOneSegmentRangeManyTimes()
     ClearScores() --reset score tables
     if ss>se then ss,se=se,ss end --switch if needed
     local Foundone=false
@@ -1127,7 +1139,7 @@ function ReBuild(ss,se,tries)
 end
 -- end rebuild section
 -- section to compute segmentscore(part)s
-function getPartscore(ss,se,attr)
+function getPartscore(ss,se,attr) -- now Get_ScorePart_Score()
     local s=0
     if attr=='total' then
         s=Score()
@@ -1145,20 +1157,44 @@ function getPartscore(ss,se,attr)
     return s
 end
 
-function InitWORKONbool()
-    WORKONbool=SegmentSetToBool(WORKON)
+function InitWORKONbool() -- see main()
+    WORKONbool= -- now g_bSegmentsToRebuildBooleanTable[]
+      SegmentSetToBool( -- see main()
+        WORKON) -- now 
 end
 
-function MustWorkon(i,j)
-    for k=i,j do if not WORKONbool[k] then return false end end
+-- Differences between the "WORKON/WORKONbool" tables and the "areas" table:
+
+-- WORKON is a "segment range" table: now UserSelectedSegmentRangesToRebuild[]
+-- WORKON starts out as {{1,SegmentCountWithoutLigands}}
+-- The user can change the values in the WORKON table on the "Select Segments to Rebuild" page.
+-- Then we remove all Frozen, Locked and Ligand segments from WORKON. 
+-- Lastly, we convert WORKON to WORKONbool
+
+-- WORKONbool is a "segment" table:
+-- This has the same segments as those represented by the segment ranges in WORKON.
+-- Being at the "segment" level and boolean format, makes it easy to check individual
+-- segments to see if they are allowed to be rebuilt.
+
+-- "areas" is a "segment range" table:  now g_XLowestScoringSegmentRangesTable[]
+-- "areas" are the Lowest Scoring Segment Ranges about to be rebuilt, etc
+
+-- The rebuild process is primarily driven by the "areas" table. But when forming segment ranges it calls
+-- MustWorkon() which checks the "WORKONbool" table to make sure the range does not contain any frozen,
+-- locked or ligand segment.
+
+function MustWorkon(i,j) -- now bSegmentRangeIsAllowedToBeRebuilt() + bSegmentIsAllowedToBeRebuilt()
+    for k=i,j do if not 
+      WORKONbool[k] -- now g_bSegmentsToRebuildBooleanTable[]
+      then return false end end
     return true
 end
 
-function GetSegmentScores()
+function GetSegmentScores() -- now Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts()
     if lastSegScores~=Score() then
         lastSegScores=Score()
         for i=1,segCnt2 do
-            if WORKONbool[i] then
+            if WORKONbool[i] then -- now g_bSegmentsToRebuildBooleanTable[]
                 if #scrPart==0 then
                     -- if nothing specified by user default is
                     -- segmentenergy - reference + extra Density score
@@ -1179,32 +1215,33 @@ end
 -- end section segmentscore(part)s
 
 -- Administration of the different slots and best scores
-Scores={} --{save_no,points,totscore,showlist,todo,rbnr}
+Scores={} --{save_no,points,totscore,showlist,todo,rbnr} -- now g_ScorePart_Scores_Table
 
 -- Compute which scoreparts to use
-ActiveSub=FindActiveSubscores(true)
+ActiveSub= -- now g_ActiveScorePartsTable[]
+  FindActiveSubscores(true) -- now Populate_g_ActiveScorePartsTable()
 
-ScoreParts={ --{save_no,name,active,longname}
+ScoreParts={ --{save_no,name,active,longname} -- now g_ScorePartsTable[] -- now in Populate_g_ScorePartsTable()
     {4,'total',true,'4(total)'},
     {5,'loctotal',true,'5(loctotal)'}
 }
 nextslot=6
-if HASLIGAND then
+if HASLIGAND then -- now in Populate_g_ScorePartsTable()
     ScoreParts[#ScoreParts+1] = { nextslot,'ligand',true,nextslot..'(ligand)'}
     nextslot=nextslot+1
     print("Ligand slot enabled")
 end
 
-for i=1,#ActiveSub do
+for i=1,#ActiveSub do -- now in Populate_g_ScorePartsTable()
     if ActiveSub[i] ~='Reference' then
         ScoreParts[#ScoreParts+1] = { nextslot,ActiveSub[i],true,nextslot..'('..ActiveSub[i]..')' }
         nextslot=nextslot+1
     end
 end
 
-function ClearScores()
-    Scores={}
-    for i=1,#ScoreParts do
+function ClearScores() -- now Populate_g_ScorePart_Scores_Table()
+    Scores={} -- now g_ScorePart_Scores_Table[]
+    for i=1,#ScoreParts do -- now g_ScorePartsTable[]
         if ScoreParts[i][3] then
             Scores[#Scores+1]={ScoreParts[i][1],-9999999,-9999999,'',false,-1}
         end
@@ -1212,18 +1249,19 @@ function ClearScores()
     slotScr={}
 end
 
-function SaveScores(ss,se,RBnr)
-    local scr={}
-    for i=1,#ScoreParts do
+function SaveScores(ss,se,RBnr) -- now Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()
+    local scr={} -- now l_ActiveScorePartsScoreTable[]
+    for i=1,#ScoreParts do -- now g_ScorePartsTable[]
         if ScoreParts[i][3] then
-            scr[#scr+1]={ScoreParts[i][1],getPartscore(ss,se,ScoreParts[i][2])}
+            scr[#scr+1]= -- now l_ActiveScorePartsScoreTable[]
+            {ScoreParts[i][1],getPartscore(ss,se,ScoreParts[i][2])}
         end
     end
-    local totscore=Score()
-    for i=1,#Scores do
+    local totscore=Score() -- now GetPoseTotalScore()
+    for i=1,#Scores do -- now g_ScorePart_Scores_Table[]
         local s=scr[i][2]
         if s>Scores[i][2] then
-            local slot=scr[i][1]
+            local slot=scr[i][1] -- now ScorePart_Number
             save.Quicksave(slot) --print("Saved slot ",slot," pts" ,s) --debug
             Scores[i][2]=s
             Scores[i][3]=totscore
@@ -1233,34 +1271,39 @@ function SaveScores(ss,se,RBnr)
     SaveBest()
 end
 
-function ListSlots()
+function ListSlots() -- now Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTotalScore_And_FirstInString()
     --Give overview of slot occupation
     --And sets which slots to process
-    local Donelist={}
-    for i=1,#Scores do Donelist[i]=false end
+    local Donelist={} -- now l_ScorePartScoresDoneStatusTable[]
+    for i=1,#Scores do -- now g_ScorePart_Scores_Table[]
+      Donelist[i]=false end -- now l_ScorePartScoresDoneStatusTable[]
     local Report=""
-    for i=1,#Scores do if not Donelist[i] then
-        local Curlist=" "..Scores[i][1]
+    for i=1,#Scores do -- now g_ScorePart_Scores_Table[] 
+      if not Donelist[i] then -- now l_ScorePartScoresDoneStatusTable[]
+        local Curlist=" "..
+          Scores[i][1] -- now g_ScorePart_Scores_Table[]
         Scores[i][5]=true --This one we have to process
         -- Now find identical filled slots
-        for j=i+1,#Scores do if Scores[j][3] == Scores[i][3] then
-            Curlist=Curlist.."="..Scores[j][1]
-            Donelist[j]=true
+        for j=i+1,#Scores do if Scores[j][3] == Scores[i][3] then -- now g_ScorePart_Scores_Table[]
+            Curlist=Curlist.."="..
+              Scores[j][1] -- now g_ScorePart_Scores_Table[]
+            Donelist[j]=true -- now l_ScorePartScoresDoneStatusTable[]
         end end
-        Scores[i][4]=Curlist
+        Scores[i][4]= -- now g_ScorePart_Scores_Table[]
+          Curlist -- now g_ScorePart_Scores_Table[]
         Report=Report.." "..Curlist
     end end
     print("Slotlist:"..Report)
 end
 -- end of administration of slots and scores
 
-function PrintAreas()
-    if #areas<19 then
+function PrintAreas() -- now DisplaySegmentRanges() -- MISTAKE IN HERE!!!
+    if #areas<19 then -- now g_XLowestScoringSegmentRangesTable[]
         local a=""
         local x=0
-        for i=1,#areas do
+        for i=1,#areas do -- now g_XLowestScoringSegmentRangesTable[]
             x=x+1
-            a=a..areas[i][1].."-"..areas[i][2].." "
+            a=a..areas[i][1].."-"..areas[i][2].." " -- now g_XLowestScoringSegmentRangesTable[]
             if x>6 then
                 print(a)
                 a=""
@@ -1269,11 +1312,11 @@ function PrintAreas()
         end
         if x>0 then print(a) end
     else
-        print("It is "..#areas.." places, not listing.")
+        print("It is "..#areas.." places, not listing.") -- now g_XLowestScoringSegmentRangesTable[]
     end
 end
 
-function AddLoop(sS)
+function AddLoop(sS) -- now Add_Loop_SegmentRange_To_SegmentRangesTable()
     local ss=sS
     local ssStart=structure.GetSecondaryStructure(ss)
     local se=ss
@@ -1282,12 +1325,12 @@ function AddLoop(sS)
         else break end
     end
     if se-ss+2>minLen and loops==true then
-        areas[#areas+1]={ss,se}
+        areas[#areas+1]={ss,se} -- now g_XLowestScoringSegmentRangesTable[]
     end
     return se
 end
 
-function AddOther(sS)
+function AddOther(sS) -- now Add_Loop_Plus_One_Other_Type_SegmentRange_To_SegmentRangesTable()
     local ss=sS
     local ssStart=structure.GetSecondaryStructure(ss)
 
@@ -1314,11 +1357,11 @@ function AddOther(sS)
     if sheets==false and ssStart=="E" then return se end
     if helices==false and ssStart=="H" then return se end
     if se-ss+2>minLen then
-        areas[#areas+1]={ss,se}
+        areas[#areas+1]={ss,se} -- now g_XLowestScoringSegmentRangesTable[]
     end
     return se
 end
-function FindAreas()
+function FindAreas() -- now Add_Loop_Helix_And_Sheet_Segments_To_SegmentRangesTable()
     if loops then
         local done=false
         local ss=0
@@ -1379,17 +1422,17 @@ function doMutate()
     if Score() < curscore then PopPosition() else ClrTopPosition() end
 end
 
-function DeepRebuild()
+function DeepRebuild() -- now RebuildManySegmentRanges()
     local ss=Score()
     print("Deep"..action.." started at score: "..round3(ss))
     if struct==false then AllLoop() end
     save.Quicksave(3)
     recentbest.Save()
 
-    for i=1,#areas do
+    for i=1,#areas do -- now g_XLowestScoringSegmentRangesTable[]
         local ss1=Score()
-        local s=areas[i][1]
-        local e=areas[i][2]
+        local s=areas[i][1] -- now g_XLowestScoringSegmentRangesTable[]
+        local e=areas[i][2] -- now g_XLowestScoringSegmentRangesTable[]
         local CurrentHigh=0
         local CurrentAll="" -- to report where gains came from
         local CurrentHighScore= -99999999
@@ -1477,41 +1520,43 @@ end --skip section
     if struct==false and SAVEDstructs then save.LoadSecondaryStructure() end
 end
 
-function DRcall(how)
+function DRcall(how) -- now PrepareToRebuildSegmentRanges()
     if how=="drw" then
         local stepsize=1
         if minLen>maxLen then stepsize= -1 end
         for i=minLen,maxLen,stepsize do --search from minl to maxl worst segments
             len=i
-            FindWorst(true) --fill areas table. Comment it if you have set them by hand
-            PrintAreas()
+            FindWorst(true) -- Populate_g_SegmentRangesTable_WithWorstScoringSegmentRanges()
+            --fills areas table. Comment it if you have set them by hand
+            
+            PrintAreas() -- now DisplaySegmentRanges()
             DeepRebuild()
 
         end
     elseif how=="fj" then --DRW len cutted on pieces
         FindWorst(true) --add to areas table worst part
-        areas2={}
-        for a=1,#areas do
-            local s=areas[a] --{ss,se}
+        areas2={}  -- now l_XLowestScoringSegmentRangesTable[]
+        for a=1,#areas do -- now g_XLowestScoringSegmentRangesTable[]
+            local s=areas[a] --{ss,se} -- now g_XLowestScoringSegmentRangesTable[]
             local ss=s[1] --start segment of worst area
             local se=s[2] --end segment of worst area
             for i=ss,se do
                 for x=1,len do
                     if i+x<=se then
-                        areas2[#areas2+1]={i,i+x}
+                        areas2[#areas2+1]={i,i+x} -- now l_XLowestScoringSegmentRangesTable[]
                     end
                 end
             end
         end
-        areas=areas2
+        areas=areas2 -- now g_ and l_XLowestScoringSegmentRangesTable[]
         PrintAreas()
         DeepRebuild()
     elseif how=="all" then
-        areas={}
+        areas={} -- now g_XLowestScoringSegmentRangesTable[]
         for i=minLen,maxLen do
             for x=1,segCnt2 do
                 if i+x-1<=segCnt2 then
-                    areas[#areas+1]={x,x+i-1}
+                    areas[#areas+1]={x,x+i-1} -- now g_XLowestScoringSegmentRangesTable[]
                 end
             end
         end
@@ -1521,8 +1566,8 @@ function DRcall(how)
         FindWorst(true)
         PrintAreas()
         DeepRebuild()
-    elseif how=="areas" then
-        areas={}
+    elseif how=="areas" then -- now g_XLowestScoringSegmentRangesTable[]
+        areas={} -- now g_XLowestScoringSegmentRangesTable[]
         FindAreas()
         PrintAreas()
         DeepRebuild()
@@ -1598,10 +1643,12 @@ function AskMutateOptions()
     end
 end
 
-function printOptions(title)
+function printOptions(title) -- now DisplayUserSelectedOptions()
     print(title.." Based on rav4pl DRW 3.4")
     print("Length of "..action..": "..minLen.." to "..maxLen)
-    print(action.." area: "..SegmentSetToString(WORKON))
+    print(action.." area: "..
+      SegmentSetToString( -- now ConvertSegmentRangesTableToListOfSegmentRanges()
+      WORKON)) -- now inverted as g_FrozenLockedOrLigandSegmentsTable[], now displayed in Populate_g_FrozenLockedOrLigandSegments()
     print("Nr of "..action.." each try: "..rebuilds)
     if WF>1 then print("Wiggle factor "..WF) end
     if not struct then print("Convert everything to loops") end
@@ -1620,34 +1667,42 @@ function printOptions(title)
     if disjunct then print("Running in disjunct mode") end
 end
 
-function AskSubScores()
+function AskSubScores() -- now AskUserToSelectScorePartsForStabilize()
     local ask = dialog.CreateDialog("Slot selection "..progname..DRWVersion)
     ask.l1=dialog.AddLabel("Specify which slots based on scorepart to use")
-    for i=1,#ScoreParts do
-        ask[ScoreParts[i][2]]=dialog.AddCheckbox(ScoreParts[i][1].." "..ScoreParts[i][2],ScoreParts[i][3])
+    for i=1,#ScoreParts do -- now g_ScorePartsTable[]
+        ask[ScoreParts[i][2]]= -- now g_ScorePartsTable[]
+          dialog.AddCheckbox(ScoreParts[i][1].." ".. -- now g_ScorePartsTable[]
+          ScoreParts[i][2], -- now g_ScorePartsTable[]
+          ScoreParts[i][3]) -- now g_ScorePartsTable[]
     end
     ask.OK = dialog.AddButton("OK",1) ask.Cancel = dialog.AddButton("Cancel",0)
     if dialog.Show(ask) > 0 then
-      for i=1,#ScoreParts do ScoreParts[i][3]=ask[ScoreParts[i][2]].value end
+      for i=1,#ScoreParts do  -- now g_ScorePartsTable[]
+        ScoreParts[i][3]= -- now g_ScorePartsTable[]
+          ask[ScoreParts[i][2]].value -- now g_ScorePartsTable[]
+      end
     end
 end
 
-function AskSelScores()
+function AskSelScores() -- now AskUserToSelectScorePartsForCalculatingWorseScoringSegments()
     local ask = dialog.CreateDialog("Set worst searching "..progname..DRWVersion)
     ask.l1=dialog.AddLabel("Specify which worst subscoretotal(s) to count")
     for i=3,#ScoreParts do
         ask[ScoreParts[i][2]]=dialog.AddCheckbox(ScoreParts[i][2],false)
     end
     ask.OK = dialog.AddButton("OK",1) ask.Cancel = dialog.AddButton("Cancel",0)
-    scrPart={}
+    scrPart={} -- now g_UserSelected_ScorePartsForCalculatingWorseScoringSegmentsTable[]
     if dialog.Show(ask) > 0 then
       for i=3,#ScoreParts do
-        if ask[ScoreParts[i][2]].value then scrPart[#scrPart+1]=ScoreParts[i][2] end
+        if ask[ScoreParts[i][2]].value then 
+          scrPart[#scrPart+1]=ScoreParts[i][2] -- now g_UserSelected_ScorePartsForCalculatingWorseScoringSegmentsTable[]
+        end
       end
     end
 end
 
-function AskDRWOptions()
+function AskDRWOptions() -- now bAskUserToSelect_RebuildOptions()
     local askresult
     local askmutable=HASMUTABLE
     local ask = dialog.CreateDialog("Tvdl enhanced "..progname..DRWVersion)
@@ -1676,7 +1731,8 @@ end
 
     ask.ll4=dialog.AddLabel("Skip first worst parts (crash resume)")
     ask.nrskip=dialog.AddSlider("Skip parts:",nrskip,0,segCnt2,0)
-    ask.SEL= dialog.AddCheckbox("(Re)select where to work on ",false)
+    ask.SEL= -- now l_bUserWantsToSelectSegmentsToRebuild
+      dialog.AddCheckbox("(Re)select where to work on ",false) -- now "Select Segments to Rebuild..."
     if HASMUTABLE then
         ask.MUTS = dialog.AddCheckbox("(Re)set Mutate Options",askmutable)
     end
@@ -1724,7 +1780,7 @@ end
         end
         localshakes=ask.localshakes.value
         if nrofbridges > 1 then savebridges=ask.bridge.value end
-        if ask.SEL.value then
+        if ask.SEL.value then -- now l_bUserWantsToSelectSegmentsToRebuild
             Slot4=false
             SlotAll=false
             local SelMode={}
@@ -1734,24 +1790,27 @@ end
             SelMode.defignorelocks=true
             SelMode.askligands=false
             SelMode.defligands=false
-            WORKON=AskForSelections("Tvdl enhanced "..progname..DRWVersion,SelMode)
+            WORKON= -- now inverted as g_FrozenLockedOrLigandSegmentsTable[] THIS NEEDS WORK! NEED A DIFFERENT TABLE!?
+              AskForSelections( -- now AskUserToSelectSegmentsRangesToRebuild()
+                "Tvdl enhanced "..progname..DRWVersion,SelMode)
             print("Selection is now, reselect if not oke:")
-            print(SegmentSetToString(WORKON))
+            print(SegmentSetToString( -- now ConvertSegmentRangesTableToListOfSegmentRanges()
+              WORKON)) -- now inverted as g_FrozenLockedOrLigandSegmentsTable[]
             if askresult==1 then askresult=4 end --to force return to main menu
         end
         if ask.selSP.value then
-            AskSubScores()
+            AskSubScores() -- now AskUserToSelectScorePartsForStabilize()
             if askresult==1 then askresult=4 end
         end
         for i=1,#ScoreParts do if ScoreParts[i][3] then
             print("Active slot "..ScoreParts[i][1].." is "..ScoreParts[i][2])
         end end
         if ask.worst.value then
-            AskSelScores()
+            AskSelScores() -- now AskUserToSelectScorePartsForCalculatingWorseScoringSegments()
             if askresult==1 then askresult=4 end
         end
         -- Do not try to rebuild frozen or locked parts or ligands
-        WORKON=SegmentSetMinus(WORKON,FindFrozen())
+        WORKON=SegmentSetMinus(WORKON,FindFrozen()) -- now inverted as g_FrozenLockedOrLigandSegmentsTable[]
         WORKON=SegmentSetMinus(WORKON,FindLocked())
         WORKON=SegmentSetMinus(WORKON,FindAAtype("M"))
         if HASMUTABLE then if ask.MUTS.value then
@@ -1792,12 +1851,13 @@ for i=3,12 do save.Quicksave(i) end
 ]]--
 ----------------- options below VVVV
 
-areas={ --start segment, end segment. use for last line call
+areas={  -- now g_XLowestScoringSegmentRangesTable[]
+ -start segment, end segment. use for last line call
 --{1,10},
 --{20,30},
 --{32,35},
 }
-scrPart={}
+scrPart={} -- now g_UserSelected_ScorePartsForCalculatingWorseScoringSegmentsTable[]
 
 --options for (5)"areas" setting
 loops=true --rebuild loops alone
@@ -1869,7 +1929,7 @@ if HASMUTABLE then
 end
 Slot4=false
 SlotAll=true
-WORKON={{1,segCnt2}}
+WORKON={{1,segCnt2}} -- now inverted as g_FrozenLockedOrLigandSegmentsTable[]
 -- part to administrate what has been done
 Donepart={} --To find fast if to be skipped
 Blocked={} --A simple list so we can clear Donepart
@@ -1879,7 +1939,7 @@ donotrevisit=true
 clrdonelistgain=segCnt
 if clrdonelistgain > 500 then clrdonelistgain=500 end
 curclrscore=Score()
-WORKONbool={}
+WORKONbool={} -- now g_bSegmentsToRebuildBooleanTable[]
 SegmentScores={} --Optimalisation for fast worst search
 lastSegScores=0
 DRWVersion="3.1.1"
@@ -1894,18 +1954,18 @@ end
 -- MAIN PROGRAM
 firstDRWcall=true
 DRWstartscore=0
-function DRW()
+function DRW() -- now main()
     if firstDRWcall then
-        printOptions("Tvdl enhanced "..progname..DRWVersion)
+        printOptions("Tvdl enhanced "..progname..DRWVersion) -- now DisplayUserSelectedOptions()
         firstDRWcall=false
     end
-    InitWORKONbool()
+    InitWORKONbool() -- now see main()
     DRWstartscore=Score()
     if nrskip > 0 then
         local sreBuild=reBuild
         reBuild=nrskip
         Runnr=0
-        DRcall("drw")
+        DRcall("drw") -- not what you are looking for.
         nrskip=0
         reBuild=sreBuild
     end
@@ -1914,7 +1974,7 @@ function DRW()
          Runnr=Runnr+1
          print("Main cycle nr ",Runnr)
 -- DRcall("areas")
-     DRcall("drw")
+     DRcall("drw") -- now PrepareToRebuildSegmentRanges()
 -- DRcall("fj")
 -- DRcall("all")
 -- DRcall("simple")

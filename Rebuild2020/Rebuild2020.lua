@@ -210,11 +210,6 @@ function DefineGlobalVariables()
     g_bSketchBookPuzzle = true
 	end
   
-  ---------------------------------------------------------  
-  -- The following boolean UserSelectable 
-  -- variables are sorted alphabetically...
-  ---------------------------------------------------------  
-
 	g_bUserSelected_AlwaysAllowRebuildingAlreadyRebuilt_Segments = true
   -- Used in 7 functions...
 	-- ...User can change this on the Select Rebuild Options page.
@@ -236,7 +231,8 @@ function DefineGlobalVariables()
   -- When set to false then include nearby segments.
   
 	g_bUserSelected_ExtraShakeAndWiggles_AfterRebuild = false
-  -- Used in AskUserToSelectMoreOptions(), DisplayUserSelectedOptions() and RebuildOneSegmentRangeManyTimes()
+  -- Used in AskUserToSelectMoreOptions(), DisplayUserSelectedOptions() and
+  --         RebuildOneSegmentRangeManyTimes()
   -- If the value of this variable is true the rebuild process will be very slow!
   
   g_bUserSelected_FuseBestScorePartPose = true
@@ -294,11 +290,6 @@ function DefineGlobalVariables()
   g_bUserSelected_SelectScorePartsForStabilize = false
   -- Used in AskUserToSelectRebuildOptions()
   
-  ---------------------------------------------------------
-  -- The following non-UserSelectable 
-  -- variables are sorted alphabetically...
-  ---------------------------------------------------------
-
 	g_DensityWeight = 0
 	-- Used in Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts(),
 	--         CheckForLowStartingScore() and DisplayPuzzleProperties()
@@ -382,18 +373,6 @@ function DefineGlobalVariables()
   g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected = 0
   g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll = 0
   g_Stats_Script_NumberOfAttempts_MutateSidechainsAll = 0
-  
-  g_with_segments_x_thru_y = "" -- For log file reporting; Example: " w/segments 1-3"
-  -- Used in RebuildManySegmentRanges(),
-  --         RebuildOneSegmentRangeManyTimes(),
-  --         RebuildSelectedSegments(), 
-  --         ShakeSelected() and
-  --         MutateSideChainsOfSelectedSegments()
-  
-  ---------------------------------------------------------
-  -- The following UserSelectable variables are
-  -- sorted alphabetically as much as possible...
-  ---------------------------------------------------------
   
 	g_UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle = 1
 	-- Used in AskUserToSelectMoreOptions() and main()
@@ -498,7 +477,8 @@ function DefineGlobalVariables()
 	end
   
 	g_UserSelected_StartingNumberOf_SegmentRanges_ToRebuild_PerRunCycle = 4
-	-- Used in DefineGlobalVariables(), AskUserToSelectMoreOptions(), PrepareToRebuildSegmentRanges() and main()
+	-- Used in DefineGlobalVariables(), AskUserToSelectMoreOptions(),
+  --         PrepareToRebuildSegmentRanges() and main()
   
 	-- ConsecutiveSegments is the number of adjacent segments required per segment range.
 	-- Example:
@@ -529,8 +509,11 @@ function DefineGlobalVariables()
 	g_UserSelected_WiggleFactor = 1
   -- Used in AskUserToSelectRebuildOptions(), DisplayUserSelectedOptions() and WiggleSelected()
 
-  -- ...end of UserSelected variables sorted alphabetically as much as possible.
+  -- ...end of global variables sorted alphabetically as much as possible.
 
+  g_with_segments_x_thru_y = "" -- For log file reporting; Example: " w/segments 1-3"
+  -- Used in RebuildManySegmentRanges(), RebuildOneSegmentRangeManyTimes(), RebuildSelectedSegments(), 
+  --         ShakeSelected() and MutateSideChainsOfSelectedSegments()
 
   ---------------------------------------------------------
   -- The following are conditional overrides
@@ -564,27 +547,35 @@ function DefineGlobalVariables()
 	--g_UserSelected_SegmentRangesToRebuildTable = {{1, g_SegmentCount_WithoutLigands}} -- formerly WORKON[]
   -- testing...
   g_UserSelected_SegmentRangesToRebuildTable = {{1, g_SegmentCount_WithLigands}}
+    -- See usage above in table definition section.
   
-  -- See usage above in table definition section.
-  
-  ---------------------------------------------------------
+  ------------------------------------------------------------
   -- The remaining lines of this function are related to 
   -- Condition Checking, and are not sorted alphabetically...  
-  ---------------------------------------------------------
-
+  ------------------------------------------------------------
+  ------------------------------------------------------------
 	-- Start of Temporarily Disable Condition Checking module...
-	-- Temporarily disable condition checking...
+  ------------------------------------------------------------
+-- Temporarily disable normal condition checking...
 	if g_bSketchBookPuzzle == false then
     -- Could probably just call NormalConditionChecking_TemporarilyDisable() here...
-		behavior.SetFiltersDisabled(true) 
-    -- ...Enables faster CPU processing, but your score improvements are not saved to foldit...
+    
+    -- Disable normal condition checking to get current score + potential bonus points.
+    -- This assumes the conditions for getting bonus points are not yet met. And this is normally
+    -- true when this is the first time working on this puzzle. However, if we have already been
+    -- working on this puzzle and have already met the conditions for getting the bonus points,
+    -- this is will just get the current score.
+    
+		behavior.SetFiltersDisabled(true) -- Disable condition checking to get current score w/bonus points.
+    
+    -- ...enables faster CPU processing, but your score improvements are not saved to foldit.
 	end
 
-	local l_Score_WithConditionChecking_TemporarilyDisabled = GetPoseTotalScore()
+	local l_CurrentPoseTotalScoreWithPotentialBonusPoints = GetPoseTotalScore()
     
   -- debugging...
-  --l_Score_WithConditionChecking_TemporarilyDisabled =
-  --  l_Score_WithConditionChecking_TemporarilyDisabled + 500
+  --l_CurrentPoseTotalScoreWithPotentialBonusPoints =
+  --  l_CurrentPoseTotalScoreWithPotentialBonusPoints + 500
 	  
 	-- Re-enable normal condition checking...
 	if g_bSketchBookPuzzle == false then
@@ -595,41 +586,43 @@ function DefineGlobalVariables()
 	
 	local l_Score_WithNormalConditionChecking_Enabled = GetPoseTotalScore()
 		
-	g_ComputedMaximumPotentialBonusPoints = 
-    l_Score_WithConditionChecking_TemporarilyDisabled - l_Score_WithNormalConditionChecking_Enabled 
-  -- Used in DefineGlobalVariables() and DisplayPuzzleProperties()
   -- Compute the maximum potential bonus points (not available in beginner puzzles)
+	g_ComputedMaximumPotentialBonusPoints = 
+    l_CurrentPoseTotalScoreWithPotentialBonusPoints - l_Score_WithNormalConditionChecking_Enabled 
+  -- Used in DefineGlobalVariables() and DisplayPuzzleProperties()
 		
   g_UserSelected_MaximumPotentialBonusPoints = g_ComputedMaximumPotentialBonusPoints
-  --  Used in AskUserToSelectTemporarilyDisableConditionCheckingOptions() and SaveBest()
+  --  Used in AskUserToSelectNormlConditionCheckingOptions() and SaveBest()
 	
-	g_bUserSelected_TemporarilyDisable_ConditionChecking = false
+	g_bUserSelected_NormalConditionChecking_TemporarilyDisable = false --i.e.Enable Normal Condition Checking
 	--  Used in DefineGlobalVariables(), CleanUp(), SaveBest() and
-  --          AskUserToSelectTemporarilyDisableConditionCheckingOptions()
-	-- NormalConditionChecking_TemporarilyDisable (enables faster CPU processing, but
-  -- your score improvements will not be counted in foldit's Undo history)...
-  -- ...false means "Enable Normal Condition Checking".
+  --          AskUserToSelectNormlConditionCheckingOptions()
+	-- ...enables faster CPU processing, but your score improvements will not be counted in foldit's Undo
+  --    history.
   
   if math.abs(g_UserSelected_MaximumPotentialBonusPoints) > 0.1 then
     
-		print("\nl_Score_WithConditionChecking_TemporarilyDisabled: " ..
-          PrettyNumber(l_Score_WithConditionChecking_TemporarilyDisabled) ..
-          "\nl_Score_WithNormalConditionChecking_Enabled: " ..
-          PrettyNumber(l_Score_WithNormalConditionChecking_Enabled) ..
-          "\ng_MaximumPotentialBonusPoints: " .. g_UserSelected_MaximumPotentialBonusPoints)
+		print("\nPotential score, including bonus points," ..
+           " when and if bonus conditions are met: " ..
+             PrettyNumber(l_CurrentPoseTotalScoreWithPotentialBonusPoints) ..
+          "\n - Actual score right now: " ..
+             PrettyNumber(l_Score_WithNormalConditionChecking_Enabled) ..
+          "\n = Potential bonus points to gain," ..
+           " when and if bonus conditions are met: " ..
+             g_UserSelected_MaximumPotentialBonusPoints)
 		
-		g_bUserSelected_TemporarilyDisable_ConditionChecking = true
+		g_bUserSelected_NormalConditionChecking_TemporarilyDisable = true
     
-		-- Ask user for their desired maximum bonus...
-		AskUserToSelectTemporarilyDisableConditionCheckingOptions()
+		-- Ask user to verify maximum potential bonus points...
+		AskUserToSelectNormlConditionCheckingOptions()
 	end
   
-	if g_bUserSelected_TemporarilyDisable_ConditionChecking == true then
+	if g_bUserSelected_NormalConditionChecking_TemporarilyDisable == true then
 		NormalConditionChecking_TemporarilyDisable()
 	end
-  ---------------------------------------------------------
+  -----------------------------------------------------------
 	-- ...end of Temporarily Disable Condition Checking module.
-  ---------------------------------------------------------
+  -----------------------------------------------------------
 
 end -- DefineGlobalVariables()
 function SetupLocalDebugFuntions()
@@ -1967,13 +1960,13 @@ function AskUserToSelectSegmentsRangesToRebuild() -- formerly AskForSelections()
 	return l_SegmentRangesToRebuildTable
 
 end -- AskUserToSelectSegmentsRangesToRebuild()
-function AskUserToSelectTemporarilyDisableConditionCheckingOptions()
+function AskUserToSelectNormlConditionCheckingOptions()
   -- Called from DefineGlobalVariables()...
   
 	local l_Ask = dialog.CreateDialog("Temporary Fast CPU Processing")
 	l_Ask.bUserSelected_TemporarilyDisable_ConditionChecking = 
     dialog.AddCheckbox("Temporarily disable condition checking",
-    g_bUserSelected_TemporarilyDisable_ConditionChecking)
+    g_bUserSelected_NormalConditionChecking_TemporarilyDisable)
 	l_Ask.l1 = dialog.AddLabel("Computed maximum potential bonus points: " ..
     g_UserSelected_MaximumPotentialBonusPoints)
 	l_Ask.l2 = dialog.AddLabel("If this is not the correct maximum potential bonus,")
@@ -2006,7 +1999,7 @@ function AskUserToSelectTemporarilyDisableConditionCheckingOptions()
   l_Ask.l23 = dialog.AddLabel("value is greater than the last saved real best score,")
   l_Ask.l24 = dialog.AddLabel("we will re-enable condition checking and hopefully")
   l_Ask.l25 = dialog.AddLabel("we will realize the loss of penalties points and the")
-  l_Ask.l26 = dialog.AddLabel("gain of bonus points. The last real best score is")
+  l_Ask.l26 = dialog.AddLabel("gain of bonus points. The script current best score is")
   l_Ask.l27 = dialog.AddLabel("only updated when condition checking is enabled.")
   
 	l_Ask.continue = dialog.AddButton("Continue", 1)
@@ -2018,10 +2011,10 @@ function AskUserToSelectTemporarilyDisableConditionCheckingOptions()
 		g_UserSelected_MaximumPotentialBonusPoints = 0
 	end
   
-	g_bUserSelected_TemporarilyDisable_ConditionChecking =
+	g_bUserSelected_NormalConditionChecking_TemporarilyDisable =
     l_Ask.bUserSelected_TemporarilyDisable_ConditionChecking.value
     
-end -- function AskUserToSelectTemporarilyDisableConditionCheckingOptions()
+end -- function AskUserToSelectNormlConditionCheckingOptions()
 function DisplayPuzzleProperties()
   -- Called from main()...
 
@@ -3244,42 +3237,49 @@ function InvertSegmentRangesTable(l_SegmentRangesTable, l_MaxSegmentIndex)
   
 end -- function InvertSegmentRangesTable(l_SegmentRangesTable, l_MaxSegmentIndex)
 function NormalConditionChecking_ReEnable()
-  -- Called from SaveBest() and
-  --             CleanUp()...
-  
-	-- Disables faster CPU processing, so your scores will be counted...
+  -- Called from SaveBest() and CleanUp()...
 
+  -- If recent best pose was better, then restore it...why?
 	local l_RecentBest_PoseTotalScore = GetPoseTotalScore(recentbest) -- class "recentbest"
   local l_Current_PoseTotalScore = GetPoseTotalScore()
-  
 	if l_RecentBest_PoseTotalScore > l_Current_PoseTotalScore then
     
-    g_bBetterRecentBest = true -- read in NormalConditionChecking_TemporarilyDisable() above...
-		save.Quicksave(99) -- Save
-		recentbest.Restore() -- Keep the current pose if it's better; otherwise, restore the recentbest pose.
-		save.Quicksave(98) -- Save
-		save.Quickload(99) -- Load
+    g_bBetterRecentBest = true -- read in NormalConditionChecking_TemporarilyDisable(), below...why?
+    
+		save.Quicksave(99) -- Save current pose; why?
+		recentbest.Restore() -- Restore the recentbest pose only if better; otherwise, keep the current pose.
+		save.Quicksave(98) -- Save recent best pose; why?
+		save.Quickload(99) -- Load current pose; seriously why??
     
 	end
   
-	behavior.SetFiltersDisabled(false) -- <<<--- Important
+	-- Disable faster CPU processing, so your scores will be counted...
+  -- Important !!!
+  -- Important !!!
+	behavior.SetFiltersDisabled(false) -- Re-enable normal condition checking.
+  -- Important !!!
+  -- Important !!!
   
 end -- function NormalConditionChecking_ReEnable()
 function NormalConditionChecking_TemporarilyDisable()
-  -- Called from SaveBest() and 
-  --             DefineGlobalVariables()...
+  -- Called from SaveBest() and DefineGlobalVariables()...
   
-	-- Enables faster CPU processing, but your scores will not be counted...
-
-	behavior.SetFiltersDisabled(true)
+	-- Temporarily enable faster CPU processing, but your scores will not be counted...
+  -- Important !!!
+  -- Important !!!
+	behavior.SetFiltersDisabled(true) -- Temporarily disable normal condition checking.
+  -- Important !!!
+  -- Important !!!
   
-	if g_bBetterRecentBest == true then -- set in NormalConditionChecking_ReEnable() below...
+	if g_bBetterRecentBest == true then -- set in NormalConditionChecking_ReEnable() above...
+    
 		save.Quicksave(99) -- Save
 		save.Quickload(98) -- Load
 		recentbest.Save() -- Save the current pose as the recentbest pose.  
 		save.Quickload(99) -- Load
     
     g_bBetterRecentBest = false -- not sure why this line wasn't here earlier.
+    
 	end
   
 end -- function NormalConditionChecking_TemporarilyDisable()
@@ -3719,6 +3719,10 @@ function PrettyNumber(l_DirtyFloat)
   
   return l_PrettyString
   
+end -- function PrettyNumber(l_DirtyFloat)
+function PrettyNumber2(l_DirtyFloat)
+  local l_PrettyString = string.format("%.2f", l_DirtyFloat)  
+  return l_PrettyString
 end -- function PrettyNumber(l_DirtyFloat)
 function QuickSaveStack_LoadLastSavedSolution()
   -- Called from DisulfideBonds_CheckIfWeNeedToRestoreSolutionWithThemIntact(),
@@ -5067,7 +5071,7 @@ function ShakeSelected(l_FromWhere)
   -- Called from 5 functions...
       
   local l_ClashImportance = behavior.GetClashImportance()
-  local l_ClashImportanceText = " ClashImp " .. PrettyNumber(l_ClashImportance)
+  local l_ClashImportanceText = " ClashImp " .. PrettyNumber2(l_ClashImportance)
 
 		-- Shake is not considered to do much in second or more rounds; therefore, we always set Iterations=1
     
@@ -5116,7 +5120,7 @@ function WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_FromWhere)
   -- Called from 5 functions...
   
   local l_ClashImportance = behavior.GetClashImportance()
-  local l_ClashImportanceText = " ClashImp " .. PrettyNumber(l_ClashImportance)
+  local l_ClashImportanceText = " ClashImp " .. PrettyNumber2(l_ClashImportance)
 
 	-- Lets amplify the iterations for a bigger effect...
 	local l_WiggleFactor = 1
@@ -5179,7 +5183,7 @@ function WiggleAll(l_Iterations, l_FromWhere)
   -- Clash Importance for WiggleAll is almost always 1 (perhaps by accident even; see the note 
   -- at the end of this function), so it's not usually interesting in the log file. But if it's
   -- not 1, then it might be interesting...
-    l_ClashImportanceText = " ClashImp " .. PrettyNumber(l_ClashImportance)
+    l_ClashImportanceText = " ClashImp " .. PrettyNumber2(l_ClashImportance)
   end
   
 	-- Lets amplify the iterations for a bigger effect...
@@ -5438,7 +5442,7 @@ function SaveBest() -- <-- Updates g_Score_ScriptBest
   --         shake, wiggle or mutate; therefore, you cannot always expect to find the best score by calling
   --         GetPoseTotalScore().
   
-  if g_bUserSelected_TemporarilyDisable_ConditionChecking == true then
+  if g_bUserSelected_NormalConditionChecking_TemporarilyDisable == true then
     
    	local l_PoseTotalScore_WithConditionChecking_Disabled = GetPoseTotalScore()
   	local l_PotentialScore_IfAllConditionsAreMet = 
@@ -5458,7 +5462,7 @@ function SaveBest() -- <-- Updates g_Score_ScriptBest
     -- up the rebuild process, and only when there are potential bonus points to be earned.
   end
   
-  if g_bUserSelected_TemporarilyDisable_ConditionChecking == true then
+  if g_bUserSelected_NormalConditionChecking_TemporarilyDisable == true then
     -- Temporarily re-enable normal condition checking, so we
     -- can look at real scores instead of potential scores...
     NormalConditionChecking_ReEnable()
@@ -5477,7 +5481,11 @@ function SaveBest() -- <-- Updates g_Score_ScriptBest
   if l_Real_PointsGained >= l_MinimumGain_ForSave or 
     (l_Real_PointsGained >= 0.001 and g_bFoundAHighGain == true) then
     
+    -- Important !!!
+    -- Important !!!
     g_Score_ScriptBest = l_Current_PoseTotalScore  -- <<<--- This is what you are looking for!!!
+    -- Important !!!
+    -- Important !!!
     
     if g_bUserSelected_FuseBestScorePartPose == false and g_Score_ScriptBest > 0 then
       print("\nNow that the total score is positive, we will switch back on: " ..
@@ -5490,7 +5498,7 @@ function SaveBest() -- <-- Updates g_Score_ScriptBest
     g_bFoundAHighGain = true -- not exactly sure how this one works yet.
   end
   
-  if g_bUserSelected_TemporarilyDisable_ConditionChecking == true then
+  if g_bUserSelected_NormalConditionChecking_TemporarilyDisable == true then
     -- Disable condition checking again (re-enable fast CPU processing)...
     NormalConditionChecking_TemporarilyDisable()
   end
@@ -5704,7 +5712,7 @@ function CleanUp(l_ErrorMessage)
 	SetClashImportance(1)
 	save.Quickload(3) -- Load
 
-	if g_bUserSelected_TemporarilyDisable_ConditionChecking == true then
+	if g_bUserSelected_NormalConditionChecking_TemporarilyDisable == true then
 		NormalConditionChecking_ReEnable()
 	end
 	if g_bSavedSecondaryStructure == true then
