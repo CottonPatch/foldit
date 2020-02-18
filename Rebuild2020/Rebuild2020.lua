@@ -4616,6 +4616,17 @@ function main() -- formerly DRW()
 		-- PrepareToRebuildSegmentRanges("fj")
 		-- PrepareToRebuildSegmentRanges("simple")
     
+    g_Stats_Run_TotalPointsGained_Total = 
+      g_Stats_Run_TotalPointsGained_RebuildSelected +
+      g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected +
+      g_Stats_Run_TotalPointsGained_WiggleSelected +
+      g_Stats_Run_TotalPointsGained_WiggleAll +
+      g_Stats_Run_TotalPointsGained_MutateSidechainsSelected +
+      g_Stats_Run_TotalPointsGained_MutateSidechainsAll
+    if g_Stats_Run_TotalPointsGained_Total < 0.0001 then
+       g_Stats_Run_TotalPointsGained_Total = 0.0001
+    end
+      
     g_Stats_Run_TotalSecondsUsed_Total = 
       g_Stats_Run_TotalSecondsUsed_RebuildSelected +
       g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected +
@@ -4624,14 +4635,6 @@ function main() -- formerly DRW()
       g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected +
       g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll
     
-    g_Stats_Run_TotalPointsGained_Total = 
-      g_Stats_Run_TotalPointsGained_RebuildSelected +
-      g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected +
-      g_Stats_Run_TotalPointsGained_WiggleSelected +
-      g_Stats_Run_TotalPointsGained_WiggleAll +
-      g_Stats_Run_TotalPointsGained_MutateSidechainsSelected +
-      g_Stats_Run_TotalPointsGained_MutateSidechainsAll
-      
     g_Stats_Run_SuccessfulAttempts_Total = 
       g_Stats_Run_SuccessfulAttempts_RebuildSelected +
       g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected +
@@ -4648,77 +4651,105 @@ function main() -- formerly DRW()
       g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected +
       g_Stats_Run_NumberOfAttempts_MutateSidechainsAll
     
-    print("------------------------ ---------  -------  -------  ------------------")
+    print("------------------------ ------------------  -------  -------  ------------------")
     print("End of run " .. g_RunCycle .. " Stats:")
-    print("------------------------ ---------  -------  -------  ------------------")
-    print("From:                       Points  Minutes  Points/                  ")
-    print("                            Gained     Used  Minute      Success Rate:")
+    print("------------------------ ------------------  -------  -------  ------------------")
+    print("                                             Minutes  Points/                  ")
+    print("From:                       Points Gained       Used  Minute      Success Rate:")
                                           
     print("RebuildSelected          " .. 
-      PaddedNumber(g_Stats_Run_TotalPointsGained_RebuildSelected, 9, 3) .. "  " .. 
-      PaddedNumber(g_Stats_Run_TotalSecondsUsed_RebuildSelected / 60, 7, 3) .. "  " ..
+      PaddedNumber(g_Stats_Run_TotalPointsGained_RebuildSelected, 9, 3) .. "" .. 
+      PaddedString("(" ..
       PaddedNumber(g_Stats_Run_TotalPointsGained_RebuildSelected /
-                   g_Stats_Run_TotalSecondsUsed_RebuildSelected / 60, 7, 0) .. "  " ..
+                   g_Stats_Run_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+      PaddedNumber(g_Stats_Run_TotalSecondsUsed_RebuildSelected / 60, 9, 3) .. "" ..
+      PaddedNumber(g_Stats_Run_TotalPointsGained_RebuildSelected /
+                  (g_Stats_Run_TotalSecondsUsed_RebuildSelected / 60), 9, 0) .. "  " ..
       PaddedString(g_Stats_Run_SuccessfulAttempts_RebuildSelected .. "/" ..
-      PaddedNumber(g_Stats_Run_NumberOfAttempts_RebuildSelected, 0, 0), 9) .. PaddedString(" (" ..
-      PrettyNumber2(g_Stats_Run_SuccessfulAttempts_RebuildSelected /
-                   g_Stats_Run_NumberOfAttempts_RebuildSelected * 100) .. "%)", 9))
+      PaddedNumber(g_Stats_Run_NumberOfAttempts_RebuildSelected, 0, 0), 9) .. 
+      PaddedString(" (" ..
+      PaddedNumber(g_Stats_Run_SuccessfulAttempts_RebuildSelected /
+                   g_Stats_Run_NumberOfAttempts_RebuildSelected * 100, 4, 2) .. "%)", 9))
     print("ShakeSidechainsSelected  " ..
-      PaddedNumber(g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected, 9, 3) .. "  " ..
-      PaddedNumber(g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected / 60, 7, 3) .. "  " ..
+      PaddedNumber(g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected, 9, 3) .. "" ..
+      PaddedString("(" ..
       PaddedNumber(g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected /
-                   g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected / 60, 7, 0) .. "  " ..
+                   g_Stats_Run_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+      PaddedNumber(g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected / 60, 9, 3) .. "" ..
+      PaddedNumber(g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected /
+                  (g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected / 60), 9, 0) .. "  " ..
       PaddedString(g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected .. "/" ..
-      PaddedNumber(g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected, 0, 0), 9) .. PaddedString(" (" ..
-      PrettyNumber2(g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected /
-                   g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected * 100) .. "%)", 9))
+      PaddedNumber(g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected, 0, 0), 9) ..
+      PaddedString(" (" ..
+      PaddedNumber(g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected /
+                   g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected * 100, 4, 2) .. "%)", 9))
     print("WiggleSelected           " .. 
-      PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleSelected, 9, 3) .. "  " ..
-      PaddedNumber(g_Stats_Run_TotalSecondsUsed_WiggleSelected / 60, 7, 3) .. "  " ..
+      PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleSelected, 9, 3) .. "" ..
+      PaddedString("(" ..
       PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleSelected /
-                   g_Stats_Run_TotalSecondsUsed_WiggleSelected / 60, 7, 0) .. "  " ..
+                   g_Stats_Run_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+      PaddedNumber(g_Stats_Run_TotalSecondsUsed_WiggleSelected / 60, 9, 3) .. "" ..
+      PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleSelected /
+                  (g_Stats_Run_TotalSecondsUsed_WiggleSelected / 60), 9, 0) .. "  " ..
       PaddedString(g_Stats_Run_SuccessfulAttempts_WiggleSelected .. "/" ..
-      PaddedNumber(g_Stats_Run_NumberOfAttempts_WiggleSelected, 0, 0), 9) .. PaddedString(" (" ..
-      PrettyNumber2(g_Stats_Run_SuccessfulAttempts_WiggleSelected /
-                   g_Stats_Run_NumberOfAttempts_WiggleSelected * 100) .. "%)", 9))
+      PaddedNumber(g_Stats_Run_NumberOfAttempts_WiggleSelected, 0, 0), 9) ..
+      PaddedString(" (" ..
+      PaddedNumber(g_Stats_Run_SuccessfulAttempts_WiggleSelected /
+                   g_Stats_Run_NumberOfAttempts_WiggleSelected * 100, 4, 2) .. "%)", 9))
     print("WiggleAll                " .. 
-      PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleAll, 9, 3) .. "  " ..
-      PaddedNumber(g_Stats_Run_TotalSecondsUsed_WiggleAll / 60, 7, 3) .. "  " ..
+      PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleAll, 9, 3) .. "" ..
+      PaddedString("(" ..
       PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleAll /
-                   g_Stats_Run_TotalSecondsUsed_WiggleAll / 60, 7, 0) .. "  " ..
+                   g_Stats_Run_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+      PaddedNumber(g_Stats_Run_TotalSecondsUsed_WiggleAll / 60, 9, 3) .. "" ..
+      PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleAll /
+                   g_Stats_Run_TotalSecondsUsed_WiggleAll / 60, 9, 0) .. "  " ..
       PaddedString(g_Stats_Run_SuccessfulAttempts_WiggleAll .. "/" ..  
-      PaddedNumber(g_Stats_Run_NumberOfAttempts_WiggleAll, 0, 0), 9) .. PaddedString(" (" ..
-      PrettyNumber2(g_Stats_Run_SuccessfulAttempts_WiggleAll /
-                   g_Stats_Run_NumberOfAttempts_WiggleAll * 100) .. "%)", 9))
+      PaddedNumber(g_Stats_Run_NumberOfAttempts_WiggleAll, 0, 0), 9) ..
+      PaddedString(" (" ..
+      PaddedNumber(g_Stats_Run_SuccessfulAttempts_WiggleAll /
+                   g_Stats_Run_NumberOfAttempts_WiggleAll * 100, 4, 2) .. "%)", 9))
     print("MutateSidechainsSelected " ..
-      PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsSelected, 9, 3) .. "  " ..
-      PaddedNumber(g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected / 60, 7, 3) .. "  " ..
+      PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsSelected, 9, 3) .. "" ..
+      PaddedString("(" ..
       PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsSelected /
-                   g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected / 60, 7, 0) .. "  " ..
+                   g_Stats_Run_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+      PaddedNumber(g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected / 60, 9, 3) .. "" ..
+      PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsSelected /
+                  (g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected / 60), 9, 0) .. "  " ..
       PaddedString(g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected .. "/" ..
-      PaddedNumber(g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected, 0, 0), 9) .. PaddedString(" (" ..
-      PrettyNumber2(g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected /
-                   g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected * 100) .. "%)", 9))
+      PaddedNumber(g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected, 0, 0), 9) ..
+      PaddedString(" (" ..
+      PaddedNumber(g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected /
+                   g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected * 100, 4, 2) .. "%)", 9))
     print("MutateSidechainsAll      " .. 
-      PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsAll, 9, 3) .. "  " ..
-      PaddedNumber(g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll / 60, 7, 3) .. "  " ..
+      PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsAll, 9, 3) .. "" ..
+      PaddedString("(" ..
       PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsAll /
-                   g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll / 60, 7, 0) .. "  " ..
+                   g_Stats_Run_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+      PaddedNumber(g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll / 60, 9, 3) .. "" ..
+      PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsAll /
+                  (g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll / 60), 9, 0) .. "  " ..
       PaddedString(g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll .. "/" ..
-      PaddedNumber(g_Stats_Run_NumberOfAttempts_MutateSidechainsAll, 0, 0), 9) .. PaddedString(" (" ..
-      PrettyNumber2(g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll /
-                   g_Stats_Run_NumberOfAttempts_MutateSidechainsAll * 100) .. "%)", 9))
-    print("------------------------ ---------  -------  -------  ------------------")
+      PaddedNumber(g_Stats_Run_NumberOfAttempts_MutateSidechainsAll, 0, 0), 9) ..
+      PaddedString(" (" ..
+      PaddedNumber(g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll /
+                   g_Stats_Run_NumberOfAttempts_MutateSidechainsAll * 100, 4, 2) .. "%)", 9))
+    print("------------------------ ------------------  -------  -------  ------------------")
     print("Run total                " .. 
-      PaddedNumber(g_Stats_Run_TotalPointsGained_Total, 9, 3) .. "  " ..
-      PaddedNumber(g_Stats_Run_TotalSecondsUsed_Total / 60, 7, 3) .. "  " ..
+      PaddedNumber(g_Stats_Run_TotalPointsGained_Total, 9, 3) .. "" ..
+      PaddedString("(" ..
       PaddedNumber(g_Stats_Run_TotalPointsGained_Total /
-                   g_Stats_Run_TotalSecondsUsed_Total / 60, 7, 0) .. "  " ..
+                   g_Stats_Run_TotalPointsGained_Total * 100, 5, 1) .. "%)", 9) ..
+      PaddedNumber(g_Stats_Run_TotalSecondsUsed_Total / 60, 9, 3) .. "" ..
+      PaddedNumber(g_Stats_Run_TotalPointsGained_Total /
+                  (g_Stats_Run_TotalSecondsUsed_Total / 60), 9, 0) .. "  " ..
       PaddedString(g_Stats_Run_SuccessfulAttempts_Total .. "/" ..
-      PaddedNumber(g_Stats_Run_NumberOfAttempts_Total, 0, 0), 9) .. PaddedString(" (" ..
-      PrettyNumber2(g_Stats_Run_SuccessfulAttempts_Total /
-                   g_Stats_Run_NumberOfAttempts_Total * 100) .. "%)", 9))
-    print("------------------------ ---------  -------  -------  ------------------")
+      PaddedNumber(g_Stats_Run_NumberOfAttempts_Total, 0, 0), 9) ..
+      PaddedString(" (" ..
+      PaddedNumber(g_Stats_Run_SuccessfulAttempts_Total /
+                   g_Stats_Run_NumberOfAttempts_Total * 100, 4, 2) .. "%)", 9))
+    print("------------------------ ------------------  -------  -------  ------------------")
     
     g_Stats_Script_TotalSecondsUsed_RebuildSelected = 
     g_Stats_Script_TotalSecondsUsed_RebuildSelected +
@@ -5517,9 +5548,10 @@ function RebuildSelectedSegments(l_StartSegment, l_EndSegment) -- formerly local
     l_Score_After_Rebuild = GetPoseTotalScore()
     local l_ScoreImprovement = l_Score_After_Rebuild - g_Score_ScriptBest
     if l_ScoreImprovement > 0.001 then
-      print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " + " .. PaddedNumber(l_ScoreImprovement, 7, 3) ..
-            " " .. PaddedNumber(l_SecondsUsed, 6, 3) .. "s" ..
-            " " .. l_CurrentIteration .. "xRebuildSelected" ..
+      print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" .. 
+            PaddedNumber(l_ScoreImprovement, 8, 3) .. " " .. 
+            PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+            l_CurrentIteration .. "xRebuildSelected" ..
             g_round_x_of_y ..
             g_with_segments_x_thru_y)
           
@@ -5595,10 +5627,10 @@ function ShakeSelected(l_FromWhere)
   local l_Score_After_Shake = GetPoseTotalScore()
   local l_ScoreImprovement = l_Score_After_Shake - g_Score_ScriptBest
   if l_ScoreImprovement > 0.001 then
-    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " + " .. PaddedNumber(l_ScoreImprovement, 7, 3) ..
-          " " .. PaddedNumber(l_SecondsUsed, 6, 3) .. "s" ..
-          " " .. l_FromWhere ..
-          ":1xShakeSidechainsSelected" ..
+    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
+          PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
+          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+          l_FromWhere .. ":1xShakeSidechainsSelected" ..
           g_round_x_of_y ..
           g_with_segments_x_thru_y ..
           g_ScorePartText ..
@@ -5649,10 +5681,11 @@ function WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_FromWhere)
   local l_Score_After_Wiggle = GetPoseTotalScore()
   local l_ScoreImprovement = l_Score_After_Wiggle - g_Score_ScriptBest
   if l_ScoreImprovement > 0.001 then
-    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " + " .. PaddedNumber(l_ScoreImprovement, 7, 3) ..
-          " " .. PaddedNumber(l_SecondsUsed, 6, 3) .. "s" ..
-          " " .. l_FromWhere ..
-          ":" .. l_WF_Iterations .. "xWiggleSelected(" ..
+    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
+          PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
+          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+          l_FromWhere .. ":" ..
+          l_WF_Iterations .. "xWiggleSelected(" ..
           "Bb=" .. tostring(l_bWBackbone) .. "," ..
           "SC=" .. tostring(l_bWSideChains) .. ")" ..
           g_round_x_of_y ..
@@ -5717,13 +5750,13 @@ function WiggleAll(l_Iterations, l_FromWhere)
   local l_Score_After_Wiggle = GetPoseTotalScore()
   local l_ScoreImprovement = l_Score_After_Wiggle - g_Score_ScriptBest
   if l_ScoreImprovement > 0.001 then
-    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " + " .. PaddedNumber(l_ScoreImprovement, 7, 3) ..
-          " " .. PaddedNumber(l_SecondsUsed, 6, 3) .. "s" ..
-          " " .. l_FromWhere ..
-          ":" .. l_Iterations .. "xWiggleAll(Bb,SC)" ..
-         g_round_x_of_y ..
-         g_ScorePartText ..
-         l_ClashImportanceText)
+    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
+          PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
+          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+          l_FromWhere .. ":" .. l_Iterations .. "xWiggleAll(Bb,SC)" ..
+          g_round_x_of_y ..
+          g_ScorePartText ..
+          l_ClashImportanceText)
        
     local l_SecondsUsed = 0
     g_Stats_Run_TotalPointsGained_WiggleAll =
@@ -5802,13 +5835,13 @@ function MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, l_From
   l_Score_After_Mutate = GetPoseTotalScore()
   local l_ScoreImprovement = l_Score_After_Mutate - g_Score_ScriptBest
   if l_ScoreImprovement > 0.001 then
-    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " + " .. PaddedNumber(l_ScoreImprovement, 7, 3) ..
-      " " .. PaddedNumber(l_SecondsUsed, 6, 3) .. "s" ..
-      " " .. l_FromWhere ..
-      ":2xMutateSidechainsSelected" ..
-      g_round_x_of_y ..
-      g_with_segments_x_thru_y ..
-      g_ScorePartText)
+    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
+          PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
+          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+          l_FromWhere .. ":2xMutateSidechainsSelected" ..
+          g_round_x_of_y ..
+          g_with_segments_x_thru_y ..
+          g_ScorePartText)
     
     g_Stats_Run_TotalPointsGained_MutateSidechainsSelected =
     g_Stats_Run_TotalPointsGained_MutateSidechainsSelected + l_ScoreImprovement
@@ -5855,12 +5888,12 @@ function MutateSideChainsAll(l_FromWhere)
   l_Score_After_Mutate = GetPoseTotalScore()
   local l_ScoreImprovement = l_Score_After_Mutate - g_Score_ScriptBest
   if l_ScoreImprovement > 0.001 then
-    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " + " .. PaddedNumber(l_ScoreImprovement, 7, 3) ..
-      " " .. PaddedNumber(l_SecondsUsed, 6, 3) .. "s" ..
-      " " .. l_FromWhere ..
-      ":2xMutateSidechainsAll" ..
-      g_round_x_of_y ..
-      g_ScorePartText)
+    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
+          PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
+          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+          l_FromWhere .. ":2xMutateSidechainsAll" ..
+          g_round_x_of_y ..
+          g_ScorePartText)
     
     g_Stats_Run_TotalPointsGained_MutateSidechainsAll =
     g_Stats_Run_TotalPointsGained_MutateSidechainsAll + l_ScoreImprovement
@@ -5998,7 +6031,7 @@ function CleanUp(l_ErrorMessage)
     g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected +
     g_Stats_Script_NumberOfAttempts_MutateSidechainsAll
     
-  -- Future improvement for stats:
+  -- Future improvements for stats:
   -- 1) Add Points gained % next to Points gained values. For example: Points Gained: 1717.277 (86.734%)
   -- 2) Add Time used % next to Time used values. For example: Minutes Used: 1392 (89.123%)
   -- 3) The script sum total of the many action seconds is close to double the actual script elasped
@@ -6013,77 +6046,105 @@ function CleanUp(l_ErrorMessage)
   --    WiggleAll:                   737/1098 (67.15%) 737/766 (96.21%) overall
   --    ...then again, this doesn't really add much useful info.
   
-  print("------------------------ ---------  -------  -------  ------------------")
+  print("------------------------ ------------------  -------  -------  ------------------")
   print("End of Script Stats:")
-  print("------------------------ ---------  -------  -------  ------------------")
-  print("From:                       Points  Minutes  Points/     ")
-  print("                            Gained     Used  Minute      Success Rate:")
+  print("------------------------ ------------------  -------  -------  ------------------")
+  print("                                             Minutes  Points/     ")
+  print("From:                       Points Gained       Used  Minute      Success Rate:")
                                         
   print("RebuildSelected          " .. 
-    PaddedNumber(g_Stats_Script_TotalPointsGained_RebuildSelected, 9, 3) .. "  " .. 
-    PaddedNumber(g_Stats_Script_TotalSecondsUsed_RebuildSelected / 60, 7, 3) .. "  " ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_RebuildSelected, 9, 3) .. "" .. 
+    PaddedString("(" ..
     PaddedNumber(g_Stats_Script_TotalPointsGained_RebuildSelected /
-                 g_Stats_Script_TotalSecondsUsed_RebuildSelected / 60, 7, 0) .. "  " ..
+                 g_Stats_Script_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+    PaddedNumber(g_Stats_Script_TotalSecondsUsed_RebuildSelected / 60, 9, 3) .. "" ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_RebuildSelected /
+                (g_Stats_Script_TotalSecondsUsed_RebuildSelected / 60), 9, 0) .. "  " ..
     PaddedString(g_Stats_Script_SuccessfulAttempts_RebuildSelected .. "/" ..
-    PaddedNumber(g_Stats_Script_NumberOfAttempts_RebuildSelected, 0, 0), 9) .. PaddedString(" (" ..
-    PrettyNumber2(g_Stats_Script_SuccessfulAttempts_RebuildSelected /
-                 g_Stats_Script_NumberOfAttempts_RebuildSelected * 100) .. "%)", 9))
+    PaddedNumber(g_Stats_Script_NumberOfAttempts_RebuildSelected, 0, 0), 9) ..
+    PaddedString(" (" ..
+    PaddedNumber(g_Stats_Script_SuccessfulAttempts_RebuildSelected /
+                 g_Stats_Script_NumberOfAttempts_RebuildSelected * 100, 4, 2) .. "%)", 9))
   print("ShakeSidechainsSelected  " ..
-    PaddedNumber(g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected, 9, 3) .. "  " ..
-    PaddedNumber(g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected / 60, 7, 3) .. "  " ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected, 9, 3) .. "" ..
+    PaddedString("(" ..
     PaddedNumber(g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected /
-                 g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected / 60, 7, 0) .. "  " ..
+                 g_Stats_Script_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+    PaddedNumber(g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected / 60, 9, 3) .. "" ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected /
+                (g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected / 60), 9, 0) .. "  " ..
     PaddedString(g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected .. "/" ..
-    PaddedNumber(g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected, 0, 0), 9) .. PaddedString(" (" ..
-    PrettyNumber2(g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected /
-                 g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected * 100) .. "%)", 9))
+    PaddedNumber(g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected, 0, 0), 9) ..
+    PaddedString(" (" ..
+    PaddedNumber(g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected /
+                 g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected * 100, 4, 2) .. "%)", 9))
   print("WiggleSelected           " .. 
-    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleSelected, 9, 3) .. "  " ..
-    PaddedNumber(g_Stats_Script_TotalSecondsUsed_WiggleSelected / 60, 7, 3) .. "  " ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleSelected, 9, 3) .. "" ..
+    PaddedString("(" ..
     PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleSelected /
-                 g_Stats_Script_TotalSecondsUsed_WiggleSelected / 60, 7, 0) .. "  " ..
+                 g_Stats_Script_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+    PaddedNumber(g_Stats_Script_TotalSecondsUsed_WiggleSelected / 60, 9, 3) .. "" ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleSelected /
+                (g_Stats_Script_TotalSecondsUsed_WiggleSelected / 60), 9, 0) .. "  " ..
     PaddedString(g_Stats_Script_SuccessfulAttempts_WiggleSelected .. "/" ..
-    PaddedNumber(g_Stats_Script_NumberOfAttempts_WiggleSelected, 0, 0), 9) .. PaddedString(" (" ..
-    PrettyNumber2(g_Stats_Script_SuccessfulAttempts_WiggleSelected /
-                 g_Stats_Script_NumberOfAttempts_WiggleSelected * 100) .. "%)", 9))
+    PaddedNumber(g_Stats_Script_NumberOfAttempts_WiggleSelected, 0, 0), 9) ..
+    PaddedString(" (" ..
+    PaddedNumber(g_Stats_Script_SuccessfulAttempts_WiggleSelected /
+                 g_Stats_Script_NumberOfAttempts_WiggleSelected * 100, 4, 2) .. "%)", 9))
   print("WiggleAll                " .. 
-    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleAll, 9, 3) .. "  " ..
-    PaddedNumber(g_Stats_Script_TotalSecondsUsed_WiggleAll / 60, 7, 3) .. "  " ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleAll, 9, 3) .. "" ..
+    PaddedString("(" ..
     PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleAll /
-                 g_Stats_Script_TotalSecondsUsed_WiggleAll / 60, 7, 0) .. "  " ..
+                 g_Stats_Script_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+    PaddedNumber(g_Stats_Script_TotalSecondsUsed_WiggleAll / 60, 9, 3) .. "" ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleAll /
+                (g_Stats_Script_TotalSecondsUsed_WiggleAll / 60), 9, 0) .. "  " ..
     PaddedString(g_Stats_Script_SuccessfulAttempts_WiggleAll .. "/" ..  
-    PaddedNumber(g_Stats_Script_NumberOfAttempts_WiggleAll, 0, 0), 9) .. PaddedString(" (" ..
-    PrettyNumber2(g_Stats_Script_SuccessfulAttempts_WiggleAll /
-                 g_Stats_Script_NumberOfAttempts_WiggleAll * 100) .. "%)", 9))
+    PaddedNumber(g_Stats_Script_NumberOfAttempts_WiggleAll, 0, 0), 9) ..
+    PaddedString(" (" ..
+    PaddedNumber(g_Stats_Script_SuccessfulAttempts_WiggleAll /
+                 g_Stats_Script_NumberOfAttempts_WiggleAll * 100, 4, 2) .. "%)", 9))
   print("MutateSidechainsSelected " ..
-    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsSelected, 9, 3) .. "  " ..
-    PaddedNumber(g_Stats_Script_TotalSecondsUsed_MutateSidechainsSelected / 60, 7, 3) .. "  " ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsSelected, 9, 3) .. "" ..
+    PaddedString("(" ..
     PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsSelected /
-                 g_Stats_Script_TotalSecondsUsed_MutateSidechainsSelected / 60, 7, 0) .. "  " ..
+                 g_Stats_Script_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+    PaddedNumber(g_Stats_Script_TotalSecondsUsed_MutateSidechainsSelected / 60, 9, 3) .. "" ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsSelected /
+                (g_Stats_Script_TotalSecondsUsed_MutateSidechainsSelected / 60), 9, 0) .. "  " ..
     PaddedString(g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected .. "/" ..
-    PaddedNumber(g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected, 0, 0), 9) .. PaddedString(" (" ..
-    PrettyNumber2(g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected /
-                 g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected * 100) .. "%)", 9))
+    PaddedNumber(g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected, 0, 0), 9) ..
+    PaddedString(" (" ..
+    PaddedNumber(g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected /
+                 g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected * 100, 4, 2) .. "%)", 9))
   print("MutateSidechainsAll      " .. 
-    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsAll, 9, 3) .. "  " ..
-    PaddedNumber(g_Stats_Script_TotalSecondsUsed_MutateSidechainsAll / 60, 7, 3) .. "  " ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsAll, 9, 3) .. "" ..
+    PaddedString("(" ..
     PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsAll /
-                 g_Stats_Script_TotalSecondsUsed_MutateSidechainsAll / 60, 7, 0) .. "  " ..
+                 g_Stats_Script_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+    PaddedNumber(g_Stats_Script_TotalSecondsUsed_MutateSidechainsAll / 60, 9, 3) .. "" ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsAll /
+                (g_Stats_Script_TotalSecondsUsed_MutateSidechainsAll / 60), 9, 0) .. "  " ..
     PaddedString(g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll .. "/" ..
-    PaddedNumber(g_Stats_Script_NumberOfAttempts_MutateSidechainsAll, 0, 0), 9) .. PaddedString(" (" ..
-    PrettyNumber2(g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll /
-                 g_Stats_Script_NumberOfAttempts_MutateSidechainsAll * 100) .. "%)", 9))
-  print("------------------------ ---------  -------  -------  ------------------")
+    PaddedNumber(g_Stats_Script_NumberOfAttempts_MutateSidechainsAll, 0, 0), 9) ..
+    PaddedString(" (" ..
+    PaddedNumber(g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll /
+                 g_Stats_Script_NumberOfAttempts_MutateSidechainsAll * 100, 4, 2) .. "%)", 9))
+  print("------------------------ ------------------  -------  -------  ------------------")
   print("Run total                " .. 
-    PaddedNumber(g_Stats_Script_TotalPointsGained_Total, 9, 3) .. "  " ..
-    PaddedNumber(g_Stats_Script_TotalSecondsUsed_Total / 60, 7, 3) .. "  " ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_Total, 9, 3) .. "" ..
+    PaddedString("(" ..
     PaddedNumber(g_Stats_Script_TotalPointsGained_Total /
-                 g_Stats_Script_TotalSecondsUsed_Total / 60, 7, 0) .. "  " ..
+                 g_Stats_Script_TotalPointsGained_Total * 100, 5, 1) .. "%)", 9) ..
+    PaddedNumber(g_Stats_Script_TotalSecondsUsed_Total / 60, 9, 3) .. "" ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_Total /
+                (g_Stats_Script_TotalSecondsUsed_Total / 60), 9, 0) .. "  " ..
     PaddedString(g_Stats_Script_SuccessfulAttempts_Total .. "/" ..
-    PaddedNumber(g_Stats_Script_NumberOfAttempts_Total, 0, 0), 9) .. PaddedString(" (" ..
-    PrettyNumber2(g_Stats_Script_SuccessfulAttempts_Total /
-                 g_Stats_Script_NumberOfAttempts_Total * 100) .. "%)", 9))
-  print("------------------------ ---------  -------  -------  ------------------")
+    PaddedNumber(g_Stats_Script_NumberOfAttempts_Total, 0, 0), 9) ..
+    PaddedString(" (" ..
+    PaddedNumber(g_Stats_Script_SuccessfulAttempts_Total /
+                 g_Stats_Script_NumberOfAttempts_Total * 100, 4, 2) .. "%)", 9))
+  print("------------------------ ------------------  -------  -------  ------------------")
 
   local l_Score_AtEndOf_Script = g_Score_ScriptBest
 	print("\nStarting Score: " .. PrettyNumber(g_Score_AtStartOf_Script) ..
