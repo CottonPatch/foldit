@@ -1026,10 +1026,10 @@ function ChkDoneList() -- now CheckIfAlreadyRebuiltSegmentsMustBeIncluded()
 end
 --end of administration part
 
-function FindWorst(firsttime) -- now Populate_g_SegmentRangesTable_WithWorstScoringSegmentRanges
+function FindWorst(firsttime) -- now Populate_g_XLowestScoringSegmentRangesTable
     print("Searching worst scoring parts of len "..len)
     ChkDisjunctList(len)
-    wrst={} -- now l_WorstScoringSegmentRangesTable[]
+    wrst={} -- now l_XLowestScoringSegmentRangesTable[]
     GetSegmentScores()
     local skiplist=""
     local nrskip=0
@@ -1037,7 +1037,7 @@ function FindWorst(firsttime) -- now Populate_g_SegmentRangesTable_WithWorstScor
         if not CheckDone(i,i+len-1) and MustWorkon(i,i+len-1)
         then
             local s=getPartscore(i,i+len-1)
-            wrst[#wrst+1]={s,i} -- now l_WorstScoringSegmentRangesTable[]
+            wrst[#wrst+1]={s,i} -- now l_XLowestScoringSegmentRangesTable[]
         else
             if CheckDone(i,i+len-1)
             then
