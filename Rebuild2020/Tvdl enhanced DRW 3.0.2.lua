@@ -8,7 +8,7 @@ function DefineGlobalVariables()
 	g_bDebugMode = false
 	if _G ~= nil then
 		g_bDebugMode = true
---		SetupLocalDebugFuntions()
+		--SetupLocalDebugFuntions()
 	end  
   
   ---------------------------------------------------------
@@ -155,7 +155,7 @@ function DefineGlobalVariables()
   -- Used in NormalConditionChecking_TemporarilyDisable() and NormalConditionChecking_ReEnable()...
 	
 	g_bFoundAHighGain = true
-  -- Used in RebuildManySegmentRanges() and SaveBest()
+  -- Used in RebuildManySegmentRanges() and SaveBst()
 	
 	g_bFreeDesignPuzzle = false
 	-- Used in DisplayPuzzleProperties()
@@ -203,7 +203,7 @@ function DefineGlobalVariables()
   --         AskUserToSelectRebuildOptions(),
   --         RebuildManySegmentRanges(),
   --         RebuildOneSegmentRangeManyTimes() and
-  --         SaveBest
+  --         SaveBst()
   local l_PuzzleName = puzzle.GetName()  
   if string.find(l_PuzzleName, "Sketchbook") then
     g_bSketchBookPuzzle = true
@@ -275,7 +275,7 @@ function DefineGlobalVariables()
   
   g_bUserSelected_NormalStabilize = true
   --  Used in CheckForLowStartingScore(), AskUserToSelectMoreOptions(), DisplayUserSelectedOptions(),
-  --  RebuildManySegmentRanges() and SaveBest()
+  --  RebuildManySegmentRanges() and SaveBst()
   
 	g_bUserSelected_PerformExtraStabilize = false
   -- Used in AskUserToSelectMoreOptions(), RebuildManySegmentRanges() and StabilizeSegmentRange()
@@ -329,7 +329,7 @@ function DefineGlobalVariables()
 	-- Used in CleanUp()...
   
   g_Score_ScriptBest = Score()
-  -- Used in SaveBest() and many others...
+  -- Used in SaveBst() and many others...
   
   g_ScorePartText = "" -- Example: " ScorePart 4 (total)", " ScorePart 6 (ligand) 6=7=11" 
   
@@ -480,7 +480,7 @@ function DefineGlobalVariables()
   -- Really, most of the gains are with just 2 consecutive segments!
   
  	g_UserSelected_SketchBookPuzzle_MinimumGainForSave = 0
-  -- Used in AskUserToSelectRebuildOptions() and SaveBest()
+  -- Used in AskUserToSelectRebuildOptions() and SaveBst()
 
 	g_UserSelected_SkipFuseBestScorePartPose_IfCurrentRebuild_LosesMoreThan = 
 		(g_SegmentCount_WithoutLigands - (g_SegmentCount_WithoutLigands % 4)) / 4
@@ -610,10 +610,10 @@ function DefineGlobalVariables()
   -- Used in DefineGlobalVariables() and DisplayPuzzleProperties()
 		
   g_UserSelected_MaximumPotentialBonusPoints = g_ComputedMaximumPotentialBonusPoints
-  --  Used in AskUserToSelectNormlConditionCheckingOptions() and SaveBest()
+  --  Used in AskUserToSelectNormlConditionCheckingOptions() and SaveBst()
 	
 	g_bUserSelected_NormalConditionChecking_TemporarilyDisable = false --i.e.Enable Normal Condition Checking
-	--  Used in DefineGlobalVariables(), CleanUp(), SaveBest() and
+	--  Used in DefineGlobalVariables(), CleanUp(), SaveBst() and
   --          AskUserToSelectNormlConditionCheckingOptions()
 	-- ...enables faster CPU processing, but your score improvements will not be counted in foldit's Undo
   --    history.
@@ -1276,7 +1276,12 @@ NEW in version 2
 ]]--
 
 -- Handy shorts module
-SetupLocalDebugFuntions()
+	g_bDebugMode = false
+	if _G ~= nil then
+		g_bDebugMode = true
+		SetupLocalDebugFuntions()
+	end  
+
 normal= 1 -- (current.GetExplorationMultiplier() == 0)
 segCnt=structure.GetCount()
 segCnt2=segCnt
@@ -1465,7 +1470,7 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere)
                   SaveBest() -- <-- Updates g_Score_ScriptBest
                 elseif l_Score_After_Shake < g_Score_ScriptBest then
                   -- Should will undo our last change because it dropped our score...
-                  recentbest.Restore()
+                  --recentbest.Restore()
                 end
                 g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected =
                 g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected + l_SecondsUsed
@@ -1507,7 +1512,7 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere)
                 SaveBest() -- <-- Updates g_Score_ScriptBest
               elseif l_Score_After_Wiggle < g_Score_ScriptBest then
                 -- Should will undo our last change because it dropped our score...
-                recentbest.Restore()
+                --recentbest.Restore()
               end
               g_Stats_Run_TotalSecondsUsed_WiggleSelected =
               g_Stats_Run_TotalSecondsUsed_WiggleSelected + l_SecondsUsed
@@ -1546,7 +1551,7 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere)
                 SaveBest() -- <-- Updates g_Score_ScriptBest
               elseif l_Score_After_Wiggle < g_Score_ScriptBest then
                 -- Should will undo our last change because it dropped our score...
-                recentbest.Restore()
+                --recentbest.Restore()
               end
               g_Stats_Run_TotalSecondsUsed_WiggleSelected =
               g_Stats_Run_TotalSecondsUsed_WiggleSelected + l_SecondsUsed
@@ -1586,7 +1591,7 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere)
                 SaveBest() -- <-- Updates g_Score_ScriptBest
               elseif l_Score_After_Wiggle < g_Score_ScriptBest then
                 -- Should will undo our last change because it dropped our score...
-                recentbest.Restore()
+                --recentbest.Restore()
               end
               g_Stats_Run_TotalSecondsUsed_WiggleSelected =
               g_Stats_Run_TotalSecondsUsed_WiggleSelected + l_SecondsUsed
@@ -1627,7 +1632,7 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere)
                   SaveBest() -- <-- Updates g_Score_ScriptBest
                 elseif l_Score_After_Shake < g_Score_ScriptBest then
                   -- Should will undo our last change because it dropped our score...
-                  recentbest.Restore()
+                  --recentbest.Restore()
                 end
                 g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected =
                 g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected + l_SecondsUsed
@@ -1653,24 +1658,25 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere)
                   print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
                         PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
                         PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-                        l_FromWhere .. ":1xShakeSidechainsAll" ..
+                        --l_FromWhere .. ":1xShakeSidechainsAll" ..
+                        2*wf*iters .. "xWiggleAll(Bb=true,SC=false)" ..
                         g_round_x_of_y ..
                         g_with_segments_x_thru_y ..
                         g_ScorePartText ..
                         l_ClashImportanceText)        
-                  g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected =
-                  g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected + l_ScoreImprovement
-                  g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected =
-                  g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected + 1
+                  g_Stats_Run_TotalPointsGained_WiggleAll =
+                  g_Stats_Run_TotalPointsGained_WiggleAll + l_ScoreImprovement
+                  g_Stats_Run_SuccessfulAttempts_WiggleAll =
+                  g_Stats_Run_SuccessfulAttempts_WiggleAll + 1
                   SaveBest() -- <-- Updates g_Score_ScriptBest
                 elseif l_Score_After_Shake < g_Score_ScriptBest then
                   -- Should will undo our last change because it dropped our score...
-                  recentbest.Restore()
+                  --recentbest.Restore()
                 end
-                g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected =
-                g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected + l_SecondsUsed
-                g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected =
-                g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected + 1    
+                g_Stats_Run_TotalSecondsUsed_WiggleAll =
+                g_Stats_Run_TotalSecondsUsed_WiggleAll + l_SecondsUsed
+                g_Stats_Run_NumberOfAttempts_WiggleAll =
+                g_Stats_Run_NumberOfAttempts_WiggleAll + 1    
                 
             elseif how == "ws" then
               local l_TimeBefore = os.clock()
@@ -1689,24 +1695,24 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere)
                   print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
                         PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
                         PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-                        l_FromWhere .. ":1xShakeSidechainsAll" ..
+                        2*wf*iters .. "xWiggleAll(Bb=false,SC=true)" ..
                         g_round_x_of_y ..
                         g_with_segments_x_thru_y ..
                         g_ScorePartText ..
                         l_ClashImportanceText)        
-                  g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected =
-                  g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected + l_ScoreImprovement
-                  g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected =
-                  g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected + 1
+                  g_Stats_Run_TotalPointsGained_WiggleAll =
+                  g_Stats_Run_TotalPointsGained_WiggleAll + l_ScoreImprovement
+                  g_Stats_Run_SuccessfulAttempts_WiggleAll =
+                  g_Stats_Run_SuccessfulAttempts_WiggleAll + 1
                   SaveBest() -- <-- Updates g_Score_ScriptBest
                 elseif l_Score_After_Shake < g_Score_ScriptBest then
                   -- Should will undo our last change because it dropped our score...
-                  recentbest.Restore()
+                  --recentbest.Restore()
                 end
-                g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected =
-                g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected + l_SecondsUsed
-                g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected =
-                g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected + 1    
+                g_Stats_Run_TotalSecondsUsed_WiggleAll =
+                g_Stats_Run_TotalSecondsUsed_WiggleAll + l_SecondsUsed
+                g_Stats_Run_NumberOfAttempts_WiggleAll =
+                g_Stats_Run_NumberOfAttempts_WiggleAll + 1    
                 
             elseif how == "wa" then
               local l_TimeBefore = os.clock()
@@ -1725,24 +1731,24 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere)
                   print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
                         PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
                         PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-                        l_FromWhere .. ":1xShakeSidechainsAll" ..
+                        2*wf*iters .. "xWiggleAll(Bb=true,SC=true)" ..
                         g_round_x_of_y ..
                         g_with_segments_x_thru_y ..
                         g_ScorePartText ..
                         l_ClashImportanceText)        
-                  g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected =
-                  g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected + l_ScoreImprovement
-                  g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected =
-                  g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected + 1
+                  g_Stats_Run_TotalPointsGained_WiggleAll =
+                  g_Stats_Run_TotalPointsGained_WiggleAll + l_ScoreImprovement
+                  g_Stats_Run_SuccessfulAttempts_WiggleAll =
+                  g_Stats_Run_SuccessfulAttempts_WiggleAll + 1
                   SaveBest() -- <-- Updates g_Score_ScriptBest
                 elseif l_Score_After_Shake < g_Score_ScriptBest then
                   -- Should will undo our last change because it dropped our score...
-                  recentbest.Restore()
+                  --recentbest.Restore()
                 end
-                g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected =
-                g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected + l_SecondsUsed
-                g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected =
-                g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected + 1    
+                g_Stats_Run_TotalSecondsUsed_WiggleAll =
+                g_Stats_Run_TotalSecondsUsed_WiggleAll + l_SecondsUsed
+                g_Stats_Run_NumberOfAttempts_WiggleAll =
+                g_Stats_Run_NumberOfAttempts_WiggleAll + 1    
                 
             end
         end
@@ -2300,16 +2306,6 @@ function qStab() -- StabilizeSegmentRange
 end -- function qStab() 
 
 function Cleanup(err)
-    print("Restoring CI, initial selection, best result and structures")
-    CI(1)
-    save.Quickload(3)
-
-    if Filteractive then FilterOn() end
-    if SAVEDstructs==true then save.LoadSecondaryStructure() end
-    selection.DeselectAll()
-    if SAFEselection ~= nil then SetSelection(SAFEselection) end
-    print(err)
-    
   
   g_Stats_Script_ElaspedSeconds = os.clock() - g_ScriptStartTime
   
@@ -2513,8 +2509,20 @@ function Cleanup(err)
         PaddedNumber(g_Stats_Script_ElaspedSeconds / 60, 5, 3) .. " minutes or " ..
         PaddedNumber(g_Stats_Script_ElaspedSeconds / 3600, 5, 3) .. " hours" ..
         "\n")
-    
-end
+      
+    print("Restoring CI, initial selection, best result and structures")
+    CI(1)
+    save.Quickload(3)
+
+    if Filteractive then FilterOn() end
+    if SAVEDstructs==true then save.LoadSecondaryStructure() end
+    selection.DeselectAll()
+    if SAFEselection ~= nil then SetSelection(SAFEselection) end
+    if err ~= nill then
+      print(err)
+    end
+       
+end -- function Cleanup()
 
 -- Module AskSelections
 -- 02-05-2012 Timo van der Laan, Free to use for non commercial purposes
@@ -3175,7 +3183,7 @@ function MutateSel(maxitter, l_FromWhere)
     SaveBest() -- <-- Updates g_Score_ScriptBest
   
   elseif l_Score_After_Mutate < g_Score_ScriptBest then
-    recentbest.Restore()
+    --recentbest.Restore()
   end
   g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected =
   g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected + l_SecondsUsed
