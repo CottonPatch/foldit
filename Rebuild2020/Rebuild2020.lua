@@ -397,7 +397,7 @@ function DefineGlobalVariables()
 		g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan = 40 -- why so low?
 	end
   if g_bDebugMode == true then
-    g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan = 10000
+    --g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan = 10000
   end
   
 	g_UserSelected_Mutate_ClashImportance = 0.9
@@ -2688,10 +2688,8 @@ function bSegmentIsAllowedToBeRebuilt(l_SegmentIndex)
   
   if g_CurrentRebuildPointsGained >
     g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan then
-    -- this scenario never appears to be happening, because g_CurrentRebuildPointsGained
-    -- is always = 0. But why is it always 0?
     -- g_CurrentRebuildPointsGained is added to in RebuildManySegmentRanges()
-    -- g_CurrentRebuildPointsGained is reset in 
+    -- g_CurrentRebuildPointsGained is never reset to zero
     return true
   end
   
@@ -5575,7 +5573,7 @@ function RebuildManySegmentRanges() -- was DeepRebuild()
     -- segments per segment range...
       
       print("\n  The current rebuild gain of " .. PrettyNumber(g_CurrentRebuildPointsGained) ..
-               " is greater than the 'Move on to more consecutive segments per range if " ..
+               " is greater than the 'Move on to more consecutive segments per range if" ..
                " current rebuild points gained is more than' value of " ..
                 g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan .. 
                " points (this value can be changed on the 'More Options' page);" ..
