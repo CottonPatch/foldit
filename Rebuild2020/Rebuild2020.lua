@@ -193,7 +193,7 @@ function DefineGlobalVariables()
     g_bSketchBookPuzzle = true
 	end
   
-	g_bUserSelected_AlwaysAllowRebuildingAlreadyRebuilt_Segments = true
+	g_bUserSelected_AlwaysAllowRebuildingAlreadyRebuilt_Segments = false
   -- Used in 7 functions...
 	-- ...User can change this on the Select Rebuild Options page.
   --if g_bDebugMode == true then
@@ -393,12 +393,12 @@ function DefineGlobalVariables()
 	--   g_SegmentCount_WithoutLigands = 135
 	--   g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan =
 	--    (135 - (135 % 4)) /4 = (135 - 3) / 4 = 135 / 4 = 33.75
-	if g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan < 10000 then
-		g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan = 10000 -- was 40
+	if g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan > 40 then
+		g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan = 40 -- why so low?
 	end
-  --if g_bDebugMode == true then
-  --  g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan = 10000
-  --end
+  if g_bDebugMode == true then
+    g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan = 10000
+  end
   
 	g_UserSelected_Mutate_ClashImportance = 0.9
 	-- Used in MutateSideChainsOfSelectedSegments() and AskUserToSelectMutateOptions()
@@ -2419,7 +2419,7 @@ function DisplayUserSelectedOptions() -- was printOptions()
            " without regard to number of points gained from rebuild.")
 	else
 		print("  User selected to only allow rebuilding already rebuilt segments" ..
-					" if current rebuild pointed gained is more than " ..
+					" if current rebuild points gained is more than " ..
           g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan ..
           "")
 	end
@@ -2686,8 +2686,12 @@ function bSegmentIsAllowedToBeRebuilt(l_SegmentIndex)
 		return true
 	end
   
-  if g_CurrentRebuildPointsGained > -- set in RebuildManySegmentRanges()
+  if g_CurrentRebuildPointsGained >
     g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan then
+    -- this scenario never appears to be happening, because g_CurrentRebuildPointsGained
+    -- is always = 0. But why is it always 0?
+    -- g_CurrentRebuildPointsGained is added to in RebuildManySegmentRanges()
+    -- g_CurrentRebuildPointsGained is reset in 
     return true
   end
   
@@ -2947,9 +2951,6 @@ function CheckForLowStartingScore()
          " is less than " .. l_LowScore .. " points, to speed things up, we will temporarily")
   print("  perform quick stabilize and skip fusing best position" ..
          " until the score increases above " .. l_LowScore .. " points.")
-       -- The More Options page only provides a way to set these variables to false,
-       -- which would do nothing in this case. So the following statement is not true...
-       -- " However, these defaults can be changed on the More options page.")
 	g_bUserSelected_FuseBestScorePartPose = false
 	g_bUserSelected_NormalStabilize = false
 
@@ -2979,7 +2980,7 @@ function CheckIfAlreadyRebuiltSegmentsMustBeIncluded() -- was ChkDisjunctList()
     
 		if l_ConsecutiveSegmentsCounter >= g_RequiredNumberOfConsecutiveSegments then
       
-			-- Yeah, another segment range with enough consecutive Segments to meet 
+			-- Yay, another segment range with enough consecutive Segments to meet 
       -- the minimun required segments per segment range, despite having a bunch
       -- of already-rebuilt (or ineligable because they are frozen or locked) 
       -- segments in our way...
@@ -2988,7 +2989,7 @@ function CheckIfAlreadyRebuiltSegmentsMustBeIncluded() -- was ChkDisjunctList()
       
       if l_SegmentRangeCounter >= g_UserSelected_MaxNumberOf_SegmentRanges_ToRebuild_ThisRunCycle then
         
-			-- Yeah, we have enough segments ranges to get started rebuilding. Let's return and get to it...
+			-- Yay, we have enough segments ranges to get started rebuilding. Let's return and get to it...
         return
         
       end
@@ -3001,8 +3002,8 @@ function CheckIfAlreadyRebuiltSegmentsMustBeIncluded() -- was ChkDisjunctList()
 	-- let's set all the entries in the g_bSegmentsAlreadyRebuiltTable to false.
 	-- This should give us plenty of segments to work with...
   -- Too much noise in the log file...
-	--print("\n  Not enough consecutive not-already-rebuilt segments available to create a segment range;" ..
-  --     "\n  therefore, we will set all already-rebuilt segments to not-already-rebuilt and try again...")
+	print("\n  Not enough consecutive not-already-rebuilt segments available to create a segment range;" ..
+        "\n  therefore, we will set all already-rebuilt segments to not-already-rebuilt and try again...")
        
   ResetSegmentsAlreadyRebuiltTable()
        
@@ -5549,28 +5550,30 @@ function RebuildManySegmentRanges() -- was DeepRebuild()
     -- I think this should be the end of this function!
     
     
+    local l_Score_After_SeveralMoreChangesToSegmentRange = GetPoseTotalScore()
+    
+		g_CurrentRebuildPointsGained = l_Score_After_SeveralMoreChangesToSegmentRange -
+                                   l_Score_Before_SeveralChangesToSegmentRange
+    -- g_CurrentRebuildPointsGained is checked in bSegmentIsAllowedToBeRebuilt().
+    
+    l_RemainingSegmentRanges = #g_XLowestScoringSegmentRangesTable - l_SegmentRangeIndex
+    
     -- I really don't like this next check...
     -- Does this check really improve the build process? Or, does it simply skip a bunch of
     -- really good rebuild prospects of segment ranges with fewer consecutive segments...
     -- We need indisputable comparison data to prove this is a good idea...
     -- Comparison data should include many puzzle types, with score and time elapsed comparisons.
-    local l_Score_After_SeveralMoreChangesToSegmentRange = GetPoseTotalScore()
-    
-		local g_CurrentRebuildPointsGained = l_Score_After_SeveralMoreChangesToSegmentRange -
-                                         l_Score_Before_SeveralChangesToSegmentRange
-     -- g_CurrentRebuildPointsGained is checked in bSegmentIsAllowedToBeRebuilt().
-    
-		-- The default for g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan
-    -- is 40 or less. If we just gained more than
-    -- g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan, 
-		-- then we figure, that's good enough for now. It is now time to move on to 
-		-- more consecutive segments per segment range...But why such a low number?
-    l_RemainingSegmentRanges = #g_XLowestScoringSegmentRangesTable - l_SegmentRangeIndex
-    
 		if (g_CurrentRebuildPointsGained - 
       g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan) > 0.001 and
-      l_RemainingSegmentRanges > 0 then
-         
+      l_RemainingSegmentRanges > 0 then         
+    
+		-- The default for g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan
+    -- is 40 or less. Why such a low number?
+    
+    -- We just gained > g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan;
+		-- therefore, we figure that's good enough for now. It is now time to move on to more consecutive
+    -- segments per segment range...
+      
       print("\n  The current rebuild gain of " .. PrettyNumber(g_CurrentRebuildPointsGained) ..
                " is greater than the 'Move on to more consecutive segments per range if " ..
                " current rebuild points gained is more than' value of " ..
@@ -5750,7 +5753,7 @@ function RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment) -- was Re
 	SetClashImportance(1) -- This call to SetClashImportance is probably not needed here because we
   --                       normally SetClashImportance just before each rebuild, shake, wiggle and
   --                       mutate. I'll double check.
-
+  print("l_NumberOfTimesStructureChanged = " .. l_NumberOfTimesStructureChanged)
 	return l_NumberOfTimesStructureChanged
 
 end -- RebuildOneSegmentRangeManyTimes() -- was ReBuild()
@@ -5833,6 +5836,16 @@ function RebuildSelectedSegments(l_StartSegment, l_EndSegment) -- was localRebui
       -- 5) RebuildSelected had multiple round successes 3 out of 10 times (30%). Low sample size!
 
     elseif l_Score_After_Rebuild < g_Score_ScriptBest then
+      print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " .. 
+            PaddedNumber(l_ScoreImprovement, 8, 3) .. " " .. 
+            PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+            l_CurrentIteration .. "xRebuildSelected" ..
+            g_round_x_of_y ..
+            g_with_segments_x_thru_y)
+          
+      -- A success of sorts...
+      g_Stats_Run_SuccessfulAttempts_RebuildSelected = 
+      g_Stats_Run_SuccessfulAttempts_RebuildSelected + 1
       -- the original code did not call recentbest.Restore()
       -- Should we undo our last change because it caused a drop in our score?
       -- Maybe; Maybe not. We might allow a small drop with the hope to 
