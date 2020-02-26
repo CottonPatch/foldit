@@ -1156,7 +1156,6 @@ function SetupLocalDebugFuntions()
   current.RandomlyChange_g_Debug_CurrentEnergyScore()
 
 end -- function SetupLocalDebugFuntions()
-
 function PaddedNumber(l_DirtyFloat, l_PadWidth, l_AfterDecimal)
   -- Called from ()...
   
@@ -1203,8 +1202,6 @@ end -- function PrettyNumber(l_DirtyFloat)
 function GetPoseTotalScore()
   return(Score())
 end
-
-
 --[[
     Based on Rav3n_pl Deep Rebuild v3.x
     WARNING!
@@ -1220,7 +1217,6 @@ On the best position a fuze is run if it looks promissing enough.
 
 Changed by: Timo van der Laan 17-12-2011 till 28-12-2012
 ]]--
-
 --[[
 Overview:
 
@@ -1274,27 +1270,22 @@ NEW in version 2
 3.0.0 Made a Remix version in the same source
 3.0.1 Fixed density weight computation if filters are active
 ]]--
-
 -- Handy shorts module
 	g_bDebugMode = false
 	if _G ~= nil then
 		g_bDebugMode = true
 		SetupLocalDebugFuntions()
 	end  
-
 normal= 1 -- (current.GetExplorationMultiplier() == 0)
 segCnt=structure.GetCount()
 segCnt2=segCnt
 while structure.GetSecondaryStructure(segCnt2)=="M" do segCnt2=segCnt2-1 end
-
--- On request of gmn
-CIfactor=1
+CIfactor=1 
 maxCI=true
 function CI(CInr)
     if CInr > 0.99 then maxCI=true else maxCI=false end
     behavior.SetClashImportance(CInr*CIfactor)
 end
-
 function CheckCI() -- now AskUserToCheckClashImportance()
    local ask=dialog.CreateDialog("Clash importance is not 1")
    ask.l1=dialog.AddLabel("Last change to change it")
@@ -1302,10 +1293,8 @@ function CheckCI() -- now AskUserToCheckClashImportance()
    ask.continue=dialog.AddButton("Continue",1)
    dialog.Show(ask)
 end
-
 if behavior.GetClashImportance() < 0.99 then CheckCI() end
 CIfactor=behavior.GetClashImportance()
-
 -- Score functions
 function Score(pose)
     if pose==nil then pose=current end
@@ -1320,7 +1309,6 @@ function Score(pose)
         return total*pose.GetExplorationMultiplier()
     end
 end
-
 function SegScore(pose)
     if pose==nil then pose=current end
     local total=8000
@@ -1329,24 +1317,19 @@ function SegScore(pose)
     end
     return total
 end
-
 function RBScore()
     return Score(recentbest)
 end
-
 function round3(x)--cut all afer 3-rd place
     return x-x%0.001
 end
-
 -- Module Filteractive
-
 Filterscore=Score()
 if SKETCHBOOKPUZZLE == false then behavior.SetSlowFiltersDisabled(true) end
 FilterOffscore=Score()
 if SKETCHBOOKPUZZLE == false then behavior.SetSlowFiltersDisabled(false) end
 maxbonus=Filterscore-FilterOffscore
 CURBONUS=maxbonus
-
 function Filter()
    local ask=dialog.CreateDialog("Slow filters seem to be active")
    ask.disable=dialog.AddCheckbox("Run with disabled slow filters",Filteractive)
@@ -1362,7 +1345,6 @@ function Filter()
 if maxbonus=="" then maxbonus=0 end
    Filteractive=ask.disable.value
 end
-
 BetterRecentBest=false
 function FilterOff()
     -- Filters off but restore a better recentbest with filter off
@@ -1374,7 +1356,6 @@ function FilterOff()
         save.Quickload(99)
     end
 end
-
 function FilterOn()
     -- Filter on but remember recent best if better than current
     BetterRecentBest= Score(recentbest) > Score()
@@ -1386,7 +1367,6 @@ function FilterOn()
     end
     behavior.SetSlowFiltersDisabled(false)
 end
-
 Filteractive=(math.abs(maxbonus) > 0.1)
 if Filteractive then
    --Filters active, give people a choice
@@ -1394,44 +1374,43 @@ if Filteractive then
    Filter()
 end
 -- End of module Filteractive
-
 MINGAIN=0
 foundahighgain=true
-bestScore=Score()
+bestScore=Score() -- now g_Score_ScriptBest = GetPoseTotalScore()
 if Filteractive then FilterOff() end
 function SaveBest()
-  if (not Filteractive) or
-     (Score()+maxbonus>bestScore) then
-     if Filteractive then FilterOn() end
-     local g=Score()-bestScore
-     if g>MINGAIN or ( g>0 and foundahighgain) then
-        if g>0.01 then
-          --print("Gained another "..round3(g).." pts.")
-        end
-        bestScore=Score()
-        g_Score_ScriptBest = bestScore
-        save.Quicksave(3)
- foundahighgain=true
-     end
-     if Filteractive then FilterOff() end
+  if (not Filteractive) or -- now if g_bUserSelected_NormalConditionChecking_TemporarilyDisable == true then
+    (Score()+maxbonus>bestScore) then
+    if Filteractive then  -- now if g_bUserSelected_NormalConditionChecking_TemporarilyDisable == true then
+      FilterOn() -- now NormalConditionChecking_ReEnable()
+    end
+    local g = Score() - bestScore
+    if g > MINGAIN or (g > 0 and foundahighgain) then
+      if g > 0.01 then
+        --print("Gained another "..round3(g).." pts.")
+      end
+      bestScore=Score() -- bestScore is now g_Score_ScriptBest
+      g_Score_ScriptBest = bestScore -- added for stats reporting
+      save.Quicksave(3)
+      foundahighgain=true
+   end
+   if Filteractive then FilterOff() end
   end
 end
-
--- New WiggleFactor
-WF=1
--- Wiggle function
--- Optimized due to Susumes ideas
--- Note the extra parameter to be used if only selected parts must be done
+WF=1 -- New WiggleFactor
 function Wiggle(how, iters, minppi,onlyselected,l_FromWhere)
-    --score conditioned recursive wiggle/shake
-    --fixed a bug, absolute difference is the threshold now
-    if how==nil then how="wa" end
-    if iters==nil then iters=3 end
-    
-    if minppi==nil then minppi=0.1 end
-    if onlyselected==nil then onlyselected=false end
-    local wf=1
-    if maxCI then wf=WF end
+  -- Wiggle function
+  -- Optimized due to Susumes ideas
+  -- Note the extra parameter to be used if only selected parts must be done
+  --score conditioned recursive wiggle/shake
+  --fixed a bug, absolute difference is the threshold now
+  if how==nil then how="wa" end
+  if iters==nil then iters=3 end
+  
+  if minppi==nil then minppi=0.1 end
+  if onlyselected==nil then onlyselected=false end
+  local wf=1
+  if maxCI then wf=WF end
   local l_ClashImportance = behavior.GetClashImportance()
   local l_ClashImportanceText = " ClashImp " .. PaddedNumber(l_ClashImportance, 0, 2)    
   
@@ -1467,9 +1446,9 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere)
                   g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected + l_ScoreImprovement
                   g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected =
                   g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected + 1
-                  SaveBest() -- <-- Updates g_Score_ScriptBest
+                  --SaveBest() -- <-- Updates g_Score_ScriptBest
                 elseif l_Score_After_Shake < g_Score_ScriptBest then
-                  -- Should will undo our last change because it dropped our score...
+                  -- Should we undo our last change because it dropped our score...
                   --recentbest.Restore()
                 end
                 g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected =
@@ -1509,9 +1488,9 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere)
                 g_Stats_Run_TotalPointsGained_WiggleSelected + l_ScoreImprovement
                 g_Stats_Run_SuccessfulAttempts_WiggleSelected =
                 g_Stats_Run_SuccessfulAttempts_WiggleSelected + 1
-                SaveBest() -- <-- Updates g_Score_ScriptBest
+                --SaveBest() -- <-- Updates g_Score_ScriptBest
               elseif l_Score_After_Wiggle < g_Score_ScriptBest then
-                -- Should will undo our last change because it dropped our score...
+                -- Should we undo our last change because it dropped our score...
                 --recentbest.Restore()
               end
               g_Stats_Run_TotalSecondsUsed_WiggleSelected =
@@ -1548,9 +1527,9 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere)
                 g_Stats_Run_TotalPointsGained_WiggleSelected + l_ScoreImprovement
                 g_Stats_Run_SuccessfulAttempts_WiggleSelected =
                 g_Stats_Run_SuccessfulAttempts_WiggleSelected + 1
-                SaveBest() -- <-- Updates g_Score_ScriptBest
+                --SaveBest() -- <-- Updates g_Score_ScriptBest
               elseif l_Score_After_Wiggle < g_Score_ScriptBest then
-                -- Should will undo our last change because it dropped our score...
+                -- Should we undo our last change because it dropped our score...
                 --recentbest.Restore()
               end
               g_Stats_Run_TotalSecondsUsed_WiggleSelected =
@@ -1588,9 +1567,9 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere)
                 g_Stats_Run_TotalPointsGained_WiggleSelected + l_ScoreImprovement
                 g_Stats_Run_SuccessfulAttempts_WiggleSelected =
                 g_Stats_Run_SuccessfulAttempts_WiggleSelected + 1
-                SaveBest() -- <-- Updates g_Score_ScriptBest
+                --SaveBest() -- <-- Updates g_Score_ScriptBest
               elseif l_Score_After_Wiggle < g_Score_ScriptBest then
-                -- Should will undo our last change because it dropped our score...
+                -- Should we undo our last change because it dropped our score...
                 --recentbest.Restore()
               end
               g_Stats_Run_TotalSecondsUsed_WiggleSelected =
@@ -1629,9 +1608,9 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere)
                   g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected + l_ScoreImprovement
                   g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected =
                   g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected + 1
-                  SaveBest() -- <-- Updates g_Score_ScriptBest
+                  --SaveBest() -- <-- Updates g_Score_ScriptBest
                 elseif l_Score_After_Shake < g_Score_ScriptBest then
-                  -- Should will undo our last change because it dropped our score...
+                  -- Should we undo our last change because it dropped our score...
                   --recentbest.Restore()
                 end
                 g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected =
@@ -1668,9 +1647,9 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere)
                   g_Stats_Run_TotalPointsGained_WiggleAll + l_ScoreImprovement
                   g_Stats_Run_SuccessfulAttempts_WiggleAll =
                   g_Stats_Run_SuccessfulAttempts_WiggleAll + 1
-                  SaveBest() -- <-- Updates g_Score_ScriptBest
+                  --SaveBest() -- <-- Updates g_Score_ScriptBest
                 elseif l_Score_After_Shake < g_Score_ScriptBest then
-                  -- Should will undo our last change because it dropped our score...
+                  -- Should we undo our last change because it dropped our score...
                   --recentbest.Restore()
                 end
                 g_Stats_Run_TotalSecondsUsed_WiggleAll =
@@ -1704,9 +1683,9 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere)
                   g_Stats_Run_TotalPointsGained_WiggleAll + l_ScoreImprovement
                   g_Stats_Run_SuccessfulAttempts_WiggleAll =
                   g_Stats_Run_SuccessfulAttempts_WiggleAll + 1
-                  SaveBest() -- <-- Updates g_Score_ScriptBest
+                  --SaveBest() -- <-- Updates g_Score_ScriptBest
                 elseif l_Score_After_Shake < g_Score_ScriptBest then
-                  -- Should will undo our last change because it dropped our score...
+                  -- Should we undo our last change because it dropped our score...
                   --recentbest.Restore()
                 end
                 g_Stats_Run_TotalSecondsUsed_WiggleAll =
@@ -1740,9 +1719,9 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere)
                   g_Stats_Run_TotalPointsGained_WiggleAll + l_ScoreImprovement
                   g_Stats_Run_SuccessfulAttempts_WiggleAll =
                   g_Stats_Run_SuccessfulAttempts_WiggleAll + 1
-                  SaveBest() -- <-- Updates g_Score_ScriptBest
+                  --SaveBest() -- <-- Updates g_Score_ScriptBest
                 elseif l_Score_After_Shake < g_Score_ScriptBest then
-                  -- Should will undo our last change because it dropped our score...
+                  -- Should we undo our last change because it dropped our score...
                   --recentbest.Restore()
                 end
                 g_Stats_Run_TotalSecondsUsed_WiggleAll =
@@ -1755,14 +1734,6 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere)
         --if math.abs(Score()-sp) > minppi then return Wiggle(how, iters, minppi,onlyselected) end
     --end
 end
-
--- end of handy shorts module
-
--- Segment set and list module
--- Notice that most functions assume that the sets are well formed
--- (=ordered and no overlaps)
--- 02-05-2012 TvdL Free to use for non commercial purposes
-
 function SegmentListToSet(list)
     local result={}
     local f=0
@@ -1781,7 +1752,6 @@ function SegmentListToSet(list)
     --SegmentPrintSet(result)
     return result
 end
-
 function SegmentSetToList(set)
     local result={}
     for i=1,#set do
@@ -1792,12 +1762,10 @@ function SegmentSetToList(set)
     end
     return result
 end
-
 function SegmentCleanSet(set)
 -- Makes it well formed
     return SegmentListToSet(SegmentSetToList(set))
 end
-
 function SegmentInvertSet(set,maxseg)
 -- Gives back all segments not in the set
 -- maxseg is added for ligand
@@ -1811,7 +1779,6 @@ function SegmentInvertSet(set,maxseg)
     if set[#set][2] ~= maxseg then result[#result+1]={set[#set][2]+1,maxseg} end
     return result
 end
-
 function SegmentInvertList(list)
     table.sort(list)
     local result={}
@@ -1821,7 +1788,6 @@ function SegmentInvertList(list)
     for j=list[#list]+1,segCnt2 do result[#result+1]=j end
     return result
 end
-
 function SegmentInList(s,list)
     table.sort(list)
     for i=1,#list do
@@ -1831,7 +1797,6 @@ function SegmentInList(s,list)
     end
     return false
 end
-
 function SegmentInSet(set,s)
     for i=1,#set do
         if s>=set[i][1] and s<=set[i][2] then return true
@@ -1840,7 +1805,6 @@ function SegmentInSet(set,s)
     end
     return false
 end
-
 function SegmentJoinList(list1,list2)
     local result=list1
     if result == nil then return list2 end
@@ -1848,11 +1812,9 @@ function SegmentJoinList(list1,list2)
     table.sort(result)
     return result
 end
-
 function SegmentJoinSet(set1,set2)
     return SegmentListToSet(SegmentJoinList(SegmentSetToList(set1),SegmentSetToList(set2)))
 end
-
 function SegmentCommList(list1,list2)
     local result={}
     table.sort(list1)
@@ -1868,19 +1830,15 @@ function SegmentCommList(list1,list2)
     end
     return result
 end
-
 function SegmentCommSet(set1,set2)
     return SegmentListToSet(SegmentCommList(SegmentSetToList(set1),SegmentSetToList(set2)))
 end
-
 function SegmentSetMinus(set1,set2)
     return SegmentCommSet(set1,SegmentInvertSet(set2))
 end
-
 function SegmentPrintSet(set)
     print(SegmentSetToString(set))
 end
-
 function SegmentSetToString(set)
     local line = ""
     for i=1,#set do
@@ -1889,7 +1847,6 @@ function SegmentSetToString(set)
     end
     return line
 end
-
 function SegmentSetInSet(set,sub)
     if sub==nil then return true end
     -- Checks if sub is a proper subset of set
@@ -1898,7 +1855,6 @@ function SegmentSetInSet(set,sub)
     end
     return true
 end
-
 function SegmentRangeInSet(set,range)
     if range==nil or #range==0 then return true end
     local b=range[1]
@@ -1910,7 +1866,6 @@ function SegmentRangeInSet(set,range)
     end
     return false
 end
-
 function SegmentSetToBool(set)
     local result={}
     for i=1,structure.GetCount() do
@@ -1919,7 +1874,6 @@ function SegmentSetToBool(set)
     return result
 end
 --- End of Segment Set module
-
 -- Module Find Segment Types
 function FindMutablesList()
     local result={}
@@ -1929,7 +1883,6 @@ end
 function FindMutables()
     return SegmentListToSet(FindMutablesList())
 end
-
 function FindFrozenList()
     local result={}
     for i=1,segCnt2 do if freeze.IsFrozen(i) then result[#result+1]=i end end
@@ -1938,7 +1891,6 @@ end
 function FindFrozen()
     return SegmentListToSet(FindFrozenList())
 end
-
 function FindLockedList()
     local result={}
     for i=1,segCnt2 do if structure.IsLocked(i) then result[#result+1]=i end end
@@ -1947,7 +1899,6 @@ end
 function FindLocked()
     return SegmentListToSet(FindLockedList())
 end
-
 function FindSelectedList()
     local result={}
     for i=1,segCnt do if selection.IsSelected(i) then result[#result+1]=i end end
@@ -1956,7 +1907,6 @@ end
 function FindSelected()
     return SegmentListToSet(FindSelectedList())
 end
-
 function FindAAtypeList(aa)
     local result={}
     for i=1,segCnt2 do
@@ -1967,7 +1917,6 @@ end
 function FindAAtype(aa)
     return SegmentListToSet(FindAAtypeList(aa))
 end
-
 function FindAminotype(at) --NOTE: only this one gives a list not a set
     local result={}
     for i=1,segCnt2 do
@@ -1976,9 +1925,7 @@ function FindAminotype(at) --NOTE: only this one gives a list not a set
     return result
 end
 -- end Module Find Segment Types
-
 -- Module to compute subscores
--- TvdL, 14-12-2012
 function GetSubscore(types,seg1,seg2,pose) -- now Calculate_SegmentRange_Score()
     local result=0
     if type(types) == "table" then
@@ -1997,7 +1944,6 @@ function GetSubscore(types,seg1,seg2,pose) -- now Calculate_SegmentRange_Score()
     end
     if normal then return result else return result*pose.GetExplorationMultiplier() end
 end
-
 function FindActiveSubscores(show) -- now Populate_g_ActiveScorePartsTable()
     local result={}
     local Subs=puzzle.GetPuzzleSubscoreNames()
@@ -2018,9 +1964,7 @@ function FindActiveSubscores(show) -- now Populate_g_ActiveScorePartsTable()
     return result
 end
 -- End module to compute subscores
-
--- Position stack module 1.0
--- uses slot 60 and higher
+-- Position stack module 1.0 - uses slot 60 and higher
 Stackmin=60
 StackMarks={}
 StackPos=60
@@ -2032,7 +1976,6 @@ function PushPosition()
     save.Quicksave(StackPos)
     StackPos=StackPos+1
 end
-
 function PopPosition()
     if StackPos==60 then
         print("Position stack underflow, exiting")
@@ -2066,19 +2009,16 @@ function ClrTopPosition()
 end
 -- Start of module for bridgechecking
 Cyslist={}
-savebridges=false --default no bridgechecking
+savebridges=false -- default no bridgechecking
 nrofbridges=0
-
 function setCyslist()
     Cyslist=FindAminotype("c")
     nrofbridges=CountBridges()
 end
-
 function IsBridge(i)
     if structure.IsLocked(i) then return false end
     return ''..current.GetSegmentEnergySubscore(i,'disulfides') ~= '-0'
 end
-
 function CountBridges()
     local count = 0
     for i = 1,#Cyslist do
@@ -2086,25 +2026,19 @@ function CountBridges()
     end
     return count
 end
-
 function BridgesBroken()
     return savebridges == true and CountBridges() < nrofbridges
 end
-
 function Bridgesave()
     if savebridges then PushPosition() end
 end
-
 function Bridgerestore()
     if savebridges then
         if BridgesBroken() then PopPosition() else ClrTopPosition() end
     end
 end
-
 -- End module bridgechecking
-
 -- Module find puzzle properties
--- Tvdl 14-12-2012
 HASMUTABLE=false
 HASDENSITY=false
 HASLIGAND= (segCnt2<segCnt)
@@ -2112,7 +2046,6 @@ DENSITYWEIGHT=0
 PROBABLESYM=false
 FREEDESIGN=false
 SKETCHBOOKPUZZLE=false
-
 function SetPuzzleProperties()
     print("Computing puzzle properties")
     -- Find out if the puzzle has mutables
@@ -2154,13 +2087,10 @@ function SetPuzzleProperties()
      SKETCHBOOKPUZZLE=true
     end
 end
-
 SetPuzzleProperties()
 -- End of module find puzzle properties
-
 -- Standard Fuze module
 -- Picks up all gains by using recentbest
-
 function GetRB(prefun,postfun) -- get recent best pose
     if RBScore()> Score() then
         if prefun ~= nil then prefun() end
@@ -2168,7 +2098,6 @@ function GetRB(prefun,postfun) -- get recent best pose
         if postfun ~= nil then postfun() end
     end
 end
-
 function FuzeEnd(prefun,postfun)
     if prefun ~= nil then prefun() end
     CI(1)
@@ -2179,7 +2108,6 @@ function FuzeEnd(prefun,postfun)
     if postfun ~= nil then postfun() end
     SaveBest()
 end
-
 function Fuze1(ci1,ci2,prefun,postfun,globshake)
     if prefun ~=nil then prefun() end
     if globshake==nil then globshake=true end
@@ -2189,7 +2117,6 @@ function Fuze1(ci1,ci2,prefun,postfun,globshake)
     Wiggle("wa",1,nil,nil,"Fuze1b")
     if postfun ~= nil then postfun() end
 end
-
 function Fuze2(ci1,ci2,prefun,postfun)
     if prefun ~= nil then prefun() end
     CI(ci1)
@@ -2200,7 +2127,6 @@ function Fuze2(ci1,ci2,prefun,postfun)
     Wiggle("wa",1,nil,nil,"Fuze2b")
     if postfun ~= nil then postfun() end
 end
-
 function reFuze(scr,slot)
     local s=Score()
     if s<scr then
@@ -2211,13 +2137,13 @@ function reFuze(scr,slot)
     end
     return scr
 end
-
 function Fuze(slot,prefun,postfun,globshake)
     local scr=Score()
     if slot == nil then slot=4 save.Quicksave(slot) end
 
     recentbest.Save()
-    Fuze1(0.3,0.6,prefun,postfun,globshake) FuzeEnd(prefun,postfun)
+    Fuze1(0.3,0.6,prefun,postfun,globshake)
+    FuzeEnd(prefun,postfun)
     scr=reFuze(scr,slot)
     Fuze2(0.3,1,prefun,postfun)
     GetRB(prefun,postfun)
@@ -2237,16 +2163,13 @@ function Fuze(slot,prefun,postfun,globshake)
     SaveBest()
 end
 -- end standard Fuze module
-
 -- Module setsegmentset
--- Tvdl, 11-05-2012 Free to use for noncommercial purposes
 function SetSelection(set) -- now CleanUpSelectedSegmentRanges()
     selection.DeselectAll()
     if set ~= nil then for i=1,#set do
         selection.SelectRange(set[i][1],set[i][2])
     end end
 end
-
 function SelectAround(ss,se,radius,nodeselect) -- now SelectSegmentsNearSegmentRange()
     if nodeselect~=true then selection.DeselectAll() end
     for i=1, segCnt2 do
@@ -2255,17 +2178,15 @@ function SelectAround(ss,se,radius,nodeselect) -- now SelectSegmentsNearSegmentR
         end
     end
 end
-
 function SetAAtype(set,aa)
     local saveselected=FindSelected()
     SetSelection(set)
     structure.SetSecondaryStructureSelected(aa)
     SetSelection(saveselected)
 end
-
 -- Module AllLoop
 SAVEDstructs=false
-function AllLoop() -- ConvertAllSegmentsToLoops()
+function AllLoop() -- now ConvertAllSegmentsToLoops()
   --turning entire structure to loops
     local anychange=false
     for i=1,segCnt2 do
@@ -2281,8 +2202,7 @@ function AllLoop() -- ConvertAllSegmentsToLoops()
         structure.SetSecondaryStructureSelected("L")
     end
 end
-
-function qStab() -- StabilizeSegmentRange
+function qStab() -- now StabilizeSegmentRange()
     -- Do not accept qstab losses
     local curscore=Score()
     PushPosition()
@@ -2304,7 +2224,6 @@ function qStab() -- StabilizeSegmentRange
     recentbest.Restore()
     if Score() < curscore then PopPosition() else ClrTopPosition() end
 end -- function qStab() 
-
 function Cleanup(err)
   
   g_Stats_Script_ElaspedSeconds = os.clock() - g_ScriptStartTime
@@ -2523,10 +2442,8 @@ function Cleanup(err)
     end
        
 end -- function Cleanup()
-
 -- Module AskSelections
--- 02-05-2012 Timo van der Laan, Free to use for non commercial purposes
-function AskForSelections(title,mode) -- AskUserToSelectSegmentsRangesToRebuild()
+function AskForSelections(title,mode) -- now AskUserToSelectSegmentsRangesToRebuild()
     local result={{1,structure.GetCount()}} -- All segments
     if mode == nil then mode={} end
     if mode.askloops==nil then mode.askloops=true end
@@ -2670,10 +2587,9 @@ function AskForSelections(title,mode) -- AskUserToSelectSegmentsRangesToRebuild(
     return result
 end
 -- end of module AskSelections
-
 progname="DRW "
 action="rebuild"
-function Sort(tab,items) -- SortBySegmentScore()
+function Sort(tab,items) -- now SortBySegmentScore()
   --BACWARD bubble sorting - lowest on top, only needed items
     for x=1,items do --items do
         for y=x+1,#tab do
@@ -2684,8 +2600,7 @@ function Sort(tab,items) -- SortBySegmentScore()
     end
     return tab
 end
-
-function AddDone(first,last) -- SetSegmentsAlreadyRebuilt()
+function AddDone(first,last) -- now SetSegmentsAlreadyRebuilt()
     if donotrevisit then
         Donepart[first+(last-first)*segCnt2]=true
         Blocked[#Blocked+1]=first+(last-first)*segCnt2
@@ -2694,8 +2609,7 @@ function AddDone(first,last) -- SetSegmentsAlreadyRebuilt()
         for i=first,last do Disj[i]=true end
     end
 end
-
-function CheckDone(first,last) -- bSegmentRangeIsAllowedToBeRebuilt
+function CheckDone(first,last) -- now bSegmentRangeIsAllowedToBeRebuilt()
     if not donotrevisit then return false end
     local result=
       Donepart[first+(last-first)*segCnt2] -- now deprecated
@@ -2706,7 +2620,6 @@ function CheckDone(first,last) -- bSegmentRangeIsAllowedToBeRebuilt
     end
     return result
 end
-
 function ChkDisjunctList(n) -- now CheckIfAlreadyRebuiltSegmentsMustBeIncluded()
     if not disjunct then return end
     local maxlen=0
@@ -2721,7 +2634,6 @@ function ChkDisjunctList(n) -- now CheckIfAlreadyRebuiltSegmentsMustBeIncluded()
         Disj[i]=false -- now g_bSegmentsAlreadyRebuiltTable[]
     end
 end
-
 function ClearDoneList() -- now ResetSegmentsAlreadyRebuiltTable()
 
     for i=1,#Blocked do 
@@ -2736,7 +2648,6 @@ function ClearDoneList() -- now ResetSegmentsAlreadyRebuiltTable()
     Blocked={}
     curclrscore=Score()
 end
-
 function ChkDoneList() -- now CheckIfAlreadyRebuiltSegmentsMustBeIncluded()
     if not donotrevisit and not disjunt then return end
     if Score() > curclrscore+clrdonelistgain then
@@ -2746,7 +2657,6 @@ function ChkDoneList() -- now CheckIfAlreadyRebuiltSegmentsMustBeIncluded()
     end
 end
 --end of administration part
-
 function FindWorst(firsttime) -- now Populate_g_XLowestScoringSegmentRangesTable
     print("Searching worst scoring parts of len "..len)
     ChkDisjunctList(len)
@@ -2789,114 +2699,166 @@ function FindWorst(firsttime) -- now Populate_g_XLowestScoringSegmentRangesTable
         FindWorst(false) -- recursion
     end
 end -- FindWorst()
-
 -- Rebuild section
 function localRebuild(maxiters) -- now RebuildSelectedSegments()
+  -- Called from ReBuild() below; now RebuildOneSegmentRangeManyTimes()
+  -- Calls structure.RebuildSelected(); foldit code
   
-    local l_TimeBefore = os.clock()
+  local l_TimeBefore = os.clock()
 
-    if maxiters==nil then maxiters=3 end
-    local s=Score()
-    local i=0
-    if bandflip then band.DisableAll() end
-    Bridgesave()
-    repeat
-        i=i+1
-        if i>maxiters then break end
-        
-        
-        
-        structure.RebuildSelected(i)
-        
-        
-        
-    until Score()~=s and BridgesBroken() == false
-    if bandflip then band.EnableAll() end
-    Bridgerestore()
+  if maxiters==nil then
+    maxiters = 3
+  end
+  local s=Score()
+  local i=0
+  if bandflip then band.DisableAll() end
+  Bridgesave()
+  
+  repeat
     
-    local l_TimeAfter = os.clock()
-    local l_SecondsUsed = l_TimeAfter - l_TimeBefore
-    l_Score_After_Rebuild = GetPoseTotalScore()
-    local l_ScoreImprovement = l_Score_After_Rebuild - g_Score_ScriptBest
-    if l_ScoreImprovement > 0.001 then
-      print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" .. 
-            PaddedNumber(l_ScoreImprovement, 8, 3) .. " " .. 
-            PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-            i .. "xRebuildSelected" ..
-            g_round_x_of_y ..
-            g_with_segments_x_thru_y)
+    i=i+1
+    if i > maxiters then
+      break
+    end
           
-      g_Stats_Run_TotalPointsGained_RebuildSelected =
-      g_Stats_Run_TotalPointsGained_RebuildSelected + l_ScoreImprovement
-      g_Stats_Run_SuccessfulAttempts_RebuildSelected = 
-      g_Stats_Run_SuccessfulAttempts_RebuildSelected + 1
-    elseif l_Score_After_Rebuild < g_Score_ScriptBest then
-      -- the original code would break here and return done=true at the end of this function
-      -- the original code did not call recentbest.Restore()
-      -- Should we undo our last change because it caused a drop in our score?
-      -- Maybe not. We might allow a small drop with the hope to 
-      -- recover points with a mutate, shake and wiggle...
-      recentbest.Restore()
-    end
-    g_Stats_Run_TotalSecondsUsed_RebuildSelected = 
-    g_Stats_Run_TotalSecondsUsed_RebuildSelected + l_SecondsUsed
-    g_Stats_Run_NumberOfAttempts_RebuildSelected = 
-    g_Stats_Run_NumberOfAttempts_RebuildSelected + 1
+    -- Important!!!
+    -- Important!!!
+    -- Important!!!
+    structure.RebuildSelected(i)
+    -- Important!!!
+    -- Important!!!
+    -- Important!!!       
+        
+  until Score()~=s and BridgesBroken() == false
     
-    if Score()~=s then return true else return false end
-end
-
+  if bandflip then
+    band.EnableAll()
+  end
+  Bridgerestore()
+  
+  local l_TimeAfter = os.clock()
+  local l_SecondsUsed = l_TimeAfter - l_TimeBefore
+  l_Score_After_Rebuild = GetPoseTotalScore()
+  local l_ScoreImprovement = l_Score_After_Rebuild - g_Score_ScriptBest
+  if l_ScoreImprovement > 0.001 then
+    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" .. 
+          PaddedNumber(l_ScoreImprovement, 8, 3) .. " " .. 
+          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+          i .. "xRebuildSelected" ..
+          g_round_x_of_y ..
+          g_with_segments_x_thru_y)
+        
+    g_Stats_Run_TotalPointsGained_RebuildSelected =
+    g_Stats_Run_TotalPointsGained_RebuildSelected + l_ScoreImprovement
+    g_Stats_Run_SuccessfulAttempts_RebuildSelected = 
+    g_Stats_Run_SuccessfulAttempts_RebuildSelected + 1
+  elseif l_Score_After_Rebuild < g_Score_ScriptBest then
+    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " " .. 
+      PaddedNumber(l_ScoreImprovement, 8, 3) .. " " .. 
+      PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+      i .. "xRebuildSelected" ..
+      g_round_x_of_y ..
+      g_with_segments_x_thru_y)
+    g_Stats_Run_SuccessfulAttempts_RebuildSelected = 
+    g_Stats_Run_SuccessfulAttempts_RebuildSelected + 1
+    -- the original code would break here and return done=true at the end of this function
+    -- the original code did not call recentbest.Restore()
+    -- Should we undo our last change because it caused a drop in our score?
+    -- Maybe not. We might allow a small drop with the hope to 
+    -- recover points with a mutate, shake and wiggle...
+    --recentbest.Restore()
+  end
+  g_Stats_Run_TotalSecondsUsed_RebuildSelected = 
+  g_Stats_Run_TotalSecondsUsed_RebuildSelected + l_SecondsUsed
+  g_Stats_Run_NumberOfAttempts_RebuildSelected = 
+  g_Stats_Run_NumberOfAttempts_RebuildSelected + 1
+  
+  if Score() ~= s then 
+    return true 
+  else 
+    return false
+  end
+    
+end -- function localRebuild(maxiters); now RebuildSelectedSegments()
 function ReBuild(ss,se,tries) -- now RebuildOneSegmentRangeManyTimes()
-    ClearScores() --reset score tables
-    if ss>se then ss,se=se,ss end --switch if needed
-    local Foundone=false
-    for try=1,tries do -- perform loop for number of tries
-        if SKETCHBOOKPUZZLE then save.Quickload(3) end
+  -- Called from DeepRebuild() way below; now RebuildManySegmentRanges()
+  -- Calls localRebuild() above; now RebuildSelectedSegments()
+  
+  ClearScores() --reset score tables
+  if ss>se then ss,se=se,ss end --switch if needed
+  local Foundone=false
+  local l_NumberOfTimesStructureChanged = 0
+  
+  for try = 1, tries do -- perform loop for number of tries
+    
+    if SKETCHBOOKPUZZLE then save.Quickload(3) end
+    selection.DeselectAll()
+    CI(rebuildCI)
+    selection.SelectRange(ss,se)
+    g_with_segments_x_thru_y = " w/segments " .. ss .. "-" .. se		
+
+    -- local extra_rebuilds = 1
+    -- if savebridges then extra_rebuilds=3 end --extra if bridges keep breaking
+    local done
+    -- repeat
+    
+    -- Important!!!
+    -- Important!!!
+    -- Important!!!      
+    done = localRebuild(try) -- above; now RebuildSelectedSegments()
+    -- Important!!!
+    -- Important!!!
+    -- Important!!!      
+  
+    -- extra_rebuilds = extra_rebuilds -1
+    -- until done or extra_rebuilds == 0
+    SaveBest()
+    
+    if done==true then
+      l_NumberOfTimesStructureChanged = l_NumberOfTimesStructureChanged + 1
+      Foundone=true
+      Bridgesave()
+      
+      if doSpecial==true then
+        SelectAround(ss,se,9)
+        CI(1)
+        Wiggle("s",1,nil,true,"ReBuild1")
+        Wiggle("ws",2,nil,true,"ReBuild2")
         selection.DeselectAll()
-        CI(rebuildCI)
         selection.SelectRange(ss,se)
-      -- local extra_rebuilds = 1
-      -- if savebridges then extra_rebuilds=3 end --extra if bridges keep breaking
-        local done
-      -- repeat
-            done=localRebuild(try)
-      -- extra_rebuilds = extra_rebuilds -1
-      -- until done or extra_rebuilds == 0
-        SaveBest()
-        if done==true then
-            Foundone=true
-            Bridgesave()
-            if doSpecial==true then
-                SelectAround(ss,se,9)
-                CI(1)
-                Wiggle("s",1,nil,true,"ReBuild1")
-                Wiggle("ws",2,nil,true,"ReBuild2")
-                selection.DeselectAll()
-                selection.SelectRange(ss,se)
-                Wiggle("wb",4,nil,true,"ReBuild3")
-                SelectAround(ss,se,9)
-            elseif doShake==true then
-                CI(shakeCI)
-                Wiggle("s",1,nil,true,"ReBuild4")
-            end
-            Bridgerestore()
-            if AfterRB then
-                PushPosition() --save the current position for next round
-                doMutate("AfterRebuild")
-            end
-            SaveScores(ss,se,try)
-            if AfterRB then PopPosition() end
-        end
-      -- if (try > 3 or savebridges) and Foundone==false then
-          if Foundone==false then
-            --print("No valid rebuild found on this section")
-            --print("After 9 or more rebuild attempts, giving up")
-            break
-        end
+        Wiggle("wb",4,nil,true,"ReBuild3")
+        SelectAround(ss,se,9)
+      elseif doShake==true then
+        CI(shakeCI)
+        Wiggle("s",1,nil,true,"ReBuild4")
+      end
+      
+      Bridgerestore()
+      if AfterRB then
+        PushPosition() --save the current position for next round
+        doMutate("AfterRebuild")
+      end
+      SaveScores(ss,se,try)
+      if AfterRB then PopPosition() end
+        
+    end -- if done==true then
+    
+  -- if (try > 3 or savebridges) and Foundone==false then
+    if Foundone==false then
+      --print("No valid rebuild found on this section")
+      --print("After 9 or more rebuild attempts, giving up")
+      break            
     end
-    CI(1)
-    return Foundone
-end -- function ReBuild(ss,se,tries)
+      
+  end -- for try=1,tries do
+  
+  CI(1)
+  
+  print("l_NumberOfTimesStructureChanged = " .. l_NumberOfTimesStructureChanged)
+	  
+  return Foundone
+  
+end -- function ReBuild(ss,se,tries); now RebuildOneSegmentRangeManyTimes()
 -- end rebuild section
 -- section to compute segmentscore(part)s
 function getPartscore(ss,se,attr) -- now Get_ScorePart_Score()
@@ -2916,40 +2878,37 @@ function getPartscore(ss,se,attr) -- now Get_ScorePart_Score()
     end
     return s
 end
-
-function InitWORKONbool() -- see main()
+function InitWORKONbool() -- now see main()
     WORKONbool= -- now g_bSegmentsToRebuildBooleanTable[]
       SegmentSetToBool( -- see main()
         WORKON) -- now 
+
+  -- Differences between the "WORKON/WORKONbool" tables and the "areas" table:
+
+  -- WORKON is a "segment range" table: now UserSelectedSegmentRangesToRebuild[]
+  -- WORKON starts out as {{1,SegmentCountWithoutLigands}}
+  -- The user can change the values in the WORKON table on the "Select Segments to Rebuild" page.
+  -- Then we remove all Frozen, Locked and Ligand segments from WORKON. 
+  -- Lastly, we convert WORKON to WORKONbool
+
+  -- WORKONbool is a "segment" table:
+  -- This has the same segments as those represented by the segment ranges in WORKON.
+  -- Being at the "segment" level and boolean format, makes it easy to check individual
+  -- segments to see if they are allowed to be rebuilt.
+
+  -- "areas" is a "segment range" table:  now g_XLowestScoringSegmentRangesTable[]
+  -- "areas" are the Lowest Scoring Segment Ranges about to be rebuilt, etc
+
+  -- The rebuild process is primarily driven by the "areas" table. But when forming segment ranges it calls
+  -- MustWorkon() which checks the "WORKONbool" table to make sure the range does not contain any frozen,
+  -- locked or ligand segment.
 end
-
--- Differences between the "WORKON/WORKONbool" tables and the "areas" table:
-
--- WORKON is a "segment range" table: now UserSelectedSegmentRangesToRebuild[]
--- WORKON starts out as {{1,SegmentCountWithoutLigands}}
--- The user can change the values in the WORKON table on the "Select Segments to Rebuild" page.
--- Then we remove all Frozen, Locked and Ligand segments from WORKON. 
--- Lastly, we convert WORKON to WORKONbool
-
--- WORKONbool is a "segment" table:
--- This has the same segments as those represented by the segment ranges in WORKON.
--- Being at the "segment" level and boolean format, makes it easy to check individual
--- segments to see if they are allowed to be rebuilt.
-
--- "areas" is a "segment range" table:  now g_XLowestScoringSegmentRangesTable[]
--- "areas" are the Lowest Scoring Segment Ranges about to be rebuilt, etc
-
--- The rebuild process is primarily driven by the "areas" table. But when forming segment ranges it calls
--- MustWorkon() which checks the "WORKONbool" table to make sure the range does not contain any frozen,
--- locked or ligand segment.
-
 function MustWorkon(i,j) -- now bSegmentRangeIsAllowedToBeRebuilt() + bSegmentIsAllowedToBeRebuilt()
     for k=i,j do if not 
       WORKONbool[k] -- now g_bSegmentsToRebuildBooleanTable[]
       then return false end end
     return true
 end
-
 function GetSegmentScores() -- now Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts()
     if lastSegScores~=Score() then
         lastSegScores=Score()
@@ -2973,15 +2932,11 @@ function GetSegmentScores() -- now Populate_g_SegmentScoresTable_BasedOnUserSele
     end
 end
 -- end section segmentscore(part)s
-
 -- Administration of the different slots and best scores
 Scores={} --{save_no,points,totscore,showlist,todo,rbnr} -- now g_ScorePart_Scores_Table
-
 -- Compute which scoreparts to use
 ActiveSub= -- now g_ActiveScorePartsTable[]
-
 FindActiveSubscores(false) -- was true -- now Populate_g_ActiveScorePartsTable()
-
 ScoreParts={ --{save_no,name,active,longname} -- now g_ScorePartsTable[] -- now in Populate_g_ScorePartsTable()
     {4,'total',true,'4(total)'},
     {5,'loctotal',true,'5(loctotal)'}
@@ -2992,14 +2947,12 @@ if HASLIGAND then -- now in Populate_g_ScorePartsTable()
     nextslot=nextslot+1
     print("Ligand slot enabled")
 end
-
 for i=1,#ActiveSub do -- now in Populate_g_ScorePartsTable()
     if ActiveSub[i] ~='Reference' then
         ScoreParts[#ScoreParts+1] = { nextslot,ActiveSub[i],true,nextslot..'('..ActiveSub[i]..')' }
         nextslot=nextslot+1
     end
 end
-
 function ClearScores() -- now Populate_g_ScorePart_Scores_Table()
     Scores={} -- now g_ScorePart_Scores_Table[]
     for i=1,#ScoreParts do -- now g_ScorePartsTable[]
@@ -3009,8 +2962,7 @@ function ClearScores() -- now Populate_g_ScorePart_Scores_Table()
     end
     slotScr={}
 end
-
-function SaveScores(ss,se,RBnr) -- now Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()
+function SaveScores(ss,se,RBnr) -- Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields
     local scr={} -- now l_ActiveScorePartsScoreTable[]
     for i=1,#ScoreParts do -- now g_ScorePartsTable[]
         if ScoreParts[i][3] then
@@ -3031,10 +2983,10 @@ function SaveScores(ss,se,RBnr) -- now Update_g_ScorePart_Scores_Table_ScorePart
     end
     SaveBest()
 end
-
-function ListSlots() -- now Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTotalScore_And_FirstInString()
-    --Give overview of slot occupation
-    --And sets which slots to process
+function ListSlots()--Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTotalScore_And_...
+  -- was Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTotalScore_And_FirstInString()
+  --Give overview of slot occupation
+  --And sets which slots to process
     local Donelist={} -- now l_ScorePartScoresDoneStatusTable[]
     for i=1,#Scores do -- now g_ScorePart_Scores_Table[]
       Donelist[i]=false end -- now l_ScorePartScoresDoneStatusTable[]
@@ -3057,8 +3009,7 @@ function ListSlots() -- now Update_g_ScorePart_Scores_Table_StringOfScorePartNum
     print("Slotlist:"..Report)
 end
 -- end of administration of slots and scores
-
-function PrintAreas() -- now DisplaySegmentRanges() -- MISTAKE IN HERE!!!
+function PrintAreas() -- now DisplaySegmentRanges()
     if #areas<19 then -- now g_XLowestScoringSegmentRangesTable[]
         local a=""
         local x=0
@@ -3076,7 +3027,6 @@ function PrintAreas() -- now DisplaySegmentRanges() -- MISTAKE IN HERE!!!
         print("It is "..#areas.." places, not listing.") -- now g_XLowestScoringSegmentRangesTable[]
     end
 end
-
 function AddLoop(sS) -- now Add_Loop_SegmentRange_To_SegmentRangesTable()
     local ss=sS
     local ssStart=structure.GetSecondaryStructure(ss)
@@ -3090,7 +3040,6 @@ function AddLoop(sS) -- now Add_Loop_SegmentRange_To_SegmentRangesTable()
     end
     return se
 end
-
 function AddOther(sS) -- now Add_Loop_Plus_One_Other_Type_SegmentRange_To_SegmentRangesTable()
     local ss=sS
     local ssStart=structure.GetSecondaryStructure(ss)
@@ -3148,11 +3097,9 @@ function FindAreas() -- now Add_Loop_Helix_And_Sheet_Segments_To_SegmentRangesTa
         until done~=false
     end
 end
-
 firstRBseg=0
 lastRBseg=0
-
-function MutateSel(maxitter, l_FromWhere)
+function MutateSel(maxitter, l_FromWhere) -- now MutateSideChainsOfSelectedSegments()
   if maxitter == nil then maxitter=2 end
   local l_TimeBefore = os.clock()
     
@@ -3180,7 +3127,7 @@ function MutateSel(maxitter, l_FromWhere)
     g_Stats_Run_TotalPointsGained_MutateSidechainsSelected + l_ScoreImprovement
     g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected =
       g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected + 1
-    SaveBest() -- <-- Updates g_Score_ScriptBest
+    --SaveBest() -- <-- Updates g_Score_ScriptBest
   
   elseif l_Score_After_Mutate < g_Score_ScriptBest then
     --recentbest.Restore()
@@ -3191,13 +3138,11 @@ function MutateSel(maxitter, l_FromWhere)
   g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected + 1    
     
 end
-
-function MutateAll(l_FromWhere)
+function MutateAll(l_FromWhere) -- now MutateSideChainsAll()
     selection.SelectAll()
     MutateSel(maxitter, l_FromWhere)
 end
-
-function doMutate(l_FromWhere)
+function doMutate(l_FromWhere)  -- now MutateSideChainsOfSelectedSegments()
     if not HASMUTABLE then return end
     -- Do not accept loss if mutating
     local curscore=Score()
@@ -3217,159 +3162,220 @@ function doMutate(l_FromWhere)
     Bridgerestore()
     if Score() < curscore then PopPosition() else ClrTopPosition() end
 end
-
 function DeepRebuild() -- now RebuildManySegmentRanges()
-    local ss=Score()
-    print("Deep"..action.." started at score: "..round3(ss))
-    if struct==false then AllLoop() end
-    save.Quicksave(3)
-    recentbest.Save()
+  -- Called from DRcall() below; now PrepareToRebuildSegmentRanges()
+  -- Calls ReBuild() way above; now RebuildOneSegmentRangeManyTimes()
+  
+  local ss=Score()
+  print("Deep"..action.." started at score: "..round3(ss))
+  if struct==false then AllLoop() end
+  save.Quicksave(3)
+  recentbest.Save()
 
-    for i=1,#areas do -- now g_XLowestScoringSegmentRangesTable[]
-        local ss1=Score()
-        local s=areas[i][1] -- now g_XLowestScoringSegmentRangesTable[]
-        local e=areas[i][2] -- now g_XLowestScoringSegmentRangesTable[]
-        local CurrentHigh=0
-        local CurrentAll="" -- to report where gains came from
-        local CurrentHighScore= -99999999
-        firstRBseg=s
-        lastRBseg=e
-        Bridgesave()
-if Runnr > 0 then --Runnr 0 is to skip worst parts
-        --print("DR "..Runnr.."."..(e-s+1).."."..i.." "..s.."-"..e.." "..
-        --     rebuilds.." times. Wait... Current score: "..round3(Score()))
-if SKETCHBOOKPUZZLE then
-foundahighgain=false
-end
+  for i = 1, #areas do -- now g_XLowestScoringSegmentRangesTable[]
+    
+    local ss1=Score()
+    local s=areas[i][1] -- now g_XLowestScoringSegmentRangesTable[]
+    local e=areas[i][2] -- now g_XLowestScoringSegmentRangesTable[]
+    local CurrentHigh=0
+    local CurrentAll="" -- to report where gains came from
+    local CurrentHighScore= -99999999
+    firstRBseg=s
+    lastRBseg=e
+    Bridgesave()
+    
+    if Runnr > 0 then --Runnr 0 is to skip worst parts
+      
+      --print("DR "..Runnr.."."..(e-s+1).."."..i.." "..s.."-"..e.." "..
+      --     rebuilds.." times. Wait... Current score: "..round3(Score()))
+      if SKETCHBOOKPUZZLE then
+        foundahighgain=false
+      end
+      
+      -- Important!!!
+      -- Important!!!
+      -- Important!!!      
+      if ReBuild(s,e,rebuilds) == true then -- way above; now RebuildOneSegmentRangeManyTimes()        
+      -- Important!!!
+      -- Important!!!
+      -- Important!!!        
 
-        if ReBuild(s,e,rebuilds) then
-
-if SKETCHBOOKPUZZLE == false then
-            -- Make sure we do not miss an improvement during rebuild
-            if RBScore() > bestScore then
+        if SKETCHBOOKPUZZLE == false then
+          -- Make sure we do not miss an improvement during rebuild
+          if RBScore() > bestScore then
+              Bridgesave()
+              recentbest.Restore()
+              Bridgerestore()
+              if Score() > bestScore+0.00001 then
+                  print("Found a missed gain!!!")
+                  SaveScores(s,e,0)
+              end
+          end
+        end
+        
+        ListSlots()
+        for r=1,#Scores do
+            if Scores[r][5] then
+                local slot=Scores[r][1]
+                save.Quickload(slot)
+                SelectAround(s,e,12) --local shake after rebuild/remix
                 Bridgesave()
-                recentbest.Restore()
-                Bridgerestore()
-                if Score() > bestScore+0.00001 then
-                    print("Found a missed gain!!!")
-                    SaveScores(s,e,0)
+                if not skipqstab then qStab()
+                else
+                    CI(1)
+                    Wiggle("s",1,nil,true,"DeepBuild1")
+                    Wiggle("ws",1,nil,true,"DeepBuild1")
                 end
-            end
-end
-            ListSlots()
-            for r=1,#Scores do
-                if Scores[r][5] then
-                    local slot=Scores[r][1]
-                    save.Quickload(slot)
-                    SelectAround(s,e,12) --local shake after rebuild/remix
-                    Bridgesave()
-                    if not skipqstab then qStab()
-                    else
-                        CI(1)
-                        Wiggle("s",1,nil,true,"DeepBuild1")
-                        Wiggle("ws",1,nil,true,"DeepBuild1")
-                    end
-                    Bridgerestore()
-                    if AfterQstab then doMutate("AfterQstab") end
-                    save.Quicksave(slot)
-                    if Score() > CurrentHighScore then
-                         CurrentHigh=slot
-                         CurrentAll=Scores[r][4].."(RB"..Scores[r][6]..")"
-                         CurrentHighScore=Score()
-                    end
-                    SaveBest()
-                    print("Stabilized score: "..round3(Score()).." from slot "..ScoreParts[slot-3][4])
-                end
-            end
-            save.Quickload(CurrentHigh)
-            if not skipfuze and ss1-Score() < maxlossbeforefuze*(e-s+1)/3 then
-                print("Fuzing best position.")
-                if not AfterQstab and BeFuze then doMutate("BeforeFuze") end
-                save.Quicksave(4)
-                if savebridges then Fuze(4,Bridgesave,Bridgerestore,localshakes) else Fuze(4,nil,nil,localshakes) end
-                if AfterFuze then doMutate("AfterFuze") end
-            end
-            SaveBest()
-            save.Quickload(3)
-        else save.Quickload(3) end
-end --skip section
-        if savebridges then
-            if BridgesBroken() then
-                -- THIS SHOULD NOT HAPPEN
-                print("Unexpected bridge broken, pls report\n")
-                print("Restoring a good position, discarding wins\n")
                 Bridgerestore()
-                save.Quicksave(3)
-                bestScore=Score()
-            else Bridgerestore()
+                if AfterQstab then doMutate("AfterQstab") end
+                save.Quicksave(slot)
+                if Score() > CurrentHighScore then
+                     CurrentHigh=slot
+                     CurrentAll=Scores[r][4].."(RB"..Scores[r][6]..")"
+                     CurrentHighScore=Score()
+                end
+                SaveBest()
+                print("Stabilized score: "..round3(Score()).." from slot "..ScoreParts[slot-3][4])
             end
-        else Bridgerestore() end
-        if ss1+0.00001 < Score() then
-            --print("Gain from slots ",CurrentAll)
         end
-        AddDone(s,e)
-        ChkDoneList()
-        if Score()-ss > minGain then break end
-
+        save.Quickload(CurrentHigh)
+        
+        if not skipfuze and ss1-Score() < maxlossbeforefuze*(e-s+1)/3 then
+            print("Fuzing best position.")
+            if not AfterQstab and BeFuze then doMutate("BeforeFuze") end
+            save.Quicksave(4)
+            if savebridges then
+              Fuze(4,Bridgesave,Bridgerestore,localshakes)
+            else
+              Fuze(4,nil,nil,localshakes)
+            end
+            if AfterFuze then
+              doMutate("AfterFuze")
+            end
+        end -- if not skipfuze and ss1-Score() < maxlossbeforefuze*(e-s+1)/3 then
+        
+        SaveBest()
+        save.Quickload(3)
+        
+      else
+        
+        save.Quickload(3)
+        
+      end
+      
+    end -- if Runnr > 0 then
+    
+    if savebridges then
+        if BridgesBroken() then
+            -- THIS SHOULD NOT HAPPEN
+            print("Unexpected bridge broken, pls report\n")
+            print("Restoring a good position, discarding wins\n")
+            Bridgerestore()
+            save.Quicksave(3)
+            bestScore=Score()
+        else Bridgerestore()
+        end
+    else
+      Bridgerestore()
     end
-    print("Deep"..action.." gain: "..round3(Score()-ss))
-    if struct==false and SAVEDstructs then save.LoadSecondaryStructure() end
-end
+    
+    if ss1+0.00001 < Score() then
+      --print("Gain from slots ",CurrentAll)
+    end
+    
+    AddDone(s,e)
+    ChkDoneList()
+    
+    if Score()-ss > minGain then
+      print("\n  The current rebuild gain of " .. PrettyNumber(Score()-ss) ..
+               " is greater than the 'Move on to more consecutive segments per range if" ..
+               " current rebuild points gained is more than' value of " ..
+                minGain .. 
+               " points (this value can be changed on the 'More Options' page);" ..
+               " therefore, we will now skip the" .. 
+            "\n  remaining " .. 0 .. " segment ranges with " ..
+                g_RequiredNumberOfConsecutiveSegments .. 
+               " consecutive segments, and begin processing segments ranges with " ..
+                (g_RequiredNumberOfConsecutiveSegments + 1) .. " consecutive segments.")      
+      
+      
+      break
+    end
+    
+  end -- for i = 1, #areas do 
 
+  print("Deep"..action.." gain: "..round3(Score()-ss))
+  
+  if struct==false and SAVEDstructs then
+    save.LoadSecondaryStructure()
+  end
+  
+end -- function DeepRebuild(); now RebuildManySegmentRanges()
 function DRcall(how) -- now PrepareToRebuildSegmentRanges()
-    if how=="drw" then
-        local stepsize=1
-        if minLen>maxLen then stepsize= -1 end
-        for i=minLen,maxLen,stepsize do --search from minl to maxl worst segments
-            len=i
-            FindWorst(true) -- Populate_g_SegmentRangesTable_WithWorstScoringSegmentRanges()
-            --fills areas table. Comment it if you have set them by hand
-            
-            PrintAreas() -- now DisplaySegmentRanges()
-            DeepRebuild()
-
+  -- Called from DRW() way below; now main()
+  -- Calls DeepRebuild() above; now RebuildManySegmentRanges()
+  
+  if how=="drw" then
+    
+    local stepsize=1
+    if minLen>maxLen then stepsize= -1 end
+    for i=minLen,maxLen,stepsize do --search from minl to maxl worst segments
+      len=i
+      FindWorst(true) -- Populate_g_SegmentRangesTable_WithWorstScoringSegmentRanges()
+      --fills areas table. Comment it if you have set them by hand
+      
+      PrintAreas() -- now DisplaySegmentRanges()
+      
+      -- Important!!!
+      -- Important!!!
+      -- Important!!!      
+      DeepRebuild() -- see above; now RebuildManySegmentRanges()
+      -- Important!!!
+      -- Important!!!
+      -- Important!!!      
+      
+    end -- for i=minLen,maxLen,stepsize do
+  
+  elseif how=="fj" then --DRW len cutted on pieces
+    FindWorst(true) --add to areas table worst part
+    areas2={}  -- now l_XLowestScoringSegmentRangesTable[]
+    for a=1,#areas do -- now g_XLowestScoringSegmentRangesTable[]
+      local s=areas[a] --{ss,se} -- now g_XLowestScoringSegmentRangesTable[]
+      local ss=s[1] --start segment of worst area
+      local se=s[2] --end segment of worst area
+      for i=ss,se do
+        for x=1,len do
+          if i+x<=se then
+            areas2[#areas2+1]={i,i+x} -- now l_XLowestScoringSegmentRangesTable[]
+          end
         end
-    elseif how=="fj" then --DRW len cutted on pieces
-        FindWorst(true) --add to areas table worst part
-        areas2={}  -- now l_XLowestScoringSegmentRangesTable[]
-        for a=1,#areas do -- now g_XLowestScoringSegmentRangesTable[]
-            local s=areas[a] --{ss,se} -- now g_XLowestScoringSegmentRangesTable[]
-            local ss=s[1] --start segment of worst area
-            local se=s[2] --end segment of worst area
-            for i=ss,se do
-                for x=1,len do
-                    if i+x<=se then
-                        areas2[#areas2+1]={i,i+x} -- now l_XLowestScoringSegmentRangesTable[]
-                    end
-                end
-            end
-        end
-        areas=areas2 -- now g_ and l_XLowestScoringSegmentRangesTable[]
-        PrintAreas()
-        DeepRebuild()
-    elseif how=="all" then
-        areas={} -- now g_XLowestScoringSegmentRangesTable[]
-        for i=minLen,maxLen do
-            for x=1,segCnt2 do
-                if i+x-1<=segCnt2 then
-                    areas[#areas+1]={x,x+i-1} -- now g_XLowestScoringSegmentRangesTable[]
-                end
-            end
-        end
-        PrintAreas()
-        DeepRebuild()
-    elseif how=="simple" then
-        FindWorst(true)
-        PrintAreas()
-        DeepRebuild()
-    elseif how=="areas" then -- now g_XLowestScoringSegmentRangesTable[]
-        areas={} -- now g_XLowestScoringSegmentRangesTable[]
-        FindAreas()
-        PrintAreas()
-        DeepRebuild()
+      end
     end
+    areas=areas2 -- now g_ and l_XLowestScoringSegmentRangesTable[]
+    PrintAreas()
+    DeepRebuild()
+  elseif how=="all" then
+    areas={} -- now g_XLowestScoringSegmentRangesTable[]
+    for i=minLen,maxLen do
+        for x=1,segCnt2 do
+            if i+x-1<=segCnt2 then
+                areas[#areas+1]={x,x+i-1} -- now g_XLowestScoringSegmentRangesTable[]
+            end
+        end
+    end
+    PrintAreas()
+    DeepRebuild()
+  elseif how=="simple" then
+    FindWorst(true)
+    PrintAreas()
+    DeepRebuild()
+  elseif how=="areas" then -- now g_XLowestScoringSegmentRangesTable[]
+    areas={} -- now g_XLowestScoringSegmentRangesTable[]
+    FindAreas()
+    PrintAreas()
+    DeepRebuild()
+  end
 end
-
 function AskMoreOptions()
     local ask=dialog.CreateDialog("More "..progname.." options")
     ask.fastQstab=dialog.AddCheckbox("Do a fast qStab",fastQstab)
@@ -3410,7 +3416,6 @@ function AskMoreOptions()
     donotrevisit=ask.donotrevisit.value
     skipfuze=ask.skipfuze.value
 end
-
 function AskMutateOptions()
     local ask = dialog.CreateDialog("Mutate Options")
     ask.AfterRB = dialog.AddCheckbox("Mutate after "..action,AfterRB)
@@ -3438,7 +3443,6 @@ function AskMutateOptions()
         if MUTSur then MUTRB=false end
     end
 end
-
 function printOptions(title) -- now DisplayUserSelectedOptions()
     print(title.." Based on rav4pl DRW 3.4")
     print("Length of "..action..": "..minLen.." to "..maxLen)
@@ -3462,7 +3466,6 @@ function printOptions(title) -- now DisplayUserSelectedOptions()
     if nrskip > 0 then print("SKIPPING "..nrskip.." worst segmentparts") end
     if disjunct then print("Running in disjunct mode") end
 end
-
 function AskSubScores() -- now AskUserToSelectScorePartsForStabilize()
     local ask = dialog.CreateDialog("Slot selection "..progname..DRWVersion)
     ask.l1=dialog.AddLabel("Specify which slots based on scorepart to use")
@@ -3480,7 +3483,6 @@ function AskSubScores() -- now AskUserToSelectScorePartsForStabilize()
       end
     end
 end
-
 function AskSelScores() -- now AskUserToSelectScorePartsForCalculatingWorseScoringSegments()
     local ask = dialog.CreateDialog("Set worst searching "..progname..DRWVersion)
     ask.l1=dialog.AddLabel("Specify which worst subscoretotal(s) to count")
@@ -3497,7 +3499,6 @@ function AskSelScores() -- now AskUserToSelectScorePartsForCalculatingWorseScori
       end
     end
 end
-
 function AskDRWOptions() -- now bAskUserToSelect_RebuildOptions()
     local askresult
     local askmutable=HASMUTABLE
@@ -3634,9 +3635,7 @@ end
 until askresult < 2
     return askresult > 0
 end
--- Quick fix for failing first rebuild
-for i=3,12 do save.Quicksave(i) end
-
+for i=3,12 do save.Quicksave(i) end -- ...quick fix for failing first rebuild.
 --[[
     USAGE
 1. 'drw' - need 'minLen' and 'maxLen'; finding worst scores by len betwen that 2
@@ -3645,8 +3644,6 @@ for i=3,12 do save.Quicksave(i) end
 4. 'simple' - need 'len'; find and rebuild worst scoring parts of that lenght
 5. 'areas' - need secondary structure set and 'true' on at least one of structure
 ]]--
------------------ options below VVVV
-
 areas={  -- now g_XLowestScoringSegmentRangesTable[]
 --start segment, end segment. use for last line call
 --{1,10},
@@ -3654,49 +3651,22 @@ areas={  -- now g_XLowestScoringSegmentRangesTable[]
 --{32,35},
 }
 scrPart={} -- now g_UserSelected_ScorePartsForCalculatingWorseScoringSegmentsTable[]
-
 --options for (5)"areas" setting
 loops=true --rebuild loops alone
 sheets=false --rebuild sheets + surrounding loops
 helices=true --false --rebuild helices + surrounding loops
-
 doShake=true --false --shake rebuilded area (only!) every rebuild, slowing down process
 doSpecial=false -- local shake, wiggle sidec, wiggle backbone, even slower
 shakeCI=0.31 --clash imortance while shaking
-
 struct=false --set in all loop (if true work in structure mode)
-
 fastQstab=true --false --if true faster stabilize, but longer
-
 reBuild=4 --up to worst parts to look at
 reBuildmore=1 --increased by every main cycle
 rebuilds=15 --how many rebuilds to try, set at least 10!
-
-function askAUNT()
-    local ask=dialog.CreateDialog("HI Auntdeen")
-    ask.l1=dialog.AddLabel("Set number of rebuilds")
-    ask.l2=dialog.AddLabel("Low    15")
-    ask.l3=dialog.AddLabel("Medium 25")
-    ask.l4=dialog.AddLabel("High   40")
-    ask.low=dialog.AddButton("Low",1)
-    ask.med=dialog.AddButton("Medium",2)
-    ask.high=dialog.AddButton("High",3)
-    local result=dialog.Show(ask)
-    if result==1 then rebuilds=15
-    elseif result==2 then rebuilds=25
-    else rebuilds=40 end
-end
-
-if ISAUNTDEEN then
-    askAUNT()
-end
 rebuildCI=0 --clash importance while rebuild
-
 len=6 --find worst segments part
-
 minLen=2 --or specify minimum len -- now g_UserSelected_StartRebuildingWithThisManyConsecutiveSegments
 maxLen=4 --and maximim len -- now g_UserSelected_ResetToStartValueAfterRebuildingWithThisManyConsecutiveSegments
-
 -- New options
 maxnrofRuns=5 -- 40 -- Set it very high if you want to run forever
 Runnr=0
@@ -3746,11 +3716,13 @@ if SKETCHBOOKPUZZLE then
    clrdonelistgain=500
    struct=true
 end
-
 -- MAIN PROGRAM
 firstDRWcall=true
 DRWstartscore=0
 function DRW() -- now main()
+  -- Called from global code at bottom of script.
+  -- Calls DRcall(); way above
+  
   DefineGlobalVariables()
 
     if firstDRWcall then
@@ -3782,9 +3754,16 @@ print("------------------------ ------------------  ----------------  -------  -
         " w/" .. minLen .. 
         "-" .. maxLen ..
         " consecutive segments:")
-
+      
+      -- Important!!!
+      -- Important!!!
+      -- Important!!!      
+    DRcall("drw") -- way above; now PrepareToRebuildSegmentRanges()
+      -- Important!!!
+      -- Important!!!
+      -- Important!!!      
+    
     -- DRcall("areas")
-    DRcall("drw") -- now PrepareToRebuildSegmentRanges()
     -- DRcall("fj")
     -- DRcall("all")
     -- DRcall("simple")
@@ -4091,8 +4070,7 @@ print("------------------------ ------------------  ----------------  -------  -
 
   Cleanup()
 
-end
-
+end -- function DRW() -- now main()
 -- Change defaults if the startscore is negative
 if Score() < 4000 then
     local adjust=true
@@ -4112,11 +4090,17 @@ if Score() < 4000 then
         skipqstab=true
     end
 end
-
 SAFEselection=FindSelected()
-
-if AskDRWOptions() then
+if AskDRWOptions() then -- now AskUserToSelectRebuildOptions()
     --xpcall(DRW,Cleanup)
-    DRW()
-end
+    
+    -- Important!!!
+    -- Important!!!
+    -- Important!!!
+    DRW() -- above; now main()
+    -- Important!!!
+    -- Important!!!
+    -- Important!!!
+    
+end -- if AskDRWOptions() then
 
