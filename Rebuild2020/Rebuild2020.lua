@@ -1321,15 +1321,17 @@ function AskUserToSelectMoreOptions()
 	l_Ask.g_bUserSelected_PerformExtraStabilize =
 		dialog.AddCheckbox("Extra", g_bUserSelected_PerformExtraStabilize) -- default is false
 
-	l_Ask.L_70 = dialog.AddLabel("Stabilize or Simple-Shake-n-Wiggle:")
+	l_Ask.L_70 = dialog.AddLabel("Stabilize or simply Shake-n-Wiggle each score")
+	l_Ask.L_71 = dialog.AddLabel("part pose:")
 	l_Ask.g_bUserSelected_PerformStabilize =
     dialog.AddCheckbox("Stabilize", g_bUserSelected_PerformStabilize)
   
 	l_Ask.g_bUserSelected_FuseBestScorePartPose =
-    dialog.AddCheckbox("Fuse best score part position", g_bUserSelected_FuseBestScorePartPose)
+    dialog.AddCheckbox("Fuse best score part pose", g_bUserSelected_FuseBestScorePartPose)
 	
-	l_Ask.L_90 = dialog.AddLabel("Skip fusing best position if current rebuild loses")
-	l_Ask.L_91 = dialog.AddLabel("more than (Points * # of segments per range / 3):")
+	l_Ask.L_90 = dialog.AddLabel("Reject each rebuild with a potential loss exceeding")
+	l_Ask.L_92 = dialog.AddLabel("'Points' X segments per range / 3:") -- default is >= 30
+  l_Ask.L_93 = dialog.AddLabel("(For example: 30 X 2 / 3 = 20)")
 	l_Ask.g_UserSelected_SkipFuseBestScorePartPose_IfCurrentRebuild_LosesMoreThan = 
 		dialog.AddSlider("  Points:", 
       g_UserSelected_SkipFuseBestScorePartPose_IfCurrentRebuild_LosesMoreThan, -5, 200, 0)
@@ -1391,24 +1393,27 @@ function AskUserToSelectMutateOptions()
 	
 	--l_Ask.l1 = dialog.AddLabel("Mutate after rebuild:")
 	l_Ask.g_bUserSelected_Mutate_After_Rebuild =
-    dialog.AddCheckbox("Mutate after Rebuild", g_bUserSelected_Mutate_After_Rebuild)
+    dialog.AddCheckbox("Mutate after rebuild selected segments",
+      g_bUserSelected_Mutate_After_Rebuild)
 	
-	--l_Ask.l2 = dialog.AddLabel("Mutate during Stabilize:")
+	--l_Ask.l2 = dialog.AddLabel("Mutate during stabilize all score part poses:")
 	l_Ask.g_bUserSelected_Mutate_During_Stabilize =
-		dialog.AddCheckbox("Mutate during Stabilize", g_bUserSelected_Mutate_During_Stabilize)
+		dialog.AddCheckbox("Mutate during stabilize all score part poses",
+      g_bUserSelected_Mutate_During_Stabilize)
 		
-	--l_Ask.l3 = dialog.AddLabel("Mutate after Stabilize:")
+	--l_Ask.l3 = dialog.AddLabel("Mutate after stabilize all score part poses:")
 	l_Ask.g_bUserSelected_Mutate_After_Stabilize =
-		dialog.AddCheckbox("Mutate after Stabilize", g_bUserSelected_Mutate_After_Stabilize)
+		dialog.AddCheckbox("Mutate after stabilize all score part poses",
+      g_bUserSelected_Mutate_After_Stabilize)
 		
-	--l_Ask.l4 = dialog.AddLabel("Mutate before Fuse best position:")
+	--l_Ask.l4 = dialog.AddLabel("Mutate before fuse best score part pose:")
 	l_Ask.g_bUserSelected_Mutate_Before_FuseBestScorePartPose =
-    dialog.AddCheckbox("Mutate before Fuse best position",
+    dialog.AddCheckbox("Mutate before fuse best score part pose",
       g_bUserSelected_Mutate_Before_FuseBestScorePartPose)
 	
-	--l_Ask.l5 = dialog.AddLabel("Mutate after Fuse best position:")
+	--l_Ask.l5 = dialog.AddLabel("Mutate after fuse best score part pose:")
 	l_Ask.g_bUserSelected_Mutate_After_FuseBestScorePartPose =
-    dialog.AddCheckbox("Mutate after Fuse best position",
+    dialog.AddCheckbox("Mutate after fuse best score part pose",
       g_bUserSelected_Mutate_After_FuseBestScorePartPose)
 
 	l_Ask.l6 = dialog.AddLabel("What to mutate. Second option overrides first. ")
@@ -1533,7 +1538,7 @@ function AskUserToSelectRebuildOptions() -- was AskDRWOptions()
 		
 		if g_bSketchBookPuzzle == true then
 			l_Ask.L80 = dialog.AddLabel("For a sketch book puzzle:")
-			l_Ask.L81 = dialog.AddLabel("Save the current position if the")
+			l_Ask.L81 = dialog.AddLabel("Save the current pose if the")
 			l_Ask.L82 = dialog.AddLabel("current rebuild gain is more than:")
 			l_Ask.g_UserSelected_SketchBookPuzzle_MinimumGainForSave =
 				dialog.AddSlider("  Points:",
@@ -2926,7 +2931,7 @@ function CheckForLowStartingScore()
                  PrettyNumber(l_ScoreWithoutElectronDensity) .. " is already greater than 4000 points" ..
               " (high enough without")
       print( "  including Electron Density), we will keep the default" ..
-              " options of: 'Stabilize' and 'fuse best score part position'.")
+              " options of: 'Stabilize all score part poses' and 'fuse best score part pose'.")
 			return
 		end
 	end
@@ -2937,7 +2942,7 @@ function CheckForLowStartingScore()
 
 	print("\n  Since the starting score of " .. PrettyNumber(l_Current_PoseTotalScore) ..
          " is less than " .. l_LowScore .. " points, to speed things up, we will temporarily")
-  print("  skip stabilizing and fusing best position" ..
+  print("  skip stabilizing all score part poses and fusing best score part pose" ..
          " until the score increases above " .. l_LowScore .. " points.")
 	g_bUserSelected_FuseBestScorePartPose = false
 	g_bUserSelected_PerformStabilize = false
@@ -2990,8 +2995,8 @@ function CheckIfAlreadyRebuiltSegmentsMustBeIncluded() -- was ChkDisjunctList()
 	-- let's set all the entries in the g_bSegmentsAlreadyRebuiltTable to false.
 	-- This should give us plenty of segments to work with...
   -- Too much noise in the log file...
-	print("\n  Not enough consecutive not-already-rebuilt segments available to create a segment range;" ..
-        "\n  therefore, we will set all already-rebuilt segments to not-already-rebuilt and try again...")
+	print("Not enough consecutive not-already-rebuilt segments available to create a segment range;" ..
+      "\ntherefore, we will set all already-rebuilt segments to not-already-rebuilt and try again...")
        
   Reset_g_bSegmentsAlreadyRebuiltTable()
        
@@ -4815,7 +4820,7 @@ function SaveBest() -- <-- Updates g_Score_ScriptBest
     
     if g_bUserSelected_FuseBestScorePartPose == false and g_Score_ScriptBest > 0 then
       print("\nNow that the total score is positive, we will switch back on: " ..
-            "'stabilize' and 'fuse best score part position'.\n")
+            "'stabilize all score part poses' and 'fuse best score part pose'.\n")
       g_bUserSelected_FuseBestScorePartPose = true
       g_bUserSelected_PerformStabilize = true
     end
@@ -5832,9 +5837,9 @@ function RebuildSegmentRangeSetXofYwithManySegmentRanges() -- was DeepRebuild()
 		-- therefore, we figure that's good enough for now. It is now time to move on to more consecutive
     -- segments per segment range...
       
-      print("\n  The current rebuild gain of " .. PrettyNumber(g_CurrentRebuildPointsGained) ..
-            " is greater than the 'Move on to more consecutive segments per range if" ..
-            " current rebuild points gained is more than' value of " ..
+      print("The current rebuild gain of " .. PrettyNumber(g_CurrentRebuildPointsGained) ..
+            " points for this segment range is greater than the 'Move on to more consecutive" ..
+            " segments per range if current rebuild points gained is more than' value of " ..
             g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan .. 
             " points (this value can be changed on the 'More Options' page);" ..
             " therefore, we will now skip the remaining " .. l_RemainingSegmentRanges ..
@@ -5977,9 +5982,9 @@ function RebuildSegmentRangeXofYforManyRounds(l_StartSegment, l_EndSegment) -- w
       -- range and only one attempt. Next, we are going to check for ScorePart improvements
       -- for this one specific rebuild attempt. For each ScorePart that improves, associate
       -- the current pose (and PoseTotalScore) of the protein to that ScorePart. Later, after
-      -- all these rebuild attempts, in RebuildSegmentRangeSetXofYwithManySegmentRanges() we will step through each
-      -- of these best saved ScorePart poses and mutate, shake and wiggle them some more to
-      -- see if we can further improve their scores...
+      -- all these rebuild attempts, in RebuildSegmentRangeSetXofYwithManySegmentRanges() we
+      -- will step through each of these best saved ScorePart poses and mutate, shake and wiggle
+      -- them some more to see if we can further improve their scores...
           
       -- Important!!!
       -- Important!!!
@@ -5997,11 +6002,13 @@ function RebuildSegmentRangeXofYforManyRounds(l_StartSegment, l_EndSegment) -- w
     if l_bStructureChanged == false then
       
       if l_Round < l_MaxRounds then
-        print("After 3 attempts, round" .. g_round_x_of_y .. g_with_segments_x_thru_y .. 
-          " failed to favorably change the structure of the protein; therefore," ..
-          " we are skipping the following " .. l_MaxRounds - l_Round .. " rounds" ..
-          " for this segment range and moving on to the next segment range.")
-      
+        print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
+              "                    " ..
+              "Rebuilding round" ..
+              g_round_x_of_y ..
+              g_with_segments_x_thru_y ..
+              " Rejected 3 times in a row: moving on to next segment range")
+        
       end
       break -- for l_Round = 1, l_MaxRounds do
       
@@ -6017,7 +6024,7 @@ function RebuildSegmentRangeXofYforManyRounds(l_StartSegment, l_EndSegment) -- w
 	SetClashImportance(1) -- This call to SetClashImportance is probably not needed here because we
   --                       normally SetClashImportance just before each rebuild, shake, wiggle and
   --                       mutate. I'll double check.
-  print("l_NumberOfTimesStructureChanged = " .. l_NumberOfTimesStructureChanged)
+  --print("l_NumberOfTimesStructureChanged = " .. l_NumberOfTimesStructureChanged)
 	return l_NumberOfTimesStructureChanged
 
 end -- RebuildSegmentRangeXofYforManyRounds() -- was ReBuild()
@@ -6040,8 +6047,8 @@ function RebuildRoundXofYforManyAttempts(l_StartSegment, l_EndSegment) -- was lo
 		band.DisableAll() -- will re-enable after rebuild.
 	end
 
-  local l_MaxAttemtpsPerRound = 3 -- the original code used l_Round here from Rebuild()
-  for l_CurrentAttemptForThisRound = 1, l_MaxAttemtpsPerRound do
+  local l_MaxAttemptsPerRound = 3 -- the original code used l_Round here from Rebuild()
+  for l_CurrentAttemptForThisRound = 1, l_MaxAttemptsPerRound do
     
     local l_RebuildIterations = l_CurrentAttemptForThisRound -- just for fun, I suppose.
     
@@ -6094,11 +6101,9 @@ function RebuildRoundXofYforManyAttempts(l_StartSegment, l_EndSegment) -- was lo
               l_RebuildIterations .. "xRebuildSelected" ..
               g_round_x_of_y ..
               g_with_segments_x_thru_y ..
-              " This rebuild change would result in a loss of " .. 
-              PaddedNumber(l_PotentialPointLoss, 1, 3) .. 
-              " points, which is higher than the max loss allowed of " .. 
+              " Rebuild rejected: potential loss exceeds max of " .. 
               PaddedNumber(l_MaxLossAllowed, 1, 0) .. 
-              " points; therefore, we are rejecting this rebuild change.")
+              " points")
         -- The potential score loss is too great, so let's revert the change...
         recentbest.Restore()
       else
@@ -6118,8 +6123,8 @@ function RebuildRoundXofYforManyAttempts(l_StartSegment, l_EndSegment) -- was lo
       g_Stats_Run_SuccessfulAttempts_RebuildSelected + 1
       
       local l_MovingOnText = ""
-      --if l_CurrentAttemptForThisRound < l_MaxAttemtpsPerRound then
-        l_MovingOnText = " Successful structure change, so moving on to the next round."
+      --if l_CurrentAttemptForThisRound < l_MaxAttemptsPerRound then
+        l_MovingOnText = " Successful structure change: moving on to the next round"
       --end
       
       print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" .. 
@@ -6140,7 +6145,7 @@ function RebuildRoundXofYforManyAttempts(l_StartSegment, l_EndSegment) -- was lo
     
     end -- if l_bStructureChanged == true then
     
-  end -- for l_CurrentAttemptForThisRound = 1, l_MaxAttemtpsPerRound do
+  end -- for l_CurrentAttemptForThisRound = 1, l_MaxAttemptsPerRound do
 
 	if g_bUserSelected_DisableBandsDuringRebuild == true then
 		band.EnableAll()
@@ -6532,8 +6537,7 @@ end -- function Fuse2(l_ClashImportanceBefore, l_ClashImportanceAfter)
 function CleanUp(l_ErrorMessage)
   -- Called from RebuildOnePuzzleWithManyRuns() above or xpcall() below
 	
-	print("Cleaning up: Restoring Clash Importance, initial selection," ..
-      "\n             best result and structures ... done.")
+	print("Cleaning up: Restoring Clash Importance, Initial Selection, Best Result and Secondary Structures.")
 	SetClashImportance(1)
 	save.Quickload(3) -- Load
 
@@ -6593,7 +6597,7 @@ function ScriptDocumentation()
 		   here: https://fold.it/portal/recipe/46192
 
 	Description:
-	1. This is a long run rebuilder script. The goal of this script is to rebuild selected and/or lowest scoring segments and segment ranges several times to find better scoring positions (aka: poses / conformations / shapes). If working on a design puzzle, this script will also look for better scoring amino acids for each (mutable / changeable) segment.
+	1. This is a long run rebuilder script. The goal of this script is to rebuild selected and/or lowest scoring segments and segment ranges several times to find better scoring poses (aka: positions / conformations / shapes / structures). If working on a design puzzle, this script will also look for better scoring amino acids for each (mutable / changeable) segment.
 	Definitions:
 	"Rebuild:" Rebuilding attempts to find a better shape for a section of your protein by trying the shapes of similar proteins. Rebuild works with "fragments" of three segments. Rebuild works by looking in its database for fragments with a similar amino acid sequence. The shape of the matching fragments is then applied to your protein. For more details read this article: https://foldit.fandom.com/wiki/Rebuild
 	"Mutate:" means "change to a different amino acid". In Foldit design puzzles, some segments are mutable, meaning their amino acids can be changed.  Mutate picks the best amino acid for one or more segments based on criteria known only to the Foldit design team. For more details, read this article: https://foldit.fandom.com/wiki/Mutate
@@ -6628,9 +6632,9 @@ function ScriptDocumentation()
 	"Layer filter:"
 	"Ligand:"
 	2. Each rebuild is scored in different ways and saved if better.
-	3. After rebuild finishes, script tries to stabilize each different saved position.
-	4. Because some positions are better in more than one way, sometimes there is only one position to stabilize. Could this be written more clearly?
-	5. On the best position a fuse is run if it looks promising enough.
+	3. After rebuild finishes, script tries to stabilize each different saved score part pose.
+	4. Because some score part pose are better in more than one way, sometimes there is only one best score part pose to stabilize. Could this be written more clearly?
+	5. On the best score part pose a fuse is run if it looks promising enough.
 
 	Features (most have user selectable parameters):
 	1. Can be used in design puzzles, has mutate options for that.
