@@ -1,8 +1,7 @@
 
-local DummyVariable_ToStopExpandingFirstFunctionWhenDebugging
 -- Start of Setting Things Up...
 function DefineGlobalVariables()
-  -- Called from main()...
+  -- Called from RebuildOnePuzzleWithManyRuns()...
 
   --local alien=require"alien"
   --local kernel32=alien.load("kernel32.dll")
@@ -26,13 +25,13 @@ function DefineGlobalVariables()
 	-- Used in CheckIfAlreadyRebuiltSegmentsMustBeIncluded(),
   --         bSegmentIsAllowedToBeRebuilt(),
   --         SetSegmentsAlreadyRebuilt(),
-  --         ResetSegmentsAlreadyRebuiltTable()
+  --         Reset_g_bSegmentsAlreadyRebuiltTable()
 	-- g_bSegmentsAlreadyRebuiltTable={true/false}
 	-- g_bSegmentsAlreadyRebuiltTable keeps track of which segments have already been processed...
   
 	g_bUserSelectd_SegmentsAllowedToBeRebuiltTable = {} -- was WORKONbool[]
 	-- Used in Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts(),
-	--         bSegmentIsAllowedToBeRebuilt() and main()
+	--         bSegmentIsAllowedToBeRebuilt() and RebuildOnePuzzleWithManyRuns()
 	-- g_bUserSelectd_SegmentsAllowedToBeRebuiltTable={true/false}
 
 	g_CysteineSegmentsTable = {}
@@ -44,10 +43,10 @@ function DefineGlobalVariables()
   g_FrozenLockedOrLigandSegmentsTable = {} -- was (the inverse of) WORKON/WORKONbool
 
 	g_ScorePart_Scores_Table = {} -- was Scores[]
-	-- Used in Populate_g_ScorePart_Scores_Table(),
+	-- Used in Reset_g_ScorePart_Scores_Table(),
 	--         Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields(),
 	--         Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTotalScore_And_FirstInS...
-  --         and RebuildManySegmentRanges()
+  --         and RebuildSegmentRangeSetXofYwithManySegmentRanges()
 	-- g_ScorePart_Scores_Table={ScorePart_Number=1, ScorePart_Score=2, PoseTotalScore=3,
   --                           StringOfScorePartNumbersWithSamePoseTotalScore=4,
   --                           bFirstInStringOfScorePartNumbersWithSamePoseTotalScore=5}
@@ -67,8 +66,8 @@ function DefineGlobalVariables()
   --         AskUserToSelectRebuildOptions(),
   --         AskUserToSelectScorePartsForStabilize(),
   --         AskUserToSelectScorePartsForCalculatingWorseScoringSegments(),
-  --         RebuildManySegmentRanges(),
-  --         Populate_g_ScorePart_Scores_Table() and
+  --         RebuildSegmentRangeSetXofYwithManySegmentRanges(),
+  --         Reset_g_ScorePart_Scores_Table() and
 	--         Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()
 	-- g_ScorePartsTable={ScorePart_Number=1, ScorePart_Name=2, l_bScorePart_IsActive=3, LongName=4}
 		spt_ScorePart_Number = 1
@@ -92,10 +91,10 @@ function DefineGlobalVariables()
   g_UserSelected_SegmentRangesAllowedToBeRebuiltTable = {} -- was WORKON[]
 	-- g_UserSelected_SegmentRangesAllowedToBeRebuiltTable is initiallly 
   -- set to {1, g_SegmentCount_WithoutLigands} (i.e., all the segments
-  -- in the main protein) in DefineGlobalVariables() then the user can
+  -- in the RebuildOnePuzzleWithManyRuns protein) in DefineGlobalVariables() then the user can
   -- change this value in AskUserToSelectSegmentsRangesToRebuild() plus
   -- AskUserToSelectRebuildOptions() and finally we remove all frozen,
-  -- locked and ligand segments in main(). This is important because we
+  -- locked and ligand segments in RebuildOnePuzzleWithManyRuns(). This is important because we
   -- don't want to waste any time attempting to rebuild, mutate, shake
   -- or wiggle any segments that are not allowed to do so.
 
@@ -149,7 +148,7 @@ function DefineGlobalVariables()
   --         NormalConditionChecking_TemporarilyReEnableToCheckScore()
 	
 	g_bFoundAHighGain = true
-  -- Used in RebuildManySegmentRanges() and SaveBest()
+  -- Used in RebuildSegmentRangeSetXofYwithManySegmentRanges() and SaveBest()
 	
 	g_bFreeDesignPuzzle = false
 	-- Used in DisplayPuzzleProperties()
@@ -244,7 +243,7 @@ function DefineGlobalVariables()
 	g_bUserSelected_Mutate_SelectedAndNearby_Segments = false
   -- Used in 4 functions
   
-  g_bUserSelected_NormalStabilize = true
+  g_bUserSelected_PerformStabilize = true
   -- Used in 5 functions
   
 	g_bUserSelected_PerformExtraStabilize = false
@@ -269,21 +268,21 @@ function DefineGlobalVariables()
   -- Used in 5 functions
 
 	g_CurrentRebuildPointsGained = 0
-	-- Used in bSegmentIsAllowedToBeRebuilt() and RebuildManySegmentRanges()
+	-- Used in bSegmentIsAllowedToBeRebuilt() and RebuildSegmentRangeSetXofYwithManySegmentRanges()
   
 	g_QuickSaveStackPosition = 60 -- Uses slot 60 and higher...
   -- Used in 3 functions
   
 	g_RebuildClashImportance = 0
-	-- Used in RebuildOneSegmentRangeManyTimes()
+	-- Used in RebuildSegmentRangeXofYforManyRounds()
   -- Clash importance value to use during the rebuild step.
   -- Always set to 0, so we really don't need it. 
   
-  g_round_x_of_y = "" -- For log file reporting; Example: " round 1 of 10"
+  g_round_x_of_y = "" -- For log file reporting; Example: " round 1 of 15"
   -- Used in 5 functions
 
   g_RunCycle = 0 -- was Runnr
-  -- Used in main() and RebuildManySegmentRanges(),
+  -- Used in RebuildOnePuzzleWithManyRuns() and RebuildSegmentRangeSetXofYwithManySegmentRanges(),
  	
 	g_Score_AtStartOf_Script = GetPoseTotalScore()
 	-- Used in CleanUp()...
@@ -304,14 +303,13 @@ function DefineGlobalVariables()
   g_ScriptStartTime = os.clock()
   
   g_Stats_Run_StartTime = os.clock()
-  g_Stats_Run_EndTime = os.clock()
   
-  g_Stats_Run_TotalSecondsUsed_RebuildSelected = 0.0001 -- prevent divide by zero error
-  g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected = 0.0001
-  g_Stats_Run_TotalSecondsUsed_WiggleSelected = 0.0001
-  g_Stats_Run_TotalSecondsUsed_WiggleAll = 0.0001
-  g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected = 0.0001
-  g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll = 0.0001
+  g_Stats_Run_TotalSecondsUsed_RebuildSelected = 0
+  g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected = 0
+  g_Stats_Run_TotalSecondsUsed_WiggleSelected = 0
+  g_Stats_Run_TotalSecondsUsed_WiggleAll = 0
+  g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected = 0
+  g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll = 0
 
   g_Stats_Script_TotalSecondsUsed_RebuildSelected = 0
   g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected = 0
@@ -348,12 +346,12 @@ function DefineGlobalVariables()
   g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected = 0
   g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll = 0
   
-  g_Stats_Run_NumberOfAttempts_RebuildSelected = 0.1 -- prevent divide by zero error
-  g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected = 0.1
-  g_Stats_Run_NumberOfAttempts_WiggleSelected = 0.1
-  g_Stats_Run_NumberOfAttempts_WiggleAll = 0.1
-  g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected = 0.1
-  g_Stats_Run_NumberOfAttempts_MutateSidechainsAll = 0.1    
+  g_Stats_Run_NumberOfAttempts_RebuildSelected = 0.0001 -- prevent divide by zero error
+  g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected = 0.0001
+  g_Stats_Run_NumberOfAttempts_WiggleSelected = 0.0001
+  g_Stats_Run_NumberOfAttempts_WiggleAll = 0.0001
+  g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected = 0.0001
+  g_Stats_Run_NumberOfAttempts_MutateSidechainsAll = 0.0001    
 	
   g_Stats_Script_NumberOfAttempts_RebuildSelected = 0
   g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected = 0
@@ -363,7 +361,7 @@ function DefineGlobalVariables()
   g_Stats_Script_NumberOfAttempts_MutateSidechainsAll = 0
   
 	g_UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle = 1
-	-- Used in AskUserToSelectMoreOptions() and main()
+	-- Used in AskUserToSelectMoreOptions() and RebuildOnePuzzleWithManyRuns()
   
 	g_UserSelected_AfterRebuild_ShakeSegmentRange_ClashImportance = 0.31
   -- Used in 3 functions
@@ -382,7 +380,7 @@ function DefineGlobalVariables()
   
 	g_UserSelected_MaxNumberOf_SegmentRanges_ToRebuild_ThisRunCycle = 0 -- was reBuild
   -- Used in 3 functions
-  -- see main() for definition
+  -- see RebuildOnePuzzleWithManyRuns() for definition
 	-- Yah, not really convinced this one helps yet.
   
 	g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan =
@@ -393,7 +391,7 @@ function DefineGlobalVariables()
 	--   g_SegmentCount_WithoutLigands = 135
 	--   g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan =
 	--    (135 - (135 % 4)) /4 = (135 - 3) / 4 = 135 / 4 = 33.75
-	if g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan > 40 then
+	if g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan < 40 then
 		g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan = 40 -- why so low?
 	end
   if g_bDebugMode == true then
@@ -409,14 +407,16 @@ function DefineGlobalVariables()
 	g_UserSelected_NumberOfSegmentRangesToSkip = 0 -- set to any value other than 0, to debug related code
   -- Used in 3 functions
   
-	g_UserSelected_NumberOfRunCycles = 5 -- 10 is plenty, 5 is usually enough for most tests
+	g_UserSelected_NumberOfRunCycles = 10 -- 10 is plenty, 5 is usually enough for most tests
   -- Used in 4 functions
   -- Set it very high if you want to run forever
   if g_bDebugMode == true then
     g_UserSelected_NumberOfRunCycles = 5 -- is high enough for debug mode
   end
 
-	g_UserSelected_NumberOfTimesToRebuildEach_SegmentRange_PerRunCycle = 10 -- set to at least 10
+	-- Maximum number of rounds (with up to 3 attempts per round) to attempt to favorably change 
+  -- the protein structure using structure.RebuildSelected() for each segment range per run cycle:
+	g_UserSelected_MaxNumberOfRoundsToRebuildEachSegmentRangePerRunCycle = 15 -- set to at least 10
   -- Used in 3 functions
 
 	g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan = 
@@ -626,31 +626,9 @@ function SetupLocalDebugFuntions()
   g_Debug_NumberOfTimesWeCalled_RandomlyChange_g_Debug_CurrentEnergyScore = 0
   current.RandomlyChange_g_Debug_CurrentEnergyScore = function()
     -- This is not a foldit function. This function is only
-    -- used by the following debug version of the foldit functions:    --
+    -- used by the following debug version of the foldit functions:
     -- MutateSidechainsSelected,MutateSidechainsAll,RebuildSelected,ShakeSidechainsAll,
     -- ShakeSidechainsSelected,WiggleAll,WiggleSelected
-    
-    
-    -- This is now handled in each of the foldit action functions below
-    if 1 == 2 then
-      -- To make things more realistic...
-      -- The more times this function is called the less likely we will 
-      -- change the g_Debug_CurrentEnergyScore...
-      g_Debug_NumberOfTimesWeCalled_RandomlyChange_g_Debug_CurrentEnergyScore =
-        g_Debug_NumberOfTimesWeCalled_RandomlyChange_g_Debug_CurrentEnergyScore + 1
-        
-      -- Let's arbitrarily set 1800 times to be the high-end of the number of time this function is called.
-      local l_TimesCalled = g_Debug_NumberOfTimesWeCalled_RandomlyChange_g_Debug_CurrentEnergyScore
-      if l_TimesCalled > 1580 then
-        l_TimesCalled = 1580  -- 1580 / 1800 = 88% The change of staying is slim at 88 <= x <= 90 
-      end    
-      local l_PercentOfMax = 100 * (l_TimesCalled / 1800)
-      local l_RandomlyReturnWithNoChange = RandomFloat(l_PercentOfMax, 100)
-      if l_RandomlyReturnWithNoChange > 90 then -- at least a 10% chance of no score change, and increasing
-        return -- no score change this time
-      end
-      
-    end -- if 1 == 2 then
     
 		-- Time to get a new random score..
 		local l_EnergyScore = RandomFloat(-10000, 10000)
@@ -660,7 +638,10 @@ function SetupLocalDebugFuntions()
 			if g_Debug_ScriptBestEnergyScore ~= -999999 then -- allow the first score to be whatever.
       
         -- If not the first score, only allow small incremental improvements...
-				if l_EnergyScore - g_Debug_ScriptBestEnergyScore > 100 then
+        -- However, if we are in the negative score region, allow larger improvements...
+        if g_Debug_ScriptBestEnergyScore < 0 then
+          l_EnergyScore = g_Debug_ScriptBestEnergyScore + RandomFloat(0, 1000)
+				elseif l_EnergyScore - g_Debug_ScriptBestEnergyScore > 100 then
 					l_EnergyScore = g_Debug_ScriptBestEnergyScore + RandomFloat(0, 100)
 				end
 			end
@@ -1126,20 +1107,26 @@ function SetupLocalDebugFuntions()
     -- To make things more realistic...
     -- The more times this function is called the less likely we will 
     -- change the g_Debug_CurrentEnergyScore...
-    g_Debug_NumberOfTimesWeCalled_RebuildSelected =
-      g_Debug_NumberOfTimesWeCalled_RebuildSelected + 1
+    
+    -- Nevermind, the call to structure.RebuildSelected in production appears to always
+    -- change the PoseTotalScore
+    if 1 == 2 then
+      g_Debug_NumberOfTimesWeCalled_RebuildSelected =
+        g_Debug_NumberOfTimesWeCalled_RebuildSelected + 1
+        
+      -- Let's arbitrarily set 10 times to be the high-end of the number of times this function is called.
+      local l_HighEnd = 10
+      local l_TimesCalled = g_Debug_NumberOfTimesWeCalled_RebuildSelected
+      if l_TimesCalled > l_HighEnd * .88 then
+        l_TimesCalled = l_HighEnd * .88  -- 88% The change of staying is slim at 88 <= x <= 89.5
+      end    
+      local l_PercentOfMax = 100 * (l_TimesCalled / l_HighEnd)
+      local l_RandomlyReturnWithNoChange = RandomFloat(l_PercentOfMax, 100)
+      if l_RandomlyReturnWithNoChange > 89.5 then -- at least a 10% chance of no score change, and increasing
+        return -- no score change this time
+      end 
       
-    -- Let's arbitrarily set 10 times to be the high-end of the number of times this function is called.
-    local l_HighEnd = 10
-    local l_TimesCalled = g_Debug_NumberOfTimesWeCalled_RebuildSelected
-    if l_TimesCalled > l_HighEnd * .88 then
-      l_TimesCalled = l_HighEnd * .88  -- 88% The change of staying is slim at 88 <= x <= 89.5
-    end    
-    local l_PercentOfMax = 100 * (l_TimesCalled / l_HighEnd)
-    local l_RandomlyReturnWithNoChange = RandomFloat(l_PercentOfMax, 100)
-    if l_RandomlyReturnWithNoChange > 89.5 then -- at least a 10% chance of no score change, and increasing
-      return -- no score change this time
-    end 
+    end -- if 1 == 2 then
     
     current.RandomlyChange_g_Debug_CurrentEnergyScore()
 	end
@@ -1297,64 +1284,65 @@ function AskUserToSelectMoreOptions()
 
 	local l_Ask = dialog.CreateDialog("More Options")
 
-	l_Ask.L40 = dialog.AddLabel("Starting number of segment ranges to rebuild per")
-	l_Ask.L41 = dialog.AddLabel("run cycle:")
+	l_Ask.L_10 = dialog.AddLabel("Starting number of segment ranges to rebuild per")
+	l_Ask.L_11 = dialog.AddLabel("run cycle:")
 	l_Ask.g_UserSelected_StartingNumberOf_SegmentRanges_ToRebuild_PerRunCycle =
 		dialog.AddSlider("  Ranges / cycle:",
 			g_UserSelected_StartingNumberOf_SegmentRanges_ToRebuild_PerRunCycle, 1,
       g_SegmentCount_WithoutLigands, 0)
 
-	l_Ask.L50 = dialog.AddLabel("Additional number of segment ranges to rebuild per")
-	l_Ask.L51 = dialog.AddLabel("run cycle to add after each run cycle completes:")
+	l_Ask.L_20 = dialog.AddLabel("Additional number of segment ranges to rebuild per")
+	l_Ask.L_21 = dialog.AddLabel("run cycle after each run cycle completes:")
 	l_Ask.g_UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle =
 		dialog.AddSlider("  Add ranges:",
 			g_UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle, 0, 4, 0)
 
-	l_Ask.L30 = dialog.AddLabel("Number of times to rebuild each segment range")
-	l_Ask.L31 = dialog.AddLabel("per run cycle:") -- default is 15 (or 10)
-	l_Ask.g_UserSelected_NumberOfTimesToRebuildEach_SegmentRange_PerRunCycle =
-		dialog.AddSlider("  Rebuilds:", 
-      g_UserSelected_NumberOfTimesToRebuildEach_SegmentRange_PerRunCycle, 1, 100, 0)
+	l_Ask.L_30 = dialog.AddLabel("Maximum number of rounds (with up to 3 attempts")
+  l_Ask.L_31 = dialog.AddLabel("per round) to attempt to favorably change the")
+  l_Ask.L_32 = dialog.AddLabel("protein structure using structure.RebuildSelected")
+  l_Ask.L_33 = dialog.AddLabel("for each segment range per run cycle:") -- default is 15
+	l_Ask.g_UserSelected_MaxNumberOfRoundsToRebuildEachSegmentRangePerRunCycle =
+		dialog.AddSlider("  Max Rounds:", 
+      g_UserSelected_MaxNumberOfRoundsToRebuildEachSegmentRangePerRunCycle, 1, 100, 0)
 
-	l_Ask.L60 = dialog.AddLabel("After Each Rebuild:")
-	l_Ask.L61 = dialog.AddLabel("... Shake segment range")
-	l_Ask.L62 = dialog.AddLabel("... with clash importance:")
+	l_Ask.L_40 = dialog.AddLabel("After Each Rebuild:")
+	l_Ask.L_41 = dialog.AddLabel("... shake segment range with clash importance:")
 	l_Ask.g_UserSelected_AfterRebuild_ShakeSegmentRange_ClashImportance =
     dialog.AddSlider("", 
       g_UserSelected_AfterRebuild_ShakeSegmentRange_ClashImportance, 0, 1, 2)
   
-	l_Ask.L70 = dialog.AddLabel("... Add 2xRegional plus 4xLocal Wiggles:")
-	l_Ask.L71 = dialog.AddLabel("... w/SideChains w/Backbone w/ClashImportance=1")
+	l_Ask.L_50 = dialog.AddLabel("... plus add 2xRegional plus 4xLocal Wiggles with")
+	l_Ask.L_51 = dialog.AddLabel("side chains & backbone w/Clash Importance=1:")
     l_Ask.g_bUserSelected_ExtraShakeAndWiggles_AfterRebuild =
 		dialog.AddCheckbox("Very SLOW!",
 			g_bUserSelected_ExtraShakeAndWiggles_AfterRebuild)
 
-	l_Ask.L0 = dialog.AddLabel("Perform Extra Stabilize (shake and wiggle more)")
+	l_Ask.L_60 = dialog.AddLabel("Perform Extra Stabilize (shake and wiggle more)")
 	l_Ask.g_bUserSelected_PerformExtraStabilize =
 		dialog.AddCheckbox("Extra", g_bUserSelected_PerformExtraStabilize) -- default is false
 
-	l_Ask.L80 = dialog.AddLabel("Normal stabilize or quick stabilize")
-	l_Ask.g_bUserSelected_NormalStabilize =
-    dialog.AddCheckbox("Normal stabilize", g_bUserSelected_NormalStabilize)
+	l_Ask.L_70 = dialog.AddLabel("Stabilize or Simple-Shake-n-Wiggle:")
+	l_Ask.g_bUserSelected_PerformStabilize =
+    dialog.AddCheckbox("Stabilize", g_bUserSelected_PerformStabilize)
   
 	l_Ask.g_bUserSelected_FuseBestScorePartPose =
     dialog.AddCheckbox("Fuse best score part position", g_bUserSelected_FuseBestScorePartPose)
 	
-	l_Ask.L10 = dialog.AddLabel("Skip fusing best position if current rebuild loses")
-	l_Ask.L11 = dialog.AddLabel("more than (Points * # of segments per range / 3):")
+	l_Ask.L_90 = dialog.AddLabel("Skip fusing best position if current rebuild loses")
+	l_Ask.L_91 = dialog.AddLabel("more than (Points * # of segments per range / 3):")
 	l_Ask.g_UserSelected_SkipFuseBestScorePartPose_IfCurrentRebuild_LosesMoreThan = 
 		dialog.AddSlider("  Points:", 
       g_UserSelected_SkipFuseBestScorePartPose_IfCurrentRebuild_LosesMoreThan, -5, 200, 0)
 
-	l_Ask.L1 = dialog.AddLabel("Move on to more consecutive segments per range")
-	l_Ask.L2 = dialog.AddLabel("if current rebuild points gained is more than:")
+	l_Ask.L_100 = dialog.AddLabel("Move on to more consecutive segments per range")
+	l_Ask.L_101 = dialog.AddLabel("if current rebuild points gained is more than:")
 	l_Ask.g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan =
 		dialog.AddSlider("  Points:",
-			g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan, 0, 10000, 0)
-      -- ...default is 40 or less.
+			g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan, 0, 500, 0)
+      -- ...default is 40 or less (or more?).
 
-	l_Ask.L20 = dialog.AddLabel("Only allow rebuilding already rebuilt segments")
-	l_Ask.L21 = dialog.AddLabel("if current rebuild gain is more than:")
+	l_Ask.L_110 = dialog.AddLabel("Only allow rebuilding already rebuilt segments")
+	l_Ask.L_111 = dialog.AddLabel("if current rebuild gain is more than:")
 	l_Ask.g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan =
 		dialog.AddSlider("  Points:",
 			g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan, 0,
@@ -1369,8 +1357,8 @@ function AskUserToSelectMoreOptions()
 	g_UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle =
 		l_Ask.g_UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle.value
 	
-	g_UserSelected_NumberOfTimesToRebuildEach_SegmentRange_PerRunCycle =
-		l_Ask.g_UserSelected_NumberOfTimesToRebuildEach_SegmentRange_PerRunCycle.value
+	g_UserSelected_MaxNumberOfRoundsToRebuildEachSegmentRangePerRunCycle =
+		l_Ask.g_UserSelected_MaxNumberOfRoundsToRebuildEachSegmentRangePerRunCycle.value
 
 	g_UserSelected_AfterRebuild_ShakeSegmentRange_ClashImportance =
     l_Ask.g_UserSelected_AfterRebuild_ShakeSegmentRange_ClashImportance.value
@@ -1381,8 +1369,8 @@ function AskUserToSelectMoreOptions()
 	g_bUserSelected_PerformExtraStabilize = l_Ask.g_bUserSelected_PerformExtraStabilize.value
   -- ...default is false.
   
-	g_bUserSelected_NormalStabilize = 
-    l_Ask.g_bUserSelected_NormalStabilize.value
+	g_bUserSelected_PerformStabilize = 
+    l_Ask.g_bUserSelected_PerformStabilize.value
 	g_UserSelected_SkipFuseBestScorePartPose_IfCurrentRebuild_LosesMoreThan =
     l_Ask.g_UserSelected_SkipFuseBestScorePartPose_IfCurrentRebuild_LosesMoreThan.value
   
@@ -1465,7 +1453,7 @@ function AskUserToSelectMutateOptions()
 
 end -- AskUserToSelectMutateOptions()
 function AskUserToSelectRebuildOptions() -- was AskDRWOptions()
-  -- Called from main() was DRW()
+  -- Called from RebuildOnePuzzleWithManyRuns() was DRW()
   -- Calls AskUserToSelectSegmentsRangesToRebuild() -- was AskForSelections()
   -- Calls AskUserToSelectMutateOptions()
   
@@ -1670,7 +1658,7 @@ function AskUserToSelectRebuildOptions() -- was AskDRWOptions()
         end
 			end
       
-      -- Select Main 4 ScoreParts for Stabilize...
+      -- Select main 4 ScoreParts for Stabilize...
 			if g_bUserSelected_SelectMain4ScorePartsForStabilize ~=
         l_Ask.g_bUserSelected_SelectMain4ScorePartsForStabilize.value then
         
@@ -1679,7 +1667,7 @@ function AskUserToSelectRebuildOptions() -- was AskDRWOptions()
         
 				if g_bUserSelected_SelectMain4ScorePartsForStabilize == true then
           
-          print("\nUser selected the following Main 4 ScoreParts for Stabilize:")
+          print("\nUser selected the following main 4 ScoreParts for Stabilize:")
           
 					-- g_ScorePartsTable={ScorePart_Number=1, ScorePart_Name=2, l_bScorePart_IsActive=3, LongName=4}
 					for l_ScorePartsTableIndex = 1, #g_ScorePartsTable do
@@ -2207,7 +2195,7 @@ function AskUserToSelectConditionCheckingOptions()
     
 end -- function AskUserToSelectConditionCheckingOptions()
 function DisplayPuzzleProperties()
-  -- Called from main()...
+  -- Called from RebuildOnePuzzleWithManyRuns()...
 
   -- Puzzle name and ID...
 	print("  Puzzle name: " .. puzzle.GetName() .. "")
@@ -2319,7 +2307,7 @@ function DisplayUserSelectedMutateOptions()
 
 end -- function DisplayUserSelectedMutateOptions()
 function DisplayUserSelectedOptions() -- was printOptions()
-  -- Called from main() was DRW()
+  -- Called from RebuildOnePuzzleWithManyRuns() was DRW()
 
 	print("\nUser Selected Rebuild Options:\n")
 
@@ -2336,8 +2324,9 @@ function DisplayUserSelectedOptions() -- was printOptions()
 	--print("  Reset To Start Value After Processing With This Many Consecutive Segments: " ..
 	--	g_UserSelected_ResetToStartValueAfterRebuildingWithThisManyConsecutiveSegments) -- default = 4
 
-	--print("  Number of times to rebuild each segment range per run cycle: " ..
-	--	g_UserSelected_NumberOfTimesToRebuildEach_SegmentRange_PerRunCycle)
+	-- print("  Maximum number of rounds (with up to 3 attempts per round) to attempt to favorably change" ..
+  --  " the protein structure using structure.RebuildSelected() for each segment range per run cycle: " ..
+	--	g_UserSelected_MaxNumberOfRoundsToRebuildEachSegmentRangePerRunCycle)
 
   if g_OriginalNumberOfDisulfideBonds > 1 then
     if g_bUserSelected_KeepDisulfideBondsIntact == true then
@@ -2379,17 +2368,18 @@ function DisplayUserSelectedOptions() -- was printOptions()
 	end
   
   if g_bUserSelected_SelectMain4ScorePartsForStabilize == true then
-    print("  User selected the Main 4 ScoreParts for Stabilize.")
+    print("  User selected the main 4 ScoreParts for Stabilize.")
   elseif g_bUserSelected_SelectScorePartsForStabilize == true then
     print("  User selected ScoreParts for Stabilize.")
   else
     print("  User selected all ScoreParts for Stabilize.")
   end
   
-	if g_bUserSelected_NormalStabilize == true then
-    print("  User selected normal Stabilize w/1xShakeSelected and " .. (3 * l_Iterations) .. "xWiggleAll.")
+	if g_bUserSelected_PerformStabilize == true then
+    print("  User selected Stabilize w/1xShakeSelected and " .. (3 * l_Iterations) .. "xWiggleAll.")
   else
-    print("  User selected quick Stabilize w/1xShakeSelected and " .. l_Iterations .. "xWiggleSelected.")
+    print("  User selected simple ShakeAndWiggle: w/1xShakeSelected and " .. l_Iterations ..
+      "xWiggleSelected.")
 	end
   
 	if g_bUserSelected_PerformExtraStabilize == true then
@@ -2428,7 +2418,7 @@ end -- DisplayUserSelectedOptions()
 -- ...end of Ask and Display User Options.
 -- Start of Support Functions...
 function Add_Loop_Helix_And_Sheet_Segments_To_SegmentRangesTable() -- was FindAreas()
-  -- Called from RebuildRunXofYwithManySetsOfConsecutiveSegmentsRanges() when l_How = 'segments'
+  -- Called from RebuildRunXofYwithManySegmentRangeSets() when l_How = 'segments'
   
 	if g_bRebuildLoopsOnly == true then
 		local l_bDone = false
@@ -2671,12 +2661,12 @@ end -- function bIsSegmentIndexInSegmentRangesTable(l_SegmentIndex, l_SegmentRan
 function bSegmentIsAllowedToBeRebuilt(l_SegmentIndex)
   -- Called from bSegmentRangeIsAllowedToBeRebuilt()...
 
-  -- g_bUserSelectd_SegmentsAllowedToBeRebuiltTable[] is populated in main() from 
+  -- g_bUserSelectd_SegmentsAllowedToBeRebuiltTable[] is populated in RebuildOnePuzzleWithManyRuns() from 
   -- g_UserSelected_SegmentRangesAllowedToBeRebuiltTable[] which is is initially
   -- set to {{1, g_SegmentCount_WithoutLigands}} in DefineGlobalVariables() then
   -- the user can change this value in AskUserToSelectSegmentsRangesToRebuild()
   -- plus AskUserToSelectRebuildOptions(), and finally we remove all frozen,
-  -- locked and ligand segments in main()...
+  -- locked and ligand segments in RebuildOnePuzzleWithManyRuns()...
   if g_bUserSelectd_SegmentsAllowedToBeRebuiltTable[l_SegmentIndex] == false then -- was WORKONbool[]
     --if g_FrozenLockedOrLigandSegmentsTable[l_SegmentIndex] == true then
 		return false -- Note: this option overrides the below options.
@@ -2688,7 +2678,7 @@ function bSegmentIsAllowedToBeRebuilt(l_SegmentIndex)
   
   if g_CurrentRebuildPointsGained >
     g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan then
-    -- g_CurrentRebuildPointsGained is added to in RebuildManySegmentRanges()
+    -- g_CurrentRebuildPointsGained is added to in RebuildSegmentRangeSetXofYwithManySegmentRanges()
     -- g_CurrentRebuildPointsGained is never reset to zero
     return true
   end
@@ -2918,7 +2908,7 @@ function Calculate_SegmentRange_Score(l_ScorePart_NameOrTable, l_StartSegment, l
 
 end -- Calculate_SegmentRange_Score(l_ScorePart_NameOrTable, l_StartSegment, l_EndSegment)
 function CheckForLowStartingScore()
-  -- Called from main()...
+  -- Called from RebuildOnePuzzleWithManyRuns()...
 
   -- Change defaults if the starting score is low (or negative)...
   local l_LowScore = 0 -- This was 4000, but why? Perhaps 4000 was a good low limit for ED puzzles.
@@ -2947,10 +2937,10 @@ function CheckForLowStartingScore()
 
 	print("\n  Since the starting score of " .. PrettyNumber(l_Current_PoseTotalScore) ..
          " is less than " .. l_LowScore .. " points, to speed things up, we will temporarily")
-  print("  perform quick stabilize and skip fusing best position" ..
+  print("  skip stabilizing and fusing best position" ..
          " until the score increases above " .. l_LowScore .. " points.")
 	g_bUserSelected_FuseBestScorePartPose = false
-	g_bUserSelected_NormalStabilize = false
+	g_bUserSelected_PerformStabilize = false
 
 end -- function CheckForLowStartingScore()
 function CheckIfAlreadyRebuiltSegmentsMustBeIncluded() -- was ChkDisjunctList()
@@ -3003,7 +2993,7 @@ function CheckIfAlreadyRebuiltSegmentsMustBeIncluded() -- was ChkDisjunctList()
 	print("\n  Not enough consecutive not-already-rebuilt segments available to create a segment range;" ..
         "\n  therefore, we will set all already-rebuilt segments to not-already-rebuilt and try again...")
        
-  ResetSegmentsAlreadyRebuiltTable()
+  Reset_g_bSegmentsAlreadyRebuiltTable()
        
 end -- CheckIfAlreadyRebuiltSegmentsMustBeIncluded()
 function bCheckIfFrozenLockedOrLigandSegment(l_SegmentIndex)
@@ -3043,7 +3033,7 @@ function CleanUpSegmentRangesTable(l_SegmentRangesTable)
 
 end -- function CleanUpSegmentRangesTable(l_SegmentRangesTable)
 function ConvertAllSegmentsToLoops()
-  -- Called from RebuildManySegmentRanges()...
+  -- Called from RebuildSegmentRangeSetXofYwithManySegmentRanges()...
 
   -- Turn entire structure into loops...
   -- Remember loops are not helices. Loops are just plain swiggly lines...
@@ -3127,7 +3117,7 @@ function ConvertSegmentRangesTableToSegmentsTable(l_SegmentRangesTable)
 end -- function ConvertSegmentRangesTableToSegmentsTable(l_SegmentRangesTable)
 function ConvertSegmentRangesTableToSegmentsBooleanTable(l_SegmentRangesToRebuildTable)-- was InitWORKONbool
   -- ...was InitWORKONbool(), I think.
-  -- Called from main() was DRW()
+  -- Called from RebuildOnePuzzleWithManyRuns() was DRW()
   
 	-- l_SegmentRangesToRebuildTable={StartSegment, EndSegment} e.g., {{1,3},{5,7},{9,11}}
 	-- l_bSegmentsToRebuildBooleanTable={bToRebuild} -- e.g., {true,true,true,false,true, ...}
@@ -3197,8 +3187,563 @@ function ConvertSegmentsTableToSegmentRangesTable(l_SegmentsTable)
 	return l_SegmentRangesTable
   
 end -- function ConvertSegmentsTableToSegmentRangesTable(l_SegmentsTable)
+function DisplayEndOfRunStatistics()
+  
+  local l_Stats_Run_EndTime = os.clock()
+  local l_Stats_Run_ElaspedMinutes = (l_Stats_Run_EndTime - g_Stats_Run_StartTime) / 60
+  
+  local l_Stats_Run_TotalPointsGained_Total = 
+    g_Stats_Run_TotalPointsGained_RebuildSelected +
+    g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected +
+    g_Stats_Run_TotalPointsGained_WiggleSelected +
+    g_Stats_Run_TotalPointsGained_WiggleAll +
+    g_Stats_Run_TotalPointsGained_MutateSidechainsSelected +
+    g_Stats_Run_TotalPointsGained_MutateSidechainsAll
+  if l_Stats_Run_TotalPointsGained_Total < 0.0001 then
+     l_Stats_Run_TotalPointsGained_Total = 0.0001
+  end
+    
+  local l_Stats_Run_TotalSecondsUsed_Total = 
+    g_Stats_Run_TotalSecondsUsed_RebuildSelected +
+    g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected +
+    g_Stats_Run_TotalSecondsUsed_WiggleSelected +
+    g_Stats_Run_TotalSecondsUsed_WiggleAll +
+    g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected +
+    g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll
+  
+  local l_Stats_Run_SuccessfulAttempts_Total = 
+    g_Stats_Run_SuccessfulAttempts_RebuildSelected +
+    g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected +
+    g_Stats_Run_SuccessfulAttempts_WiggleSelected +
+    g_Stats_Run_SuccessfulAttempts_WiggleAll +
+    g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected +
+    g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll
+    
+  local l_Stats_Run_NumberOfAttempts_Total = 
+    g_Stats_Run_NumberOfAttempts_RebuildSelected +
+    g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected +
+    g_Stats_Run_NumberOfAttempts_WiggleSelected +
+    g_Stats_Run_NumberOfAttempts_WiggleAll +
+    g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected +
+    g_Stats_Run_NumberOfAttempts_MutateSidechainsAll
+    
+  -- The script sum total of the many action seconds is close to double the actual script elasped
+  -- time. For example 93 vs 55 seconds. To get a more accurate time spent, we divide the 
+  -- time per action by the total time of all actions. This gives a reasonable percent of time
+  -- taken per action. We then multiply this percentage by the actual time elapsed. For example
+  -- RebuildSelected says it took 83 of the 93 total action seconds. This represents 89% of
+  -- the total actual elapsed time of 55 seconds or 49 actual seconds
+
+  local l_PercentTimeUsed_RebuildSelected = 
+        g_Stats_Run_TotalSecondsUsed_RebuildSelected / l_Stats_Run_TotalSecondsUsed_Total
+  local l_PercentTimeUsed_ShakeSidechainsSelected = 
+        g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected / l_Stats_Run_TotalSecondsUsed_Total
+  local l_PercentTimeUsed_WiggleSelected =
+        g_Stats_Run_TotalSecondsUsed_WiggleSelected / l_Stats_Run_TotalSecondsUsed_Total
+  local l_PercentTimeUsed_WiggleAll =
+        g_Stats_Run_TotalSecondsUsed_WiggleAll / l_Stats_Run_TotalSecondsUsed_Total
+  local l_PercentTimeUsed_MutateSidechainsSelected =
+        g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected / l_Stats_Run_TotalSecondsUsed_Total
+  local l_PercentTimeUsed_MutateSidechainsAll =
+        g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll / l_Stats_Run_TotalSecondsUsed_Total
+
+  -- Approximate minutes used (not 100% accurate because clock is only accurate to +/- 0.001 seconds)
+  local l_Stats_Run_TotalMinutesUsed_RebuildSelected =
+        l_Stats_Run_ElaspedMinutes * l_PercentTimeUsed_RebuildSelected
+     if l_Stats_Run_TotalMinutesUsed_RebuildSelected < 0.0001 then
+        l_Stats_Run_TotalMinutesUsed_RebuildSelected = 0.0001
+     end
+  local l_Stats_Run_TotalMinutesUsed_ShakeSidechainsSelected =
+        l_Stats_Run_ElaspedMinutes * l_PercentTimeUsed_ShakeSidechainsSelected
+     if l_Stats_Run_TotalMinutesUsed_ShakeSidechainsSelected < 0.0001 then
+        l_Stats_Run_TotalMinutesUsed_ShakeSidechainsSelected = 0.0001
+     end
+  local l_Stats_Run_TotalMinutesUsed_WiggleSelected =
+        l_Stats_Run_ElaspedMinutes * l_PercentTimeUsed_WiggleSelected
+     if l_Stats_Run_TotalMinutesUsed_WiggleSelected < 0.0001 then
+        l_Stats_Run_TotalMinutesUsed_WiggleSelected = 0.0001
+     end
+  local l_Stats_Run_TotalMinutesUsed_WiggleAll =
+        l_Stats_Run_ElaspedMinutes * l_PercentTimeUsed_WiggleAll
+     if l_Stats_Run_TotalMinutesUsed_WiggleAll < 0.0001 then
+        l_Stats_Run_TotalMinutesUsed_WiggleAll = 0.0001
+     end
+  local l_Stats_Run_TotalMinutesUsed_MutateSidechainsSelected =
+        l_Stats_Run_ElaspedMinutes * l_PercentTimeUsed_MutateSidechainsSelected
+     if l_Stats_Run_TotalMinutesUsed_MutateSidechainsSelected < 0.0001 then
+        l_Stats_Run_TotalMinutesUsed_MutateSidechainsSelected = 0.0001
+     end
+  local l_Stats_Run_TotalMinutesUsed_MutateSidechainsAll =
+        l_Stats_Run_ElaspedMinutes * l_PercentTimeUsed_MutateSidechainsAll
+     if l_Stats_Run_TotalMinutesUsed_MutateSidechainsAll < 0.0001 then
+        l_Stats_Run_TotalMinutesUsed_MutateSidechainsAll = 0.0001
+     end
+  
+  print("------------------------ ------------------  ----------------  -------  ------------------")
+  print("End of run " .. g_RunCycle .. " Stats:")
+  print("------------------------ ------------------  ----------------  -------  ------------------")
+  print("From:                       Points Gained      Minutes Used    Pts/Min     Success Rate:")
+  print("------------------------ ------------------  ----------------  -------  ------------------")
+                                        
+  print("RebuildSelected          " .. 
+    PaddedNumber(g_Stats_Run_TotalPointsGained_RebuildSelected, 9, 3) .. "" ..
+    PaddedString("(" ..
+    PaddedNumber(g_Stats_Run_TotalPointsGained_RebuildSelected /
+                 l_Stats_Run_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+    
+    PaddedNumber(l_Stats_Run_TotalMinutesUsed_RebuildSelected, 9, 3) .. "" ..
+    PaddedString("(" ..
+    PaddedNumber(l_PercentTimeUsed_RebuildSelected * 100, 4, 2) .. "%)", 9) ..
+             
+    PaddedNumber(g_Stats_Run_TotalPointsGained_RebuildSelected /
+                 l_Stats_Run_TotalMinutesUsed_RebuildSelected, 9, 0) .. "  " ..
+               
+    PaddedString(g_Stats_Run_SuccessfulAttempts_RebuildSelected .. "/" ..
+    PaddedNumber(g_Stats_Run_NumberOfAttempts_RebuildSelected, 0, 0), 9) ..
+    PaddedString(" (" ..
+    PaddedNumber(g_Stats_Run_SuccessfulAttempts_RebuildSelected /
+                 g_Stats_Run_NumberOfAttempts_RebuildSelected * 100, 4, 2) .. "%)", 9))
+  print("ShakeSidechainsSelected  " ..
+    PaddedNumber(g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected, 9, 3) .. "" ..
+    PaddedString("(" ..
+    PaddedNumber(g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected /
+                 l_Stats_Run_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+    
+    PaddedNumber(l_Stats_Run_TotalMinutesUsed_ShakeSidechainsSelected, 9, 3) .. "" ..
+    PaddedString("(" ..
+    PaddedNumber(l_PercentTimeUsed_ShakeSidechainsSelected * 100, 4, 2) .. "%)", 9) ..
+             
+    PaddedNumber(g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected /
+                 l_Stats_Run_TotalMinutesUsed_ShakeSidechainsSelected, 9, 0) .. "  " ..
+              
+    PaddedString(g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected .. "/" ..
+    PaddedNumber(g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected, 0, 0), 9) ..
+    PaddedString(" (" ..
+    PaddedNumber(g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected /
+                 g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected * 100, 4, 2) .. "%)", 9))
+  print("WiggleSelected           " .. 
+    PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleSelected, 9, 3) .. "" ..
+    PaddedString("(" ..
+    PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleSelected /
+                 l_Stats_Run_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+    
+    PaddedNumber(l_Stats_Run_TotalMinutesUsed_WiggleSelected, 9, 3) .. "" ..      
+    PaddedString("(" ..
+    PaddedNumber(l_PercentTimeUsed_WiggleSelected * 100, 4, 2) .. "%)", 9) ..
+             
+    PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleSelected /
+                 l_Stats_Run_TotalMinutesUsed_WiggleSelected, 9, 0) .. "  " ..
+              
+    PaddedString(g_Stats_Run_SuccessfulAttempts_WiggleSelected .. "/" ..
+    PaddedNumber(g_Stats_Run_NumberOfAttempts_WiggleSelected, 0, 0), 9) ..
+    PaddedString(" (" ..
+    PaddedNumber(g_Stats_Run_SuccessfulAttempts_WiggleSelected /
+                 g_Stats_Run_NumberOfAttempts_WiggleSelected * 100, 4, 2) .. "%)", 9))
+  print("WiggleAll                " .. 
+    PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleAll, 9, 3) .. "" ..
+    PaddedString("(" ..
+    PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleAll /
+                 l_Stats_Run_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+    
+    PaddedNumber(l_Stats_Run_TotalMinutesUsed_WiggleAll, 9, 3) .. "" ..      
+    PaddedString("(" ..
+    PaddedNumber(l_PercentTimeUsed_WiggleAll * 100, 4, 2) .. "%)", 9) ..
+             
+    PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleAll /
+                 l_Stats_Run_TotalMinutesUsed_WiggleAll, 9, 0) .. "  " ..
+               
+    PaddedString(g_Stats_Run_SuccessfulAttempts_WiggleAll .. "/" ..  
+    PaddedNumber(g_Stats_Run_NumberOfAttempts_WiggleAll, 0, 0), 9) ..
+    PaddedString(" (" ..
+    PaddedNumber(g_Stats_Run_SuccessfulAttempts_WiggleAll /
+                 g_Stats_Run_NumberOfAttempts_WiggleAll * 100, 4, 2) .. "%)", 9))
+  print("MutateSidechainsSelected " ..
+    PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsSelected, 9, 3) .. "" ..
+    PaddedString("(" ..
+    PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsSelected /
+                 l_Stats_Run_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+    
+    PaddedNumber(l_Stats_Run_TotalMinutesUsed_MutateSidechainsSelected, 9, 3) .. "" ..      
+    PaddedString("(" ..
+    PaddedNumber(l_PercentTimeUsed_MutateSidechainsSelected * 100, 4, 2) .. "%)", 9) ..
+             
+    PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsSelected /
+                 l_Stats_Run_TotalMinutesUsed_MutateSidechainsSelected, 9, 0) .. "  " ..
+              
+    PaddedString(g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected .. "/" ..
+    PaddedNumber(g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected, 0, 0), 9) ..
+    PaddedString(" (" ..
+    PaddedNumber(g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected /
+                 g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected * 100, 4, 2) .. "%)", 9))
+  print("MutateSidechainsAll      " .. 
+    PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsAll, 9, 3) .. "" ..
+    PaddedString("(" ..
+    PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsAll /
+                 l_Stats_Run_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+    
+    PaddedNumber(l_Stats_Run_TotalMinutesUsed_MutateSidechainsAll, 9, 3) .. "" ..      
+    PaddedString("(" ..
+    PaddedNumber(l_PercentTimeUsed_MutateSidechainsAll * 100, 4, 2) .. "%)", 9) ..
+             
+    PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsAll /
+                 l_Stats_Run_TotalMinutesUsed_MutateSidechainsAll, 9, 0) .. "  " ..
+              
+    PaddedString(g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll .. "/" ..
+    PaddedNumber(g_Stats_Run_NumberOfAttempts_MutateSidechainsAll, 0, 0), 9) ..
+    PaddedString(" (" ..
+    PaddedNumber(g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll /
+                 g_Stats_Run_NumberOfAttempts_MutateSidechainsAll * 100, 4, 2) .. "%)", 9))
+  print("------------------------ ------------------  ----------------  -------  ------------------")
+  print("Run total                " .. 
+    PaddedNumber(l_Stats_Run_TotalPointsGained_Total, 9, 3) .. "   (100%)" ..
+             
+    PaddedNumber(l_Stats_Run_ElaspedMinutes, 9, 3) .. "   (100%)" ..
+             
+    PaddedNumber(l_Stats_Run_TotalPointsGained_Total /
+                (l_Stats_Run_TotalSecondsUsed_Total / 60), 9, 0) .. "  " ..
+              
+    PaddedString(l_Stats_Run_SuccessfulAttempts_Total .. "/" ..
+    PaddedNumber(l_Stats_Run_NumberOfAttempts_Total, 0, 0), 9) ..
+    PaddedString(" (" ..
+    PaddedNumber(l_Stats_Run_SuccessfulAttempts_Total /
+                 l_Stats_Run_NumberOfAttempts_Total * 100, 4, 2) .. "%)", 9))
+  print("------------------------ ------------------  ----------------  -------  ------------------")
+  
+  g_Stats_Script_TotalPointsGained_RebuildSelected = 
+  g_Stats_Script_TotalPointsGained_RebuildSelected +
+     g_Stats_Run_TotalPointsGained_RebuildSelected
+  g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected =
+  g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected +
+     g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected
+  g_Stats_Script_TotalPointsGained_WiggleSelected =
+  g_Stats_Script_TotalPointsGained_WiggleSelected +
+     g_Stats_Run_TotalPointsGained_WiggleSelected
+  g_Stats_Script_TotalPointsGained_WiggleAll =
+  g_Stats_Script_TotalPointsGained_WiggleAll +
+     g_Stats_Run_TotalPointsGained_WiggleAll
+  g_Stats_Script_TotalPointsGained_MutateSidechainsSelected =
+  g_Stats_Script_TotalPointsGained_MutateSidechainsSelected +
+     g_Stats_Run_TotalPointsGained_MutateSidechainsSelected
+  g_Stats_Script_TotalPointsGained_MutateSidechainsAll =
+  g_Stats_Script_TotalPointsGained_MutateSidechainsAll +
+     g_Stats_Run_TotalPointsGained_MutateSidechainsAll
+  
+  g_Stats_Script_TotalSecondsUsed_RebuildSelected = 
+  g_Stats_Script_TotalSecondsUsed_RebuildSelected +
+     g_Stats_Run_TotalSecondsUsed_RebuildSelected
+  g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected =
+  g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected +
+     g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected
+  g_Stats_Script_TotalSecondsUsed_WiggleSelected =
+  g_Stats_Script_TotalSecondsUsed_WiggleSelected +
+     g_Stats_Run_TotalSecondsUsed_WiggleSelected
+  g_Stats_Script_TotalSecondsUsed_WiggleAll =
+  g_Stats_Script_TotalSecondsUsed_WiggleAll +
+     g_Stats_Run_TotalSecondsUsed_WiggleAll
+  g_Stats_Script_TotalSecondsUsed_MutateSidechainsSelected =
+  g_Stats_Script_TotalSecondsUsed_MutateSidechainsSelected +
+     g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected
+  g_Stats_Script_TotalSecondsUsed_MutateSidechainsAll =
+  g_Stats_Script_TotalSecondsUsed_MutateSidechainsAll +
+     g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll
+  
+  g_Stats_Script_SuccessfulAttempts_RebuildSelected = 
+  g_Stats_Script_SuccessfulAttempts_RebuildSelected +
+     g_Stats_Run_SuccessfulAttempts_RebuildSelected
+  g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected =
+  g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected +
+     g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected
+  g_Stats_Script_SuccessfulAttempts_WiggleSelected =
+  g_Stats_Script_SuccessfulAttempts_WiggleSelected +
+     g_Stats_Run_SuccessfulAttempts_WiggleSelected
+  g_Stats_Script_SuccessfulAttempts_WiggleAll =
+  g_Stats_Script_SuccessfulAttempts_WiggleAll +
+     g_Stats_Run_SuccessfulAttempts_WiggleAll
+  g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected =
+  g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected +
+     g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected
+  g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll =
+  g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll +
+     g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll
+  
+  g_Stats_Script_NumberOfAttempts_RebuildSelected = 
+  g_Stats_Script_NumberOfAttempts_RebuildSelected +
+     g_Stats_Run_NumberOfAttempts_RebuildSelected
+  g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected =
+  g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected +
+     g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected
+  g_Stats_Script_NumberOfAttempts_WiggleSelected =
+  g_Stats_Script_NumberOfAttempts_WiggleSelected +
+     g_Stats_Run_NumberOfAttempts_WiggleSelected
+  g_Stats_Script_NumberOfAttempts_WiggleAll =
+  g_Stats_Script_NumberOfAttempts_WiggleAll +
+     g_Stats_Run_NumberOfAttempts_WiggleAll
+  g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected =
+  g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected +
+     g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected
+  g_Stats_Script_NumberOfAttempts_MutateSidechainsAll =
+  g_Stats_Script_NumberOfAttempts_MutateSidechainsAll +
+     g_Stats_Run_NumberOfAttempts_MutateSidechainsAll
+  
+  g_Stats_Run_StartTime = os.clock()
+  
+  g_Stats_Run_TotalPointsGained_RebuildSelected = 0
+  g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected = 0
+  g_Stats_Run_TotalPointsGained_WiggleSelected = 0
+  g_Stats_Run_TotalPointsGained_WiggleAll = 0
+  g_Stats_Run_TotalPointsGained_MutateSidechainsSelected = 0
+  g_Stats_Run_TotalPointsGained_MutateSidechainsAll = 0
+  
+  g_Stats_Run_TotalSecondsUsed_RebuildSelected = 0
+  g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected = 0
+  g_Stats_Run_TotalSecondsUsed_WiggleSelected = 0
+  g_Stats_Run_TotalSecondsUsed_WiggleAll = 0
+  g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected = 0
+  g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll = 0
+  
+  g_Stats_Run_SuccessfulAttempts_RebuildSelected = 0
+  g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected = 0
+  g_Stats_Run_SuccessfulAttempts_WiggleSelected = 0
+  g_Stats_Run_SuccessfulAttempts_WiggleAll = 0
+  g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected = 0
+  g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll = 0
+  
+  g_Stats_Run_NumberOfAttempts_RebuildSelected = 0.0001 -- prevent divide by zero
+  g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected = 0.0001
+  g_Stats_Run_NumberOfAttempts_WiggleSelected = 0.0001
+  g_Stats_Run_NumberOfAttempts_WiggleAll = 0.0001
+  g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected = 0.0001
+  g_Stats_Run_NumberOfAttempts_MutateSidechainsAll = 0.0001
+    
+end -- function DisplayEndOfRunStatistics()
+
+function DisplayEndOfScriptStatistics()  
+    
+  local l_ScriptEndTime = os.clock()
+  local l_Stats_Script_ElaspedMinutes = (l_ScriptEndTime - g_ScriptStartTime) / 60
+  
+  local l_Stats_Script_TotalPointsGained_Total = 
+    g_Stats_Script_TotalPointsGained_RebuildSelected +
+    g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected +
+    g_Stats_Script_TotalPointsGained_WiggleSelected +
+    g_Stats_Script_TotalPointsGained_WiggleAll +
+    g_Stats_Script_TotalPointsGained_MutateSidechainsSelected +
+    g_Stats_Script_TotalPointsGained_MutateSidechainsAll
+    if l_Stats_Script_TotalPointsGained_Total < 0.0001 then
+       l_Stats_Script_TotalPointsGained_Total = 0.0001
+    end
+  
+  local l_Stats_Script_TotalSecondsUsed_Total = 
+    g_Stats_Script_TotalSecondsUsed_RebuildSelected +
+    g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected +
+    g_Stats_Script_TotalSecondsUsed_WiggleSelected +
+    g_Stats_Script_TotalSecondsUsed_WiggleAll +
+    g_Stats_Script_TotalSecondsUsed_MutateSidechainsSelected +
+    g_Stats_Script_TotalSecondsUsed_MutateSidechainsAll
+  
+  local l_Stats_Script_SuccessfulAttempts_Total = 
+    g_Stats_Script_SuccessfulAttempts_RebuildSelected +
+    g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected +
+    g_Stats_Script_SuccessfulAttempts_WiggleSelected +
+    g_Stats_Script_SuccessfulAttempts_WiggleAll +
+    g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected +
+    g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll
+    
+  local l_Stats_Script_NumberOfAttempts_Total = 
+    g_Stats_Script_NumberOfAttempts_RebuildSelected +
+    g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected +
+    g_Stats_Script_NumberOfAttempts_WiggleSelected +
+    g_Stats_Script_NumberOfAttempts_WiggleAll +
+    g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected +
+    g_Stats_Script_NumberOfAttempts_MutateSidechainsAll
+    
+  local l_PercentTimeUsed_RebuildSelected = 
+        g_Stats_Script_TotalSecondsUsed_RebuildSelected / l_Stats_Script_TotalSecondsUsed_Total
+  local l_PercentTimeUsed_ShakeSidechainsSelected = 
+        g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected / l_Stats_Script_TotalSecondsUsed_Total
+  local l_PercentTimeUsed_WiggleSelected =
+        g_Stats_Script_TotalSecondsUsed_WiggleSelected / l_Stats_Script_TotalSecondsUsed_Total
+  local l_PercentTimeUsed_WiggleAll =
+        g_Stats_Script_TotalSecondsUsed_WiggleAll / l_Stats_Script_TotalSecondsUsed_Total
+  local l_PercentTimeUsed_MutateSidechainsSelected =
+        g_Stats_Script_TotalSecondsUsed_MutateSidechainsSelected / l_Stats_Script_TotalSecondsUsed_Total
+  local l_PercentTimeUsed_MutateSidechainsAll =
+        g_Stats_Script_TotalSecondsUsed_MutateSidechainsAll / l_Stats_Script_TotalSecondsUsed_Total
+
+  -- Approximate minutes used (not 100% accurate because clock is only accurate to +/- 0.001 seconds)
+  local l_Stats_Script_TotalMinutesUsed_RebuildSelected =
+        l_Stats_Script_ElaspedMinutes * l_PercentTimeUsed_RebuildSelected
+     if l_Stats_Script_TotalMinutesUsed_RebuildSelected < 0.0001 then
+        l_Stats_Script_TotalMinutesUsed_RebuildSelected = 0.0001
+     end
+  local l_Stats_Script_TotalMinutesUsed_ShakeSidechainsSelected =
+        l_Stats_Script_ElaspedMinutes * l_PercentTimeUsed_ShakeSidechainsSelected
+     if l_Stats_Script_TotalMinutesUsed_ShakeSidechainsSelected < 0.0001 then
+        l_Stats_Script_TotalMinutesUsed_ShakeSidechainsSelected = 0.0001
+     end
+  local l_Stats_Script_TotalMinutesUsed_WiggleSelected =
+        l_Stats_Script_ElaspedMinutes * l_PercentTimeUsed_WiggleSelected
+     if l_Stats_Script_TotalMinutesUsed_WiggleSelected < 0.0001 then
+        l_Stats_Script_TotalMinutesUsed_WiggleSelected = 0.0001
+     end
+  local l_Stats_Script_TotalMinutesUsed_WiggleAll =
+        l_Stats_Script_ElaspedMinutes * l_PercentTimeUsed_WiggleAll
+     if l_Stats_Script_TotalMinutesUsed_WiggleAll < 0.0001 then
+        l_Stats_Script_TotalMinutesUsed_WiggleAll = 0.0001
+     end
+  local l_Stats_Script_TotalMinutesUsed_MutateSidechainsSelected =
+        l_Stats_Script_ElaspedMinutes * l_PercentTimeUsed_MutateSidechainsSelected
+     if l_Stats_Script_TotalMinutesUsed_MutateSidechainsSelected < 0.0001 then
+        l_Stats_Script_TotalMinutesUsed_MutateSidechainsSelected = 0.0001
+     end
+  local l_Stats_Script_TotalMinutesUsed_MutateSidechainsAll =
+        l_Stats_Script_ElaspedMinutes * l_PercentTimeUsed_MutateSidechainsAll
+     if l_Stats_Script_TotalMinutesUsed_MutateSidechainsAll < 0.0001 then
+        l_Stats_Script_TotalMinutesUsed_MutateSidechainsAll = 0.0001
+     end
+  
+  print("------------------------ ------------------  ----------------  -------  ------------------")
+  print("End of Script Stats:")
+  print("------------------------ ------------------  ----------------  -------  ------------------")
+  print("From:                       Points Gained      Minutes Used    Pts/Min     Success Rate:")
+  print("------------------------ ------------------  ----------------  -------  ------------------")
+  
+  print("RebuildSelected          " .. 
+    PaddedNumber(g_Stats_Script_TotalPointsGained_RebuildSelected, 9, 3) .. "" ..
+    PaddedString("(" ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_RebuildSelected /
+                 l_Stats_Script_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+    
+    PaddedNumber(l_Stats_Script_TotalMinutesUsed_RebuildSelected, 9, 3) .. "" ..
+    PaddedString("(" ..
+    PaddedNumber(l_PercentTimeUsed_RebuildSelected * 100, 4, 2) .. "%)", 9) ..
+             
+    PaddedNumber(g_Stats_Script_TotalPointsGained_RebuildSelected /
+                 l_Stats_Script_TotalMinutesUsed_RebuildSelected, 9, 0) .. "  " ..
+               
+    PaddedString(g_Stats_Script_SuccessfulAttempts_RebuildSelected .. "/" ..
+    PaddedNumber(g_Stats_Script_NumberOfAttempts_RebuildSelected, 0, 0), 9) ..
+    PaddedString(" (" ..
+    PaddedNumber(g_Stats_Script_SuccessfulAttempts_RebuildSelected /
+                 g_Stats_Script_NumberOfAttempts_RebuildSelected * 100, 4, 2) .. "%)", 9))
+  print("ShakeSidechainsSelected  " ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected, 9, 3) .. "" ..
+    PaddedString("(" ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected /
+                 l_Stats_Script_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+    
+    PaddedNumber(l_Stats_Script_TotalMinutesUsed_ShakeSidechainsSelected, 9, 3) .. "" ..
+    PaddedString("(" ..
+    PaddedNumber(l_PercentTimeUsed_ShakeSidechainsSelected * 100, 4, 2) .. "%)", 9) ..
+             
+    PaddedNumber(g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected /
+                 l_Stats_Script_TotalMinutesUsed_ShakeSidechainsSelected, 9, 0) .. "  " ..
+              
+    PaddedString(g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected .. "/" ..
+    PaddedNumber(g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected, 0, 0), 9) ..
+    PaddedString(" (" ..
+    PaddedNumber(g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected /
+                 g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected * 100, 4, 2) .. "%)", 9))
+  print("WiggleSelected           " .. 
+    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleSelected, 9, 3) .. "" ..
+    PaddedString("(" ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleSelected /
+                 l_Stats_Script_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+    
+    PaddedNumber(l_Stats_Script_TotalMinutesUsed_WiggleSelected, 9, 3) .. "" ..      
+    PaddedString("(" ..
+    PaddedNumber(l_PercentTimeUsed_WiggleSelected * 100, 4, 2) .. "%)", 9) ..
+             
+    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleSelected /
+                 l_Stats_Script_TotalMinutesUsed_WiggleSelected, 9, 0) .. "  " ..
+              
+    PaddedString(g_Stats_Script_SuccessfulAttempts_WiggleSelected .. "/" ..
+    PaddedNumber(g_Stats_Script_NumberOfAttempts_WiggleSelected, 0, 0), 9) ..
+    PaddedString(" (" ..
+    PaddedNumber(g_Stats_Script_SuccessfulAttempts_WiggleSelected /
+                 g_Stats_Script_NumberOfAttempts_WiggleSelected * 100, 4, 2) .. "%)", 9))
+  print("WiggleAll                " .. 
+    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleAll, 9, 3) .. "" ..
+    PaddedString("(" ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleAll /
+                 l_Stats_Script_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+    
+    PaddedNumber(l_Stats_Script_TotalMinutesUsed_WiggleAll, 9, 3) .. "" ..      
+    PaddedString("(" ..
+    PaddedNumber(l_PercentTimeUsed_WiggleAll * 100, 4, 2) .. "%)", 9) ..
+             
+    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleAll /
+                 l_Stats_Script_TotalMinutesUsed_WiggleAll, 9, 0) .. "  " ..
+               
+    PaddedString(g_Stats_Script_SuccessfulAttempts_WiggleAll .. "/" ..  
+    PaddedNumber(g_Stats_Script_NumberOfAttempts_WiggleAll, 0, 0), 9) ..
+    PaddedString(" (" ..
+    PaddedNumber(g_Stats_Script_SuccessfulAttempts_WiggleAll /
+                 g_Stats_Script_NumberOfAttempts_WiggleAll * 100, 4, 2) .. "%)", 9))
+  print("MutateSidechainsSelected " ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsSelected, 9, 3) .. "" ..
+    PaddedString("(" ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsSelected /
+                 l_Stats_Script_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+    
+    PaddedNumber(l_Stats_Script_TotalMinutesUsed_MutateSidechainsSelected, 9, 3) .. "" ..      
+    PaddedString("(" ..
+    PaddedNumber(l_PercentTimeUsed_MutateSidechainsSelected * 100, 4, 2) .. "%)", 9) ..
+             
+    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsSelected /
+                 l_Stats_Script_TotalMinutesUsed_MutateSidechainsSelected, 9, 0) .. "  " ..
+              
+    PaddedString(g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected .. "/" ..
+    PaddedNumber(g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected, 0, 0), 9) ..
+    PaddedString(" (" ..
+    PaddedNumber(g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected /
+                 g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected * 100, 4, 2) .. "%)", 9))
+  print("MutateSidechainsAll      " .. 
+    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsAll, 9, 3) .. "" ..
+    PaddedString("(" ..
+    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsAll /
+                 l_Stats_Script_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
+    
+    PaddedNumber(l_Stats_Script_TotalMinutesUsed_MutateSidechainsAll, 9, 3) .. "" ..      
+    PaddedString("(" ..
+    PaddedNumber(l_PercentTimeUsed_MutateSidechainsAll * 100, 4, 2) .. "%)", 9) ..
+             
+    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsAll /
+                 l_Stats_Script_TotalMinutesUsed_MutateSidechainsAll, 9, 0) .. "  " ..
+              
+    PaddedString(g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll .. "/" ..
+    PaddedNumber(g_Stats_Script_NumberOfAttempts_MutateSidechainsAll, 0, 0), 9) ..
+    PaddedString(" (" ..
+    PaddedNumber(g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll /
+                 g_Stats_Script_NumberOfAttempts_MutateSidechainsAll * 100, 4, 2) .. "%)", 9))
+  print("------------------------ ------------------  ----------------  -------  ------------------")
+  print("Script total             " ..
+    PaddedNumber(l_Stats_Script_TotalPointsGained_Total, 9, 3) .. "   (100%)" ..
+             
+    PaddedNumber(l_Stats_Script_ElaspedMinutes, 9, 3) .. "   (100%)" ..
+             
+    PaddedNumber(l_Stats_Script_TotalPointsGained_Total /
+                (l_Stats_Script_TotalSecondsUsed_Total / 60), 9, 0) .. "  " ..
+              
+    PaddedString(l_Stats_Script_SuccessfulAttempts_Total .. "/" ..
+    PaddedNumber(l_Stats_Script_NumberOfAttempts_Total, 0, 0), 9) ..
+    PaddedString(" (" ..
+    PaddedNumber(l_Stats_Script_SuccessfulAttempts_Total /
+                 l_Stats_Script_NumberOfAttempts_Total * 100, 4, 2) .. "%)", 9))
+  print("------------------------ ------------------  ----------------  -------  ------------------")
+    
+  local l_Score_AtEndOf_Script = g_Score_ScriptBest
+	print("\nStarting Score: " .. PrettyNumber(g_Score_AtStartOf_Script) ..
+        "\nPoints Gained: " .. PrettyNumber(l_Score_AtEndOf_Script - g_Score_AtStartOf_Script) ..
+        "\nFinal Score: " .. PrettyNumber(l_Score_AtEndOf_Script) ..
+        "\nElapsed Time " .. PaddedNumber(l_Stats_Script_ElaspedMinutes, 5, 3) .. " minutes or " ..
+        PaddedNumber(l_Stats_Script_ElaspedMinutes / 60, 5, 3) .. " hours" ..
+        "\n")
+
+end -- function DisplayEndOfScriptStatistics()
+
 function DisplayXLowestScoringSegmentRanges() -- was PrintAreas()
-  -- Called from RebuildManySegmentRanges()...
+  -- Called from RebuildSegmentRangeSetXofYwithManySegmentRanges()...
   
 	-- g_XLowestScoringSegmentRangesTable={StartSegment=1, EndSegment=2}
 
@@ -3502,7 +4047,7 @@ end -- function FindSegmentsWithSecondaryStructureType(In_SecondaryStructureType
 function FindSelectedSegmentRanges()
   -- Called from 1 place in SetSegmentRangeSecondaryStructureType,
   --             2 places in AskUserToSelectSegmentsRangesToRebuild() and
-  --             1 place in main()...
+  --             1 place in RebuildOnePuzzleWithManyRuns()...
   
 	return ConvertSegmentsTableToSegmentRangesTable(FindSelectedSegments())
   
@@ -3779,7 +4324,7 @@ function Populate_g_CysteineSegmentsTable()
 	g_OriginalNumberOfDisulfideBonds = DisulfideBonds_GetCount()
   
 end -- function Populate_g_CysteineSegmentsTable()
-function Populate_g_FrozenLockedOrLigandSegments() -- was (now inverted) InitWORKONbool()
+function Populate_g_FrozenLockedOrLigandSegments()
   
   g_FrozenLockedOrLigandSegmentsTable = {}
   l_FrozenLockedOrLigandSegmentsTable = {}
@@ -3803,43 +4348,8 @@ function Populate_g_FrozenLockedOrLigandSegments() -- was (now inverted) InitWOR
     l_ListOfFrozenLockedOrLigandSegmentRanges)  
   
 end
-function Populate_g_ScorePart_Scores_Table() -- was ClearScores()
-  -- Called from RebuildOneSegmentRangeManyTimes()...
-
-	g_ScorePart_Scores_Table = {} -- reset it
-
-	local l_ScorePart_Number = 0
-	local l_ScorePart_Score = -999999
-	local l_PoseTotalScore = 0
-	local l_StringOfScorePartNumbersWithSamePoseTotalScore = ''
-	local l_bFirstInStringOfScorePartNumbersWithSamePoseTotalScore = false
-
-	local l_bScorePart_IsActive
-
-	-- g_ScorePart_Scores_Table={ScorePart_Number=1, ScorePart_Score=2, PoseTotalScore=3,
-  --                           StringOfScorePartNumbersWithSamePoseTotalScore=4,
-  --                           bFirstInStringOfScorePartNumbersWithSamePoseTotalScore=5}
-	-- g_ScorePartsTable={ScorePart_Number=1, ScorePart_Name=2, l_bScorePart_IsActive=3, LongName=4}
-  
-	for l_ScorePartsTableIndex = 1, #g_ScorePartsTable do
-  
-		l_ScorePart_Number = g_ScorePartsTable[l_ScorePartsTableIndex][spt_ScorePart_Number]
-		l_bScorePart_IsActive = g_ScorePartsTable[l_ScorePartsTableIndex][spt_bScorePartIsActive]
-    
-		if l_bScorePart_IsActive == true then
-    
-			g_ScorePart_Scores_Table[#g_ScorePart_Scores_Table + 1] =
-				{l_ScorePart_Number, l_ScorePart_Score, l_PoseTotalScore,
-         l_StringOfScorePartNumbersWithSamePoseTotalScore,
-         l_bFirstInStringOfScorePartNumbersWithSamePoseTotalScore}
-         
-		end
-    
-	end
-
-end -- Populate_g_ScorePart_Scores_Table()
 function Populate_g_ScorePartsTable() -- was in global code
-  -- Called from main()...
+  -- Called from RebuildOnePuzzleWithManyRuns()...
 
 	-- Quick fix for failing first rebuild...
 	for l_ScorePart_Number = 3, 12 do
@@ -3967,7 +4477,7 @@ function Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts() -- was G
 
 end -- Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts()
 function Populate_g_XLowestScoringSegmentRangesTable(l_RecursionLevel) -- FindWorst()
-  -- Called from 3 places in RebuildRunXofYwithManySetsOfConsecutiveSegmentsRanges() and 
+  -- Called from 3 places in RebuildRunXofYwithManySegmentRangeSets() and 
   --             1 place  recursively below...
   -- Calls CheckIfAlreadyRebuiltSegmentsMustBeIncluded() -- was ChkDisjunctList()
   -- Calls Populate_g_SegmentScoresTable_BasedOnUserSelected_ScoreParts() -- was GetSegmentScores()
@@ -4141,7 +4651,7 @@ function Populate_g_XLowestScoringSegmentRangesTable(l_RecursionLevel) -- FindWo
           "\nNot enough consecutive not-already-rebuilt segments available to create a segment range;" ..
           "\ntherefore, we will set all already-rebuilt segments to not-already-rebuilt and try again...")
          
-		ResetSegmentsAlreadyRebuiltTable() -- was ClearDoneList()
+		Reset_g_bSegmentsAlreadyRebuiltTable() -- was ClearDoneList()
     
 		-- Recursion...
 		l_RecursionLevel = l_RecursionLevel + 1
@@ -4161,9 +4671,7 @@ function PrettyNumber(l_DirtyFloat)
   
 end -- function PrettyNumber(l_DirtyFloat)
 function QuickSaveStack_LoadLastSavedSolution()
-  -- Called from DisulfideBonds_CheckIfWeNeedToRestoreSolutionWithThemIntact(),
-  --             StabilizeSegmentRange() and
-  --             RebuildOneSegmentRangeManyTimes()...
+  -- Called from 3 functions
   
 	if g_QuickSaveStackPosition <= 60 then
 		print("Quicksave stack underflow, exiting script")
@@ -4184,9 +4692,7 @@ function QuickSaveStack_RemoveLastSavedSolution()
   
 end -- function QuickSaveStack_RemoveLastSavedSolution()
 function QuickSaveStack_SaveCurrentSolution()
-  -- Called from DisulfideBonds_RememberSolutionWithThemIntact(),
-  --             StabilizeSegmentRange() and
-  --             RebuildOneSegmentRangeManyTimes()...
+  -- Called from 3 functions
   
 	if g_QuickSaveStackPosition >= 100 then
 		print("Error in QuickSaveStack_SaveCurrentSolution(), Quicksave stack overflow, exiting script")
@@ -4196,14 +4702,49 @@ function QuickSaveStack_SaveCurrentSolution()
 	g_QuickSaveStackPosition = g_QuickSaveStackPosition + 1
   
 end -- function QuickSaveStack_SaveCurrentSolution()
-function ResetSegmentsAlreadyRebuiltTable() -- was ClearDoneList()
+function Reset_g_ScorePart_Scores_Table() -- was ClearScores()
+  -- Called from RebuildSegmentRangeXofYforManyRounds()...
+
+	g_ScorePart_Scores_Table = {} -- reset it
+
+	local l_ScorePart_Number = 0
+	local l_ScorePart_Score = -999999
+	local l_PoseTotalScore = 0
+	local l_StringOfScorePartNumbersWithSamePoseTotalScore = ''
+	local l_bFirstInStringOfScorePartNumbersWithSamePoseTotalScore = false
+
+	local l_bScorePart_IsActive
+
+	-- g_ScorePart_Scores_Table={ScorePart_Number=1, ScorePart_Score=2, PoseTotalScore=3,
+  --                           StringOfScorePartNumbersWithSamePoseTotalScore=4,
+  --                           bFirstInStringOfScorePartNumbersWithSamePoseTotalScore=5}
+	-- g_ScorePartsTable={ScorePart_Number=1, ScorePart_Name=2, l_bScorePart_IsActive=3, LongName=4}
+  
+	for l_ScorePartsTableIndex = 1, #g_ScorePartsTable do
+  
+		l_ScorePart_Number = g_ScorePartsTable[l_ScorePartsTableIndex][spt_ScorePart_Number]
+		l_bScorePart_IsActive = g_ScorePartsTable[l_ScorePartsTableIndex][spt_bScorePartIsActive]
+    
+		if l_bScorePart_IsActive == true then
+    
+			g_ScorePart_Scores_Table[#g_ScorePart_Scores_Table + 1] =
+				{l_ScorePart_Number, l_ScorePart_Score, l_PoseTotalScore,
+         l_StringOfScorePartNumbersWithSamePoseTotalScore,
+         l_bFirstInStringOfScorePartNumbersWithSamePoseTotalScore}
+         
+		end
+    
+	end
+
+end -- Reset_g_ScorePart_Scores_Table()
+function Reset_g_bSegmentsAlreadyRebuiltTable() -- was ClearDoneList()
   -- Called from Populate_g_XLowestScoringSegmentRangesTable()...
 
 	for l_TableIndex = 1, g_SegmentCount_WithoutLigands do
 		g_bSegmentsAlreadyRebuiltTable[l_TableIndex] = false
 	end
 
-end -- function ResetSegmentsAlreadyRebuiltTable()
+end -- function Reset_g_bSegmentsAlreadyRebuiltTable()
 function RoundTo(l_DirtyFloat, l_RoundTo)
   -- Called from PrettyNumber()..
   
@@ -4219,9 +4760,7 @@ function RoundTo(l_DirtyFloat, l_RoundTo)
   
 end -- function RoundTo(l_DirtyFloat, l_RoundTo)
 function SaveBest() -- <-- Updates g_Score_ScriptBest
-  -- Called from 1 time  in Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields(),
-  --             1 time  in RebuildOneSegmentRangeManyTimes(), and 
-  --             2 times in RebuildManySegmentRanges()...
+  -- Called from 3 functions
   
   -- Note 1: As long as you call SaveBest() after every rebuild, shake, wiggle and mutate, then
   --         g_Score_ScriptBest will always have the best score ever encounter during the script run.
@@ -4276,9 +4815,9 @@ function SaveBest() -- <-- Updates g_Score_ScriptBest
     
     if g_bUserSelected_FuseBestScorePartPose == false and g_Score_ScriptBest > 0 then
       print("\nNow that the total score is positive, we will switch back on: " ..
-            "'normal stabilize' and 'fuse best score part position'.\n")
+            "'stabilize' and 'fuse best score part position'.\n")
       g_bUserSelected_FuseBestScorePartPose = true
-      g_bUserSelected_NormalStabilize = true
+      g_bUserSelected_PerformStabilize = true
     end
     
     recentbest.Save() -- ...since foldit does not do this automatically!
@@ -4301,9 +4840,7 @@ function SegmentRangesMinus(l_SegmentRangesTable1, l_SegmentRangesTable2)
   
 end -- function SegmentRangesMinus(l_SegmentRangesTable1, l_SegmentRangesTable2)
 function SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_Radius) -- was SelectAround()
-  -- Called from MutateSideChainsOfSelectedSegments(),
-  --             RebuildManySegmentRanges() and
-  --             RebuildOneSegmentRangeManyTimes()...
+  -- Called from 3 functions
 	selection.DeselectAll()
 
 	for l_SegmentIndex = 1, g_SegmentCount_WithoutLigands do
@@ -4329,7 +4866,7 @@ function SetClashImportance(l_ClashImportance)
   
 end -- function SetClashImportance(l_ClashImportance)
 function SetSegmentsAlreadyRebuilt(l_StartSegment, l_EndSegment) -- was AddDone()
-  -- Called from RebuildManySegmentRanges()...
+  -- Called from RebuildSegmentRangeSetXofYwithManySegmentRanges()...
 
   -- Loop through the given segment range and set the g_bSegmentsAlreadyRebuiltTable
   -- values to true for each segments in the given range...
@@ -4343,13 +4880,13 @@ end -- SetSegmentsAlreadyRebuilt(l_StartSegment, l_EndSegment)
 function Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields(l_StartSegment,--SaveSco
                                                                                    l_EndSegment)
   -- was SaveScores()
-  -- Called from RebuildOneSegmentRangeManyTimes() and RebuildManySegmentRanges()  
+  -- Called from 2 functions
   
   -- We have just rebuilt (and optionally, mutated, shaked and wiggled) only one segment
   -- range and only one attempt. Next, we are going to check for ScorePart improvements
   -- for this one specific rebuild attempt. For each ScorePart that improves, associate
   -- the current pose (and PoseTotalScore) of the protein to that ScorePart. Later, after
-  -- all these rebuild attempts, in RebuildManySegmentRanges() we will step through each
+  -- all these rebuild attempts, in RebuildSegmentRangeSetXofYwithManySegmentRanges() we will step through each
   -- of these best saved ScorePart poses and mutate, shake and wiggle them some more to
   -- see if we can further improve their scores...
   
@@ -4433,7 +4970,7 @@ function Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fiel
 			g_ScorePart_Scores_Table[l_TableIndex][spst_PoseTotalScore] = l_Current_PoseTotalScore
       
 			save.Quicksave(l_ScorePart_Number) -- "Save" <<<--- Important!
-      -- See RebuildManySegmentRanges() for the corresponding save.Quickload(), "Load"
+      -- See RebuildSegmentRangeSetXofYwithManySegmentRanges() for the corresponding save.Quickload(), "Load"
       
 		end
 	end
@@ -4442,7 +4979,7 @@ function Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fiel
 end -- Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()
 function Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTotalScore_And_FirstInString()
   -- was ListSlots()
-  -- Called from RebuildManySegmentRanges()...
+  -- Called from RebuildSegmentRangeSetXofYwithManySegmentRanges()...
   
 	-- Create a string of ScorePart numbers with the same PoseTotalScore...
 	-- For example: 1=5=7 2=3=9 4 6=8, ScoreParts 1, 5 and 7 have the same PoseTotalScore, SortParts
@@ -4511,7 +5048,7 @@ function Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTot
       -- For each ScorePart_Scores_Table row with a unique PoseTotalScore (or the
       -- first in the string or scorepart numbers with the same PoseTotalScore), set
       -- the bFirstInStringOfScorePartNumbersWithSamePoseTotalScore flag to true. 
-      -- This field will be checked in RebuildManySegmentRanges()...
+      -- This field will be checked in RebuildSegmentRangeSetXofYwithManySegmentRanges()...
 			g_ScorePart_Scores_Table[l_TableIndex]
         [spst_bFirstInStringOfScorePartNumbersWithSamePoseTotalScore] = true 
       
@@ -4561,9 +5098,9 @@ function Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTot
 end -- Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTotalScore_And_FirstInString()
 -- ...end of Support Functions.
 -- Start of My Favorite Functions...
-function main() -- was DRW()
+function RebuildOnePuzzleWithManyRuns() -- was DRW()
   -- Called from 1 place in xpcall()...
-  -- Calls RebuildRunXofYwithManySetsOfConsecutiveSegmentsRanges() was DRcall()
+  -- Calls RebuildRunXofYwithManySegmentRangeSets() was DRcall()
   
 	--require('mobdebug').start("192.168.1.108") unfortunately this doesn't work in the FoldIt environment
 	DefineGlobalVariables()
@@ -4694,7 +5231,7 @@ function main() -- was DRW()
 		g_RunCycle = 0
     
     -- Not! what you are looking for! See below...
-		RebuildRunXofYwithManySetsOfConsecutiveSegmentsRanges("drw") -- was DRcall()
+		RebuildRunXofYwithManySegmentRangeSets("drw") -- was DRcall()
     
 		g_UserSelected_NumberOfSegmentRangesToSkip = 0
 		g_UserSelected_MaxNumberOf_SegmentRanges_ToRebuild_ThisRunCycle = l_RememberThisValue
@@ -4719,307 +5256,18 @@ function main() -- was DRW()
     -- Important!!!
     -- Important!!!
     -- Important!!!
-		RebuildRunXofYwithManySetsOfConsecutiveSegmentsRanges("drw") -- below; was DRcall()
+		RebuildRunXofYwithManySegmentRangeSets("drw") -- below; was DRcall()
     -- Important!!!
     -- Important!!!
     -- Important!!!
 		
 		-- Uncomment the methods you want to use...
-		-- RebuildRunXofYwithManySetsOfConsecutiveSegmentsRanges("all")
-		-- RebuildRunXofYwithManySetsOfConsecutiveSegmentsRanges("areas")
-		-- RebuildRunXofYwithManySetsOfConsecutiveSegmentsRanges("fj")
-		-- RebuildRunXofYwithManySetsOfConsecutiveSegmentsRanges("simple")
+		-- RebuildRunXofYwithManySegmentRangeSets("all")
+		-- RebuildRunXofYwithManySegmentRangeSets("areas")
+		-- RebuildRunXofYwithManySegmentRangeSets("fj")
+		-- RebuildRunXofYwithManySegmentRangeSets("simple")
     
-    g_Stats_Run_EndTime = os.clock()
-    local g_Stats_Run_ElaspedSeconds = g_Stats_Run_EndTime - g_Stats_Run_StartTime
-    
-    g_Stats_Run_TotalPointsGained_Total = 
-      g_Stats_Run_TotalPointsGained_RebuildSelected +
-      g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected +
-      g_Stats_Run_TotalPointsGained_WiggleSelected +
-      g_Stats_Run_TotalPointsGained_WiggleAll +
-      g_Stats_Run_TotalPointsGained_MutateSidechainsSelected +
-      g_Stats_Run_TotalPointsGained_MutateSidechainsAll
-    if g_Stats_Run_TotalPointsGained_Total < 0.0001 then
-       g_Stats_Run_TotalPointsGained_Total = 0.0001
-    end
-      
-    g_Stats_Run_TotalSecondsUsed_Total = 
-      g_Stats_Run_TotalSecondsUsed_RebuildSelected +
-      g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected +
-      g_Stats_Run_TotalSecondsUsed_WiggleSelected +
-      g_Stats_Run_TotalSecondsUsed_WiggleAll +
-      g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected +
-      g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll
-    
-    g_Stats_Run_SuccessfulAttempts_Total = 
-      g_Stats_Run_SuccessfulAttempts_RebuildSelected +
-      g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected +
-      g_Stats_Run_SuccessfulAttempts_WiggleSelected +
-      g_Stats_Run_SuccessfulAttempts_WiggleAll +
-      g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected +
-      g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll
-      
-    g_Stats_Run_NumberOfAttempts_Total = 
-      g_Stats_Run_NumberOfAttempts_RebuildSelected +
-      g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected +
-      g_Stats_Run_NumberOfAttempts_WiggleSelected +
-      g_Stats_Run_NumberOfAttempts_WiggleAll +
-      g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected +
-      g_Stats_Run_NumberOfAttempts_MutateSidechainsAll
-    
-    print("------------------------ ------------------  ----------------  -------  ------------------")
-    print("End of run " .. g_RunCycle .. " Stats:")
-    print("------------------------ ------------------  ----------------  -------  ------------------")
-    print("From:                       Points Gained      Minutes Used    Pts/Min     Success Rate:")
-    print("------------------------ ------------------  ----------------  -------  ------------------")
-                                          
-    print("RebuildSelected          " .. 
-      PaddedNumber(g_Stats_Run_TotalPointsGained_RebuildSelected, 9, 3) .. "" .. 
-      PaddedString("(" ..
-      PaddedNumber(g_Stats_Run_TotalPointsGained_RebuildSelected /
-                   g_Stats_Run_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
-      
-      PaddedNumber(g_Stats_Run_ElaspedSeconds * 
-                  (g_Stats_Run_TotalSecondsUsed_RebuildSelected /
-                   g_Stats_Run_TotalSecondsUsed_Total) / 60, 9, 3) .. "" ..
-      
-      PaddedString("(" ..
-      PaddedNumber(g_Stats_Run_TotalSecondsUsed_RebuildSelected /
-                   g_Stats_Run_TotalSecondsUsed_Total * 100, 4, 2) .. "%)", 9) ..
-      PaddedNumber(g_Stats_Run_TotalPointsGained_RebuildSelected /
-                  (g_Stats_Run_TotalSecondsUsed_RebuildSelected / 60), 9, 0) .. "  " ..
-      PaddedString(g_Stats_Run_SuccessfulAttempts_RebuildSelected .. "/" ..
-      PaddedNumber(g_Stats_Run_NumberOfAttempts_RebuildSelected, 0, 0), 9) .. 
-      PaddedString(" (" ..
-      PaddedNumber(g_Stats_Run_SuccessfulAttempts_RebuildSelected /
-                   g_Stats_Run_NumberOfAttempts_RebuildSelected * 100, 4, 2) .. "%)", 9))
-    print("ShakeSidechainsSelected  " ..
-      PaddedNumber(g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected, 9, 3) .. "" ..
-      PaddedString("(" ..
-      PaddedNumber(g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected /
-                   g_Stats_Run_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
-      
-      PaddedNumber(g_Stats_Run_ElaspedSeconds * 
-                  (g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected /
-                   g_Stats_Run_TotalSecondsUsed_Total) / 60, 9, 3) .. "" ..
-      
-      PaddedString("(" ..
-      PaddedNumber(g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected /
-                   g_Stats_Run_TotalSecondsUsed_Total * 100, 4, 2) .. "%)", 9) ..
-      PaddedNumber(g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected /
-                  (g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected / 60), 9, 0) .. "  " ..
-      PaddedString(g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected .. "/" ..
-      PaddedNumber(g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected, 0, 0), 9) ..
-      PaddedString(" (" ..
-      PaddedNumber(g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected /
-                   g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected * 100, 4, 2) .. "%)", 9))
-    print("WiggleSelected           " .. 
-      PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleSelected, 9, 3) .. "" ..
-      PaddedString("(" ..
-      PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleSelected /
-                   g_Stats_Run_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
-      
-      PaddedNumber(g_Stats_Run_ElaspedSeconds * 
-                  (g_Stats_Run_TotalSecondsUsed_WiggleSelected /
-                   g_Stats_Run_TotalSecondsUsed_Total) / 60, 9, 3) .. "" ..
-      
-      PaddedString("(" ..
-      PaddedNumber(g_Stats_Run_TotalSecondsUsed_WiggleSelected /
-                   g_Stats_Run_TotalSecondsUsed_Total * 100, 4, 2) .. "%)", 9) ..
-      PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleSelected /
-                  (g_Stats_Run_TotalSecondsUsed_WiggleSelected / 60), 9, 0) .. "  " ..
-      PaddedString(g_Stats_Run_SuccessfulAttempts_WiggleSelected .. "/" ..
-      PaddedNumber(g_Stats_Run_NumberOfAttempts_WiggleSelected, 0, 0), 9) ..
-      PaddedString(" (" ..
-      PaddedNumber(g_Stats_Run_SuccessfulAttempts_WiggleSelected /
-                   g_Stats_Run_NumberOfAttempts_WiggleSelected * 100, 4, 2) .. "%)", 9))
-    print("WiggleAll                " .. 
-      PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleAll, 9, 3) .. "" ..
-      PaddedString("(" ..
-      PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleAll /
-                   g_Stats_Run_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
-      
-      PaddedNumber(g_Stats_Run_ElaspedSeconds * 
-                  (g_Stats_Run_TotalSecondsUsed_WiggleAll /
-                   g_Stats_Run_TotalSecondsUsed_Total) / 60, 9, 3) .. "" ..
-      
-      PaddedString("(" ..
-      PaddedNumber(g_Stats_Run_TotalSecondsUsed_WiggleAll /
-                   g_Stats_Run_TotalSecondsUsed_Total * 100, 4, 2) .. "%)", 9) ..
-      PaddedNumber(g_Stats_Run_TotalPointsGained_WiggleAll /
-                   g_Stats_Run_TotalSecondsUsed_WiggleAll / 60, 9, 0) .. "  " ..
-      PaddedString(g_Stats_Run_SuccessfulAttempts_WiggleAll .. "/" ..  
-      PaddedNumber(g_Stats_Run_NumberOfAttempts_WiggleAll, 0, 0), 9) ..
-      PaddedString(" (" ..
-      PaddedNumber(g_Stats_Run_SuccessfulAttempts_WiggleAll /
-                   g_Stats_Run_NumberOfAttempts_WiggleAll * 100, 4, 2) .. "%)", 9))
-    print("MutateSidechainsSelected " ..
-      PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsSelected, 9, 3) .. "" ..
-      PaddedString("(" ..
-      PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsSelected /
-                   g_Stats_Run_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
-      
-      PaddedNumber(g_Stats_Run_ElaspedSeconds * 
-                  (g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected /
-                   g_Stats_Run_TotalSecondsUsed_Total) / 60, 9, 3) .. "" ..
-      
-      PaddedString("(" ..
-      PaddedNumber(g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected /
-                   g_Stats_Run_TotalSecondsUsed_Total * 100, 4, 2) .. "%)", 9) ..
-      PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsSelected /
-                  (g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected / 60), 9, 0) .. "  " ..
-      PaddedString(g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected .. "/" ..
-      PaddedNumber(g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected, 0, 0), 9) ..
-      PaddedString(" (" ..
-      PaddedNumber(g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected /
-                   g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected * 100, 4, 2) .. "%)", 9))
-    print("MutateSidechainsAll      " .. 
-      PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsAll, 9, 3) .. "" ..
-      PaddedString("(" ..
-      PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsAll /
-                   g_Stats_Run_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
-      
-      PaddedNumber(g_Stats_Run_ElaspedSeconds * 
-                  (g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll /
-                   g_Stats_Run_TotalSecondsUsed_Total) / 60, 9, 3) .. "" ..
-      
-      PaddedString("(" ..
-      PaddedNumber(g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll /
-                   g_Stats_Run_TotalSecondsUsed_Total * 100, 4, 2) .. "%)", 9) ..
-      PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsAll /
-                  (g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll / 60), 9, 0) .. "  " ..
-      PaddedString(g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll .. "/" ..
-      PaddedNumber(g_Stats_Run_NumberOfAttempts_MutateSidechainsAll, 0, 0), 9) ..
-      PaddedString(" (" ..
-      PaddedNumber(g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll /
-                   g_Stats_Run_NumberOfAttempts_MutateSidechainsAll * 100, 4, 2) .. "%)", 9))
-    print("------------------------ ------------------  ----------------  -------  ------------------")
-    print("Run total                " .. 
-      PaddedNumber(g_Stats_Run_TotalPointsGained_Total, 9, 3) .. "" ..
-      PaddedString("(" ..
-      PaddedNumber(g_Stats_Run_TotalPointsGained_Total /
-                   g_Stats_Run_TotalPointsGained_Total * 100, 5, 1) .. "%)", 9) ..
-               
-      PaddedNumber(g_Stats_Run_ElaspedSeconds / 60, 9, 3) .. "" ..
-      
-      PaddedString("(" ..
-      PaddedNumber(g_Stats_Run_TotalSecondsUsed_Total /
-                   g_Stats_Run_TotalSecondsUsed_Total * 100, 5, 1) .. "%)", 9) ..
-      PaddedNumber(g_Stats_Run_TotalPointsGained_Total /
-                  (g_Stats_Run_TotalSecondsUsed_Total / 60), 9, 0) .. "  " ..
-      PaddedString(g_Stats_Run_SuccessfulAttempts_Total .. "/" ..
-      PaddedNumber(g_Stats_Run_NumberOfAttempts_Total, 0, 0), 9) ..
-      PaddedString(" (" ..
-      PaddedNumber(g_Stats_Run_SuccessfulAttempts_Total /
-                   g_Stats_Run_NumberOfAttempts_Total * 100, 4, 2) .. "%)", 9))
-    print("------------------------ ------------------  ----------------  -------  ------------------")
-    
-    g_Stats_Script_TotalPointsGained_RebuildSelected = 
-    g_Stats_Script_TotalPointsGained_RebuildSelected +
-       g_Stats_Run_TotalPointsGained_RebuildSelected
-    g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected =
-    g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected +
-       g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected
-    g_Stats_Script_TotalPointsGained_WiggleSelected =
-    g_Stats_Script_TotalPointsGained_WiggleSelected +
-       g_Stats_Run_TotalPointsGained_WiggleSelected
-    g_Stats_Script_TotalPointsGained_WiggleAll =
-    g_Stats_Script_TotalPointsGained_WiggleAll +
-       g_Stats_Run_TotalPointsGained_WiggleAll
-    g_Stats_Script_TotalPointsGained_MutateSidechainsSelected =
-    g_Stats_Script_TotalPointsGained_MutateSidechainsSelected +
-       g_Stats_Run_TotalPointsGained_MutateSidechainsSelected
-    g_Stats_Script_TotalPointsGained_MutateSidechainsAll =
-    g_Stats_Script_TotalPointsGained_MutateSidechainsAll +
-       g_Stats_Run_TotalPointsGained_MutateSidechainsAll
-    
-    g_Stats_Script_TotalSecondsUsed_RebuildSelected = 
-    g_Stats_Script_TotalSecondsUsed_RebuildSelected +
-       g_Stats_Run_TotalSecondsUsed_RebuildSelected
-    g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected =
-    g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected +
-       g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected
-    g_Stats_Script_TotalSecondsUsed_WiggleSelected =
-    g_Stats_Script_TotalSecondsUsed_WiggleSelected +
-       g_Stats_Run_TotalSecondsUsed_WiggleSelected
-    g_Stats_Script_TotalSecondsUsed_WiggleAll =
-    g_Stats_Script_TotalSecondsUsed_WiggleAll +
-       g_Stats_Run_TotalSecondsUsed_WiggleAll
-    g_Stats_Script_TotalSecondsUsed_MutateSidechainsSelected =
-    g_Stats_Script_TotalSecondsUsed_MutateSidechainsSelected +
-       g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected
-    g_Stats_Script_TotalSecondsUsed_MutateSidechainsAll =
-    g_Stats_Script_TotalSecondsUsed_MutateSidechainsAll +
-       g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll
-    
-    g_Stats_Script_SuccessfulAttempts_RebuildSelected = 
-    g_Stats_Script_SuccessfulAttempts_RebuildSelected +
-       g_Stats_Run_SuccessfulAttempts_RebuildSelected
-    g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected =
-    g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected +
-       g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected
-    g_Stats_Script_SuccessfulAttempts_WiggleSelected =
-    g_Stats_Script_SuccessfulAttempts_WiggleSelected +
-       g_Stats_Run_SuccessfulAttempts_WiggleSelected
-    g_Stats_Script_SuccessfulAttempts_WiggleAll =
-    g_Stats_Script_SuccessfulAttempts_WiggleAll +
-       g_Stats_Run_SuccessfulAttempts_WiggleAll
-    g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected =
-    g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected +
-       g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected
-    g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll =
-    g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll +
-       g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll
-    
-    g_Stats_Script_NumberOfAttempts_RebuildSelected = 
-    g_Stats_Script_NumberOfAttempts_RebuildSelected +
-       g_Stats_Run_NumberOfAttempts_RebuildSelected
-    g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected =
-    g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected +
-       g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected
-    g_Stats_Script_NumberOfAttempts_WiggleSelected =
-    g_Stats_Script_NumberOfAttempts_WiggleSelected +
-       g_Stats_Run_NumberOfAttempts_WiggleSelected
-    g_Stats_Script_NumberOfAttempts_WiggleAll =
-    g_Stats_Script_NumberOfAttempts_WiggleAll +
-       g_Stats_Run_NumberOfAttempts_WiggleAll
-    g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected =
-    g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected +
-       g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected
-    g_Stats_Script_NumberOfAttempts_MutateSidechainsAll =
-    g_Stats_Script_NumberOfAttempts_MutateSidechainsAll +
-       g_Stats_Run_NumberOfAttempts_MutateSidechainsAll
-    
-    g_Stats_Run_StartTime = os.clock()
-    
-    g_Stats_Run_TotalPointsGained_RebuildSelected = 0
-    g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected = 0
-    g_Stats_Run_TotalPointsGained_WiggleSelected = 0
-    g_Stats_Run_TotalPointsGained_WiggleAll = 0
-    g_Stats_Run_TotalPointsGained_MutateSidechainsSelected = 0
-    g_Stats_Run_TotalPointsGained_MutateSidechainsAll = 0
-    
-    g_Stats_Run_TotalSecondsUsed_RebuildSelected = 0.0001 -- prevent divide by zero
-    g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected = 0.0001
-    g_Stats_Run_TotalSecondsUsed_WiggleSelected = 0.0001
-    g_Stats_Run_TotalSecondsUsed_WiggleAll = 0.0001
-    g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected = 0.0001
-    g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll = 0.0001
-    
-    g_Stats_Run_SuccessfulAttempts_RebuildSelected = 0
-    g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected = 0
-    g_Stats_Run_SuccessfulAttempts_WiggleSelected = 0
-    g_Stats_Run_SuccessfulAttempts_WiggleAll = 0
-    g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected = 0
-    g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll = 0
-    
-    g_Stats_Run_NumberOfAttempts_RebuildSelected = 0.1 -- prevent divide by zero
-    g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected = 0.1
-    g_Stats_Run_NumberOfAttempts_WiggleSelected = 0.1
-    g_Stats_Run_NumberOfAttempts_WiggleAll = 0.1
-    g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected = 0.1
-    g_Stats_Run_NumberOfAttempts_MutateSidechainsAll = 0.1
+    DisplayEndOfRunStatistics()    
     
 		g_UserSelected_MaxNumberOf_SegmentRanges_ToRebuild_ThisRunCycle =
       g_UserSelected_MaxNumberOf_SegmentRanges_ToRebuild_ThisRunCycle +
@@ -5029,11 +5277,11 @@ function main() -- was DRW()
 
 	CleanUp()
 
-end -- main() -- was DRW()
+end -- RebuildOnePuzzleWithManyRuns() -- was DRW()
 
-function RebuildRunXofYwithManySetsOfConsecutiveSegmentsRanges(l_How) -- was DRcall()
-  -- Called from main() above; was DRW()
-  -- Calls RebuildManySegmentRanges() below; was DeepRebuild()
+function RebuildRunXofYwithManySegmentRangeSets(l_How) -- was DRcall()
+  -- Called from RebuildOnePuzzleWithManyRuns() above; was DRW()
+  -- Calls RebuildSegmentRangeSetXofYwithManySegmentRanges() below; was DeepRebuild()
   
 	if l_How == "drw" then
 
@@ -5074,7 +5322,7 @@ function RebuildRunXofYwithManySetsOfConsecutiveSegmentsRanges(l_How) -- was DRc
       -- Important!!!
       -- Important!!!
       -- Important!!!
-			RebuildManySegmentRanges() -- below; was DeepRebuild()
+			RebuildSegmentRangeSetXofYwithManySegmentRanges() -- below; was DeepRebuild()
       -- Important!!!
       -- Important!!!
       -- Important!!!
@@ -5117,7 +5365,7 @@ function RebuildRunXofYwithManySetsOfConsecutiveSegmentsRanges(l_How) -- was DRc
       
 		end
 		g_XLowestScoringSegmentRangesTable = l_XLowestScoringSegmentRangesTable
-		RebuildManySegmentRanges()
+		RebuildSegmentRangeSetXofYwithManySegmentRanges()
     
 	elseif l_How == "all" then
     
@@ -5147,25 +5395,25 @@ function RebuildRunXofYwithManySetsOfConsecutiveSegmentsRanges(l_How) -- was DRc
         
 			end
 		end
-		RebuildManySegmentRanges()
+		RebuildSegmentRangeSetXofYwithManySegmentRanges()
     
 	elseif l_How == "simple" then
     
 		Populate_g_XLowestScoringSegmentRangesTable()
-		RebuildManySegmentRanges()
+		RebuildSegmentRangeSetXofYwithManySegmentRanges()
     
 	elseif l_How=="segments" then
     
 		g_XLowestScoringSegmentRangesTable = {} -- {StartSegment=1, EndSegment=2}
 		Add_Loop_Helix_And_Sheet_Segments_To_SegmentRangesTable()
-		RebuildManySegmentRanges()
+		RebuildSegmentRangeSetXofYwithManySegmentRanges()
     
 	end
   
-end -- RebuildRunXofYwithManySetsOfConsecutiveSegmentsRanges(l_How) -- was DRcall()
-function RebuildManySegmentRanges() -- was DeepRebuild()
-  -- Called from RebuildRunXofYwithManySetsOfConsecutiveSegmentsRanges() above; was DRcall()
-  -- Calls RebuildOneSegmentRangeManyTimes() below; was ReBuild()
+end -- RebuildRunXofYwithManySegmentRangeSets(l_How) -- was DRcall()
+function RebuildSegmentRangeSetXofYwithManySegmentRanges() -- was DeepRebuild()
+  -- Called from RebuildRunXofYwithManySegmentRangeSets() above; was DRcall()
+  -- Calls RebuildSegmentRangeXofYforManyRounds() below; was ReBuild()
   
  	local l_StartSegment = 0
 	local l_EndSegment = 0
@@ -5223,11 +5471,13 @@ function RebuildManySegmentRanges() -- was DeepRebuild()
     -- Important!!!
     -- Important!!!
     -- Important!!!
-    l_NumberOfTimesStructureChanged = RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment) -- was
+    l_NumberOfTimesStructureChanged = RebuildSegmentRangeXofYforManyRounds(l_StartSegment, l_EndSegment) -- was
     --                                                                                            ReBuild()
     -- Important!!!
     -- Important!!!
     -- Important!!!
+    
+    local l_Score_After_RebuildOneSegmentRangeManyTimes = GetPoseTotalScore()
     
     if l_NumberOfTimesStructureChanged > 0 then
     
@@ -5316,9 +5566,9 @@ function RebuildManySegmentRanges() -- was DeepRebuild()
             
           end
 
-          if g_bUserSelected_NormalStabilize == true then          
+          if g_bUserSelected_PerformStabilize == true then          
             
-            -- User selected normal stabilize (previously known as qStab) ...
+            -- User selected stabilize (previously known as qStab) ...
             
             -- Important!!!
             -- Important!!!
@@ -5330,20 +5580,21 @@ function RebuildManySegmentRanges() -- was DeepRebuild()
             
           else
             
-            -- User selected quick stabilize (ShakeAndWiggle) instead...
+            -- User selected ShakeAndWiggle instead...
             
             SetClashImportance(1)
             
             -- Important!!!
             -- Important!!!
             -- Important!!!
-            ShakeSelected("QuickStabilize")  -- FromWhere; below
-            WiggleSelected(1, false, true, "QuickStabilize") -- Iterations,bWBackbone,bWSideChains,FromWhere
+            ShakeSelected("SimpleShakeAndWiggle")  -- FromWhere; below
+            WiggleSelected(1, false, true, "SimpleShakeAndWiggle") -- Iterations,bWBackbone,bWSideChains,
+            --                                                        FromWhere
             -- Important!!!
             -- Important!!!
             -- Important!!!
             
-          end -- if g_bUserSelected_NormalStabilize == true then          
+          end -- if g_bUserSelected_PerformStabilize == true then          
           
           if g_bUserSelected_Mutate_After_Stabilize == true then
             
@@ -5390,9 +5641,8 @@ function RebuildManySegmentRanges() -- was DeepRebuild()
             -- I mean, so what, it might have been a tiny improvement and very early on in
             -- the rebuilds (of the whopping 10 rebuilds). I say we just stick with the 
             -- current best pose and move on. How about some empirical data to prove
-            -- this? Like, what were the points gained during "QuickStabilize"
-            -- and "Stabilize" versus "Rebuild", "Mutate" or "Fuse"? Ah, I need to
-            -- improve our reporting statistics, don't I?
+            -- this? Like, what were the points gained during "Stabilize" versus "Rebuild",
+            -- "Mutate" or "Fuse"? Ah, I need to improve our reporting statistics, don't I?
             -- Some anecdotal evidence: Points gained from...
             -- Rebuild: 1,31,41,4,11,
             -- Stabilize: 609 (scorepart 4, total, doesn't count!) (anyhow, we will still perform the
@@ -5452,71 +5702,81 @@ function RebuildManySegmentRanges() -- was DeepRebuild()
       local l_MaxLossAllowed = g_UserSelected_SkipFuseBestScorePartPose_IfCurrentRebuild_LosesMoreThan * 
                               (l_EndSegment - l_StartSegment + 1) / 3
                               
-      if g_bUserSelected_FuseBestScorePartPose == true and 
-         l_PotentialPointLoss < l_MaxLossAllowed then
+      if g_bUserSelected_FuseBestScorePartPose == true then
         
-        -- This following checks if g_bUserSelected_Mutate_After_Stabilize == false because
-        -- if it were true, then we would have already performed the mutate above, after the
-        -- Stabilize. duh
-        if g_bUserSelected_Mutate_Before_FuseBestScorePartPose == true and
-           g_bUserSelected_Mutate_After_Stabilize == false then
-             
-            -- Important!!!
-            -- Important!!!
-            -- Important!!!
-            MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, "BeforeFuse") -- below
-            -- Important!!!
-            -- Important!!!
-            -- Important!!!
+        if l_PotentialPointLoss > l_MaxLossAllowed then
+          -- I don't think this will ever happen because we now check for this kind of loss
+          -- after every rebuild and reject the change if the loss it too high...
           
-        end -- if g_bUserSelected_Mutate_Before_FuseBestScorePartPose == true and g_bUserSelected_Mut...
-        
-        -- Continue preparing to Fuse best ScorePart Pose...
-        
-        save.Quicksave(4) -- "Save"; Well, I don't think slot 4 means the same as it used to. 
-        --                           I need to check the original code to see if it is still needed.
-        --                           The name of the slot 4 is "Total", which I believe means the
-        --                           total of a subset of mutates, shakes and wiggles, like 
-        --                           those in the Fuse(). Perhaps by storing the Fuse results in slot
-        --                           4, it would then be treated like one of the ScorePart poses, and
-        --                           be evaluted when checking for the most improved ScorePart, and so on...
-        if g_bUserSelected_DuringFuseAndStabilizeShakeAndWiggleSelectedAndNearbySegments == true then
+          print("  Skipping Fuse because Potential Loss of " .. l_PotentialPointLoss .. " points is " ..
+                "greater than Max Loss Allowed of " .. MaxLossAllowed .. ".")        
           
-          local l_SphereRadius = 12
-          SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
-          g_with_segments_x_thru_y = " within " .. l_SphereRadius .. " angstroms of" ..
-            " segments " .. l_StartSegment .. "-" .. l_EndSegment
-            
         else
           
-          selection.DeselectAll()
-          selection.SelectRange(l_StartSegment, l_EndSegment)            
-          g_with_segments_x_thru_y = " w/segments " .. l_StartSegment .. "-" .. l_EndSegment
+          -- This following checks if g_bUserSelected_Mutate_After_Stabilize == false because
+          -- if it were true, then we would have already performed the mutate above, after the
+          -- Stabilize. duh
+          if g_bUserSelected_Mutate_Before_FuseBestScorePartPose == true and
+             g_bUserSelected_Mutate_After_Stabilize == false then
+               
+              -- Important!!!
+              -- Important!!!
+              -- Important!!!
+              MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, "BeforeFuse") -- below
+              -- Important!!!
+              -- Important!!!
+              -- Important!!!
+            
+          end -- if g_bUserSelected_Mutate_Before_FuseBestScorePartPose == true and g_bUserSelected_Mut...
           
-        end
-
-        -- Important!!!
-        -- Important!!!
-        -- Important!!!
-        FuseBestScorePartPose() -- below; was Fuze()
-        -- Important!!!
-        -- Important!!!
-        -- Important!!!
-        
-        save.Quicksave(4) -- Save Fuse pose as "ScorePart 4", even though it's not really a "ScorePart"
-        
-        if g_bUserSelected_Mutate_After_FuseBestScorePartPose == true then
+          -- Continue preparing to Fuse best ScorePart Pose...
+          
+          save.Quicksave(4) -- "Save"; Well, I don't think slot 4 means the same as it used to. 
+          --                         I need to check the original code to see if it is still needed.
+          --                         The name of the slot 4 is "Total", which I believe means the
+          --                         total of a subset of mutates, shakes and wiggles, like 
+          --                         those in the Fuse(). Perhaps by storing the Fuse results in slot
+          --                         4, it would then be treated like one of the ScorePart poses, and
+          --                         be evaluted when checking for the most improved ScorePart, and so on...
+          if g_bUserSelected_DuringFuseAndStabilizeShakeAndWiggleSelectedAndNearbySegments == true then
+            
+            local l_SphereRadius = 12
+            SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
+            g_with_segments_x_thru_y = " within " .. l_SphereRadius .. " angstroms of" ..
+              " segments " .. l_StartSegment .. "-" .. l_EndSegment
+            
+          else
+            
+            selection.DeselectAll()
+            selection.SelectRange(l_StartSegment, l_EndSegment)            
+            g_with_segments_x_thru_y = " w/segments " .. l_StartSegment .. "-" .. l_EndSegment
+            
+          end
           
           -- Important!!!
           -- Important!!!
           -- Important!!!
-          MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, "AfterFuse") -- below
+          FuseBestScorePartPose() -- below; was Fuze()
           -- Important!!!
           -- Important!!!
           -- Important!!!
-        end
+          
+          save.Quicksave(4) -- Save Fuse pose as "ScorePart 4", even though it's not really a "ScorePart"
+          
+          if g_bUserSelected_Mutate_After_FuseBestScorePartPose == true then
+            
+            -- Important!!!
+            -- Important!!!
+            -- Important!!!
+            MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, "AfterFuse") -- below
+            -- Important!!!
+            -- Important!!!
+            -- Important!!!
+          end
+          
+        end --  if l_PotentialPointLoss > l_MaxLossAllowed then
         
-      end -- if g_bUserSelected_FuseBestScorePartPose == true and l_PotentialPointLoss < l_MaxLossAllow..
+      end -- if g_bUserSelected_FuseBestScorePartPose == true then
       
     end -- if l_bStructureChanged == true then
       
@@ -5573,15 +5833,14 @@ function RebuildManySegmentRanges() -- was DeepRebuild()
     -- segments per segment range...
       
       print("\n  The current rebuild gain of " .. PrettyNumber(g_CurrentRebuildPointsGained) ..
-               " is greater than the 'Move on to more consecutive segments per range if" ..
-               " current rebuild points gained is more than' value of " ..
-                g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan .. 
-               " points (this value can be changed on the 'More Options' page);" ..
-               " therefore, we will now skip the" .. 
-            "\n  remaining " .. l_RemainingSegmentRanges .. " segment ranges with " ..
-                g_RequiredNumberOfConsecutiveSegments .. 
-               " consecutive segments, and begin processing segments ranges with " ..
-                (g_RequiredNumberOfConsecutiveSegments + 1) .. " consecutive segments.")
+            " is greater than the 'Move on to more consecutive segments per range if" ..
+            " current rebuild points gained is more than' value of " ..
+            g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan .. 
+            " points (this value can be changed on the 'More Options' page);" ..
+            " therefore, we will now skip the remaining " .. l_RemainingSegmentRanges ..
+            " segment ranges with " .. g_RequiredNumberOfConsecutiveSegments .. 
+            " consecutive segments, and begin processing segments ranges with " ..
+            (g_RequiredNumberOfConsecutiveSegments + 1) .. " consecutive segments.")
       
 			break -- for l_SegmentRangeIndex = 1, #g_XLowestScoringSegmentRangesTable do
       
@@ -5606,28 +5865,30 @@ function RebuildManySegmentRanges() -- was DeepRebuild()
     
 	end
   
-end -- RebuildManySegmentRanges() -- was DeepRebuild()
-function RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment) -- was ReBuild()
-  -- Called from RebuildManySegmentRanges() above; was DeepRebuild()
-  -- Calls RebuildSelectedSegments() below; was localRebuild()
+end -- RebuildSegmentRangeSetXofYwithManySegmentRanges() -- was DeepRebuild()
+function RebuildSegmentRangeXofYforManyRounds(l_StartSegment, l_EndSegment) -- was ReBuild()
+  -- Called from RebuildSegmentRangeSetXofYwithManySegmentRanges() above; was DeepRebuild()
+  -- Calls RebuildRoundXofYforManyAttempts() below; was localRebuild()
   -- Calls ShakeSelected() below
   -- Calls WiggleSelected() below
   -- Calls MutateSideChainsOfSelectedSegments() below
   -- Calls Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields() way above
   
-	Populate_g_ScorePart_Scores_Table() -- was ClearScores()
+	Reset_g_ScorePart_Scores_Table() -- was ClearScores()
 
 	if l_StartSegment > l_EndSegment then
 		l_StartSegment, l_EndSegment = l_EndSegment, l_StartSegment
 	end --switch around if needed
 
-  local l_Score_Before_RebuildSelectedSegments = 0
-  local l_Score_After_RebuildSelectedSegments = 0
+  local l_Score_Before_RebuildSelectedSegmentsForOneRound = 0
+  local l_Score_After_RebuildSelectedSegmentsForOneRound = 0
   local l_bStructureChanged = false
   local l_NumberOfTimesStructureChanged = 0
   
+	-- Maximum number of rounds (with up to 3 attempts per round) to attempt to favorably change 
+  -- the protein structure using structure.RebuildSelected for each segment range per run cycle:
 	local l_MaxRounds = 
-		g_UserSelected_NumberOfTimesToRebuildEach_SegmentRange_PerRunCycle -- default is 10
+		g_UserSelected_MaxNumberOfRoundsToRebuildEachSegmentRangePerRunCycle -- default is 15
     
 	for l_Round = 1, l_MaxRounds do
    
@@ -5640,12 +5901,13 @@ function RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment) -- was Re
     -- Important!!!
     -- Important!!!
     -- Important!!!
-		l_bStructureChanged = RebuildSelectedSegments(l_StartSegment, l_EndSegment) -- below; was localRebuild()
+		l_bStructureChanged = RebuildRoundXofYforManyAttempts(l_StartSegment, l_EndSegment) -- localRebuild()
     -- Important!!!
     -- Important!!!
     -- Important!!!
     
-    -- NEW!!! We are looking for ANY change to the structure, with a positive OR negative score change!!!
+    -- NEW!!! We are looking for ANY change to the structure, 
+    -- with a positive OR a slightly negative score change!!!
     if l_bStructureChanged == true then
       
       l_NumberOfTimesStructureChanged = l_NumberOfTimesStructureChanged + 1
@@ -5715,10 +5977,10 @@ function RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment) -- was Re
       -- range and only one attempt. Next, we are going to check for ScorePart improvements
       -- for this one specific rebuild attempt. For each ScorePart that improves, associate
       -- the current pose (and PoseTotalScore) of the protein to that ScorePart. Later, after
-      -- all these rebuild attempts, in RebuildManySegmentRanges() we will step through each
+      -- all these rebuild attempts, in RebuildSegmentRangeSetXofYwithManySegmentRanges() we will step through each
       -- of these best saved ScorePart poses and mutate, shake and wiggle them some more to
       -- see if we can further improve their scores...
-    
+          
       -- Important!!!
       -- Important!!!
       -- Important!!!
@@ -5727,16 +5989,20 @@ function RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment) -- was Re
       -- Important!!!
       -- Important!!!
       -- Important!!!
-    
+          
     end -- if l_bStructureChanged == true then
     
-    -- NEW!!! If there was no change to the structure then stop processing this segment range and
-    -- move on to the next segment range...
-    -- But, if there was ANY change to the structure, with a positive OR negative score change, then
-    -- continue looking for more structure changes...
+    -- If there was no favorable (i.e.; increase in points or very small decrease in points) change to 
+    -- the structure then stop processing this segment range and move on to the next one...
     if l_bStructureChanged == false then
       
-      local l_SetDebugBreakpointHere = true
+      if l_Round < l_MaxRounds then
+        print("After 3 attempts, round" .. g_round_x_of_y .. g_with_segments_x_thru_y .. 
+          " failed to favorably change the structure of the protein; therefore," ..
+          " we are skipping the following " .. l_MaxRounds - l_Round .. " rounds" ..
+          " for this segment range and moving on to the next segment range.")
+      
+      end
       break -- for l_Round = 1, l_MaxRounds do
       
     end
@@ -5754,9 +6020,9 @@ function RebuildOneSegmentRangeManyTimes(l_StartSegment, l_EndSegment) -- was Re
   print("l_NumberOfTimesStructureChanged = " .. l_NumberOfTimesStructureChanged)
 	return l_NumberOfTimesStructureChanged
 
-end -- RebuildOneSegmentRangeManyTimes() -- was ReBuild()
-function RebuildSelectedSegments(l_StartSegment, l_EndSegment) -- was localRebuild()
-  -- Called from RebuildOneSegmentRangeManyTimes() above; was Rebuild()
+end -- RebuildSegmentRangeXofYforManyRounds() -- was ReBuild()
+function RebuildRoundXofYforManyAttempts(l_StartSegment, l_EndSegment) -- was localRebuild()
+  -- Called from RebuildSegmentRangeXofYforManyRounds() above; was Rebuild()
   -- Calls structure.RebuildSelected() foldit code
 
   local l_TimeBefore = os.clock()
@@ -5774,15 +6040,17 @@ function RebuildSelectedSegments(l_StartSegment, l_EndSegment) -- was localRebui
 		band.DisableAll() -- will re-enable after rebuild.
 	end
 
-  local l_MaxIterations = 3 -- the original code used l_Round here (from RebuildOneSegmentRangeManyTimes)
-  for l_CurrentIteration = 1, l_MaxIterations do
+  local l_MaxAttemtpsPerRound = 3 -- the original code used l_Round here from Rebuild()
+  for l_CurrentAttemptForThisRound = 1, l_MaxAttemtpsPerRound do
+    
+    local l_RebuildIterations = l_CurrentAttemptForThisRound -- just for fun, I suppose.
     
     DisulfideBonds_RememberSolutionWithThemIntact() -- was Bridgesave()
     
     -- Important!!!
     -- Important!!!
     -- Important!!!
-		structure.RebuildSelected(l_CurrentIteration) -- foldit code
+		structure.RebuildSelected(l_RebuildIterations) -- foldit code
     -- Important!!!
     -- Important!!!
     -- Important!!!
@@ -5794,85 +6062,92 @@ function RebuildSelectedSegments(l_StartSegment, l_EndSegment) -- was localRebui
     l_Score_After_Rebuild = GetPoseTotalScore()
     l_ScoreImprovement = l_Score_After_Rebuild - g_Score_ScriptBest
     if l_Score_After_Rebuild == g_Score_ScriptBest then
+      -- This probably never happens...
+      if g_bDebugMode == false then
+        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " " .. 
+              PaddedNumber(l_ScoreImprovement, 8, 3) .. " " .. 
+              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+              l_RebuildIterations .. "xRebuildSelected" ..
+              g_round_x_of_y ..
+              g_with_segments_x_thru_y ..
+              " The Score_After_Rebuild == g_Score_ScriptBest == " .. 
+              PaddedNumber(l_Score_After_Rebuild, 1, 3) ..
+              ". This is not expected." ..
+              " If this happens more than once or twice, look for coding errors.")
+      end
       l_bStructureChanged = false
     else
-      l_bStructureChanged = true
+      -- Hold on, let's not allow too great a loss of points here...
+      -- This code check is "borrowed" from the code which determines if
+      -- we should perform a Fuse operation based on potential point loss.
+      -- We allow a small drop in points here with the hope to recover 
+      -- even more points later with mutates, shakes and wiggles...
+
+      local l_PotentialPointLoss = g_Score_ScriptBest - l_Score_After_Rebuild                                   
+      local l_MaxLossAllowed = g_UserSelected_SkipFuseBestScorePartPose_IfCurrentRebuild_LosesMoreThan * 
+                              (l_EndSegment - l_StartSegment + 1) / 3
+                              
+      if l_PotentialPointLoss > l_MaxLossAllowed then
+        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "" .. 
+              PaddedNumber(l_ScoreImprovement, 10, 3) .. " " .. 
+              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+              l_RebuildIterations .. "xRebuildSelected" ..
+              g_round_x_of_y ..
+              g_with_segments_x_thru_y ..
+              " This rebuild change would result in a loss of " .. 
+              PaddedNumber(l_PotentialPointLoss, 1, 3) .. 
+              " points, which is higher than the max loss allowed of " .. 
+              PaddedNumber(l_MaxLossAllowed, 1, 0) .. 
+              " points; therefore, we are rejecting this rebuild change.")
+        -- The potential score loss is too great, so let's revert the change...
+        recentbest.Restore()
+      else
+        l_bStructureChanged = true
+        
+      end
     end
 
-    if l_ScoreImprovement > 0.001 then
-      print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" .. 
-            PaddedNumber(l_ScoreImprovement, 8, 3) .. " " .. 
-            PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-            l_CurrentIteration .. "xRebuildSelected" ..
-            g_round_x_of_y ..
-            g_with_segments_x_thru_y)
-          
-      g_Stats_Run_TotalPointsGained_RebuildSelected =
-      g_Stats_Run_TotalPointsGained_RebuildSelected + l_ScoreImprovement
-      g_Stats_Run_SuccessfulAttempts_RebuildSelected = 
-      g_Stats_Run_SuccessfulAttempts_RebuildSelected + 1
-      SaveBest() -- <-- Updates g_Score_ScriptBest
-      --break -- don't break here! If we break here we will miss some of the stats. break after stats below
-      -- The original code breaks out of the for loop here and
-      -- returns "done = true" at the end of this function...
-      -- Should we do the same? Well, we should check the log
-      -- file for multiple successful rounds for a single segment
-      -- range. If it never happens, then we should should consider
-      -- breaking out of the loop here. If more than one round
-      -- often gives extra points, then I say we should not break
-      -- out of the loop and always complete all rounds as we are
-      -- currently doing. A quick look at the log file reveals the
-      -- following:
-      -- 1) We spend most of our attempts on RebuildSelected's 2701 of 5274 51%! The most of any action.
-      --    ShakeSidechainsSelected=24%, WiggleAll=21%, All other actions less than 1% each.
-      -- 2) We spend most of our time on RebuildSelected, 89% (13.6hrs!)
-      --    MutateSidechainsAll=5% (50min), all others < 1%
-      -- 3) RebuildSelected success rate is a pittyful 0.56%. The  lowest of any action.
-      --    WiggleAll=67% (the highest by far!), MutateSidechainsAll=2%, all others < 1%.
-      -- 4) RebuildSelected gained 2% of the total points gained.
-      --    WiggleAll gained 87%, MutateSidechainsAll=8%, ShakeSidechainsSelected=3%
-      -- 5) RebuildSelected had multiple round successes 3 out of 10 times (30%). Low sample size!
-
-    elseif l_Score_After_Rebuild < g_Score_ScriptBest then
-      print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " .. 
-            PaddedNumber(l_ScoreImprovement, 8, 3) .. " " .. 
-            PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-            l_CurrentIteration .. "xRebuildSelected" ..
-            g_round_x_of_y ..
-            g_with_segments_x_thru_y)
-          
-      -- A success of sorts...
-      g_Stats_Run_SuccessfulAttempts_RebuildSelected = 
-      g_Stats_Run_SuccessfulAttempts_RebuildSelected + 1
-      -- the original code did not call recentbest.Restore()
-      -- Should we undo our last change because it caused a drop in our score?
-      -- Maybe; Maybe not. We might allow a small drop with the hope to 
-      -- recover points with a mutate, shake and wiggle...
-      -- recentbest.Restore()
-      
-    end -- if l_ScoreImprovement > 0.001 then
-    
     g_Stats_Run_TotalSecondsUsed_RebuildSelected = 
     g_Stats_Run_TotalSecondsUsed_RebuildSelected + l_SecondsUsed
     g_Stats_Run_NumberOfAttempts_RebuildSelected = 
     g_Stats_Run_NumberOfAttempts_RebuildSelected + 1
     
-    -- NEW!!! We are looking for ANY change to the structure, with a positive OR negative score change!!!
     if l_bStructureChanged == true then
       
-      local l_SetDebugBreakpointHere = true
-      break -- for l_CurrentIteration = 1, l_MaxIterations do
+      g_Stats_Run_SuccessfulAttempts_RebuildSelected = 
+      g_Stats_Run_SuccessfulAttempts_RebuildSelected + 1
       
-    end
+      local l_MovingOnText = ""
+      --if l_CurrentAttemptForThisRound < l_MaxAttemtpsPerRound then
+        l_MovingOnText = " Successful structure change, so moving on to the next round."
+      --end
+      
+      print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" .. 
+            PaddedNumber(l_ScoreImprovement, 8, 3) .. " " .. 
+            PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+            l_RebuildIterations .. "xRebuildSelected" ..
+            g_round_x_of_y ..
+            g_with_segments_x_thru_y ..
+            l_MovingOnText)
+          
+      if l_ScoreImprovement > 0 then
+        g_Stats_Run_TotalPointsGained_RebuildSelected =
+        g_Stats_Run_TotalPointsGained_RebuildSelected + l_ScoreImprovement
+        SaveBest() -- <-- Updates g_Score_ScriptBest
+      end      
+      
+      break -- We break out of the rebuild iteration loop after the first successful rebuild.
     
-  end -- for l_CurrentIteration = 1, l_MaxIterations do
+    end -- if l_bStructureChanged == true then
+    
+  end -- for l_CurrentAttemptForThisRound = 1, l_MaxAttemtpsPerRound do
 
 	if g_bUserSelected_DisableBandsDuringRebuild == true then
 		band.EnableAll()
 	end
   return l_bStructureChanged
 
-end -- RebuildSelectedSegments() -- was localRebuild()
+end -- RebuildRoundXofYforManyAttempts() -- was localRebuild()
 function ShakeSelected(l_FromWhere)
   -- Called from 5 functions above and below
       
@@ -5916,7 +6191,7 @@ function ShakeSelected(l_FromWhere)
     g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected + 1
     SaveBest() -- <-- Updates g_Score_ScriptBest
   elseif l_Score_After_Shake < g_Score_ScriptBest then
-    -- Should will undo our last change because it dropped our score...
+    -- Should we undo our last change because it dropped our score...
     recentbest.Restore()
   end
   g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected =
@@ -5976,7 +6251,7 @@ function WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_FromWhere)
     g_Stats_Run_SuccessfulAttempts_WiggleSelected + 1
     SaveBest() -- <-- Updates g_Score_ScriptBest
   elseif l_Score_After_Wiggle < g_Score_ScriptBest then
-    -- Should will undo our last change because it dropped our score...
+    -- Should we undo our last change because it dropped our score...
     recentbest.Restore()
   end
   g_Stats_Run_TotalSecondsUsed_WiggleSelected =
@@ -6192,7 +6467,7 @@ function MutateSideChainsAll(l_FromWhere)
   
 end -- MutateSideChainsAll(l_FromWhere)
 function StabilizeSegmentRange(l_StartSegment, l_EndSegment) -- was qStab()
-  -- Called from RebuildManySegmentRanges() above
+  -- Called from RebuildSegmentRangeSetXofYwithManySegmentRanges() above
 
 	SetClashImportance(0.1)
 	ShakeSelected("Stabilize")
@@ -6218,7 +6493,7 @@ function StabilizeSegmentRange(l_StartSegment, l_EndSegment) -- was qStab()
   
 end -- function StabilizeSegmentRange(l_StartSegment, l_EndSegment)
 function FuseBestScorePartPose()
-  -- Called from RebuildManySegmentRanges() above
+  -- Called from RebuildSegmentRangeSetXofYwithManySegmentRanges() above
 
 	Fuse1(0.3, 0.6) -- ClashImp_Before, ClashImp_After
   WiggleAll(3, "Fuse") -- Iterations, FromWhere
@@ -6255,7 +6530,7 @@ end -- function Fuse2(l_ClashImportanceBefore, l_ClashImportanceAfter)
 -- ...end of My Favorite Functions.
 -- Start of Clean Up functions...
 function CleanUp(l_ErrorMessage)
-  -- Called from main() above or xpcall() below
+  -- Called from RebuildOnePuzzleWithManyRuns() above or xpcall() below
 	
 	print("Cleaning up: Restoring Clash Importance, initial selection," ..
       "\n             best result and structures ... done.")
@@ -6272,216 +6547,15 @@ function CleanUp(l_ErrorMessage)
 	-- Reset the Selected Segments back to the way they were before we started this program...
 	selection.DeselectAll()
 	if g_OrigSelectedSegmentRanges ~= nil then
-		-- g_OrigSelectedSegmentRanges is populated before we call main()...
+		-- g_OrigSelectedSegmentRanges is populated before we call RebuildOnePuzzleWithManyRuns()...
 		CleanUpSelectedSegmentRanges(g_OrigSelectedSegmentRanges)
 	end
 	if l_ErrorMessage ~= nil then
 		print(l_ErrorMessage)
 	end
-  
-  g_Stats_Script_ElaspedSeconds = os.clock() - g_ScriptStartTime
-  
-  g_Stats_Script_TotalPointsGained_Total = 
-    g_Stats_Script_TotalPointsGained_RebuildSelected +
-    g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected +
-    g_Stats_Script_TotalPointsGained_WiggleSelected +
-    g_Stats_Script_TotalPointsGained_WiggleAll +
-    g_Stats_Script_TotalPointsGained_MutateSidechainsSelected +
-    g_Stats_Script_TotalPointsGained_MutateSidechainsAll
-  
-  g_Stats_Script_TotalSecondsUsed_Total = 
-    g_Stats_Script_TotalSecondsUsed_RebuildSelected +
-    g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected +
-    g_Stats_Script_TotalSecondsUsed_WiggleSelected +
-    g_Stats_Script_TotalSecondsUsed_WiggleAll +
-    g_Stats_Script_TotalSecondsUsed_MutateSidechainsSelected +
-    g_Stats_Script_TotalSecondsUsed_MutateSidechainsAll
-  
-  g_Stats_Script_SuccessfulAttempts_Total = 
-    g_Stats_Script_SuccessfulAttempts_RebuildSelected +
-    g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected +
-    g_Stats_Script_SuccessfulAttempts_WiggleSelected +
-    g_Stats_Script_SuccessfulAttempts_WiggleAll +
-    g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected +
-    g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll
     
-  g_Stats_Script_NumberOfAttempts_Total = 
-    g_Stats_Script_NumberOfAttempts_RebuildSelected +
-    g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected +
-    g_Stats_Script_NumberOfAttempts_WiggleSelected +
-    g_Stats_Script_NumberOfAttempts_WiggleAll +
-    g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected +
-    g_Stats_Script_NumberOfAttempts_MutateSidechainsAll
+  DisplayEndOfScriptStatistics()
     
-  -- Future improvements for stats:
-  -- 1) The script sum total of the many action seconds is close to double the actual script elasped
-  --    time. For example 93,826 vs 55,061 seconds. To get a more accurate time spent, divide the 
-  --    time per action by the total time of all actions. This will give a reasonable percent of time
-  --    taken. Then multiply this percentage by the actual time elapsed. For example RebuildSelected
-  --    says it took 83540 of the 93826 total action seconds. This represents 89% of the total actual
-  --    elapsed time of 55061 seconds or 49,024 actual seconds (or 817 minutes or 13.6 hours)
-  -- 2) Maybe add overall % success rate next to individual action success rate. For example:
-  --    RebuildSelected Success Rate: 15/2701  (0.56%)  15/766  (1.96%) overall
-  --    ShakeSidechainsSelected:      10/1278  (0.78%)  10/766  (1.31%) overall
-  --    WiggleAll:                   737/1098 (67.15%) 737/766 (96.21%) overall
-  --    ...then again, this doesn't really add much useful info.
-  
-  print("------------------------ ------------------  ----------------  -------  ------------------")
-  print("End of Script Stats:")
-  print("------------------------ ------------------  ----------------  -------  ------------------")
-  print("From:                       Points Gained      Minutes Used    Pts/Min     Success Rate:")
-  print("------------------------ ------------------  ----------------  -------  ------------------")
-                                        
-  print("RebuildSelected          " .. 
-    PaddedNumber(g_Stats_Script_TotalPointsGained_RebuildSelected, 9, 3) .. "" .. 
-    PaddedString("(" ..
-    PaddedNumber(g_Stats_Script_TotalPointsGained_RebuildSelected /
-                 g_Stats_Script_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
-      
-    PaddedNumber(g_Stats_Script_ElaspedSeconds * 
-                (g_Stats_Script_TotalSecondsUsed_RebuildSelected /
-                 g_Stats_Script_TotalSecondsUsed_Total) / 60, 9, 3) .. "" ..
-      
-    PaddedString("(" ..
-    PaddedNumber(g_Stats_Script_TotalSecondsUsed_RebuildSelected /
-                 g_Stats_Script_TotalSecondsUsed_Total * 100, 4, 2) .. "%)", 9) ..
-    PaddedNumber(g_Stats_Script_TotalPointsGained_RebuildSelected /
-                (g_Stats_Script_TotalSecondsUsed_RebuildSelected / 60), 9, 0) .. "  " ..
-    PaddedString(g_Stats_Script_SuccessfulAttempts_RebuildSelected .. "/" ..
-    PaddedNumber(g_Stats_Script_NumberOfAttempts_RebuildSelected, 0, 0), 9) ..
-    PaddedString(" (" ..
-    PaddedNumber(g_Stats_Script_SuccessfulAttempts_RebuildSelected /
-                 g_Stats_Script_NumberOfAttempts_RebuildSelected * 100, 4, 2) .. "%)", 9))
-  print("ShakeSidechainsSelected  " ..
-    PaddedNumber(g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected, 9, 3) .. "" ..
-    PaddedString("(" ..
-    PaddedNumber(g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected /
-                 g_Stats_Script_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
-      
-    PaddedNumber(g_Stats_Script_ElaspedSeconds * 
-                (g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected /
-                 g_Stats_Script_TotalSecondsUsed_Total) / 60, 9, 3) .. "" ..
-      
-    PaddedString("(" ..
-    PaddedNumber(g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected /
-                 g_Stats_Script_TotalSecondsUsed_Total * 100, 4, 2) .. "%)", 9) ..
-    PaddedNumber(g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected /
-                (g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected / 60), 9, 0) .. "  " ..
-    PaddedString(g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected .. "/" ..
-    PaddedNumber(g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected, 0, 0), 9) ..
-    PaddedString(" (" ..
-    PaddedNumber(g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected /
-                 g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected * 100, 4, 2) .. "%)", 9))
-  print("WiggleSelected           " .. 
-    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleSelected, 9, 3) .. "" ..
-    PaddedString("(" ..
-    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleSelected /
-                 g_Stats_Script_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
-      
-    PaddedNumber(g_Stats_Script_ElaspedSeconds * 
-                (g_Stats_Script_TotalSecondsUsed_WiggleSelected /
-                 g_Stats_Script_TotalSecondsUsed_Total) / 60, 9, 3) .. "" ..
-      
-    PaddedString("(" ..
-    PaddedNumber(g_Stats_Script_TotalSecondsUsed_WiggleSelected /
-                 g_Stats_Script_TotalSecondsUsed_Total * 100, 4, 2) .. "%)", 9) ..
-    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleSelected /
-                (g_Stats_Script_TotalSecondsUsed_WiggleSelected / 60), 9, 0) .. "  " ..
-    PaddedString(g_Stats_Script_SuccessfulAttempts_WiggleSelected .. "/" ..
-    PaddedNumber(g_Stats_Script_NumberOfAttempts_WiggleSelected, 0, 0), 9) ..
-    PaddedString(" (" ..
-    PaddedNumber(g_Stats_Script_SuccessfulAttempts_WiggleSelected /
-                 g_Stats_Script_NumberOfAttempts_WiggleSelected * 100, 4, 2) .. "%)", 9))
-  print("WiggleAll                " .. 
-    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleAll, 9, 3) .. "" ..
-    PaddedString("(" ..
-    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleAll /
-                 g_Stats_Script_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
-      
-    PaddedNumber(g_Stats_Script_ElaspedSeconds * 
-                (g_Stats_Script_TotalSecondsUsed_WiggleAll /
-                 g_Stats_Script_TotalSecondsUsed_Total) / 60, 9, 3) .. "" ..
-      
-    PaddedString("(" ..
-    PaddedNumber(g_Stats_Script_TotalSecondsUsed_WiggleAll /
-                 g_Stats_Script_TotalSecondsUsed_Total * 100, 4, 2) .. "%)", 9) ..
-    PaddedNumber(g_Stats_Script_TotalPointsGained_WiggleAll /
-                (g_Stats_Script_TotalSecondsUsed_WiggleAll / 60), 9, 0) .. "  " ..
-    PaddedString(g_Stats_Script_SuccessfulAttempts_WiggleAll .. "/" ..  
-    PaddedNumber(g_Stats_Script_NumberOfAttempts_WiggleAll, 0, 0), 9) ..
-    PaddedString(" (" ..
-    PaddedNumber(g_Stats_Script_SuccessfulAttempts_WiggleAll /
-                 g_Stats_Script_NumberOfAttempts_WiggleAll * 100, 4, 2) .. "%)", 9))
-  print("MutateSidechainsSelected " ..
-    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsSelected, 9, 3) .. "" ..
-    PaddedString("(" ..
-    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsSelected /
-                 g_Stats_Script_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
-      
-    PaddedNumber(g_Stats_Script_ElaspedSeconds * 
-                (g_Stats_Script_TotalSecondsUsed_MutateSidechainsSelected /
-                 g_Stats_Script_TotalSecondsUsed_Total) / 60, 9, 3) .. "" ..
-      
-    PaddedString("(" ..
-    PaddedNumber(g_Stats_Script_TotalSecondsUsed_MutateSidechainsSelected /
-                 g_Stats_Script_TotalSecondsUsed_Total * 100, 4, 2) .. "%)", 9) ..
-    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsSelected /
-                (g_Stats_Script_TotalSecondsUsed_MutateSidechainsSelected / 60), 9, 0) .. "  " ..
-    PaddedString(g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected .. "/" ..
-    PaddedNumber(g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected, 0, 0), 9) ..
-    PaddedString(" (" ..
-    PaddedNumber(g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected /
-                 g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected * 100, 4, 2) .. "%)", 9))
-  print("MutateSidechainsAll      " .. 
-    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsAll, 9, 3) .. "" ..
-    PaddedString("(" ..
-    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsAll /
-                 g_Stats_Script_TotalPointsGained_Total * 100, 4, 2) .. "%)", 9) ..
-      
-    PaddedNumber(g_Stats_Script_ElaspedSeconds * 
-                (g_Stats_Script_TotalSecondsUsed_MutateSidechainsAll /
-                 g_Stats_Script_TotalSecondsUsed_Total) / 60, 9, 3) .. "" ..
-      
-    PaddedString("(" ..
-    PaddedNumber(g_Stats_Script_TotalSecondsUsed_MutateSidechainsAll /
-                 g_Stats_Script_TotalSecondsUsed_Total * 100, 4, 2) .. "%)", 9) ..
-    PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsAll /
-                (g_Stats_Script_TotalSecondsUsed_MutateSidechainsAll / 60), 9, 0) .. "  " ..
-    PaddedString(g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll .. "/" ..
-    PaddedNumber(g_Stats_Script_NumberOfAttempts_MutateSidechainsAll, 0, 0), 9) ..
-    PaddedString(" (" ..
-    PaddedNumber(g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll /
-                 g_Stats_Script_NumberOfAttempts_MutateSidechainsAll * 100, 4, 2) .. "%)", 9))
-  print("------------------------ ------------------  ----------------  -------  ------------------")
-  print("Run total                " .. 
-    PaddedNumber(g_Stats_Script_TotalPointsGained_Total, 9, 3) .. "" ..
-    PaddedString("(" ..
-    PaddedNumber(g_Stats_Script_TotalPointsGained_Total /
-                 g_Stats_Script_TotalPointsGained_Total * 100, 5, 1) .. "%)", 9) ..
-    
-    PaddedNumber(g_Stats_Script_ElaspedSeconds / 60, 9, 3) .. "" ..
-    
-    PaddedString("(" ..
-    PaddedNumber(g_Stats_Script_TotalSecondsUsed_Total /
-                 g_Stats_Script_TotalSecondsUsed_Total * 100, 5, 1) .. "%)", 9) ..
-    PaddedNumber(g_Stats_Script_TotalPointsGained_Total /
-                (g_Stats_Script_TotalSecondsUsed_Total / 60), 9, 0) .. "  " ..
-    PaddedString(g_Stats_Script_SuccessfulAttempts_Total .. "/" ..
-    PaddedNumber(g_Stats_Script_NumberOfAttempts_Total, 0, 0), 9) ..
-    PaddedString(" (" ..
-    PaddedNumber(g_Stats_Script_SuccessfulAttempts_Total /
-                 g_Stats_Script_NumberOfAttempts_Total * 100, 4, 2) .. "%)", 9))
-  print("------------------------ ------------------  ----------------  -------  ------------------")
-
-  local l_Score_AtEndOf_Script = g_Score_ScriptBest
-	print("\nStarting Score: " .. PrettyNumber(g_Score_AtStartOf_Script) ..
-        "\nPoints Gained: " .. PrettyNumber(l_Score_AtEndOf_Script - g_Score_AtStartOf_Script) ..
-        "\nFinal Score: " .. PrettyNumber(l_Score_AtEndOf_Script) ..
-        "\nElapsed Time " .. PrettyNumber(g_Stats_Script_ElaspedSeconds) .. " seconds or " ..
-        PaddedNumber(g_Stats_Script_ElaspedSeconds / 60, 5, 3) .. " minutes or " ..
-        PaddedNumber(g_Stats_Script_ElaspedSeconds / 3600, 5, 3) .. " hours" ..
-        "\n")
-
 end -- function CleanUp(l_ErrorMessage)
 function CleanUpSelectedSegmentRanges(l_SegmentRangesTable) -- was SetSelection()
   -- Called from CleanUp() above
@@ -6596,7 +6670,7 @@ function ScriptDocumentation()
 	2.7.0 Added option to disable slow filters on design puzzles.
 	2.8.0 Added more general way to disable slow filters on design puzzles.
 	2.8.1 Fixed filter problem when high bonus.
-	2.8.2 Add call to CleanUp after main stops normally.
+	2.8.2 Add call to CleanUp after RebuildOnePuzzleWithManyRuns stops normally.
 	3.0.0 Made a Remix version in the same source.  Really? A search in this file for "remix" turns up nada.
 	3.0.1 Fixed density weight computation if filters are active.
 
@@ -6605,6 +6679,8 @@ function ScriptDocumentation()
 end -- function ScriptDocumentation()
 -- ...end of Clean Up functions.
 
--- xpcall(main, CleanUp) -- run in protected mode, so we can fail gracefully, by calling CleanUp()...
-main() -- Call main() directly when debugging to more easily find the program line that caused an
---        exception / program abort. It makes it more obvious where the error occured.
+xpcall(RebuildOnePuzzleWithManyRuns, CleanUp) -- run in protected mode, so we can fail gracefully, by calling CleanUp()...
+--RebuildOnePuzzleWithManyRuns() -- Call RebuildOnePuzzleWithManyRuns() directly when debugging to more
+--                                  easily find the program line that caused an exception / program abort.
+--                                  It makes it more obvious where the error occured.
+--CleanUp()
