@@ -288,14 +288,22 @@ function DefineGlobalVariables()
 	-- Used in CleanUp()...
   
   g_Score_ScriptBest = GetPoseTotalScore() -- ...used in SaveBest() and many others.
-  recentbest.Save() -- Since foldit doesn't do it for us. Actually, foldit does remember creditbest
-                    -- and absolutebest, but those poses could be from the current or a previous run
-                    -- of the script. Restoring an absolutebest from a previous run of the script
-                    -- could be confusing during testing / debugging of the same puzzle over
-                    -- and over again.  It's already bad enough that we have to reset the puzzle
-                    -- and check that clash imporatance = 1 before every test run.  I'm not even sure
-                    -- how we would delete the creditbest and absolutebest poses, other than perhaps
-                    -- deleting their corresponding files in the Puzzles folder using Windows Explorer.
+  --recentbest.Save() -- Foldit automatically remembers recentbest, creditbest and absolutebest from
+                    -- the current **AND** from previous runs of the script **even if** you reset the puzzle!
+                    -- Restoring a recentbest from a previous run of the script could be confusing
+                    -- during testing and debugging of the same puzzle over and over again (e.g.; 
+                    -- resetting the puzzle every time between script executions).
+                    -- Therefore, we call recentbest.Save() to have the current score, whatever it is,
+                    -- set as the recent best for this run of the script.
+                    -- Although...perhaps we should restore the recentbest, or absolute best, at the 
+                    -- beginning of each script run. This would prevent those super negative scores
+                    -- we get when we abort in the middle of a script run and we forgot that we commented
+                    -- out the xpcall() method of calling main().
+                    -- Nah, again, restoring a previous best score after resetting a puzzle would make it
+                    -- very difficult (impossible?) to test a single puzzle many times.
+  --print("Testing absolutebest.Restore score before: " .. GetPoseTotalScore())
+  --absolutebest.Restore()
+  --print("Testing absolutebest.Restore score after: " .. GetPoseTotalScore())
   save.Quicksave(3) -- Save
   
   g_ScorePartText = "" -- Example: " ScorePart 4 (total)", " ScorePart 6 (ligand) 6=7=11" 
@@ -527,36 +535,45 @@ function DefineGlobalVariables()
 	-- Start of Temporarily Disable Condition Checking module...
   ------------------------------------------------------------
 -- Temporarily disable normal condition checking...
-	if g_bSketchBookPuzzle == false then
-    
-    -- Disable normal condition checking to get current score + potential bonus points.
-    -- This assumes the conditions for getting bonus points are not yet met. And this is normally
-    -- true when this is the first time working on this puzzle. However, if we have already been
-    -- working on this puzzle and have already met the conditions for getting the bonus points,
-    -- this will just get the current score.
-    
-		behavior.SetFiltersDisabled(true) -- Disable condition checking to get current score w/bonus points.
-    
-    -- ...enables faster CPU processing, but your score improvements are not saved to foldit.
-	end
 
-	local l_CurrentPoseTotalScoreWithPotentialBonusPoints = GetPoseTotalScore()
-    
-  -- debugging...
-  --l_CurrentPoseTotalScoreWithPotentialBonusPoints =
-  --  l_CurrentPoseTotalScoreWithPotentialBonusPoints + 500
-	  
-	-- Re-enable normal condition checking...
+local l_ScoreWithoutPotentialBonusPoints = GetPoseTotalScore()
+local l_ScoreWithPotentialBonusPoints = GetPoseTotalScore()
 	if g_bSketchBookPuzzle == false then
+    
+    -- Disable normal condition checking to get score without potential bonus points:
+    -- 1) Includes negative points for (currently applicable?) penalties (if any)
+    -- 2) Excludes bonus points earned and unearned (if any)
+		behavior.SetFiltersDisabled(true) -- Enables faster CPU processing, but your score
+    --                                   improvements will not be saved to foldit's undo history.
+    l_ScoreWithoutPotentialBonusPoints = GetPoseTotalScore()
+    
+    FilterOffScore = GetPoseTotalScore()
+    print("FilterOffScore: " .. FilterOffScore)    
+    
+    -- Re-enable normal condition checking to get score with potential bonus points:
+    -- 1) Includes negative points for (currently applicable?) penalties (if any)
+    -- 2) Includes bonus points already earned (if any) **AND** sometimes includes bonus
+    --    points not yet earned??? e.g.; Corona Virus 1805b
+    -- 3) If this is a **new** puzzle or a **reset** puzzle, this score will not include any bonus points (???).
+    -- However, if this puzzle has already been worked on, and has not been reset, and has satisfied
+    -- the conditions for earning bonus points, then this score will include any bonus points earned
+    -- so far.
 		behavior.SetFiltersDisabled(false) -- Disables faster CPU processing, so your score 
     --                                    improvements will be saved to foldit's undo history.
-	end
-	
-	local l_Score_WithNormalConditionChecking_Enabled = GetPoseTotalScore()
+    l_ScoreWithPotentialBonusPoints = GetPoseTotalScore()
+    
+    FilterOnScore = GetPoseTotalScore()
+    print("FilterOnScore: " .. FilterOnScore)
+    
+	end	
+  
+  -- debugging...
+  --l_ScoreWithPotentialBonusPoints =
+  --  l_ScoreWithPotentialBonusPoints + 500
 		
   -- Compute the maximum potential bonus points (not available in beginner puzzles)
 	g_ComputedMaximumPotentialBonusPoints = 
-    l_CurrentPoseTotalScoreWithPotentialBonusPoints - l_Score_WithNormalConditionChecking_Enabled 
+    l_ScoreWithPotentialBonusPoints - l_ScoreWithoutPotentialBonusPoints
   -- Used in DefineGlobalVariables() and DisplayPuzzleProperties()
 		
   g_UserSelected_MaximumPotentialBonusPoints = g_ComputedMaximumPotentialBonusPoints
@@ -571,9 +588,9 @@ function DefineGlobalVariables()
     
 		print("\nPotential score, including bonus points," ..
            " when and if bonus conditions are met: " ..
-             PrettyNumber(l_CurrentPoseTotalScoreWithPotentialBonusPoints) ..
-          "\n - Actual score right now: " ..
-             PrettyNumber(l_Score_WithNormalConditionChecking_Enabled) ..
+             PrettyNumber(l_ScoreWithPotentialBonusPoints) ..
+          "\n - Score without potential bonus points: " ..
+             PrettyNumber(l_ScoreWithoutPotentialBonusPoints) ..
           "\n = Potential bonus points to gain," ..
            " when and if bonus conditions are met: " ..
              g_UserSelected_MaximumPotentialBonusPoints)
@@ -620,7 +637,8 @@ function SetupLocalDebugFuntions()
 	
 	current = {}
  	pose = {} -- same structure as "current" above
- 	recentbest = {} --
+ 	recentbest = {}
+  absolutebest = {}
 
   g_Debug_NumberOfTimesWeCalled_RandomlyChange_g_Debug_CurrentEnergyScore = 0
   current.RandomlyChange_g_Debug_CurrentEnergyScore = function()
@@ -742,7 +760,7 @@ function SetupLocalDebugFuntions()
 	--   absolutebest.GetEnergyScore
 	--   absolutebest.GetSegmentEnergyScore
 	--   absolutebest.GetSegmentEnergySubscore
-	--   absolutebest.Restore -- could be helpful
+	absolutebest.Restore = function() return end -- could be helpful
 	--   band.GetLength=function() return math.random() * math.random(-5, 5) --> -5 <= x < 5 end
 	--   band.Add, band.Delete, band.DeleteAll
 	--   band.AddBetweenSegments, band.AddToBandEndpoint
@@ -4927,7 +4945,7 @@ function SaveBest() -- <-- Updates g_Score_ScriptBest
       g_bUserSelected_StabilizePosesOfSelectedScoreParts = true
     end
     
-    recentbest.Save() -- ...since foldit does not do this automatically!
+    --recentbest.Save() -- ...foldit already does this automatically!
     save.Quicksave(3) -- Save -- Slot 3 always contains the best scoring pose!
     g_bFoundAHighGain = true -- not exactly sure how this one works yet.
   end
@@ -5456,11 +5474,6 @@ function RebuildSegmentRangeSetXofYwithManySegmentRanges() -- was DeepRebuild()
     -- Remember loops are not helices. Loops are just plain swiggly lines...
 	end
 
-  -- The following two lines are now done at the beginning of the script
-  -- and every time SaveBest() is called with a better score...
-	--save.Quicksave(3) -- Save
-	--recentbest.Save() -- Save the current pose as the recentbest pose.  
-
 	-- This is the real meat of this script...
 	-- After laboriously determining which segment ranges to work on, 
   -- we finally get to rebuild, shake and wiggle them...
@@ -5730,7 +5743,7 @@ function RebuildSegmentRangeSetXofYwithManySegmentRanges() -- was DeepRebuild()
           
           print("  Skipping Fuse best score part pose because Potential Loss of " .. 
               l_PotentialPointLoss .. " points is " ..
-              "greater than Max Loss Allowed of " .. MaxLossAllowed .. ".")        
+              "greater than Max Loss Allowed of " .. l_MaxLossAllowed .. ".")        
           
         else
           
@@ -6123,7 +6136,10 @@ function RebuildRoundXofYforManyAttempts(l_StartSegment, l_EndSegment) -- was lo
               PaddedNumber(l_MaxLossAllowed, 1, 0) .. 
               " points")
         -- The potential score loss is too great, so let's revert the change...
+        --print("Testing decrease score recentbest.Save + recentbest.Restore(); Score before: " .. GetPoseTotalScore())
+        --recentbest.Save()
         recentbest.Restore()
+        --print("Testing decrease score recentbest.Save + recentbest.Restore(); Score after: " .. GetPoseTotalScore())
       else
         l_bStructureChanged = true
         
@@ -6157,7 +6173,11 @@ function RebuildRoundXofYforManyAttempts(l_StartSegment, l_EndSegment) -- was lo
         g_Stats_Run_TotalPointsGained_RebuildSelected =
         g_Stats_Run_TotalPointsGained_RebuildSelected + l_ScoreImprovement
         SaveBest() -- <-- Updates g_Score_ScriptBest
-      end      
+        
+        print("Testing increase score recentbest.Restore(); Score before: " .. GetPoseTotalScore())
+        recentbest.Restore()
+        print("Testing increase score recentbest.Restore(); Score after: " .. GetPoseTotalScore())
+      end
       
       break -- We break out of the rebuild iteration loop after the first successful rebuild.
     
@@ -6214,7 +6234,7 @@ function ShakeSelected(l_FromWhere)
     g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected + 1
     SaveBest() -- <-- Updates g_Score_ScriptBest
   elseif l_Score_After_Shake < g_Score_ScriptBest then
-    -- Should we undo our last change because it dropped our score...
+    -- Undo this Shake because it decreased our score...
     recentbest.Restore()
   end
   g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected =
@@ -6274,7 +6294,7 @@ function WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_FromWhere)
     g_Stats_Run_SuccessfulAttempts_WiggleSelected + 1
     SaveBest() -- <-- Updates g_Score_ScriptBest
   elseif l_Score_After_Wiggle < g_Score_ScriptBest then
-    -- Should we undo our last change because it dropped our score...
+    -- Undo this WiggleSelected because it decreased our score...
     recentbest.Restore()
   end
   g_Stats_Run_TotalSecondsUsed_WiggleSelected =
@@ -6342,7 +6362,7 @@ function WiggleAll(l_Iterations, l_FromWhere)
     SaveBest() -- <-- Updates g_Score_ScriptBest
     
   elseif l_Score_After_Wiggle < g_Score_ScriptBest then
-    -- Undo this wiggle because it decreased our score...
+    -- Undo this WiggleAll because it decreased our score...
     recentbest.Restore()
   end
   g_Stats_Run_TotalSecondsUsed_WiggleAll =
@@ -6428,6 +6448,7 @@ function MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, l_From
     SaveBest() -- <-- Updates g_Score_ScriptBest
   
   elseif l_Score_After_Mutate < g_Score_ScriptBest then
+    -- Undo this Mutate because it decreased our score...
     recentbest.Restore()
   end
   g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected =
@@ -6481,6 +6502,7 @@ function MutateSideChainsAll(l_FromWhere)
     SaveBest() -- <-- Updates g_Score_ScriptBest
     
   elseif l_Score_After_Mutate < g_Score_ScriptBest then
+    -- Undo this Mutate because it decreased our score...
     recentbest.Restore()
   end
   g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll =
@@ -6701,8 +6723,8 @@ function ScriptDocumentation()
 end -- function ScriptDocumentation()
 -- ...end of Clean Up functions.
 
-xpcall(RebuildOnePuzzleWithManyRuns, CleanUp) -- run in protected mode, so we can fail gracefully, by calling CleanUp()...
---RebuildOnePuzzleWithManyRuns() -- Call RebuildOnePuzzleWithManyRuns() directly when debugging to more
+--xpcall(RebuildOnePuzzleWithManyRuns, CleanUp) -- run in protected mode, so we can fail gracefully, by calling CleanUp()...
+RebuildOnePuzzleWithManyRuns() -- Call RebuildOnePuzzleWithManyRuns() directly when debugging to more
 --                                  easily find the program line that caused an exception / program abort.
 --                                  It makes it more obvious where the error occured.
---CleanUp()
+CleanUp()
