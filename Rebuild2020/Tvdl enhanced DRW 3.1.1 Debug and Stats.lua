@@ -1361,7 +1361,7 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now ShakeSelecte
         g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected + l_ScoreImprovement
         g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected =
         g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected + 1
-        --SaveBest() -- <-- Updates g_Score_ScriptBest
+        SaveBest() -- <-- Updates g_Score_ScriptBest
         
       elseif l_Score_After_Shake == g_Score_ScriptBest then    
         print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
@@ -1659,7 +1659,7 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now ShakeSelecte
         g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected + l_ScoreImprovement
         g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected =
         g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected + 1
-        --SaveBest() -- <-- Updates g_Score_ScriptBest
+        SaveBest() -- <-- Updates g_Score_ScriptBest
         
       elseif l_Score_After_Shake == g_Score_ScriptBest then    
         print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
