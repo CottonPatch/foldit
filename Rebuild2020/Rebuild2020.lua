@@ -5718,7 +5718,7 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
             local l_SphereRadius = 12
             SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
             g_with_segments_x_thru_y = " Within " .. l_SphereRadius .. " angstroms of" ..
-              " segments " .. l_StartSegment .. "-" .. l_EndSegment
+                                       " segments:" .. l_StartSegment .. "-" .. l_EndSegment
               
           else
             
@@ -5880,7 +5880,7 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
           
         else
           
-          -- This following checks if g_bUserSelected_MutateAfterStabilizePosesOfSelectedScoreParts ==
+          -- The following checks if g_bUserSelected_MutateAfterStabilizePosesOfSelectedScoreParts ==
           -- false because if it were true, then we would have already performed the mutate above, after
           -- the StabilizePosesOfSelectedScoreParts.
           if g_bUserSelected_MutateBeforeFuseBestScorePartPose == true and
@@ -5902,20 +5902,20 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
           
           save.Quicksave(4) -- "Save"; Well, I don't think slot 4 means the same as it used to. 
           --                         I need to check the original code to see if it is still needed.
-          --                         The name of the 4 is "Total", which the total of all score part
-          --                         scores.
+          --                         The name for ScorePart/Slot 4 is "Total", which is the total of 
+          --                         all score part scores.
           if g_bUserSelected_DuringStabilizeAndFuse_ShakeAndWiggleSelectedAndNearbySegments == true then
             
             local l_SphereRadius = 12
             SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
-            g_with_segments_x_thru_y = " within " .. l_SphereRadius .. " angstroms of" ..
-              " segments " .. l_StartSegment .. "-" .. l_EndSegment
+            g_with_segments_x_thru_y = " Within " .. l_SphereRadius .. " angstroms of" ..
+                                       " segments:" .. l_StartSegment .. "-" .. l_EndSegment
             
           else
             
             selection.DeselectAll()
             selection.SelectRange(l_StartSegment, l_EndSegment)            
-            g_with_segments_x_thru_y = " w/segments " .. l_StartSegment .. "-" .. l_EndSegment
+            g_with_segments_x_thru_y = " Segments:" .. l_StartSegment .. "-" .. l_EndSegment
             
           end
           
@@ -5927,7 +5927,7 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
           -- Important!!!
           -- Important!!!
           
-          save.Quicksave(4) -- Save Fused pose as "ScorePart 4", even though it's not really a "ScorePart"
+          save.Quicksave(4) -- Save (hopefully improved) Fused pose as ScorePart/Slot 4
           
           if g_bUserSelected_MutateAfterFuseBestScorePartPose == true then
             
@@ -6102,7 +6102,7 @@ function Rebuild1SegmentRangeForManyRounds(l_StartSegment, l_EndSegment) -- was 
         local l_SphereRadius = 9 -- Angstroms; maybe record in the log file? Or too boring?...
         SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)            
         g_with_segments_x_thru_y = " Within " .. l_SphereRadius .. " angstroms of" ..
-          " segments " .. l_StartSegment .. "-" .. l_EndSegment
+                                   " segments:" .. l_StartSegment .. "-" .. l_EndSegment
         
         SetClashImportance(1)
         
@@ -6121,7 +6121,7 @@ function Rebuild1SegmentRangeForManyRounds(l_StartSegment, l_EndSegment) -- was 
         
         selection.DeselectAll()
         selection.SelectRange(l_StartSegment, l_EndSegment)
-        g_with_segments_x_thru_y = " Segments " .. l_StartSegment .. "-" .. l_EndSegment		
+        g_with_segments_x_thru_y = " Segments:" .. l_StartSegment .. "-" .. l_EndSegment		
         
       -- Important!!!
       -- Important!!!
@@ -6593,9 +6593,10 @@ function MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, l_From
   
   else -- if g_bUserSelected_MutateSelectedAndNearbySegments == true then
     
- 		SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, g_UserSelected_MutateSphereRadius)
-    g_with_segments_x_thru_y = " Within " .. g_UserSelected_MutateSphereRadius .. " angstroms of" ..    
-                               " Segments:" .. l_StartSegment .. "-" .. l_EndSegment
+    local l_SphereRadius = g_UserSelected_MutateSphereRadius
+ 		SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
+    g_with_segments_x_thru_y = " Within " .. l_SphereRadius .. " angstroms of" ..    
+                               " segments:" .. l_StartSegment .. "-" .. l_EndSegment
   end
     
 	SetClashImportance(g_UserSelected_MutateClashImportance) -- default is 0.9 (close to 1)

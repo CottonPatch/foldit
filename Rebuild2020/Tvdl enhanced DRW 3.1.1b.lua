@@ -1,33 +1,3 @@
-normal= (current.GetExplorationMultiplier() == 0)
-function SegScore(pose)
-    if pose==nil then pose=current end
-    local total=8000
-    for i=1,segCnt2 do
-        total=total+pose.GetSegmentEnergyScore(i)
-    end
-    return total
-end
-function Score(pose)
-    if pose==nil then pose=current end
-    local total= pose.GetEnergyScore()
-    -- FIX for big negatives
-
-        if total < -999999 and total > -1000001 then total=SegScore(pose) end
-
-    if normal then
-        return total
-    else
-        return total*pose.GetExplorationMultiplier()
-    end
-end
-
-behavior.SetFiltersDisabled(true)
-FilterOffscore=Score()
-print("FilterOffscore1: " .. FilterOffscore)
-
-behavior.SetFiltersDisabled(false)
-Filterscore=Score()
-print("Filterscore1: " .. Filterscore)
 
 --[[
     Based on Rav3n_pl Deep Rebuild v3.x
@@ -100,12 +70,10 @@ NEW in version 2
 ]]--
 
 -- Handy shorts module
---normal= (current.GetExplorationMultiplier() == 0)
+normal= 1 -- (current.GetExplorationMultiplier() == 0)
 segCnt=structure.GetCount()
 segCnt2=segCnt
 while structure.GetSecondaryStructure(segCnt2)=="M" do segCnt2=segCnt2-1 end
-
--- On request of gmn
 CIfactor=1
 maxCI=true
 function CI(CInr)
@@ -123,9 +91,8 @@ end
 
 if behavior.GetClashImportance() < 0.99 then CheckCI() end
 CIfactor=behavior.GetClashImportance()
-
 -- Score functions
-function Score2(pose)
+function Score(pose)
     if pose==nil then pose=current end
     local total= pose.GetEnergyScore()
     -- FIX for big negatives
@@ -139,7 +106,7 @@ function Score2(pose)
     end
 end
 
-function SegScore2(pose)
+function SegScore(pose)
     if pose==nil then pose=current end
     local total=8000
     for i=1,segCnt2 do
@@ -157,16 +124,6 @@ function round3(x)--cut all afer 3-rd place
 end
 
 -- Module Filteractive
-
-behavior.SetFiltersDisabled(true)
-FilterOffscore=Score()
-print("FilterOffscore2: " .. FilterOffscore)
-
-behavior.SetFiltersDisabled(false)
-Filterscore=Score()
-print("Filterscore2: " .. Filterscore)
-
-
 SKETCHBOOKPUZZLE=false
 Filterscore=Score()
 name=puzzle.GetName()
@@ -175,17 +132,13 @@ if string.find(name,"Sketchbook") then
  SKETCHBOOKPUZZLE=true
 end
 print("SKETCHBOOKPUZZLE: " .. tostring(SKETCHBOOKPUZZLE))
-
---if SKETCHBOOKPUZZLE == false then behavior.SetSlowFiltersDisabled(true) end
 if SKETCHBOOKPUZZLE == false then behavior.SetFiltersDisabled(true) end
 FilterOffscore=Score()
---if SKETCHBOOKPUZZLE == false then behavior.SetSlowFiltersDisabled(false) end
 if SKETCHBOOKPUZZLE == false then behavior.SetFiltersDisabled(false) end
 print("Filterscore3: " .. Filterscore)
 print("FilterOffscore3: " .. FilterOffscore)
 maxbonus=Filterscore-FilterOffscore
 CURBONUS=maxbonus
-
 function Filter()
    local ask=dialog.CreateDialog("Slow filters seem to be active")
    ask.disable=dialog.AddCheckbox("Run with disabled slow filters",Filteractive)
@@ -205,7 +158,7 @@ end
 BetterRecentBest=false
 function FilterOff()
     -- Filters off but restore a better recentbest with filter off
-    behavior.SetSlowFiltersDisabled(true)
+    behavior.SetFiltersDisabled(true)
     if BetterRecentBest then
         save.Quicksave(99)
         save.Quickload(98)
@@ -223,18 +176,17 @@ function FilterOn()
         save.Quicksave(98)
         save.Quickload(99)
     end
-    behavior.SetSlowFiltersDisabled(false)
+    behavior.SetFiltersDisabled(false)
 end
 print("maxbonus: " .. maxbonus)
-
 Filteractive=(math.abs(maxbonus) > 0.1)
---if Filteractive then
+print("Filteractive: " .. tostring(Filteractive))
+if Filteractive then
    --Filters active, give people a choice
    --And ask what the maximum bonus is.
    Filter()
---end
+end
 -- End of module Filteractive
-
 MINGAIN=0
 foundahighgain=true
 bestScore=Score()
@@ -254,12 +206,11 @@ function SaveBest()
   end
 end
 
--- New WiggleFactor
-WF=1
--- Wiggle function
--- Optimized due to Susumes ideas
--- Note the extra parameter to be used if only selected parts must be done
+WF=1 -- New WiggleFactor
 function Wiggle(how, iters, minppi,onlyselected)
+  -- Wiggle function
+  -- Optimized due to Susumes ideas
+  -- Note the extra parameter to be used if only selected parts must be done
     --score conditioned recursive wiggle/shake
     --fixed a bug, absolute difference is the threshold now
     if how==nil then how="wa" end
@@ -294,14 +245,6 @@ function Wiggle(how, iters, minppi,onlyselected)
         --if math.abs(Score()-sp) > minppi then return Wiggle(how, iters, minppi,onlyselected) end
     --end
 end
-
--- end of handy shorts module
-
--- Segment set and list module
--- Notice that most functions assume that the sets are well formed
--- (=ordered and no overlaps)
--- 02-05-2012 TvdL Free to use for non commercial purposes
-
 function SegmentListToSet(list)
     local result={}
     local f=0
@@ -458,7 +401,6 @@ function SegmentSetToBool(set)
     return result
 end
 --- End of Segment Set module
-
 -- Module Find Segment Types
 function FindMutablesList()
     local result={}
@@ -515,9 +457,7 @@ function FindAminotype(at) --NOTE: only this one gives a list not a set
     return result
 end
 -- end Module Find Segment Types
-
 -- Module to compute subscores
--- TvdL, 14-12-2012
 function GetSubscore(types,seg1,seg2,pose)
     local result=0
     if type(types) == "table" then
@@ -557,9 +497,7 @@ function FindActiveSubscores(show)
     return result
 end
 -- End module to compute subscores
-
--- Position stack module 1.0
--- uses slot 60 and higher
+-- Position stack module 1.0 - uses slot 60 and higher
 Stackmin=60
 StackMarks={}
 StackPos=60
@@ -605,9 +543,8 @@ function ClrTopPosition()
 end
 -- Start of module for bridgechecking
 Cyslist={}
-savebridges=false --default no bridgechecking
+savebridges=false -- default no bridgechecking
 nrofbridges=0
-
 function setCyslist()
     Cyslist=FindAminotype("c")
     nrofbridges=CountBridges()
@@ -641,9 +578,7 @@ function Bridgerestore()
 end
 
 -- End module bridgechecking
-
 -- Module find puzzle properties
--- Tvdl 14-12-2012
 HASMUTABLE=false
 HASDENSITY=false
 HASLIGAND= (segCnt2<segCnt)
@@ -651,7 +586,6 @@ DENSITYWEIGHT=0
 PROBABLESYM=false
 FREEDESIGN=false
 SKETCHBOOKPUZZLE=false
-
 function SetPuzzleProperties()
     print("Computing puzzle properties")
     -- Find out if the puzzle has mutables
@@ -696,10 +630,8 @@ end
 
 SetPuzzleProperties()
 -- End of module find puzzle properties
-
 -- Standard Fuze module
 -- Picks up all gains by using recentbest
-
 function GetRB(prefun,postfun)
     if RBScore()> Score() then
         if prefun ~= nil then prefun() end
@@ -776,9 +708,7 @@ function Fuze(slot,prefun,postfun,globshake)
     SaveBest()
 end
 -- end standard Fuze module
-
 -- Module setsegmentset
--- Tvdl, 11-05-2012 Free to use for noncommercial purposes
 function SetSelection(set)
     selection.DeselectAll()
     if set ~= nil then for i=1,#set do
@@ -856,7 +786,6 @@ function Cleanup(err)
 end
 
 -- Module AskSelections
--- 02-05-2012 Timo van der Laan, Free to use for non commercial purposes
 function AskForSelections(title,mode)
     local result={{1,structure.GetCount()}} -- All segments
     if mode == nil then mode={} end
@@ -1001,7 +930,6 @@ function AskForSelections(title,mode)
     return result
 end
 -- end of module AskSelections
-
 progname="DRW "
 action="rebuild"
 function Sort(tab,items) --BACWARD bubble sorting - lowest on top, only needed items
@@ -1066,7 +994,6 @@ function ChkDoneList()
     end
 end
 --end of administration part
-
 function FindWorst(firsttime)
     print("Searching worst scoring parts of len "..len)
     ChkDisjunctList(len)
@@ -1230,13 +1157,11 @@ function GetSegmentScores()
     end
 end
 -- end section segmentscore(part)s
-
 -- Administration of the different slots and best scores
 Scores={} --{save_no,points,totscore,showlist,todo,rbnr}
-
 -- Compute which scoreparts to use
-ActiveSub=FindActiveSubscores(true)
-
+ActiveSub=
+FindActiveSubscores(true)
 ScoreParts={ --{save_no,name,active,longname}
     {4,'total',true,'4(total)'},
     {5,'loctotal',true,'5(loctotal)'}
@@ -1306,7 +1231,6 @@ function ListSlots()
     print("Slotlist:"..Report)
 end
 -- end of administration of slots and scores
-
 function PrintAreas()
     if #areas<19 then
         local a=""
@@ -1400,7 +1324,6 @@ end
 
 firstRBseg=0
 lastRBseg=0
-
 function MutateSel(maxitter)
     if maxitter == nil then maxitter=2 end
     structure.MutateSidechainsSelected(maxitter)
@@ -1832,9 +1755,7 @@ end
 until askresult < 2
     return askresult > 0
 end
--- Quick fix for failing first rebuild
 for i=3,12 do save.Quicksave(i) end
-
 --[[
     USAGE
 1. 'drw' - need 'minLen' and 'maxLen'; finding worst scores by len betwen that 2
@@ -1843,57 +1764,28 @@ for i=3,12 do save.Quicksave(i) end
 4. 'simple' - need 'len'; find and rebuild worst scoring parts of that lenght
 5. 'areas' - need secondary structure set and 'true' on at least one of structure
 ]]--
------------------ options below VVVV
-
 areas={ --start segment, end segment. use for last line call
 --{1,10},
 --{20,30},
 --{32,35},
 }
 scrPart={}
-
 --options for (5)"areas" setting
 loops=true --rebuild loops alone
 sheets=false --rebuild sheets + surrounding loops
 helices=true --false --rebuild helices + surrounding loops
-
 doShake=true --false --shake rebuilded area (only!) every rebuild, slowing down process
 doSpecial=false -- local shake, wiggle sidec, wiggle backbone, even slower
 shakeCI=0.31 --clash imortance while shaking
-
 struct=false --set in all loop (if true work in structure mode)
-
 fastQstab=true --false --if true faster stabilize, but longer
-
 reBuild=4 --up to worst parts to look at
 reBuildmore=1 --increased by every main cycle
 rebuilds=15 --how many rebuilds to try, set at least 10!
-
-function askAUNT()
-    local ask=dialog.CreateDialog("HI Auntdeen")
-    ask.l1=dialog.AddLabel("Set number of rebuilds")
-    ask.l2=dialog.AddLabel("Low    15")
-    ask.l3=dialog.AddLabel("Medium 25")
-    ask.l4=dialog.AddLabel("High   40")
-    ask.low=dialog.AddButton("Low",1)
-    ask.med=dialog.AddButton("Medium",2)
-    ask.high=dialog.AddButton("High",3)
-    local result=dialog.Show(ask)
-    if result==1 then rebuilds=15
-    elseif result==2 then rebuilds=25
-    else rebuilds=40 end
-end
-
-if ISAUNTDEEN then
-    askAUNT()
-end
 rebuildCI=0 --clash importance while rebuild
-
 len=6 --find worst segments part
-
 minLen=2 --or specify minimum len
 maxLen=4 --and maximim len
-
 -- New options
 maxnrofRuns=40 -- Set it very high if you want to run forever
 Runnr=0
@@ -2001,10 +1893,9 @@ if Score() < 4000 then
 end
 
 SAFEselection=FindSelected()
-
 if AskDRWOptions() then
-    --xpcall(DRW,Cleanup)
-    DRW()
+    xpcall(DRW,Cleanup)
+    --DRW()
 
 end
 
