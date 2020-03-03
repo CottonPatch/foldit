@@ -148,7 +148,7 @@ function DefineGlobalVariables()
   --         NormalConditionChecking_TemporarilyReEnableToCheckScore()
 	
 	g_bFoundAHighGain = true
-  -- Used in Rebuild1SegmentRangeSetWithManySegmentRanges() and SaveBest()
+  -- Used in 2 functions
 	
 	g_bFreeDesignPuzzle = false
 	-- Used in DisplayPuzzleProperties()
@@ -289,7 +289,7 @@ function DefineGlobalVariables()
   
   -- Wait until we determine if condition checking will be disabled for the entire script before
   -- setting g_Score_ScriptBest.
-  --g_Score_ScriptBest = GetPoseTotalScore() -- ...used in SaveBest() and many others.
+  --g_Score_ScriptBest = GetPoseTotalScore() -- ...used in many functions
   
   g_ScorePartText = "" -- Example: " ScorePart 4 (total)", " ScorePart 6 (ligand) 6=7=11" 
   
@@ -434,7 +434,7 @@ function DefineGlobalVariables()
   -- Really, most of the gains are with just 2 consecutive segments!
   
  	g_UserSelected_SketchBookPuzzle_MinimumGainForSave = 0
-  -- Used in AskUserToSelectRebuildOptions() and SaveBest()
+  -- Used in 2 functions
 
 	g_UserSelected_RejectEachRebuildWithAPotentialLossExceedingXPoints = 
 		(g_SegmentCount_WithoutLigands - (g_SegmentCount_WithoutLigands % 4)) / 4
@@ -563,7 +563,7 @@ function DefineGlobalVariables()
   -- Used in DefineGlobalVariables() and DisplayPuzzleProperties()
 		
   g_UserSelected_MaximumPotentialBonusPoints = g_ComputedMaximumPotentialBonusPoints
-  --  Used in AskUserToSelectConditionCheckingOptions() and SaveBest()
+  --  Used in 2 functions
 	
 	g_bUserSelected_NormalConditionChecking_DisableForThisEntireScriptRun = false -- Enable Normal Checking
   -- Used in 4 functions
@@ -3342,6 +3342,7 @@ function DisplayDetailsOfIncludedSegments()
   
 end -- function DisplayDetailsOfIncludedSegments()
 function DisplayEndOfRunStatistics()
+  -- Called from Rebuild1PuzzleForManyRuns()
   
   local l_Stats_Run_EndTime = os.clock()
   local l_Stats_Run_ElaspedMinutes = (l_Stats_Run_EndTime - g_Stats_Run_StartTime) / 60
@@ -3670,8 +3671,9 @@ function DisplayEndOfRunStatistics()
   g_Stats_Run_NumberOfAttempts_MutateSidechainsAll = 0.0001
     
 end -- function DisplayEndOfRunStatistics()
-function DisplayEndOfScriptStatistics()  
-    
+function DisplayEndOfScriptStatistics()
+  -- Called from CleanUp()
+  
   local l_ScriptEndTime = os.clock()
   local l_Stats_Script_ElaspedMinutes = (l_ScriptEndTime - g_ScriptStartTime) / 60
   
@@ -6568,7 +6570,7 @@ function WiggleAll(l_Iterations, l_FromWhere) -- was Wiggle()
   --                         from. Huh. Do most of our points come from WiggleAll? I wonder.
 
 end -- function WiggleAll(l_ClashImportance, l_FromWhere)
-function MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, l_FromWhere) -- was doMutate() + MutateSel()
+function MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, l_FromWhere) -- doMutate+MutateSel
   -- Called from 3 functions above and below
 
 	if g_NumberOfMutableSegments < 1 then
