@@ -3670,7 +3670,6 @@ function DisplayEndOfRunStatistics()
   g_Stats_Run_NumberOfAttempts_MutateSidechainsAll = 0.0001
     
 end -- function DisplayEndOfRunStatistics()
-
 function DisplayEndOfScriptStatistics()  
     
   local l_ScriptEndTime = os.clock()
@@ -3895,7 +3894,6 @@ function DisplayEndOfScriptStatistics()
         "\n")
 
 end -- function DisplayEndOfScriptStatistics()
-
 function DisplayXLowestScoringSegmentRanges() -- was PrintAreas()
   -- Called from Rebuild1SegmentRangeSetWithManySegmentRanges()...
   
@@ -5380,7 +5378,6 @@ function Rebuild1PuzzleForManyRuns() -- was DRW()
 	CleanUp()
 
 end -- Rebuild1PuzzleForManyRuns() -- was DRW()
-
 function Rebuild1RunWithManySegmentRangeSets(l_How) -- was DRcall()
   -- Called from Rebuild1PuzzleForManyRuns() above; was DRW()
   -- Calls Rebuild1SegmentRangeSetWithManySegmentRanges() below; was DeepRebuild()
@@ -6303,7 +6300,7 @@ function RebuildSelectedSegmentsForMax3Attempts(l_StartSegment, l_EndSegment) --
   return l_bStructureChanged
 
 end -- RebuildSelectedSegmentsForMax3Attempts() -- was localRebuild()
-function ShakeSelected(l_FromWhere)
+function ShakeSelected(l_FromWhere) -- was Wiggle()
   -- Called from 5 functions above and below
       
   local l_TimeBefore = os.clock()
@@ -6380,7 +6377,7 @@ function ShakeSelected(l_FromWhere)
   g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected + 1 
    
 end -- ShakeSelected(l_FromWhere)
-function WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_FromWhere)
+function WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_FromWhere) -- was Wiggle()
   -- Called from 5 functions above
   
   local l_TimeBefore = os.clock()
@@ -6468,7 +6465,7 @@ function WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_FromWhere)
   g_Stats_Run_NumberOfAttempts_WiggleSelected + 1
     
 end -- WiggleSelected(l_ClashImportance, l_FromWhere)
-function WiggleAll(l_Iterations, l_FromWhere)
+function WiggleAll(l_Iterations, l_FromWhere) -- was Wiggle()
   -- Called from 5 functions above and below
   
   local l_TimeBefore = os.clock()
@@ -6516,7 +6513,8 @@ function WiggleAll(l_Iterations, l_FromWhere)
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
           PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
           PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-          l_FromWhere .. ":" .. l_Iterations .. "xWiggleAll(Bb,SC)" ..
+          l_FromWhere .. ":" .. 
+          l_Iterations .. "xWiggleAll(Bb,SC)" ..
           g_round_x_of_y ..
           g_ScorePartText ..
           l_ClashImportanceText)
@@ -6532,7 +6530,8 @@ function WiggleAll(l_Iterations, l_FromWhere)
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
           "         " ..
           PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-          l_FromWhere .. ":" .. l_Iterations .. "xWiggleAll(Bb,SC)" ..
+          l_FromWhere .. ":" .. 
+          l_Iterations .. "xWiggleAll(Bb,SC)" ..
           g_round_x_of_y ..
           g_ScorePartText ..
           l_ClashImportanceText ..
@@ -6543,7 +6542,8 @@ function WiggleAll(l_Iterations, l_FromWhere)
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
           "         " ..
           PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-          l_FromWhere .. ":" .. l_Iterations .. "xWiggleAll(Bb,SC)" ..
+          l_FromWhere .. ":" .. 
+          l_Iterations .. "xWiggleAll(Bb,SC)" ..
           g_round_x_of_y ..
           g_ScorePartText ..
           l_ClashImportanceText ..
@@ -6568,7 +6568,7 @@ function WiggleAll(l_Iterations, l_FromWhere)
   --                         from. Huh. Do most of our points come from WiggleAll? I wonder.
 
 end -- function WiggleAll(l_ClashImportance, l_FromWhere)
-function MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, l_FromWhere)
+function MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, l_FromWhere) -- was doMutate() + MutateSel()
   -- Called from 3 functions above and below
 
 	if g_NumberOfMutableSegments < 1 then
@@ -6663,7 +6663,7 @@ function MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, l_From
   g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected + 1
 
 end -- MutateSideChainsOfSelectedSegments()
-function MutateSideChainsAll(l_FromWhere)
+function MutateSideChainsAll(l_FromWhere) -- was doMutate() + MutateAll()
   -- Called from MutateSideChainsOfSelectedSegments() above
  
 	if g_NumberOfMutableSegments < 1 then
@@ -6766,7 +6766,7 @@ function StabilizeOnePoseOfSelectedScoreParts(l_StartSegment, l_EndSegment) -- w
   recentbest.Restore() -- will keep current if best
 
 end -- function StabilizeOnePoseOfSelectedScoreParts(l_StartSegment, l_EndSegment)
-function FuseBestScorePartPose()
+function FuseBestScorePartPose() -- was Fuze()
   -- Called from Rebuild1SegmentRangeSetWithManySegmentRanges() above
 
 	Fuse1(0.3, 0.6) -- ClashImp_Before, ClashImp_After
