@@ -208,7 +208,7 @@ function DefineGlobalVariables()
 	-- Used in 2 functions.
   -- Set default to true if there are any bands.
   
-	g_bUserSelected_DuringStabilizeAndFuse_ShakeAndWiggleSelectedAndNearbySegments = false
+	g_bUserSelected_DuringFuse_ShakeAndWiggleSelectedAndNearbySegments = false
   -- Used in 3 functions
   -- When set to false then include nearby segments.
   
@@ -1565,10 +1565,10 @@ function AskUserToSelectRebuildOptions() -- was AskDRWOptions()
 		l_Ask.g_bUserSelected_ScorePartsFromAListForStabilizePosesOfSelectedScoreParts =
       dialog.AddCheckbox("Select ScoreParts from a list...", false)
     
-    l_Ask.g_bUserSelected_DuringStabilizeAndFuse_ShakeAndWiggleSelectedAndNearbySegments =
-      dialog.AddCheckbox("During Stabilize and Fuse, shake and ",
-        g_bUserSelected_DuringStabilizeAndFuse_ShakeAndWiggleSelectedAndNearbySegments)   
-    l_Ask.L60 = dialog.AddLabel("      wiggle selected AND nearby segments.")
+    l_Ask.g_bUserSelected_DuringFuse_ShakeAndWiggleSelectedAndNearbySegments =
+      dialog.AddCheckbox("During Fuse: shake and wiggle",
+        g_bUserSelected_DuringFuse_ShakeAndWiggleSelectedAndNearbySegments)   
+    l_Ask.L60 = dialog.AddLabel("      selected AND nearby segments.")
       
 		if g_NumberOfMutableSegments > 0 then
 			l_Ask.l_bUserWantsToSelectMutateOptions =
@@ -1751,9 +1751,9 @@ function AskUserToSelectRebuildOptions() -- was AskDRWOptions()
         end
 			end
       
-      -- During Stabilize and Fuse, shake and wiggle selected AND nearby segments...
-			g_bUserSelected_DuringStabilizeAndFuse_ShakeAndWiggleSelectedAndNearbySegments =
-        l_Ask.g_bUserSelected_DuringStabilizeAndFuse_ShakeAndWiggleSelectedAndNearbySegments.value
+      -- During Fuse: shake and wiggle selected AND nearby segments...
+			g_bUserSelected_DuringFuse_ShakeAndWiggleSelectedAndNearbySegments =
+        l_Ask.g_bUserSelected_DuringFuse_ShakeAndWiggleSelectedAndNearbySegments.value
         
 			if g_NumberOfMutableSegments > 0 then
         
@@ -2437,12 +2437,12 @@ function DisplayUserSelectedOptions() -- was printOptions()
       "xWiggleAll and 1xShakeSelected.")
   end 
   
-  if g_bUserSelected_DuringStabilizeAndFuse_ShakeAndWiggleSelectedAndNearbySegments == false then
+  if g_bUserSelected_DuringFuse_ShakeAndWiggleSelectedAndNearbySegments == false then
     
-		print("  User selected to shake and wiggle only selected segments during Stabilize and Fuse.")        
+		print("  User selected to shake and wiggle only selected segments during Fuse.")        
   else
 		print("  User selected to shake and wiggle selected AND nearby segments during" ..
-           " Stabilize and Fuse. Slow!")     
+           " Fuse. Slow!")     
   end
 
 	if g_bUserSelected_FuseBestScorePartPose == true then
@@ -5600,7 +5600,8 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
 		-- g_XLowestScoringSegmentRangesTable={StartSegment=1, EndSegment=2}
 		l_StartSegment = g_XLowestScoringSegmentRangesTable[l_SegmentRangeIndex][srtrt_StartSegment]
 		l_EndSegment = g_XLowestScoringSegmentRangesTable[l_SegmentRangeIndex][srtrt_EndSegment]
-    g_with_segments_x_thru_y = " w/segments " .. l_StartSegment .. "-" .. l_EndSegment
+    -- gets called two functions down -- g_with_segments_x_thru_y = " Segments:" .. 
+    --                                   l_StartSegment .. "-" .. l_EndSegment
     g_ScorePartText = "" 
     
 		-- DisulfideBonds_RememberSolutionWithThemIntact() -- only call this just before calling one of foldit's
@@ -5646,12 +5647,12 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
       local l_Best_ImprovedScorePart_StringOfScorePartNumbersWithSamePoseTotalScore = ""
 
       --g_ScorePartScoresTable={ScorePart_Number=1, ScorePart_Score=2, PoseTotalScore=3,
-      --                          StringOfScorePartNumbersWithSamePoseTotalScore=4,
-      --                          bFirstInStringOfScorePartNumbersWithSamePoseTotalScore=5}
+      --                        StringOfScorePartNumbersWithSamePoseTotalScore=4,
+      --                        bFirstInStringOfScorePartNumbersWithSamePoseTotalScore=5}
       
        print("Searching for best scoring score parts...")
 
-      for l_ScorePart_Scores_TableIndex = 1, #g_ScorePartScoresTable do -- original table name: Scores
+      for l_ScorePart_Scores_TableIndex = 1, #g_ScorePartScoresTable do -- was Scores[]
         
         l_bFirstInASet = g_ScorePartScoresTable[l_ScorePart_Scores_TableIndex]
                                               [spst_bFirstInStringOfScorePartNumbersWithSamePoseTotalScore]
@@ -5667,7 +5668,7 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
           -- keep the log file to the minimum.
           
           local l_ScorePart_Number = g_ScorePartScoresTable[l_ScorePart_Scores_TableIndex]
-                                                             [spst_ScorePart_Number]
+                                                           [spst_ScorePart_Number]
           local l_StringOfScorePartNumbersWithSamePoseTotalScore = 
                               g_ScorePartScoresTable[l_ScorePart_Scores_TableIndex]
                                                       [spst_StringOfScorePartNumbersWithSamePoseTotalScore]
@@ -5676,21 +5677,10 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
           if l_StringOfScorePartNumbersWithSamePoseTotalScore == "all" then 
             g_ScorePartText = " ScoreParts:All"
           else
-            --if string.len(l_StringOfScorePartNumbersWithSamePoseTotalScore) <= 2 then
-            --  l_StringOfScorePartNumbersWithSamePoseTotalScore = ""
-            --else
-            --  l_StringOfScorePartNumbersWithSamePoseTotalScore = " " .. 
-            --    l_StringOfScorePartNumbersWithSamePoseTotalScore 
-            --end
-            
             -- g_ScorePartsTable{ScorePart_Number=1, ScorePart_Name=2, bScorePart_IsActive=3, LongName=4}
             g_ScorePartText = " ScoreParts:" ..
-              --g_ScorePartsTable[l_ScorePart_Number - 3][spt_LongName] .. too much for log file
-              l_StringOfScorePartNumbersWithSamePoseTotalScore
-            -- g_ScorePartText examples: " ScorePart 4 (total)", " ScorePart 6 (ligand) 6=7=11"
-            -- StringOfScorePartNumbersWithSamePoseTotalScore examples: "4", "5=7=12", "[6=9]", "[8=11=13]"
-            
-          end -- if l_StringOfScorePartNumbersWithSamePoseTotalScore = "all" then 
+              l_StringOfScorePartNumbersWithSamePoseTotalScore -- e.g.; "4", "5=7=12", "6=9", "8=11=13"
+          end
           
           -- Reload the saved protein pose (protein shape)...
           -- Important!!!
@@ -5712,20 +5702,10 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
           
           -- Prepare to StabilizePosesOfSelectedScoreParts...
           
-          if g_bUserSelected_DuringStabilizeAndFuse_ShakeAndWiggleSelectedAndNearbySegments == true then
-              
-            local l_SphereRadius = 12
-            SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
-            g_with_segments_x_thru_y = " Within " .. l_SphereRadius .. " angstroms of" ..
-                                       " segments:" .. l_StartSegment .. "-" .. l_EndSegment
-              
-          else
-            
-            selection.DeselectAll()
-            selection.SelectRange(l_StartSegment, l_EndSegment)            
-            g_with_segments_x_thru_y = " Segments:" .. l_StartSegment .. "-" .. l_EndSegment
-            
-          end
+          local l_SphereRadius = 12
+          SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
+          g_with_segments_x_thru_y = " Wthn" .. l_SphereRadius .. "AngstrmsOf" ..
+                                     "Segs:" .. l_StartSegment .. "-" .. l_EndSegment              
 
           if g_bUserSelected_StabilizePosesOfSelectedScoreParts == true then          
             
@@ -5749,8 +5729,7 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
             -- Important!!!
             -- Important!!!
             ShakeSelected("SimpleS&W")  -- FromWhere; below
-            WiggleSelected(1, false, true, "SimpleS&W") -- Iterations,bWBackbone,bWSideChains,
-            --                                                        FromWhere
+            WiggleSelected(1, false, true, "SimpleS&W") -- Iterations,bWBackbone,bWSideChains,FromWhere
             -- Important!!!
             -- Important!!!
             -- Important!!!
@@ -5851,13 +5830,15 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
  
       -- Prepare to Fuse best SorePart Pose...
       
+      g_ScorePartText = l_Best_ImprovedScorePart_Text
+      
       local l_Plural = "s "
-      if string.len(g_ScorePartText) <= 2 then l_Plural = " " end
+      if string.len(l_Best_ImprovedScorePart_StringOfScorePartNumbersWithSamePoseTotalScore) <= 2 then
+        l_Plural = " "
+      end
       print("Found best scoring score part" .. l_Plural .. 
              l_Best_ImprovedScorePart_StringOfScorePartNumbersWithSamePoseTotalScore ..
-           " with score of " .. PaddedNumber(l_Best_ImprovedScorePart_PoseTotalScore, 1, 3))
-         
-      g_ScorePartText = l_Best_ImprovedScorePart_Text
+           " with score of " .. PaddedNumber(l_Best_ImprovedScorePart_PoseTotalScore, 1, 3))         
 
       local l_Score_After_SeveralChangesToSegmentRange = GetPoseTotalScore()
       
@@ -5903,12 +5884,12 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
           --                         I need to check the original code to see if it is still needed.
           --                         The name for ScorePart/Slot 4 is "Total", which is the total of 
           --                         all score part scores.
-          if g_bUserSelected_DuringStabilizeAndFuse_ShakeAndWiggleSelectedAndNearbySegments == true then
+          if g_bUserSelected_DuringFuse_ShakeAndWiggleSelectedAndNearbySegments == true then
             
             local l_SphereRadius = 12
             SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
-            g_with_segments_x_thru_y = " Within " .. l_SphereRadius .. " angstroms of" ..
-                                       " segments:" .. l_StartSegment .. "-" .. l_EndSegment
+            g_with_segments_x_thru_y = " Wthn" .. l_SphereRadius .. "AngstrmsOf" ..
+                                       "Segs:" .. l_StartSegment .. "-" .. l_EndSegment              
             
           else
             
@@ -6089,7 +6070,7 @@ function Rebuild1SegmentRangeForManyRounds(l_StartSegment, l_EndSegment) -- was 
       -- Important!!!
       -- Important!!!
       -- Important!!!
-      ShakeSelected("AfterRebuild") -- FromWhere; below
+      ShakeSelected("AfterRebuild1") -- FromWhere; below
       -- Important!!!
       -- Important!!!
       -- Important!!!
@@ -6101,19 +6082,14 @@ function Rebuild1SegmentRangeForManyRounds(l_StartSegment, l_EndSegment) -- was 
         local l_SphereRadius = 9 -- Angstroms; maybe record in the log file? Or too boring?...
         SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)            
         g_with_segments_x_thru_y = " Within " .. l_SphereRadius .. " angstroms of" ..
-                                   " segments:" .. l_StartSegment .. "-" .. l_EndSegment
-        
+                                   " segments:" .. l_StartSegment .. "-" .. l_EndSegment        
         SetClashImportance(1)
         
       -- Important!!!
       -- Important!!!
       -- Important!!!
-        ShakeSelected("AfterRebuild") -- FromWhere; below
-        WiggleSelected(2, false, true, "AfterRebuild") -- Iterations,w/Bb,w/SC,FromWhere; below
-      -- Important!!!
-      -- Important!!!
-      -- Important!!!
-        ShakeSelected("AfterRebuild") -- FromWhere; below
+        ShakeSelected("AfterRebuild2") -- FromWhere; below
+        WiggleSelected(2, false, true, "AfterRebuild2") -- Iterations,w/Bb,w/SC,FromWhere; below
       -- Important!!!
       -- Important!!!
       -- Important!!!
@@ -6125,8 +6101,8 @@ function Rebuild1SegmentRangeForManyRounds(l_StartSegment, l_EndSegment) -- was 
       -- Important!!!
       -- Important!!!
       -- Important!!!
-        ShakeSelected("AfterRebuild") -- FromWhere; below
-        WiggleSelected(4, true, false, "AfterRebuild") -- Iterations, bWBackbone, bWSideChains, FromWhere
+        ShakeSelected("AfterRebuild4") -- FromWhere; below
+        WiggleSelected(4, true, false, "AfterRebuild3") -- Iterations, bWBackbone, bWSideChains, FromWhere
       -- Important!!!
       -- Important!!!
       -- Important!!!
@@ -6203,7 +6179,7 @@ function RebuildSelectedSegmentsForMax3Attempts(l_StartSegment, l_EndSegment) --
   -- Called from Rebuild1SegmentRangeForManyRounds() above; was Rebuild()
   -- Calls structure.RebuildSelected() foldit code
   
-  -- For Round X of Y, Rebuild Selected Segments a Maximum of 3 Attempts...
+  -- For round X of Y, rebuild the selected segments a maximum of 3 attempts...
 
   local l_TimeBefore = os.clock()
   local l_ScoreImprovement = 0
@@ -6216,7 +6192,7 @@ function RebuildSelectedSegmentsForMax3Attempts(l_StartSegment, l_EndSegment) --
 	SetClashImportance(g_RebuildClashImportance) -- g_RebuildClashImportance is always 0, so what's the point
 	selection.DeselectAll()
 	selection.SelectRange(l_StartSegment, l_EndSegment)
-  g_with_segments_x_thru_y = " Segments:" .. l_StartSegment .. "-" .. l_EndSegment		
+  g_with_segments_x_thru_y = " Segments:" .. l_StartSegment .. "-" .. l_EndSegment
   
 	if g_bUserSelected_DisableBandsDuringRebuild == true then
 		band.DisableAll() -- will re-enable after rebuild.
@@ -6955,7 +6931,7 @@ function ScriptDocumentation()
 				Resets the original structure if mutated after rebuild for the next rebuild,
 				Set default mutate settings if a design puzzle.
 	2.4.1 Added WiggleFactor, removed reference as a ScorePart.
-	2.5.0 Added g_bUserSelected_DuringStabilizeAndFuse_ShakeAndWiggleSelectedAndNearbySegments option. Thanks Susume.
+	2.5.0 Added g_bUserSelected_DuringFuse_ShakeAndWiggleSelectedAndNearbySegments option. Thanks Susume.
 	2.5.1 Added finding wins during StabilizePosesOfSelectedScoreParts wiggle.
 	2.6.0 Changed defaults and user interface.
 	2.7.0 Added option to disable slow filters on design puzzles.
