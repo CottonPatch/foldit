@@ -1321,7 +1321,7 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now ShakeSelecte
   local wf=1
   if maxCI then wf=WF end
   local l_ClashImportance = behavior.GetClashImportance()
-  local l_ClashImportanceText = " ClashImp " .. PaddedNumber(l_ClashImportance, 0, 2)    
+  local l_ClashImportanceText = " ClashImp:" .. PaddedNumber(l_ClashImportance, 0, 2)    
   
   local sp=Score()
   
@@ -2402,7 +2402,9 @@ function AllLoop() -- now ConvertAllSegmentsToLoops()
         structure.SetSecondaryStructureSelected("L")
     end
 end
-function qStab() -- now StabilizeOnePoseOfSelectedScoreParts()
+function qStab() -- now StabilizeOnePoseOfSelectedScoreParts()  
+    -- called from DeepRebuild() -- now Rebuild1SegmentRangeSetWithManySegmentRanges() way below
+    
     -- Do not accept qstab losses
     local curscore=Score()
     PushPosition()
@@ -2791,6 +2793,8 @@ end -- function localRebuild(maxiters); now RebuildSelectedSegmentsForMax3Attemp
 function ReBuild(ss,se,tries) -- now Rebuild1SegmentRangeForManyRounds()
   -- Called from DeepRebuild() now Rebuild1SegmentRangeSetWithManySegmentRanges() way below
   -- Calls localRebuild() now RebuildSelectedSegmentsForMax3Attempts() above
+  l_StartSegment = ss
+  l_EndSegment = se
   
   ClearScores() --reset score tables
   if ss>se then ss,se=se,ss end --switch if needed
@@ -2799,13 +2803,18 @@ function ReBuild(ss,se,tries) -- now Rebuild1SegmentRangeForManyRounds()
   
   for try = 1, tries do -- perform loop for number of tries
     
+    l_Round = try
+    l_MaxRounds = tries
+    g_round_x_of_y = " Round:" .. l_Round .. "of" .. l_MaxRounds
+    g_ScorePartText = ""
+    
     if SKETCHBOOKPUZZLE then
       save.Quickload(3)
     end
     selection.DeselectAll()
     CI(rebuildCI)
     selection.SelectRange(ss,se)
-    g_with_segments_x_thru_y = " w/segments " .. ss .. "-" .. se		
+    g_with_segments_x_thru_y = " Segments:" .. ss .. "-" .. se		
 
     -- local extra_rebuilds = 1
     -- if savebridges then extra_rebuilds=3 end --extra if bridges keep breaking
@@ -2834,17 +2843,35 @@ function ReBuild(ss,se,tries) -- now Rebuild1SegmentRangeForManyRounds()
       Bridgesave()
       
       if doSpecial==true then
-        SelectAround(ss,se,9)
+        
+        l_SphereRadius = 9
+        g_with_segments_x_thru_y = " Within " .. l_SphereRadius .. " angstroms of" ..
+                                   " segments:" .. l_StartSegment .. "-" .. l_EndSegment        
+        SelectAround(ss,se,9) -- now SelectSegmentsNearSegmentRange()
         CI(1)
-        Wiggle("s",1,nil,true,"ReBuild1")
-        Wiggle("ws",2,nil,true,"ReBuild2")
+        Wiggle("s",1,nil,true,"AfterReBuild2")
+        Wiggle("ws",2,nil,true,"AfterReBuild2")
+        
         selection.DeselectAll()
         selection.SelectRange(ss,se)
+        g_with_segments_x_thru_y = " Segments:" .. l_StartSegment .. "-" .. l_EndSegment
         Wiggle("wb",4,nil,true,"ReBuild3")
+        
+        -- The following three line are not needed because:
+        -- 1) if we continue with the loop without calling doMutate then the top of the loop 
+        --    resets to the selected segment range, and
+        -- 2) if we exit this function the calling function calls SelectAround(s,e,12), and
+        -- 3) if we can doMutate() below, it makes its own segment selections.
+        l_SphereRadius = 9
+        g_with_segments_x_thru_y = " Within " .. l_SphereRadius .. " angstroms of" ..
+                                   " segments:" .. l_StartSegment .. "-" .. l_EndSegment
         SelectAround(ss,se,9)
+        
       elseif doShake==true then
+        
         CI(shakeCI)
-        Wiggle("s",1,nil,true,"ReBuild4")
+        Wiggle("s",1,nil,true,"AfterReBuild1")
+        
       end
       
       Bridgerestore()
@@ -3224,9 +3251,16 @@ function DeepRebuild() -- now Rebuild1SegmentRangeSetWithManySegmentRanges()
     local ss1=Score()
     local s=areas[i][1] -- now g_XLowestScoringSegmentRangesTable[]
     local e=areas[i][2] -- now g_XLowestScoringSegmentRangesTable[]
+    l_StartSegment = s
+    l_EndSegment = e
+    
     local CurrentHigh=0
     local CurrentAll="" -- to report where gains came from
     local CurrentHighScore= -99999999
+    local l_Best_ImprovedScorePart_Text = ""
+    local l_Best_ImprovedScorePart_StringOfScorePartNumbersWithSamePoseTotalScore = ""
+    local l_StringOfScorePartNumbersWithSamePoseTotalScore = ""
+    local l_Best_ImprovedScorePart_PoseTotalScore = CurrentHighScore
     firstRBseg=s
     lastRBseg=e
     Bridgesave()
@@ -3246,7 +3280,7 @@ function DeepRebuild() -- now Rebuild1SegmentRangeSetWithManySegmentRanges()
       -- Important!!!
       -- Important!!!
       -- Important!!!        
-
+     
         if SKETCHBOOKPUZZLE == false then
           -- Make sure we do not miss an improvement during rebuild
           if RBScore() > bestScore then
@@ -3260,34 +3294,127 @@ function DeepRebuild() -- now Rebuild1SegmentRangeSetWithManySegmentRanges()
           end
         end
         
-        ListSlots()
-        for r=1,#Scores do
-            if Scores[r][5] then
-                local slot=Scores[r][1]
-                save.Quickload(slot)
-                SelectAround(s,e,12) --local shake after rebuild/remix
-                Bridgesave()
-                if not skipqstab then qStab()
-                else
-                    CI(1)
-                    Wiggle("s",1,nil,true,"DeepBuild1")
-                    Wiggle("ws",1,nil,true,"DeepBuild1")
-                end
-                Bridgerestore()
-                if AfterQstab then
-                  doMutate("AfterQstab") -- now MutateSideChainsOfSelectedSegments() and MutateSideChainsAll
-                end
-                save.Quicksave(slot)
-                if Score() > CurrentHighScore then
-                     CurrentHigh=slot
-                     CurrentAll=Scores[r][4].."(RB"..Scores[r][6]..")"
-                     CurrentHighScore=Score()
-                end
-                SaveBest()
-                print("Stabilized score: "..round3(Score()).." from slot "..ScoreParts[slot-3][4])
+        ListSlots() -- now Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTotalScore_An
+        -- now
+        -- Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTotalScore_And_FirstInString
+        
+        for r = 1, #Scores do -- now g_ScorePartScoresTable[]
+          
+          if Scores[r][5] then
+            
+            local slot = Scores[r][1]
+            
+            l_StringOfScorePartNumbersWithSamePoseTotalScore = string.gsub(Scores[r][4]," ","")
+            if l_StringOfScorePartNumbersWithSamePoseTotalScore == "all" then 
+              g_ScorePartText = " ScoreParts:All"
+            else
+              g_ScorePartText = " ScoreParts:" ..
+                l_StringOfScorePartNumbersWithSamePoseTotalScore
             end
+            
+            -- Reload the saved protein pose (protein shape)...
+            -- Important!!!
+            -- Important!!!
+            -- Important!!!
+            save.Quickload(slot)
+            -- Important!!!
+            -- Important!!!
+            -- Important!!!
+            -- See Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields() way above 
+            -- for the corresponding save.Quicksave(l_ScorePart_Number) -- "Save"
+                
+            local l_SphereRadius = 12
+            g_with_segments_x_thru_y = " Wthn" .. l_SphereRadius .. "AngstrmsOf" ..
+                                       "Segs:" .. l_StartSegment .. "-" .. l_EndSegment              
+            SelectAround(s,e,12) -- local shake after rebuild/remix
+            
+            Bridgesave()
+            
+            if not skipqstab then
+              
+              -- Important!!!
+              -- Important!!!
+              -- Important!!!
+              qStab() -- now StabilizeOnePoseOfSelectedScoreParts() way above
+              -- Important!!!
+              -- Important!!!
+              -- Important!!!
+            
+            else
+            
+              CI(1)
+                
+              -- Important!!!
+              -- Important!!!
+              -- Important!!!
+              Wiggle("s",1,nil,true,"DeepBuild1")
+              Wiggle("ws",1,nil,true,"DeepBuild1")
+              -- Important!!!
+              -- Important!!!
+              -- Important!!!
+             
+            end
+          
+            Bridgerestore()
+            
+            if AfterQstab then
+              
+            -- Important!!!
+            -- Important!!!
+            -- Important!!!
+              doMutate("AfterQstab") -- now MutateSideChainsOfSelectedSegments() and MutateSideChainsAll
+            -- Important!!!
+            -- Important!!!
+            -- Important!!!
+            
+          end
+          
+            -- Important!!!
+            -- Important!!!
+            -- Important!!!
+            save.Quicksave(slot) -- "Save" (2nd save. After improvements, hopefully.)
+            -- Important!!!
+            -- Important!!!
+            -- Important!!!            
+            
+            if Score() > CurrentHighScore then
+              
+              CurrentHigh = slot
+              CurrentAll = Scores[r][4].."(RB"..Scores[r][6]..")"
+              CurrentHighScore = Score()                 
+              
+              l_Best_ImprovedScorePart_Text = g_ScorePartText
+              l_Best_ImprovedScorePart_StringOfScorePartNumbersWithSamePoseTotalScore =
+                l_StringOfScorePartNumbersWithSamePoseTotalScore    
+              l_Best_ImprovedScorePart_PoseTotalScore = CurrentHighScore
+                 
+            end
+            
+            SaveBest()
+            print("Stabilized score: "..round3(Score()).." from slot "..ScoreParts[slot-3][4])
+          end
         end
+                
+        -- Load the best score part pose...
+        -- Important!!!
+        -- Important!!!
+        -- Important!!!
         save.Quickload(CurrentHigh)
+        -- Important!!!
+        -- Important!!!
+        -- Important!!!
+        -- See just above in this function for the corresponding save.Quicksave() "Save"
+ 
+        -- Prepare to Fuse best SorePart Pose...
+        
+        g_ScorePartText = l_Best_ImprovedScorePart_Text      
+        local l_Plural = "s "
+        if string.len(l_Best_ImprovedScorePart_StringOfScorePartNumbersWithSamePoseTotalScore) <= 2 then
+          l_Plural = " "
+        end
+        print("Found best scoring score part" .. l_Plural .. 
+               l_Best_ImprovedScorePart_StringOfScorePartNumbersWithSamePoseTotalScore ..
+             " with score of " .. PaddedNumber(l_Best_ImprovedScorePart_PoseTotalScore, 1, 3))        
         
         if not skipfuze and ss1-Score() < maxlossbeforefuze*(e-s+1)/3 then
             print("Fuzing best position.")
@@ -3295,7 +3422,8 @@ function DeepRebuild() -- now Rebuild1SegmentRangeSetWithManySegmentRanges()
               doMutate("BeforeFuze") -- now MutateSideChainsOfSelectedSegments() and MutateSideChainsAll()
             end
             save.Quicksave(4)
-            if savebridges then
+            
+            if savebridges then              
               Fuze(4,Bridgesave,Bridgerestore,localshakes)
             else
               Fuze(4,nil,nil,localshakes)
