@@ -1,5 +1,4 @@
 
-
 function DefineGlobalVariables()
   -- Called from main()...
 
@@ -619,28 +618,6 @@ function DefineGlobalVariables()
 	-- ...enables faster CPU processing, but your score improvements will not be counted in foldit's Undo
   --    history.
   
-  --if math.abs(g_UserSelected_MaximumPotentialBonusPoints) > 0.1 then
-    
-		print("\nPotential score, including bonus points," ..
-           " when and if bonus conditions are met: " ..
-             PrettyNumber(l_CurrentPoseTotalScoreWithPotentialBonusPoints) ..
-          "\n - Actual score right now: " ..
-             PrettyNumber(l_Score_WithNormalConditionChecking_Enabled) ..
-          "\n = Potential bonus points to gain," ..
-           " when and if bonus conditions are met: " ..
-             g_UserSelected_MaximumPotentialBonusPoints)
-		
-		g_bUserSelected_NormalConditionChecking_TemporarilyDisable = true
-    
-		-- Ask user to verify maximum potential bonus points...
-		--AskUserToSelectNormlConditionCheckingOptions()
-    Filter()
-	--end
-  
-	if g_bUserSelected_NormalConditionChecking_TemporarilyDisable == true then
-		--NormalConditionChecking_TemporarilyDisable()
-    FilterOff()
-	end
   -----------------------------------------------------------
 	-- ...end of Temporarily Disable Condition Checking module.
   -----------------------------------------------------------
@@ -1328,11 +1305,22 @@ function round3(x)--cut all afer 3-rd place
     return x-x%0.001
 end
 -- Module Filteractive
+SKETCHBOOKPUZZLE=false
 Filterscore=Score()
+name=puzzle.GetName()
+if string.find(name,"Sketchbook") then
+ print("SketchbookPuzzle")
+ SKETCHBOOKPUZZLE=true
+end
+print("SKETCHBOOKPUZZLE: " .. tostring(SKETCHBOOKPUZZLE))
 if SKETCHBOOKPUZZLE == false then behavior.SetSlowFiltersDisabled(true) end
 FilterOffscore=Score()
 if SKETCHBOOKPUZZLE == false then behavior.SetSlowFiltersDisabled(false) end
-maxbonus=Filterscore-FilterOffscore
+print("Filterscore3: " .. Filterscore)
+print("FilterOffscore3: " .. FilterOffscore)
+maxbonus=0+Filterscore-FilterOffscore
+print("maxbonus: " .. maxbonus)
+
 CURBONUS=maxbonus
 function Filter()
    local ask=dialog.CreateDialog("Slow filters seem to be active")
@@ -1372,7 +1360,8 @@ function FilterOn()
     behavior.SetSlowFiltersDisabled(false)
 end
 Filteractive=(math.abs(maxbonus) > 0.1)
-if Filteractive then
+print("Filteractive: " .. tostring(Filteractive))
+if Filteractive == true then
    --Filters active, give people a choice
    --And ask what the maximum bonus is.
    Filter()
@@ -1508,6 +1497,8 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere)
               
               
               structure.WiggleSelected(2*wf*iters,false,true)
+              
+              
               
               local l_TimeAfter = os.clock()
               local l_SecondsUsed = l_TimeAfter - l_TimeBefore
@@ -2096,19 +2087,27 @@ SetPuzzleProperties()
 -- Standard Fuze module
 -- Picks up all gains by using recentbest
 function GetRB(prefun,postfun) -- get recent best pose
-    if RBScore()> Score() then
-        if prefun ~= nil then prefun() end
-        recentbest.Restore()
-        if postfun ~= nil then postfun() end
-    end
+  
+  if RBScore() > Score() then
+    
+    if prefun ~= nil then prefun() end
+    
+      recentbest.Restore() -- <<<---
+      
+    if postfun ~= nil then postfun() end
+    
+  end
+    
 end
 function FuzeEnd(prefun,postfun)
     if prefun ~= nil then prefun() end
     CI(1)
--- Wiggle("wa",1,nil,nil,"FuzeEnd")
--- Wiggle("s",1,nil,nil,"FuzeEnd")
+  -- Wiggle("wa",1,nil,nil,"FuzeEnd")
+  -- Wiggle("s",1,nil,nil,"FuzeEnd")
     Wiggle(nil,nil,nil,nil,"FuzeEnd")
-    GetRB(prefun,postfun)
+    
+    GetRB(prefun,postfun) -- <<<---
+    
     if postfun ~= nil then postfun() end
     SaveBest()
 end
@@ -2134,10 +2133,10 @@ end
 function reFuze(scr,slot)
     local s=Score()
     if s<scr then
-        save.Quickload(slot)
+        save.Quickload(slot) -- <<<---
     else
         scr=s
-        save.Quicksave(slot)
+        save.Quicksave(slot) -- <<<---
     end
     return scr
 end
@@ -2147,23 +2146,36 @@ function Fuze(slot,prefun,postfun,globshake)
 
     recentbest.Save()
     Fuze1(0.3,0.6,prefun,postfun,globshake)
-    FuzeEnd(prefun,postfun)
+    
+    FuzeEnd(prefun,postfun) -- <<<---
+    
     scr=reFuze(scr,slot)
     Fuze2(0.3,1,prefun,postfun)
-    GetRB(prefun,postfun)
+    
+    GetRB(prefun,postfun) -- <<<---
+    
     SaveBest()
     scr=reFuze(scr,slot)
     Fuze1(0.05,1,prefun,postfun,globshake)
-    GetRB(prefun,postfun)
+    
+    GetRB(prefun,postfun) -- <<<---
+    
     SaveBest()
     scr=reFuze(scr,slot)
-    Fuze2(0.7,0.5,prefun,postfun) FuzeEnd()
+    Fuze2(0.7,0.5,prefun,postfun) 
+    
+    FuzeEnd() -- <<<---
+    
     scr=reFuze(scr,slot)
     Fuze1(0.07,1,prefun,postfun,globshake)
-    GetRB(prefun,postfun)
+    
+    GetRB(prefun,postfun) -- <<<---
+    
     SaveBest()
-    reFuze(scr,slot)
-    GetRB(prefun,postfun)
+    reFuze(scr,slot) -- <<<---
+    
+    GetRB(prefun,postfun) -- <<<---
+        
     SaveBest()
 end
 -- end standard Fuze module
@@ -2224,8 +2236,8 @@ function qStab() -- now StabilizeSegmentRange()
     end
     CI(1)
     recentbest.Save()
-    Wiggle(nil,nil,nil,nil,"qStab4") -- I think this is pointless if you are simply going to restore recentbest!
-    recentbest.Restore()
+    Wiggle(nil,nil,nil,nil,"qStab4")
+    recentbest.Restore() -- will keep current if best
     if Score() < curscore then PopPosition() else ClrTopPosition() end
 end -- function qStab() 
 function Cleanup(err)
@@ -2795,7 +2807,9 @@ function ReBuild(ss,se,tries) -- now RebuildOneSegmentRangeManyTimes()
   
   for try = 1, tries do -- perform loop for number of tries
     
-    if SKETCHBOOKPUZZLE then save.Quickload(3) end
+    if SKETCHBOOKPUZZLE then
+      save.Quickload(3)
+    end
     selection.DeselectAll()
     CI(rebuildCI)
     selection.SelectRange(ss,se)
@@ -2816,9 +2830,13 @@ function ReBuild(ss,se,tries) -- now RebuildOneSegmentRangeManyTimes()
   
     -- extra_rebuilds = extra_rebuilds -1
     -- until done or extra_rebuilds == 0
-    SaveBest()
+    SaveBest() -- way above; updates g_Score_ScriptBest (bestScore) and save.Quicksave(3), but note we
+               -- have never called recentbest.Restore() or save.Quickload(3) yet!!!
+               -- Well, if this was a SketchbookPuzzle, we would have called save.Quickload(3) above
+               -- at the beginning of each round. Grr.
     
     if done==true then
+      
       l_NumberOfTimesStructureChanged = l_NumberOfTimesStructureChanged + 1
       Foundone=true
       Bridgesave()
@@ -2838,12 +2856,23 @@ function ReBuild(ss,se,tries) -- now RebuildOneSegmentRangeManyTimes()
       end
       
       Bridgerestore()
-      if AfterRB then
+      
+      if AfterRB then -- if mutate after rebuild...
         PushPosition() --save the current position for next round
         doMutate("AfterRebuild")
       end
-      SaveScores(ss,se,try)
-      if AfterRB then PopPosition() end
+      
+      -- Important!!!
+      -- Important!!!
+      -- Important!!!
+      SaveScores(ss,se,try) -- now Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields
+      -- Important!!!
+      -- Important!!!
+      -- Important!!!
+      
+      if AfterRB then -- if mutate after rebuild...
+        PopPosition()
+      end
         
     end -- if done==true then
     
@@ -2941,7 +2970,7 @@ Scores={} --{save_no,points,totscore,showlist,todo,rbnr} -- now g_ScorePart_Scor
 -- Compute which scoreparts to use
 ActiveSub= -- now g_ActiveScorePartsTable[]
 FindActiveSubscores(false) -- was true -- now Populate_g_ActiveScorePartsTable()
-ScoreParts={ --{save_no,name,active,longname} -- now g_ScorePartsTable[] -- now in Populate_g_ScorePartsTable()
+ScoreParts={ --{save_no,name,active,longname} -- now g_ScorePartsTable[] -- now in Populate_g_ScorePartsTabl
     {4,'total',true,'4(total)'},
     {5,'loctotal',true,'5(loctotal)'}
 }
@@ -3306,7 +3335,7 @@ function DeepRebuild() -- now RebuildManySegmentRanges()
       break
     end
     
-  end -- for i = 1, #areas do 
+  end -- for i = 1, #areas do -- now g_XLowestScoringSegmentRangesTable[]
 
   print("Deep"..action.." gain: "..round3(Score()-ss))
   
@@ -3670,7 +3699,7 @@ rebuilds=15 --how many rebuilds to try, set at least 10!
 rebuildCI=0 --clash importance while rebuild
 len=6 --find worst segments part
 minLen=2 --or specify minimum len -- now g_UserSelected_StartRebuildingWithThisManyConsecutiveSegments
-maxLen=4 --and maximim len -- now g_UserSelected_ResetToStartValueAfterRebuildingWithThisManyConsecutiveSegments
+maxLen=4 --and maximim len -- now g_UserSelected_ResetToStartValueAfterRebuildingWithThisManyConsecutiveSegm
 -- New options
 maxnrofRuns=5 -- 40 -- Set it very high if you want to run forever
 Runnr=0
