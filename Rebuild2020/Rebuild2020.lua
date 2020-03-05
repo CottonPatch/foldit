@@ -582,18 +582,18 @@ function DefineGlobalVariables()
     --  1805b Coronavirus, 
 		print("\nCurrent score including bonus points, because some" ..
            " or all of the bonus conditions have already been met: " ..
-             PrettyNumber(l_ScoreWithPotentialBonusPoints) ..
+             PaddedNumber(l_ScoreWithPotentialBonusPoints, 1, 3) ..
           "\n - Score without bonus points: " ..
-             PrettyNumber(l_ScoreWithoutPotentialBonusPoints) ..
+             PaddedNumber(l_ScoreWithoutPotentialBonusPoints, 1, 3) ..
           "\n = Bonus points earned already: " ..
              g_UserSelected_MaximumPotentialBonusPoints)
   elseif g_UserSelected_MaximumPotentialBonusPoints < 0 then
     -- I don't know what to display here...
 		print("\nPotential score, including bonus points," ..
            " when and if bonus conditions are met: " ..
-             PrettyNumber(l_ScoreWithPotentialBonusPoints) ..
+             PaddedNumber(l_ScoreWithPotentialBonusPoints, 1, 3) ..
           "\n - Score without potential bonus points: " ..
-             PrettyNumber(l_ScoreWithoutPotentialBonusPoints) ..
+             PaddedNumber(l_ScoreWithoutPotentialBonusPoints, 1, 3) ..
           "\n = Potential bonus points to gain," ..
            " when and if bonus conditions are met: " ..
              g_UserSelected_MaximumPotentialBonusPoints)
@@ -2301,7 +2301,7 @@ function DisplayPuzzleProperties()
        / l_DensityTotal
     end
 		print("  Puzzle has Density scores. The density weight = " .. 
-      PrettyNumber(g_DensityWeight) .. " points")
+      PaddedNumber(g_DensityWeight, 1, 3) .. " points")
 	end
 
 	-- Check if this is likely a symmetry puzzle...
@@ -2310,8 +2310,8 @@ function DisplayPuzzleProperties()
       math.abs(l_Current_PoseTotalScore
              - l_Score_TotalOfAllSegmentsIncludingLigands
              - 8000) -- why 8000?
-		-- print("PoseTotalScore " .. PrettyNumber(l_Current_PoseTotalScore ) .. 
-    --      " ComputedScore " .. PrettyNumber(l_ComputedScore) .. "")
+		-- print("PoseTotalScore " .. PaddedNumber(l_Current_PoseTotalScore, 1, 3) .. 
+    --      " ComputedScore " .. PaddedNumber(l_ComputedScore, 1, 3) .. "")
 		g_bProbableSymmetryPuzzle = l_ComputedScore > 2
 		if g_bProbableSymmetryPuzzle == true then
 			print("  Puzzle is a symmetry puzzle or has bonuses")
@@ -2323,7 +2323,7 @@ function DisplayPuzzleProperties()
            " Ligand scoring is active in ScorePart (slot) 6.")
   end 
   
-  print("  Starting score " .. PrettyNumber(l_Current_PoseTotalScore))
+  print("  Starting score " .. PaddedNumber(l_Current_PoseTotalScore, 1, 3))
 
 end -- DisplayPuzzleProperties()
 function DisplayUserSelectedMutateOptions()
@@ -2976,7 +2976,8 @@ function CheckForLowStartingScore()
     
 		if l_ScoreWithoutElectronDensity > 4000 then
 			print("\n  This is an electron density puzzle: Since the starting score of " ..
-                 PrettyNumber(l_ScoreWithoutElectronDensity) .. " is already greater than 4000 points" ..
+                 PaddedNumber(l_ScoreWithoutElectronDensity, 1, 3) ..
+                 " is already greater than 4000 points" ..
               " (high enough without")
       print( "  including Electron Density), we will keep the default" ..
               " options of: 'Stabilize selected score part poses' and 'fuse best score part pose'.")
@@ -2988,7 +2989,7 @@ function CheckForLowStartingScore()
 		return -- score is high enough for now...
   end
 
-	print("\n  Since the starting score of " .. PrettyNumber(l_Current_PoseTotalScore) ..
+	print("\n  Since the starting score of " .. PaddedNumber(l_Current_PoseTotalScore, 1, 3) ..
          " is less than " .. l_LowScore .. " points, to speed things up, we will temporarily")
   print("  skip stabilizing all score part poses and fusing best score part pose" ..
          " until the score increases above " .. l_LowScore .. " points.")
@@ -3888,9 +3889,9 @@ function DisplayEndOfScriptStatistics()
   print("------------------------ ------------------  ----------------  -------  ------------------")
     
   local l_Score_AtEndOf_Script = g_Score_ScriptBest
-	print("\nStarting Score: " .. PrettyNumber(g_Score_AtStartOf_Script) ..
-        "\nPoints Gained: " .. PrettyNumber(l_Score_AtEndOf_Script - g_Score_AtStartOf_Script) ..
-        "\nFinal Score: " .. PrettyNumber(l_Score_AtEndOf_Script) ..
+	print("\nStarting Score: " .. PaddedNumber(g_Score_AtStartOf_Script, 1, 3) ..
+        "\nPoints Gained: " .. PaddedNumber((l_Score_AtEndOf_Script - g_Score_AtStartOf_Script), 1, 3) ..
+        "\nFinal Score: " .. PaddedNumber(l_Score_AtEndOf_Script, 1, 3) ..
         "\nElapsed Time " .. PaddedNumber(l_Stats_Script_ElaspedMinutes, 5, 3) .. " minutes or " ..
         PaddedNumber(l_Stats_Script_ElaspedMinutes / 60, 5, 3) .. " hours" ..
         "\n")
@@ -3920,7 +3921,6 @@ function DisplayXLowestScoringSegmentRanges() -- was PrintAreas()
             
 	end -- for l_SegmentIndex = 1, l_MaxNumberOfSegmentRangesToDisplay do
 
-  --l_ListOfSegmentRanges = "Score " .. PrettyNumber(g_Score_ScriptBest) ..
   l_ListOfSegmentRanges = PaddedNumber(g_Score_ScriptBest, 9, 3) ..
     "          " ..
     PaddedNumber((os.clock() - g_ScriptStartTime) / 60, 7, 3) .. "m" ..
@@ -4274,7 +4274,7 @@ function GetPoseTotalScore(l_pose) -- was Score()
 	if l_pose == nil then
 		l_pose = current -- the class "current"
 	end
-	local l_Total = l_pose.GetEnergyScore()
+	local l_Total = tonumber(PaddedNumber(l_pose.GetEnergyScore(), 1, 3)) -- Important to round here!
 
 	return l_Total
 
@@ -4392,12 +4392,21 @@ function NormalConditionChecking_DisableForThisEntireScriptRun()
   
 end -- function NormalConditionChecking_DisableForThisEntireScriptRun()
 function PaddedNumber(l_DirtyFloat, l_PadWidth, l_AfterDecimal)
-  -- Called from ()...
+  -- Called 177 times from 17 functions
   
+  -- I guess we no longer need the the more complicated function RoundTo() below...
+  -- This function appears to round numbers just perfectly. Even negative numbers!
+  -- +1.0004 rounds to +1.000 which is correct!    
+  -- +1.0005 rounds to +1.001 which is correct!
+  -- -1.0004 rounds to -1.000 which is correct!    
+  -- -1.0005 rounds to -1.001 which is correct!
+  if l_DirtyFloat < 0 then
+    debugme = 1 
+  end  
   local l_PrettyString = string.format("%" .. l_PadWidth .. "." .. l_AfterDecimal .. "f", l_DirtyFloat)  
   return l_PrettyString
   
-end -- function PrettyNumber(l_DirtyFloat)
+end -- function PaddedNumber(l_DirtyFloat)
 function PaddedString(l_String, l_PadWidth)
   -- Called from ()...
   
@@ -4812,12 +4821,17 @@ function Populate_g_XLowestScoringSegmentRangesTable(l_RecursionLevel) -- FindWo
 	end
 
 end -- Populate_g_XLowestScoringSegmentRangesTable() -- was FindWorst()
-function PrettyNumber(l_DirtyFloat)
-  -- Called from 3 functions  
+function obsolete_PrettyNumber(l_DirtyFloat)
+  -- Called 15 times from 5 functions
+  -- DefineGlobalVariablesx4,DisplayPuzzlePropertiesx2,CheckForLowStartingScorex2,
+  -- DisplayEndOfScriptStatisticsx3,     
+  -- Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTotalScore_And_FirstInStringx1,
+  -- Rebuild1SegmentRangeSetWithManySegmentRanges, 
+  
   -- This is the new version of RoundToThirdDecimal()...
   
-  local l_MaybeDirtyFloat = RoundTo(l_DirtyFloat, 1000)  
-  local l_PrettyString = string.format("%.3f", l_MaybeDirtyFloat)  
+  --so not needed...local l_MaybeDirtyFloat = RoundTo(l_DirtyFloat, 1000)  
+  local l_PrettyString = string.format("%.3f", l_MaybeDirtyFloat)
   
   return l_PrettyString
   
@@ -4896,11 +4910,24 @@ function Reset_g_bSegmentsAlreadyRebuiltTable() -- was ClearDoneList()
 	end
 
 end -- function Reset_g_bSegmentsAlreadyRebuiltTable()
-function RoundTo(l_DirtyFloat, l_RoundTo)
-  -- Called from PrettyNumber()..
+function obsolete_RoundTo(l_DirtyFloat, l_RoundTo)
+  -- Only called from PrettyNumber() above..
+  -- The below logic is simple, but unneccesary because an even more simple
+  -- string.format("%.3f", l_MaybeDirtyFloat) will do the same thing.
   
   local x = .5
+    -- Example with positive number rounded up:
+    -- 1.0005 * 1000 = 1000.5 + .5 = 1001.0; where, Integer = 1001 / 1000 = 1.001 which is correct!
+    -- Positive number rounded down:
+    -- 1.0004 * 1000 = 1000.4 + .5 = 1000.9; where, Integer = 1000 / 1000 = 1.000 which is correct!    
   if l_DirtyFloat * l_RoundTo < 0 then
+    -- Not sure why we need to multiply by l_RoundTo first, but anyhow, negative
+    -- numbers are treated differently for the below logic to work properly.
+    -- Example with negative number rounded down:
+    -- -1.0005 will be correctly rounded "down" (more negative) to -1.001, like this:
+    -- -1.0005 * 1000 = -1000.5 -.5 = -1001.0; where, Integer = -1001 / 1000 = -1.001 which is correct!
+    -- Negative number rounded up:
+    -- -1.0004 * 1000 = -1000.4 -.5 = -1000.9; where, Integer = -1000 / 1000 = -1.000 which is correct!    
     x = -.5 
   end
   
@@ -5253,7 +5280,7 @@ function Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTot
         
 			l_Combined_StringOfScorePartNumbersWithSamePoseTotalScore =
       l_Combined_StringOfScorePartNumbersWithSamePoseTotalScore ..
-				"\n  PoseTotalScore value: [" .. PrettyNumber(l_OuterLoop_PoseTotalScore) .. "]" ..
+				"\n  PoseTotalScore value: [" .. PaddedNumber(l_OuterLoop_PoseTotalScore, 1, 3) .. "]" ..
 				" ScorePart_Numbers: [" .. l_StringOfScorePartNumbersWithSamePoseTotalScore .."]"
 		end
     
@@ -5980,7 +6007,7 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
 		-- therefore, we figure that's good enough for now. It is now time to move on to more consecutive
     -- segments per segment range...
       
-      print("The current rebuild gain of " .. PrettyNumber(g_CurrentRebuildPointsGained) ..
+      print("The current rebuild gain of " .. PaddedNumber(g_CurrentRebuildPointsGained, 1, 3) ..
             " points for this segment range is greater than the 'Move on to more consecutive" ..
             " segments per range if current rebuild points gained is more than' value of " ..
             g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan .. 
