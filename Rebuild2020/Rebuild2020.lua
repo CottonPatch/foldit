@@ -1,7 +1,7 @@
 
 -- Start of Setting Things Up...
 function DefineGlobalVariables()
-  -- Called from Rebuild1PuzzleForManyRuns()...
+  -- Called from Step1_Rebuild1Puzzle()...
 
   --local alien=require"alien"
   --local kernel32=alien.load("kernel32.dll")
@@ -31,7 +31,7 @@ function DefineGlobalVariables()
   
 	g_bUserSelectd_SegmentsAllowedToBeRebuiltTable = {} -- was WORKONbool[]
 	-- Used in Populate_g_SegmentScoresTable_BasedOnUserSelectedScoreParts(),
-	--         bSegmentIsAllowedToBeRebuilt() and Rebuild1PuzzleForManyRuns()
+	--         bSegmentIsAllowedToBeRebuilt() and Step1_Rebuild1Puzzle()
 	-- g_bUserSelectd_SegmentsAllowedToBeRebuiltTable={true/false}
 
 	g_CysteineSegmentsTable = {}
@@ -44,9 +44,9 @@ function DefineGlobalVariables()
 
 	g_ScorePartScoresTable = {} -- was Scores[]
 	-- Used in Reset_g_ScorePart_Scores_Table(),
-	--         Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields(),
+	--         Step9_CheckForScorePartImprovements(),
 	--         Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTotalScore_And_FirstInS...
-  --         and Rebuild1SegmentRangeSetWithManySegmentRanges()
+  --         and Step3_Rebuild1SegmentRangeSet()
 	-- g_ScorePartScoresTable={ScorePart_Number=1, ScorePart_Score=2, PoseTotalScore=3,
   --                           StringOfScorePartNumbersWithSamePoseTotalScore=4,
   --                           bFirstInStringOfScorePartNumbersWithSamePoseTotalScore=5}
@@ -66,9 +66,9 @@ function DefineGlobalVariables()
   --         AskUserToSelectRebuildOptions(),
   --         AskUserToSelectScorePartsForStabilizePosesOfSelectedScoreParts(),
   --         AskUserToSelectScorePartsForCalculatingWorseScoringSegments(),
-  --         Rebuild1SegmentRangeSetWithManySegmentRanges(),
+  --         Step3_Rebuild1SegmentRangeSet(),
   --         Reset_g_ScorePart_Scores_Table() and
-	--         Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()
+	--         Step9_CheckForScorePartImprovements()
 	-- g_ScorePartsTable={ScorePart_Number=1, ScorePart_Name=2, l_bScorePart_IsActive=3, LongName=4}
 		spt_ScorePart_Number = 1
 		spt_ScorePart_Name = 2 -- could have been called "SlotName", but since
@@ -91,10 +91,10 @@ function DefineGlobalVariables()
   g_UserSelected_SegmentRangesAllowedToBeRebuiltTable = {} -- was WORKON[]
 	-- g_UserSelected_SegmentRangesAllowedToBeRebuiltTable is initiallly 
   -- set to {1, g_SegmentCount_WithoutLigands} (i.e., all the segments
-  -- in the Rebuild1PuzzleForManyRuns protein) in DefineGlobalVariables() then the user can
+  -- in the Step1_Rebuild1Puzzle protein) in DefineGlobalVariables() then the user can
   -- change this value in AskUserToSelectSegmentsRangesToRebuild() plus
   -- AskUserToSelectRebuildOptions() and finally we remove all frozen,
-  -- locked and ligand segments in Rebuild1PuzzleForManyRuns(). This is important because we
+  -- locked and ligand segments in Step1_Rebuild1Puzzle(). This is important because we
   -- don't want to waste any time attempting to rebuild, mutate, shake
   -- or wiggle any segments that are not allowed to do so.
 
@@ -161,7 +161,7 @@ function DefineGlobalVariables()
 	-- Used in Populate_g_ScorePartsTable() and DisplayPuzzleProperties()
 	
 	g_bMaxClashImportance = true
-	-- Used in SetClashImportance() and WiggleSelected()
+	-- Used in SetClashImportance() and Step7_WiggleSelected()
 	
 	g_bProbableSymmetryPuzzle = false
   -- Used in DisplayPuzzleProperties() -- for informational display in log file only.
@@ -261,20 +261,20 @@ function DefineGlobalVariables()
 	g_DensityWeight = 0
   -- Used in 3 functions
   
-	g_LastSegmentScore = 0
+	g_LastSegmentScore = ""
   -- Used in Populate_g_SegmentScoresTable_BasedOnUserSelectedScoreParts()
   
   g_OriginalNumberOfDisulfideBonds = 0
   -- Used in 5 functions
 
 	g_CurrentRebuildPointsGained = 0
-	-- Used in bSegmentIsAllowedToBeRebuilt() and Rebuild1SegmentRangeSetWithManySegmentRanges()
+	-- Used in bSegmentIsAllowedToBeRebuilt() and Step3_Rebuild1SegmentRangeSet()
   
 	g_QuickSaveStackPosition = 60 -- Uses slot 60 and higher...
   -- Used in 3 functions
   
 	g_RebuildClashImportance = 0
-	-- Used in Rebuild1SegmentRangeForManyRounds()
+	-- Used in Step4_Rebuild1SegmentRange()
   -- Clash importance value to use during the rebuild step.
   -- Always set to 0, so we really don't need it. 
   
@@ -282,7 +282,7 @@ function DefineGlobalVariables()
   -- Used in 5 functions
 
   g_RunCycle = 0 -- was Runnr
-  -- Used in Rebuild1PuzzleForManyRuns() and Rebuild1SegmentRangeSetWithManySegmentRanges(),
+  -- Used in Step1_Rebuild1Puzzle() and Step3_Rebuild1SegmentRangeSet(),
  	
 	g_Score_AtStartOf_Script = GetPoseTotalScore()
 	-- Used in CleanUp()...
@@ -354,7 +354,7 @@ function DefineGlobalVariables()
   g_Stats_Script_NumberOfAttempts_MutateSidechainsAll = 0
   
 	g_UserSelected_AdditionalNumberOfSegmentRangesToRebuild_PerRunCycle = 1
-	-- Used in AskUserToSelectMoreOptions() and Rebuild1PuzzleForManyRuns()
+	-- Used in AskUserToSelectMoreOptions() and Step1_Rebuild1Puzzle()
   
 	g_UserSelected_AfterRebuildShakeSegmentRangeClashImportance = 0.31
   -- Used in 3 functions
@@ -374,7 +374,7 @@ function DefineGlobalVariables()
   
 	g_UserSelected_MaxNumberOf_SegmentRanges_ToRebuild_ThisRunCycle = 0 -- was reBuild
   -- Used in 3 functions
-  -- see Rebuild1PuzzleForManyRuns() for definition
+  -- see Step1_Rebuild1Puzzle() for definition
 	-- Yah, not really convinced this one helps yet.
   
 	g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan =
@@ -393,7 +393,7 @@ function DefineGlobalVariables()
   end
   
 	g_UserSelected_MutateClashImportance = 0.9
-	-- Used in MutateSideChainsOfSelectedSegments() and AskUserToSelectMutateOptions()
+	-- Used in Step8_MutateSideChainsOfSelectedSegments() and AskUserToSelectMutateOptions()
 
 	g_UserSelected_MutateSphereRadius = 8 -- Angstroms
   -- Used in 3 functions
@@ -559,7 +559,7 @@ function DefineGlobalVariables()
 		
   -- Compute the maximum potential bonus points (not available in beginner puzzles)
 	g_ComputedMaximumPotentialBonusPoints = 
-    l_ScoreWithPotentialBonusPoints - l_ScoreWithoutPotentialBonusPoints
+    tonumber(l_ScoreWithPotentialBonusPoints) - tonumber(l_ScoreWithoutPotentialBonusPoints)
   -- Used in DefineGlobalVariables() and DisplayPuzzleProperties()
 		
   g_UserSelected_MaximumPotentialBonusPoints = g_ComputedMaximumPotentialBonusPoints
@@ -582,18 +582,18 @@ function DefineGlobalVariables()
     --  1805b Coronavirus, 
 		print("\nCurrent score including bonus points, because some" ..
            " or all of the bonus conditions have already been met: " ..
-             PaddedNumber(l_ScoreWithPotentialBonusPoints, 1, 3) ..
+             l_ScoreWithPotentialBonusPoints ..
           "\n - Score without bonus points: " ..
-             PaddedNumber(l_ScoreWithoutPotentialBonusPoints, 1, 3) ..
+             l_ScoreWithoutPotentialBonusPoints ..
           "\n = Bonus points earned already: " ..
              g_UserSelected_MaximumPotentialBonusPoints)
   elseif g_UserSelected_MaximumPotentialBonusPoints < 0 then
     -- I don't know what to display here...
 		print("\nPotential score, including bonus points," ..
            " when and if bonus conditions are met: " ..
-             PaddedNumber(l_ScoreWithPotentialBonusPoints, 1, 3) ..
+             l_ScoreWithPotentialBonusPoints ..
           "\n - Score without potential bonus points: " ..
-             PaddedNumber(l_ScoreWithoutPotentialBonusPoints, 1, 3) ..
+             l_ScoreWithoutPotentialBonusPoints ..
           "\n = Potential bonus points to gain," ..
            " when and if bonus conditions are met: " ..
              g_UserSelected_MaximumPotentialBonusPoints)
@@ -610,7 +610,7 @@ function DefineGlobalVariables()
   
   -- This was moved from above to take into account if condition checking is disabled for the entire
   -- script.
-  g_Score_ScriptBest = GetPoseTotalScore()
+  g_Score_ScriptBest = GetPoseTotalScore() -- g_Score_ScriptBest is a string!
   recentbest.Save() -- Foldit automatically remembers recentbest, creditbest and absolutebest from
                     -- the current **AND** from previous runs of the script **even if** you reset the puzzle!
                     -- Restoring a recentbest from a previous run of the script could be confusing
@@ -652,7 +652,7 @@ function SetupLocalDebugFuntions()
  -- g_Debug_CurrentEnergyScore goes up and down randomly after each call to:
  --   MutateSidechainsSelected, MutateSidechainsAll, RebuildSelected, 
  --   ShakeSidechainsAll, ShakeSidechainsSelected, 
- --   WiggleAll and WiggleSelected...
+ --   WiggleAll and Step7_WiggleSelected...
 	g_Debug_CurrentEnergyScore = -999999
   g_Debug_ScriptBestEnergyScore = g_Debug_CurrentEnergyScore
   g_Debug_QuickSaveEnergyScore = {}
@@ -667,7 +667,7 @@ function SetupLocalDebugFuntions()
     -- This is not a foldit function. This function is only
     -- used by the following debug version of the foldit functions:
     -- MutateSidechainsSelected,MutateSidechainsAll,RebuildSelected,ShakeSidechainsAll,
-    -- ShakeSidechainsSelected,WiggleAll,WiggleSelected
+    -- ShakeSidechainsSelected,WiggleAll,Step7_WiggleSelected
     
 		-- Time to get a new random score..
 		local l_EnergyScore = RandomFloat(-10000, 10000)
@@ -1499,7 +1499,7 @@ function AskUserToSelectMutateOptions()
 
 end -- AskUserToSelectMutateOptions()
 function AskUserToSelectRebuildOptions() -- was AskDRWOptions()
-  -- Called from Rebuild1PuzzleForManyRuns() was DRW()
+  -- Called from Step1_Rebuild1Puzzle() was DRW()
   -- Calls AskUserToSelectSegmentsRangesToRebuild() -- was AskForSelections()
   -- Calls AskUserToSelectMutateOptions()
   
@@ -2244,7 +2244,7 @@ function AskUserToSelectConditionCheckingOptions()
     
 end -- function AskUserToSelectConditionCheckingOptions()
 function DisplayPuzzleProperties()
-  -- Called from Rebuild1PuzzleForManyRuns()...
+  -- Called from Step1_Rebuild1Puzzle()...
 
   -- Puzzle name and ID...
 	print("  Puzzle name: " .. puzzle.GetName() .. "")
@@ -2292,26 +2292,26 @@ function DisplayPuzzleProperties()
   local l_Current_PoseTotalScore = GetPoseTotalScore()
 	if g_bHasDensity == true then
     -- How was this formula derived? What if PoseTotalScore is negative?
-    if l_Current_PoseTotalScore > 0 then
+    if tonumber(l_Current_PoseTotalScore) > 0 then
       g_DensityWeight = 
-        (l_Current_PoseTotalScore 
+        (tonumber(l_Current_PoseTotalScore)
        - g_ComputedMaximumPotentialBonusPoints
-       - l_Score_TotalOfAllSegmentsIncludingLigands
+       - tonumber(l_Score_TotalOfAllSegmentsIncludingLigands)
        - 8000)
-       / l_DensityTotal
+       / tonumber(l_DensityTotal)
     end
 		print("  Puzzle has Density scores. The density weight = " .. 
       PaddedNumber(g_DensityWeight, 1, 3) .. " points")
 	end
 
 	-- Check if this is likely a symmetry puzzle...
-	if g_bHasDensity == false then    
+  	if g_bHasDensity == false then    
 		local l_ComputedScore = 
-      math.abs(l_Current_PoseTotalScore
-             - l_Score_TotalOfAllSegmentsIncludingLigands
+      math.abs(tonumber(l_Current_PoseTotalScore)
+             - tonumber(l_Score_TotalOfAllSegmentsIncludingLigands)
              - 8000) -- why 8000?
-		-- print("PoseTotalScore " .. PaddedNumber(l_Current_PoseTotalScore, 1, 3) .. 
-    --      " ComputedScore " .. PaddedNumber(l_ComputedScore, 1, 3) .. "")
+		-- print("PoseTotalScore " .. l_Current_PoseTotalScore .. 
+    --      " ComputedScore " .. l_ComputedScore .. "")
 		g_bProbableSymmetryPuzzle = l_ComputedScore > 2
 		if g_bProbableSymmetryPuzzle == true then
 			print("  Puzzle is a symmetry puzzle or has bonuses")
@@ -2323,7 +2323,7 @@ function DisplayPuzzleProperties()
            " Ligand scoring is active in ScorePart (slot) 6.")
   end 
   
-  print("  Starting score " .. PaddedNumber(l_Current_PoseTotalScore, 1, 3))
+  print("  Starting score " .. l_Current_PoseTotalScore)
 
 end -- DisplayPuzzleProperties()
 function DisplayUserSelectedMutateOptions()
@@ -2356,7 +2356,7 @@ function DisplayUserSelectedMutateOptions()
 
 end -- function DisplayUserSelectedMutateOptions()
 function DisplayUserSelectedOptions() -- was printOptions()
-  -- Called from Rebuild1PuzzleForManyRuns() was DRW()
+  -- Called from Step1_Rebuild1Puzzle() was DRW()
 
 	print("\nUser Selected Rebuild Options:\n")
 
@@ -2469,7 +2469,7 @@ end -- DisplayUserSelectedOptions()
 -- ...end of Ask and Display User Options.
 -- Start of Support Functions...
 function Add_Loop_Helix_And_Sheet_Segments_To_SegmentRangesTable() -- was FindAreas()
-  -- Called from Rebuild1RunWithManySegmentRangeSets() when l_How = 'segments'
+  -- Called from Step2_Rebuild1Run() when l_How = 'segments'
   
 	if g_bRebuildLoopsOnly == true then
 		local l_bDone = false
@@ -2672,7 +2672,7 @@ function bIsADisulfideBondSegment(l_SegmentIndex)
 	-- We already know this is a cysteine segment, but is it also bonded to another cysteine segment,
 	-- via a disulfide bond. We can find out by checking if this segment has a disulfide score > 0...
 	local DisulfidesEnergySubscore =
-		tonumber(tostring(current.GetSegmentEnergySubscore(l_SegmentIndex, l_ScorePart)))
+		tonumber(PaddedNumber(current.GetSegmentEnergySubscore(l_SegmentIndex, l_ScorePart), 1, 3))
 	-- print("GetSegmentEnergySubscore(" .. l_SegmentIndex .. ", 'disulfides')=[" .. 
 	--  DisulfidesEnergySubscore .. "]")
 	if DisulfidesEnergySubscore > 0 then
@@ -2712,12 +2712,12 @@ end -- function bIsSegmentIndexInSegmentRangesTable(l_SegmentIndex, l_SegmentRan
 function bSegmentIsAllowedToBeRebuilt(l_SegmentIndex)
   -- Called from bSegmentRangeIsAllowedToBeRebuilt()...
 
-  -- g_bUserSelectd_SegmentsAllowedToBeRebuiltTable[] is populated in Rebuild1PuzzleForManyRuns() from 
+  -- g_bUserSelectd_SegmentsAllowedToBeRebuiltTable[] is populated in Step1_Rebuild1Puzzle() from 
   -- g_UserSelected_SegmentRangesAllowedToBeRebuiltTable[] which is is initially
   -- set to {{1, g_SegmentCount_WithoutLigands}} in DefineGlobalVariables() then
   -- the user can change this value in AskUserToSelectSegmentsRangesToRebuild()
   -- plus AskUserToSelectRebuildOptions(), and finally we remove all frozen,
-  -- locked and ligand segments in Rebuild1PuzzleForManyRuns()...
+  -- locked and ligand segments in Step1_Rebuild1Puzzle()...
   if g_bUserSelectd_SegmentsAllowedToBeRebuiltTable[l_SegmentIndex] == false then -- was WORKONbool[]
     --if g_FrozenLockedOrLigandSegmentsTable[l_SegmentIndex] == true then
 		return false -- Note: this option overrides the below options.
@@ -2729,7 +2729,7 @@ function bSegmentIsAllowedToBeRebuilt(l_SegmentIndex)
   
   if g_CurrentRebuildPointsGained >
     g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildGainIsMoreThanXPoints then
-    -- g_CurrentRebuildPointsGained is added to in Rebuild1SegmentRangeSetWithManySegmentRanges()
+    -- g_CurrentRebuildPointsGained is added to in Step3_Rebuild1SegmentRangeSet()
     -- g_CurrentRebuildPointsGained is never reset to zero
     return true
   end
@@ -2763,7 +2763,7 @@ function bSegmentRangeIsAllowedToBeRebuilt(l_StartSegment, l_EndSegment) -- was 
 end -- function bSegmentRangeIsAllowedToBeRebuilt(l_StartSegment, l_EndSegment)
 function Calculate_ScorePart_Score(l_ScorePart_Name, l_StartSegment, l_EndSegment) -- was getPartscore
   -- Called from Populate_g_XLowestScoringSegmentRangesTable() and
-  --             Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()...
+  --             Step9_CheckForScorePartImprovements()...
   
   -- I think this function could/should be merged into the more frequently used
   -- Calculate_SegmentRange_Score() function. No, don't do that. They each serve
@@ -2789,6 +2789,10 @@ function Calculate_ScorePart_Score(l_ScorePart_Name, l_StartSegment, l_EndSegmen
   --  Calculate_SegmentRange_Score() with the same ScorePart_Name
 
 	local l_ScorePart_Score = 0
+  local l_DirtyScoreTotal = 0 -- anytime a float is involved in a calulation, even simple addition, 
+  --                             it can become dirty! e.g.; 1.123 becomes 1.1230000000001
+	local l_CleanScoreTotal = 0
+  local l_SegmentEnergyScore
     
 	if l_ScorePart_Name == nil then
     
@@ -2807,18 +2811,18 @@ function Calculate_ScorePart_Score(l_ScorePart_Name, l_StartSegment, l_EndSegmen
       --
       -- Note: This is different than calling GetPoseTotalScore() because
       --       this is only for a small range of segments, not all segments...
-			l_ScorePart_Score = l_ScorePart_Score + g_SegmentScoresTable[l_SegmentIndex]
+			l_DirtyScoreTotal = l_DirtyScoreTotal + g_SegmentScoresTable[l_SegmentIndex]
 		end
-    
-    return l_ScorePart_Score    
+    l_CleanScoreTotal = PaddedNumber(l_DirtyScoreTotal, 1, 3)
+    return l_CleanScoreTotal -- yes we are returning a string on purpose!
   end
 
 	if l_ScorePart_Name == 'total' then
     
-    -- Example usage: from Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields,
+    -- Example usage: from Step9_CheckForScorePartImprovements,
     --                when stepping through each ScorePart to update the ScorePart_Scores field...
-		l_ScorePart_Score = GetPoseTotalScore()
-    return l_ScorePart_Score    
+		l_CleanScoreTotal = GetPoseTotalScore()
+    return l_CleanScoreTotal -- yes we are returning a string on purpose!
     
   end
   
@@ -2828,23 +2832,25 @@ function Calculate_ScorePart_Score(l_ScorePart_Name, l_StartSegment, l_EndSegmen
     --       is the same as calling...
     --        Calculate_SegmentRange_Score(nil, l_StartSegment, l_EndSegment)
     
-		l_ScorePart_Score = Calculate_SegmentRange_Score(nil, l_StartSegment, l_EndSegment)
-    return l_ScorePart_Score    
+		l_CleanScoreTotal = Calculate_SegmentRange_Score(nil, l_StartSegment, l_EndSegment)
+    return l_CleanScoreTotal -- yes we are returning a string on purpose!
     
   end
     
   if l_ScorePart_Name == 'ligand' then --ligand score
     
 		for l_SegmentIndex = g_SegmentCount_WithoutLigands + 1, g_SegmentCount_WithLigands do -- w/ligands!
-			l_ScorePart_Score = l_ScorePart_Score + current.GetSegmentEnergyScore(l_SegmentIndex)
+      l_SegmentEnergyScore = current.GetSegmentEnergyScore(l_SegmentIndex)
+			l_DirtyScoreTotal = l_DirtyScoreTotal + l_SegmentEnergyScore        
 		end
-    return l_ScorePart_Score    
+    l_CleanScoreTotal = PaddedNumber(l_DirtyScoreTotal, 1, 3)
+    return l_CleanScoreTotal -- yes we are returning a string on purpose!
     
 	end 
   
   -- Example usage:
   -- 1) from Calculate_ScorePart_Score() with l_ScorePart_Name == 'Clashing' from
-  --    Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()
+  --    Step9_CheckForScorePartImprovements()
   --    when stepping through each ScorePart to update the ScorePart_Scores field...
   -- Geez, why didn't you just call Calculate_SegmentRange_Score directly? Well, we
   -- could have, but then Calculate_SegmentRange_Score would need to handle the
@@ -2855,10 +2861,10 @@ function Calculate_ScorePart_Score(l_ScorePart_Name, l_StartSegment, l_EndSegmen
   -- case in this function where l_ScorePart_Name is nil. We just need to make sure
   -- 'g_SegmentScoresTable[l_SegmentIndex]' and 
   -- 'current.GetSegmentEnergyScore(l_SegmentIndex)' return the same value!
-  l_ScorePart_Score = Calculate_SegmentRange_Score(l_ScorePart_Name, l_StartSegment, l_EndSegment)
-	return l_ScorePart_Score
+  l_CleanScoreTotal = Calculate_SegmentRange_Score(l_ScorePart_Name, l_StartSegment, l_EndSegment)
+	return l_CleanScoreTotal -- yes we are returning a string on purpose!
 
-end
+end -- Calculate_ScorePart_Score(l_ScorePart_Name, l_StartSegment, l_EndSegment) -- was getPartscore
 function Calculate_SegmentRange_Score(l_ScorePart_NameOrTable, l_StartSegment, l_EndSegment) -- GetSubScore
   -- was GetSubscore()
   -- Called from 1 place recursively in Calculate_SegmentRange_Score(),
@@ -2876,9 +2882,11 @@ function Calculate_SegmentRange_Score(l_ScorePart_NameOrTable, l_StartSegment, l
 	--       e.g.; 1=Clashing, 2=Pairwise, 3=Packing, Hiding, Bonding, Ideality, Backbone,
 	--             Sidechain, Reference...
 
-	local l_ScoreTotal = 0
-	local l_ScorePart_Score = 0
 	local l_ScorePart_Name = ""
+  local l_DirtyScoreTotal = 0 -- anytime a float is involved in a calulation, even simple addition, 
+  --                             it can become dirty! e.g.; 1.123 becomes 1.1230000000001
+	local l_CleanScoreTotal = 0
+  local l_SegmentRange_Score, l_SegmentEnergyScore, l_SegmentEnergySubScore
   
   -- A table of ScoreParts was passed in...
 	if type(l_ScorePart_NameOrTable) == "table" then
@@ -2888,20 +2896,21 @@ function Calculate_SegmentRange_Score(l_ScorePart_NameOrTable, l_StartSegment, l
 			-- recursion...
 			-- Call back with each ScorePart in the ScorePart_NameOrTable...
 			l_ScorePart_Name = l_ScorePart_NameOrTable[l_ScorePart_NameOrTableIndex]
-			l_ScorePart_Score = Calculate_SegmentRange_Score(l_ScorePart_Name, l_StartSegment, 
+			l_SegmentRange_Score = Calculate_SegmentRange_Score(l_ScorePart_Name, l_StartSegment, 
                                                        l_EndSegment)
-			l_ScoreTotal = l_ScoreTotal + l_ScorePart_Score      
+			l_DirtyScoreTotal = l_DirtyScoreTotal + l_SegmentRange_Score
 		end
-    return l_ScoreTotal
-  end 
+    l_CleanScoreTotal = PaddedNumber(l_DirtyScoreTotal, 1, 3)
+    return l_CleanScoreTotal -- yes we are returning a string on purpose!
+  end
   
   -- Nothing was passed in...
 	if l_ScorePart_NameOrTable == nil and l_StartSegment == nil and l_EndSegment == nil then            
     -- Calculate the total score of all segment ranges and include all ScoreParts...
     -- I suspect if you ended up here, it was by accident (i.e., a coding error),
     -- because you should have just called GetPoseTotalScore(l_pose) directly instead!
-    local l_Current_PoseTotalScore = GetPoseTotalScore(l_pose)
-    return l_Current_PoseTotalScore
+    local l_CleanScoreTotal = GetPoseTotalScore(l_pose)
+    return l_CleanScoreTotal -- yes we are returning a string on purpose!
   end 
   
   if l_StartSegment == nil then
@@ -2929,15 +2938,14 @@ function Calculate_SegmentRange_Score(l_ScorePart_NameOrTable, l_StartSegment, l
     --       is then used to compute g_DensityWeight, and
     --    b) l_ComputedScore, which is used to determine g_bProbableSymmetryPuzzle
     -- 2) from Calculate_ScorePart_Score() with l_ScorePart_Name == 'loctotal' from
-    --    Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()
+    --    Step9_CheckForScorePartImprovements()
     --    when stepping through each ScorePart to update the ScorePart_Scores field...
     for l_SegmentIndex = l_StartSegment, l_EndSegment do
-      local l_SegmentEnergyScore = current.GetSegmentEnergyScore(l_SegmentIndex)
-      l_ScoreTotal = l_ScoreTotal + l_SegmentEnergyScore
-      -- print("current.GetSegmentEnergyScore(" .. l_SegmentIndex .. ")=[" ..
-      --  current.GetSegmentEnergyScore(l_SegmentIndex) .. "]")
+      l_SegmentEnergyScore = current.GetSegmentEnergyScore(l_SegmentIndex)
+      l_DirtyScoreTotal = l_DirtyScoreTotal + l_SegmentEnergyScore 
     end
-    return l_ScoreTotal
+    l_CleanScoreTotal = PaddedNumber(l_DirtyScoreTotal, 1, 3)
+    return l_CleanScoreTotal -- yes we are returning a string on purpose!
   end
   
   -- Hopefully a ScorePart was passed in...
@@ -2948,31 +2956,31 @@ function Calculate_SegmentRange_Score(l_ScorePart_NameOrTable, l_StartSegment, l
   -- 1) from DisplayPuzzleProperties() to calulate
   --    l_DensityTotal, where ScorePart_Name = "density"...
   -- 2) from Calculate_ScorePart_Score() with l_ScorePart_Name == 'Clashing' from
-  --    Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()
+  --    Step9_CheckForScorePartImprovements()
   --    when stepping through each ScorePart to update the ScorePart_Scores field...
   for l_SegmentIndex = l_StartSegment, l_EndSegment do
-    l_ScorePart_Score = current.GetSegmentEnergySubscore(l_SegmentIndex, l_ScorePart_Name)
-    l_ScoreTotal = l_ScoreTotal + l_ScorePart_Score
-    -- print("current.GetSegmentEnergySubscore(" .. l_SegmentIndex .. "," .. l_ScorePart_Name .. ")=["
-    --  .. current.GetSegmentEnergySubscore(l_SegmentIndex, l_ScorePart_Name) .. "]")
+    l_SegmentEnergySubScore = current.GetSegmentEnergySubscore(l_SegmentIndex, l_ScorePart_Name)
+    l_DirtyScoreTotal = l_DirtyScoreTotal + l_SegmentEnergySubScore
   end
-  
-	return l_ScoreTotal
+  l_CleanScoreTotal = PaddedNumber(l_DirtyScoreTotal, 1, 3)
+  return l_CleanScoreTotal -- yes we are returning a string on purpose!
 
 end -- Calculate_SegmentRange_Score(l_ScorePart_NameOrTable, l_StartSegment, l_EndSegment)
 function CheckForLowStartingScore()
-  -- Called from Rebuild1PuzzleForManyRuns()...
+  -- Called from Step1_Rebuild1Puzzle()...
 
   -- Change defaults if the starting score is low (or negative)...
   local l_LowScore = 0 -- This was 4000, but why? Perhaps 4000 was a good low limit for ED puzzles.
 
   local l_Current_PoseTotalScore = GetPoseTotalScore()
 
-	if g_bHasDensity == true then
+	--if g_bHasDensity == true then
+    if g_bHasDensity == false then
+    
     
 		local l_DensitySubScore = Calculate_SegmentRange_Score("density")
-		local l_WeightedDensitySubScore = l_DensitySubScore  * (g_DensityWeight + 1)
-		local l_ScoreWithoutElectronDensity = l_Current_PoseTotalScore - l_WeightedDensitySubScore
+		local l_WeightedDensitySubScore = tonumber(l_DensitySubScore) * (g_DensityWeight + 1)
+		local l_ScoreWithoutElectronDensity = tonumber(l_Current_PoseTotalScore) - l_WeightedDensitySubScore
     
 		if l_ScoreWithoutElectronDensity > 4000 then
 			print("\n  This is an electron density puzzle: Since the starting score of " ..
@@ -2985,11 +2993,11 @@ function CheckForLowStartingScore()
 		end
 	end
 
-	if l_Current_PoseTotalScore >= l_LowScore then
+	if tonumber(l_Current_PoseTotalScore) >= l_LowScore then
 		return -- score is high enough for now...
   end
 
-	print("\n  Since the starting score of " .. PaddedNumber(l_Current_PoseTotalScore, 1, 3) ..
+	print("\n  Since the starting score of " .. l_Current_PoseTotalScore ..
          " is less than " .. l_LowScore .. " points, to speed things up, we will temporarily")
   print("  skip stabilizing all score part poses and fusing best score part pose" ..
          " until the score increases above " .. l_LowScore .. " points.")
@@ -3087,7 +3095,7 @@ function CleanUpSegmentRangesTable(l_SegmentRangesTable)
 
 end -- function CleanUpSegmentRangesTable(l_SegmentRangesTable)
 function ConvertAllSegmentsToLoops()
-  -- Called from Rebuild1SegmentRangeSetWithManySegmentRanges()...
+  -- Called from Step3_Rebuild1SegmentRangeSet()...
 
   -- Turn entire structure into loops...
   -- Remember loops are not helices. Loops are just plain swiggly lines...
@@ -3110,13 +3118,13 @@ function ConvertAllSegmentsToLoops()
 	if l_bFoundSomethingOtherThanALoopSegment == true then
   
 		save.SaveSecondaryStructure()  -- We reload this saved secondary structure at the end of 
-    --                                Rebuild1SegmentRangeSetWithManySegmentRanges() with a 
+    --                                Step3_Rebuild1SegmentRangeSet() with a 
     --                                call to save.LoadSecondaryStructure()
 		g_bSavedSecondaryStructure = true -- This reminds us to undo this change in 
-    --                                   Rebuild1SegmentRangeSetWithManySegmentRanges()
+    --                                   Step3_Rebuild1SegmentRangeSet()
 		selection.SelectAll()
 		structure.SetSecondaryStructureSelected("L") -- We undo this change at the end of 
-    --                                              Rebuild1SegmentRangeSetWithManySegmentRanges()
+    --                                              Step3_Rebuild1SegmentRangeSet()
     --                                              with a call to save.LoadSecondaryStructure()    
 	end
   
@@ -3177,7 +3185,7 @@ function ConvertSegmentRangesTableToSegmentsTable(l_SegmentRangesTable)
 end -- function ConvertSegmentRangesTableToSegmentsTable(l_SegmentRangesTable)
 function ConvertSegmentRangesTableToSegmentsBooleanTable(l_SegmentRangesToRebuildTable)-- was InitWORKONbool
   -- ...was InitWORKONbool(), I think.
-  -- Called from Rebuild1PuzzleForManyRuns() was DRW()
+  -- Called from Step1_Rebuild1Puzzle() was DRW()
   
 	-- l_SegmentRangesToRebuildTable={StartSegment, EndSegment} e.g., {{1,3},{5,7},{9,11}}
 	-- l_bSegmentsToRebuildBooleanTable={bToRebuild} -- e.g., {true,true,true,false,true, ...}
@@ -3249,8 +3257,15 @@ function ConvertSegmentsTableToSegmentRangesTable(l_SegmentsTable)
 end -- function ConvertSegmentsTableToSegmentRangesTable(l_SegmentsTable)
 function DisplayDetailsOfIncludedSegments()
   
-  local l_SelectedSegmentRanges -- to do?
   local l_SkippedSegmentRanges -- maybe?
+  
+ 	g_OriginallySelectedSegmentRanges = FindSelectedSegmentRanges() -- only used in CleanUp()
+  local l_ListOfSelectedSegmentRanges =
+    ConvertSegmentRangesTableToListOfSegmentRanges(g_OriginallySelectedSegmentRanges)
+  if l_ListOfSelectedSegmentRanges == "" then
+    l_ListOfSelectedSegmentRanges = "none"
+  end
+  print("\n  Selected Segment Ranges: " .. l_ListOfSelectedSegmentRanges)
   
   local l_FrozenBackboneSegmentRanges
   local l_FrozenSideChainSegmentRanges
@@ -3262,7 +3277,7 @@ function DisplayDetailsOfIncludedSegments()
   if l_ListOfFrozenBackboneSegmentRanges == "" then
     l_ListOfFrozenBackboneSegmentRanges = "none"
   end
-  print("\n  Frozen Backbone Segment Ranges: " .. l_ListOfFrozenBackboneSegmentRanges)
+  print("  Frozen Backbone Segment Ranges: " .. l_ListOfFrozenBackboneSegmentRanges)
   g_UserSelected_SegmentRangesAllowedToBeRebuiltTable =  -- was WORKON[]
     SegmentRangesMinus(g_UserSelected_SegmentRangesAllowedToBeRebuiltTable, l_FrozenBackboneSegmentRanges)
   
@@ -3343,7 +3358,7 @@ function DisplayDetailsOfIncludedSegments()
   
 end -- function DisplayDetailsOfIncludedSegments()
 function DisplayEndOfRunStatistics()
-  -- Called from Rebuild1PuzzleForManyRuns()
+  -- Called from Step1_Rebuild1Puzzle()
   
   local l_Stats_Run_EndTime = os.clock()
   local l_Stats_Run_ElaspedMinutes = (l_Stats_Run_EndTime - g_Stats_Run_StartTime) / 60
@@ -3889,7 +3904,7 @@ function DisplayEndOfScriptStatistics()
   print("------------------------ ------------------  ----------------  -------  ------------------")
     
   local l_Score_AtEndOf_Script = g_Score_ScriptBest
-	print("\nStarting Score: " .. PaddedNumber(g_Score_AtStartOf_Script, 1, 3) ..
+	print("\nStarting Score: " .. g_Score_AtStartOf_Script ..
         "\nPoints Gained: " .. PaddedNumber((l_Score_AtEndOf_Script - g_Score_AtStartOf_Script), 1, 3) ..
         "\nFinal Score: " .. PaddedNumber(l_Score_AtEndOf_Script, 1, 3) ..
         "\nElapsed Time " .. PaddedNumber(l_Stats_Script_ElaspedMinutes, 5, 3) .. " minutes or " ..
@@ -3898,7 +3913,7 @@ function DisplayEndOfScriptStatistics()
 
 end -- function DisplayEndOfScriptStatistics()
 function DisplayXLowestScoringSegmentRanges() -- was PrintAreas()
-  -- Called from Rebuild1SegmentRangeSetWithManySegmentRanges()...
+  -- Called from Step3_Rebuild1SegmentRangeSet()...
   
 	-- g_XLowestScoringSegmentRangesTable={StartSegment=1, EndSegment=2}
 
@@ -4274,11 +4289,13 @@ function GetPoseTotalScore(l_pose) -- was Score()
 	if l_pose == nil then
 		l_pose = current -- the class "current"
 	end
-	local l_Total = tonumber(PaddedNumber(l_pose.GetEnergyScore(), 1, 3)) -- Important to round here!
+	local l_DirtyScoreTotal = l_pose.GetEnergyScore()
+  l_CleanScoreTotal = PaddedNumber(l_DirtyScoreTotal, 1, 3)
+  --l_CleanScoreTotal = tonumber(l_PaddedNumber) -- a simple call to tonumber() can turn a pretty number
+  --                                                like 123.456 to 123.4559999999999 or 123.456000000001
+  return l_CleanScoreTotal -- yes, we are returning a string on purpose. Stupid dirty floats.
 
-	return l_Total
-
-end
+end -- function GetPoseTotalScore(l_pose) -- was Score()
 function GetXLowestSortedValues(l_Table, l_NumberOfItems) -- was Sort()
 
   -- Called from Populate_g_XLowestScoringSegmentRangesTable()...
@@ -4341,7 +4358,7 @@ function NormalConditionChecking_TemporarilyReEnableToCheckScore()
   -- If recent best pose was better, remember it, while we check the score, then restore it again.
 	local l_RecentBest_PoseTotalScore = GetPoseTotalScore(recentbest) -- class "recentbest"
   local l_Current_PoseTotalScore = GetPoseTotalScore()
-	if l_RecentBest_PoseTotalScore > l_Current_PoseTotalScore then
+	if tonumber(l_RecentBest_PoseTotalScore) > tonumber(l_Current_PoseTotalScore) then
     
     -- Save the recent best pose in slot 98. We will restore this pose "as-recentbest" again
     -- very soon, right after we check the score (to see if the conditions are met to get the 
@@ -4400,9 +4417,9 @@ function PaddedNumber(l_DirtyFloat, l_PadWidth, l_AfterDecimal)
   -- +1.0005 rounds to +1.001 which is correct!
   -- -1.0004 rounds to -1.000 which is correct!    
   -- -1.0005 rounds to -1.001 which is correct!
-  if l_DirtyFloat < 0 then
-    debugme = 1 
-  end  
+  --if l_DirtyFloat < 0 then
+  --  debugme = 1 
+  --end  
   local l_PrettyString = string.format("%" .. l_PadWidth .. "." .. l_AfterDecimal .. "f", l_DirtyFloat)  
   return l_PrettyString
   
@@ -4510,7 +4527,7 @@ function Populate_g_FrozenLockedOrLigandSegments()
   
 end
 function Populate_g_ScorePartsTable() -- was in global code
-  -- Called from Rebuild1PuzzleForManyRuns()...
+  -- Called from Step1_Rebuild1Puzzle()...
 
 	-- Quick fix for failing first rebuild...
 	for l_ScorePart_Number = 3, 12 do
@@ -4582,7 +4599,7 @@ function Populate_g_SegmentScoresTable_BasedOnUserSelectedScoreParts() -- was Ge
 		return 
 	end
 
-	local l_SegmentScore, l_Reference_ScorePart, l_Density_ScorePart
+	local l_SegmentScore, l_Reference_ScorePart, l_Density_ScorePart, l_bThisSegmentIsMutable
 
 	-- Fortunately this is the only function that sets and checks g_LastSegmentScore...  
 	g_LastSegmentScore = GetPoseTotalScore()
@@ -4601,7 +4618,7 @@ function Populate_g_SegmentScoresTable_BasedOnUserSelectedScoreParts() -- was Ge
 				l_SegmentScore = current.GetSegmentEnergyScore(l_SegmentIndex)
 					-- If this segment is not a Mutable, then
 					-- subtract back out (of the SegmentScore) the Reference_ScorePart...
-				local l_bThisSegmentIsMutable = structure.IsMutable(l_SegmentIndex)
+				l_bThisSegmentIsMutable = structure.IsMutable(l_SegmentIndex)
 				if l_bThisSegmentIsMutable == false then
 					l_Reference_ScorePart = current.GetSegmentEnergySubscore(l_SegmentIndex, 'Reference')
 					l_SegmentScore = l_SegmentScore - l_Reference_ScorePart
@@ -4616,6 +4633,7 @@ function Populate_g_SegmentScoresTable_BasedOnUserSelectedScoreParts() -- was Ge
           Calculate_SegmentRange_Score( -- was GetSubscore()
             g_UserSelected_ScorePartsForCalculatingLowestScoringSegmentsTable, -- was scrPart[]
             l_SegmentIndex, l_SegmentIndex)
+        DebugMe = 1
 			end
       
       -- The first time this function is called we add one row per user
@@ -4629,7 +4647,9 @@ function Populate_g_SegmentScoresTable_BasedOnUserSelectedScoreParts() -- was Ge
       -- with gaps for user non-selected, frozen, locked and ligand segments.
       -- g_SegmentScoresTable is only used by Calculate_ScorePart_Score(),
       -- which is used by both Populate_g_XLowestScoringSegmentRangesTable() and
-      -- Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()
+      -- Step9_CheckForScorePartImprovements()
+      --l_SegmentScore = tonumber(PaddedNumber(l_SegmentScore, 1, 3))
+      l_SegmentScore = PaddedNumber(l_SegmentScore, 1, 3) -- yes, we store it as a string!
 			g_SegmentScoresTable[l_SegmentIndex] = l_SegmentScore
       
     end -- If g_bUserSelectd_SegmentsAllowedToBeRebuiltTable[l_SegmentIndex] == true then
@@ -4638,7 +4658,7 @@ function Populate_g_SegmentScoresTable_BasedOnUserSelectedScoreParts() -- was Ge
 
 end -- Populate_g_SegmentScoresTable_BasedOnUserSelectedScoreParts()
 function Populate_g_XLowestScoringSegmentRangesTable(l_RecursionLevel) -- FindWorst()
-  -- Called from Rebuild1RunWithManySegmentRangeSets() and 
+  -- Called from Step2_Rebuild1Run() and 
   --             recursively below...
   -- Calls CheckIfAlreadyRebuiltSegmentsMustBeIncluded() -- was ChkDisjunctList()
   -- Calls Populate_g_SegmentScoresTable_BasedOnUserSelectedScoreParts() -- was GetSegmentScores()
@@ -4821,21 +4841,6 @@ function Populate_g_XLowestScoringSegmentRangesTable(l_RecursionLevel) -- FindWo
 	end
 
 end -- Populate_g_XLowestScoringSegmentRangesTable() -- was FindWorst()
-function obsolete_PrettyNumber(l_DirtyFloat)
-  -- Called 15 times from 5 functions
-  -- DefineGlobalVariablesx4,DisplayPuzzlePropertiesx2,CheckForLowStartingScorex2,
-  -- DisplayEndOfScriptStatisticsx3,     
-  -- Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTotalScore_And_FirstInStringx1,
-  -- Rebuild1SegmentRangeSetWithManySegmentRanges, 
-  
-  -- This is the new version of RoundToThirdDecimal()...
-  
-  --so not needed...local l_MaybeDirtyFloat = RoundTo(l_DirtyFloat, 1000)  
-  local l_PrettyString = string.format("%.3f", l_MaybeDirtyFloat)
-  
-  return l_PrettyString
-  
-end -- function PrettyNumber(l_DirtyFloat)
 function QuickSaveStack_LoadLastSavedSolution()
   -- Called from 3 functions
   
@@ -4868,7 +4873,7 @@ function QuickSaveStack_SaveCurrentSolution()
   
 end -- function QuickSaveStack_SaveCurrentSolution()
 function Reset_g_ScorePart_Scores_Table() -- was ClearScores()
-  -- Called from Rebuild1SegmentRangeForManyRounds()...
+  -- Called from Step4_Rebuild1SegmentRange()...
 
 	g_ScorePartScoresTable = {} -- reset it
 
@@ -4910,33 +4915,6 @@ function Reset_g_bSegmentsAlreadyRebuiltTable() -- was ClearDoneList()
 	end
 
 end -- function Reset_g_bSegmentsAlreadyRebuiltTable()
-function obsolete_RoundTo(l_DirtyFloat, l_RoundTo)
-  -- Only called from PrettyNumber() above..
-  -- The below logic is simple, but unneccesary because an even more simple
-  -- string.format("%.3f", l_MaybeDirtyFloat) will do the same thing.
-  
-  local x = .5
-    -- Example with positive number rounded up:
-    -- 1.0005 * 1000 = 1000.5 + .5 = 1001.0; where, Integer = 1001 / 1000 = 1.001 which is correct!
-    -- Positive number rounded down:
-    -- 1.0004 * 1000 = 1000.4 + .5 = 1000.9; where, Integer = 1000 / 1000 = 1.000 which is correct!    
-  if l_DirtyFloat * l_RoundTo < 0 then
-    -- Not sure why we need to multiply by l_RoundTo first, but anyhow, negative
-    -- numbers are treated differently for the below logic to work properly.
-    -- Example with negative number rounded down:
-    -- -1.0005 will be correctly rounded "down" (more negative) to -1.001, like this:
-    -- -1.0005 * 1000 = -1000.5 -.5 = -1001.0; where, Integer = -1001 / 1000 = -1.001 which is correct!
-    -- Negative number rounded up:
-    -- -1.0004 * 1000 = -1000.4 -.5 = -1000.9; where, Integer = -1000 / 1000 = -1.000 which is correct!    
-    x = -.5 
-  end
-  
-  Integer, Decimal = math.modf(l_DirtyFloat * l_RoundTo + x)
-  l_MaybeDirtyFloat = Integer / l_RoundTo -- any division can accidentally introduce 0.000000000000001
-  
-  return l_MaybeDirtyFloat
-  
-end -- function RoundTo(l_DirtyFloat, l_RoundTo)
 function SaveBest() -- <-- Updates g_Score_ScriptBest
   -- Called from 3 functions
   
@@ -4945,7 +4923,6 @@ function SaveBest() -- <-- Updates g_Score_ScriptBest
   -- Note 2: The value of GetPoseTotalScore() can go up and down drastically after any call to rebuild,
   --         shake, wiggle or mutate; therefore, you cannot always expect to find the best score by calling
   --         GetPoseTotalScore().
-  
   if g_bUserSelected_NormalConditionChecking_DisableForThisEntireScriptRun == true then
     
     -- Do not attempt to improve g_Score_ScriptBest if:
@@ -4953,10 +4930,11 @@ function SaveBest() -- <-- Updates g_Score_ScriptBest
     -- 2) Reenabling normal condition checking would not likely improve our g_Score_ScriptBest.
     
    	local l_PoseTotalScore_WithConditionChecking_Disabled = GetPoseTotalScore()
-  	local l_PotentialScore_IfAllConditionsAreMet = 
-          l_PoseTotalScore_WithConditionChecking_Disabled + g_UserSelected_MaximumPotentialBonusPoints
+  	local l_PotentialScore_IfAllConditionsAreMet =
+          tonumber(l_PoseTotalScore_WithConditionChecking_Disabled) +
+          g_UserSelected_MaximumPotentialBonusPoints
     
-    if (l_PotentialScore_IfAllConditionsAreMet <= g_Score_ScriptBest) then
+    if (l_PotentialScore_IfAllConditionsAreMet <= tonumber(g_Score_ScriptBest)) then
       return
     end
     
@@ -4978,7 +4956,7 @@ function SaveBest() -- <-- Updates g_Score_ScriptBest
   -- With normal condition checking re-enabled, a call to GetPoseTotalScore()
   -- will return an actual, real, counted, foldit-saved, current pose total score...
   local l_Current_PoseTotalScore = GetPoseTotalScore()
-  local l_Real_PointsGained = l_Current_PoseTotalScore - g_Score_ScriptBest  
+  local l_Real_PointsGained = tonumber(l_Current_PoseTotalScore) - tonumber(g_Score_ScriptBest)
   
   local l_MinimumGain_ForSave = 0.001
   if g_bSketchBookPuzzle == true then
@@ -4990,11 +4968,11 @@ function SaveBest() -- <-- Updates g_Score_ScriptBest
     
     -- Important !!!
     -- Important !!!
-    g_Score_ScriptBest = l_Current_PoseTotalScore  -- <<<--- This is what you are looking for!!!
+    g_Score_ScriptBest = l_Current_PoseTotalScore  -- yes, g_Score_ScriptBest is a string. Get over it.
     -- Important !!!
     -- Important !!!
     
-    if g_bUserSelected_FuseBestScorePartPose == false and g_Score_ScriptBest > 0 then
+    if g_bUserSelected_FuseBestScorePartPose == false and tonumber(g_Score_ScriptBest) > 0 then
       print("\nNow that the total score is positive, we will switch back on: " ..
             "'stabilize selected score part poses' and 'fuse best score part pose'.\n")
       g_bUserSelected_FuseBestScorePartPose = true
@@ -5047,7 +5025,7 @@ function SetClashImportance(l_ClashImportance)
   
 end -- function SetClashImportance(l_ClashImportance)
 function SetSegmentsAlreadyRebuilt(l_StartSegment, l_EndSegment) -- was AddDone()
-  -- Called from Rebuild1SegmentRangeSetWithManySegmentRanges()...
+  -- Called from Step3_Rebuild1SegmentRangeSet()...
 
   -- Loop through the given segment range and set the g_bSegmentsAlreadyRebuiltTable
   -- values to true for each segments in the given range...
@@ -5058,137 +5036,33 @@ function SetSegmentsAlreadyRebuilt(l_StartSegment, l_EndSegment) -- was AddDone(
   end
 
 end -- SetSegmentsAlreadyRebuilt(l_StartSegment, l_EndSegment)
-function Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields(l_StartSegment,--SaveSco
-                                                                                   l_EndSegment)
-  -- was SaveScores()
-  -- Called from 2 functions
-  
-  -- We have just rebuilt (and optionally, mutated, shaked and wiggled) only one segment
-  -- range and only one attempt. Next, we are going to check for ScorePart improvements
-  -- for this one specific rebuild attempt. For each ScorePart that improves, associate
-  -- the current pose (and PoseTotalScore) of the protein to that ScorePart. Later, after
-  -- all these rebuild attempts, in Rebuild1SegmentRangeSetWithManySegmentRanges() we will 
-  -- step through each of these best saved score part poses and mutate, shake and wiggle them 
-  -- some more to see if we can further improve their scores...
-  
-  -- Example g_ScorePartsTable entries...
-  -- g_ScorePartsTable={}
-  --   ScorePart_Number=1, ScorePart_Name=2, l_bScorePart_IsActive=3, LongName=4
-	-- {{4, "total",      true, "4 (total)"},     {5, "loctotal",  true, "5 (loctotal)"},
-  --  {6, "ligand",     true, "6 (ligand)"},    {7, "Clashing",  true, "7 (Clashing)"},
-  --  {8, "Pairwise",   true, "8 (Pairwise)"},  {9, "Packing",   true, "9 (Packing)"},
-  --  {10, "Hiding",    true, "10 (Hiding)"},   {11, "Bonding",  true, "11 (Bonding)"},
-  --  {12, "Ideality",  true, "12 (Ideality)"}, {13, "Backbone", true, "13 (Backbone)"},
-  --  {14, "Sidechain", true, "14 (Sidechain)"}}
-    
-	-- Example l_ActiveScorePartsScoreTable entries...
-  -- l_ActiveScorePartsScoreTable={}
-		local aspst_ScorePart_Number = 1
-		local aspst_ScorePart_Score = 2
-  -- {{ 4,-6977.2286118734919}, {5, -12.456666312787226},
-  --  { 6,   32.9263532067909}, {7,   0.781476616839258},
-  --  { 8,    0.8518807244965}, {9,  -0.013940290319947},
-  --  {10,    1.4852902498961}, {11,  0.548291360564633},
-  --  {12,    0.0896093168034}, {13, -0.595251617638442},
-  --  {14,    0.3282749583402}}
-  
-  -- Example g_ScorePartScoresTable entries (before updating fields 4 and 5)...
-  -- g_ScorePartScoresTable={}
-  --   ScorePart_Number=1, ScorePart_Score=2, PoseTotalScore=3, 
-  --   StringOfScorePartNumbersWithSamePoseTotalScore=4,
-  --   bFirstInStringOfScorePartNumbersWithSamePoseTotalScore=5
-  --{{ 4,-2070.4815006125,-2070.4815006125,"",false},{ 5,4.2974272030,-8544.6292812514,"",false},
-  -- { 6,   41.9906112341,-5500.1149833617,"",false},{ 7,0.4566169644,-4424.6808476751,"",false},
-  -- { 8,    1.3090043250,-5500.1149833617,"",false},{ 9,0.3907275101,-8544.6292812514,"",false},
-  -- {10,    1.3220077059,-4424.6808476751,"",false},{11,0.3854063676,-4424.6808476751,"",false},
-  -- {12,    1.3755310009,-5500.1149833617,"",false},{13,1.2065804745,-4424.6808476751,"",false},
-  -- {14,    0.2095337681,-5500.1149833617,"",false}}
-  
-	-- Create a new list of active ScoreParts, then call
-	-- Calculate_ScorePart_Score() to get each ScorePart's scores...
-	local l_ActiveScorePartsScoreTable = {} -- {1=ScorePart_Number, 2=ScorePart_Score}
-	local l_ScorePart_Number, l_ScoreType, l_bScorePart_IsActive, l_ScorePart_Score
-  
-	-- g_ScorePartsTable={ScorePart_Number=1, ScorePart_Name=2, l_bScorePart_IsActive=3, LongName=4}
-	for l_ScorePartsTableIndex = 1, #g_ScorePartsTable do
-		l_ScorePart_Number    = g_ScorePartsTable[l_ScorePartsTableIndex][spt_ScorePart_Number]
-		l_ScorePart_Name      = g_ScorePartsTable[l_ScorePartsTableIndex][spt_ScorePart_Name]
-		l_bScorePart_IsActive = g_ScorePartsTable[l_ScorePartsTableIndex][spt_bScorePartIsActive]
-    
-		if l_bScorePart_IsActive == true then
-      
-			-- Here is where we are getting the actual score to save...
-			l_ScorePart_Score = Calculate_ScorePart_Score(l_ScorePart_Name, l_StartSegment, l_EndSegment)
-			l_ActiveScorePartsScoreTable[#l_ActiveScorePartsScoreTable + 1] = 
-                                                                    {l_ScorePart_Number, l_ScorePart_Score}
-		end
-    
-	end
-
-	local l_NewScorePart_Score, l_OldScorePart_Score
-  
-	local l_Current_PoseTotalScore = GetPoseTotalScore()
-  -- note 1: Several g_ScorePartScoresTable rows will have the same l_Current_PoseTotalScore.
-
-  -- Let's keep track of any ScorePart improvements. If there are improvements for
-  -- a particular ScorePart, save the protein's pose for later regional shaking and wiggling...
-	-- Update the global ScorePart_Scores_Table with each new ScorePart Score...
-	-- g_ScorePartScoresTable={ScorePart_Number=1, ScorePart_Score=2, PoseTotalScore=3,
-  --                           StringOfScorePartNumbersWithSamePoseTotalScore=4,
-  --                           bFirstInStringOfScorePartNumbersWithSamePoseTotalScore=5}
-	for l_TableIndex = 1, #g_ScorePartScoresTable do
-		l_NewScorePart_Score = l_ActiveScorePartsScoreTable[l_TableIndex][aspst_ScorePart_Score]
-		l_OldScorePart_Score = g_ScorePartScoresTable[l_TableIndex][spst_ScorePart_Score]
-    
-		if l_NewScorePart_Score > l_OldScorePart_Score then
-			l_ScorePart_Number = l_ActiveScorePartsScoreTable[l_TableIndex][aspst_ScorePart_Number]
-      
-			-- Save current solution (protein's pose) to FoldIt. After we finish rebuilding this
-      -- segment range several times, we will reload the successful poses (the rebuilds
-      -- that gained ScorePart points) and apply some regional shakes and wiggles to find more
-      -- gains...
-			g_ScorePartScoresTable[l_TableIndex][spst_ScorePart_Score] = l_NewScorePart_Score
-			g_ScorePartScoresTable[l_TableIndex][spst_PoseTotalScore] = l_Current_PoseTotalScore
-      
-      -- Important!!!
-      -- Important!!!
-      -- Important!!!
-			save.Quicksave(l_ScorePart_Number) -- "Save"
-      -- Important!!!
-      -- Important!!!
-      -- Important!!!
-      -- See Rebuild1SegmentRangeSetWithManySegmentRanges() for the corresponding save.Quickload()
-      
-		end
-	end
-  local debug = 1
-
-end -- Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()
 function Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTotalScore_And_FirstInString()
   -- was ListSlots()
-  -- Called from Rebuild1SegmentRangeSetWithManySegmentRanges()...
+  -- Called from Step3_Rebuild1SegmentRangeSet()...
   
 	-- Create a string of ScorePart numbers with the same PoseTotalScore...
-	-- For example: 1=5=7 2=3=9 4 6=8, ScoreParts 1, 5 and 7 have the same PoseTotalScore, SortParts
-  -- 2, 3 and 9 have the same PoseTotalScore and SortParts 6 and 8 have the same PoseTotalScore.
+	-- For example: 1=5=7 2=3=9 4 6=8
+  -- In this example, 
+  --  ScoreParts 1, 5 and 7 have the same PoseTotalScore, 
+  --  SortParts 2, 3 and 9 have the same PoseTotalScore and 
+  --  SortParts 6 and 8 have the same PoseTotalScore
   -- Allow me to explain how these different SortParts ended up having the same PoseTotalScore...
-  -- After each rebuild attempt of the same segment range (normally 10 attempts per segment range),
+  -- After each rebuild attempt of one segment range (normally 10 attempts per segment range)
   -- each score part might have slightly improved. Well, for each of the score parts that improved
   -- for that particular rebuild (could be one or it could be many scorepart that improved), we 
-  -- associate the same pose total score of that rebuild to each of the improved score parts.
-  -- An example: 
-  -- 1) Say we just completed rebuild round 7 of 10, and scoreparts 2, 3 and 9 were the 
-  --    only 3 of the 20ish scoreparts to improve.. We set the remember-this-PoseTotalScore
-  --    of each of these score parts to the current PoseTotalScore (i.e., we update the 
-  --    PoseTotalScore field of the g_ScorePartScoresTable for the rows with scorepart
-  --    numbers 2, 3 and 9).
-  -- 2) Next, we just completed round 8 of 10 and only score parts 1, 5 and 7 improved. So we
-  --    assign the latest best PoseTotalScore to score parts 1, 5 and 7.
-  -- 3) Next, we just completed round 9 of 10 and only score parts 6 and 8 improved. So we assign
-  --    assign the new latest and greatest PoseTotalScore to score parts 6 and 8.
-  -- 4) Next we just completed round 10 of 10 and only score part 4 improved. So we assign the
+  -- associated the same pose total score of that rebuild to each of the improved score parts.
+  -- For example: 
+  -- 1) Say we had just completed rebuild round 7 of 10, and scoreparts 2, 3 and 9 were the 
+  --    only 3 of the 20ish scoreparts to improve. In that case we would have updated the 
+  --    corresponding ScorePart rows of the g_ScorePartScoresTable with the then current
+  --    PoseTotalScore.
+  -- 2) Next, we completed round 8 of 10 and only score parts 1, 5 and 7 improved. So we
+  --    assigned the latest PoseTotalScore to score parts 1, 5 and 7.
+  -- 3) Next, we completed round 9 of 10 and only score parts 6 and 8 improved. So, again, we
+  --    assigned the latest PoseTotalScore to score parts 6 and 8.
+  -- 4) Next, we completed round 10 of 10 and only score part 4 improved. So we assign the
   --    latest PoseTotalScore to score part 4.
-  -- 5) Now, at this point is we were to build a string of score part numbers with the same
+  -- 5) Now, at this point if we were to build a string of score part numbers with the same
   --    PoseTotalScore, it would look something like this: "1=5=7 2=3=9 4 6=8"
   -- Now you know...
   -- So, what's the purpose of grouping ScoreParts with the same PoseTotalScore? The point of grouping
@@ -5236,7 +5110,7 @@ function Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTot
       -- For each ScorePart_Scores_Table row with a unique PoseTotalScore (or the
       -- first in the string or scorepart numbers with the same PoseTotalScore), set
       -- the bFirstInStringOfScorePartNumbersWithSamePoseTotalScore flag to true. 
-      -- This field will be checked in Rebuild1SegmentRangeSetWithManySegmentRanges()...
+      -- This field will be checked in Step3_Rebuild1SegmentRangeSet()...
 			g_ScorePartScoresTable[l_TableIndex]
         [spst_bFirstInStringOfScorePartNumbersWithSamePoseTotalScore] = true 
       
@@ -5259,7 +5133,7 @@ function Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTot
           -- l_StringOfScorePartNumbersWithSamePoseTotalScore...
 					l_StringOfScorePartNumbersWithSamePoseTotalScore =
 						l_StringOfScorePartNumbersWithSamePoseTotalScore .. "=" .. l_InnerLoop_ScorePart_Number
-
+           
 					-- Since we justed added this ScorePart number to the 
           -- StringOfScorePartNumbersWithSamePoseTotalScore we need to 
           -- skip this ScorePart number in the outer loop; otherwise, we 
@@ -5277,24 +5151,34 @@ function Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTot
 			-- StringOfScorePartNumbersWithSamePoseTotalScore examples: 4, 5=7=12, 6=9, 8=11=13
 			g_ScorePartScoresTable[l_TableIndex][spst_StringOfScorePartNumbersWithSamePoseTotalScore] =
         l_StringOfScorePartNumbersWithSamePoseTotalScore
+      
+      l_NewLine = "\n"
+      if l_Combined_StringOfScorePartNumbersWithSamePoseTotalScore == "" then
+        l_NewLine = ""
+      end
+      l_s = "s "
+      if string.len(l_StringOfScorePartNumbersWithSamePoseTotalScore) <= 2 then
+        l_s = "  "
+      end
         
 			l_Combined_StringOfScorePartNumbersWithSamePoseTotalScore =
       l_Combined_StringOfScorePartNumbersWithSamePoseTotalScore ..
-				"\n  PoseTotalScore value: [" .. PaddedNumber(l_OuterLoop_PoseTotalScore, 1, 3) .. "]" ..
-				" ScorePart_Numbers: [" .. l_StringOfScorePartNumbersWithSamePoseTotalScore .."]"
-		end
+				l_NewLine .. PaddedNumber(l_OuterLoop_PoseTotalScore, 9, 3) ..
+				" = ScorePart" .. l_s .. l_StringOfScorePartNumbersWithSamePoseTotalScore
+        
+		end -- if l_ScorePartScoresDoneStatusTable[l_TableIndex] == false then
     
-	end
+	end -- for l_TableIndex = 1, #g_ScorePartScoresTable do
 
-	--print("\n  Combined_StringOfScorePartNumbersWithSamePoseTotalScore: " ..
-  --         l_Combined_StringOfScorePartNumbersWithSamePoseTotalScore)
+	print(l_Combined_StringOfScorePartNumbersWithSamePoseTotalScore)
+  local DebugMe = 1
 
 end -- Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTotalScore_And_FirstInString()
 -- ...end of Support Functions.
 -- Start of My Favorite Functions...
-function Rebuild1PuzzleForManyRuns() -- was DRW()
+function Step1_Rebuild1Puzzle() -- was DRW()
   -- Called from 1 place in xpcall()...
-  -- Calls Rebuild1RunWithManySegmentRangeSets() was DRcall()
+  -- Calls Step2_Rebuild1Run() was DRcall()
   
   -- Rebuild 1 Puzzle for User Selected Number Of Run Cycles, where:
   --  1) each run rebuilds segment range sets from X to Y number of consecutive segments, and
@@ -5335,8 +5219,6 @@ function Rebuild1PuzzleForManyRuns() -- was DRW()
 
 	DisplayPuzzleProperties()
 
-	g_OrigSelectedSegmentRanges = FindSelectedSegmentRanges() -- only used in CleanUp()
-
 	local l_bOkayToContinue
 	l_bOkayToContinue = AskUserToSelectRebuildOptions() -- Major code in here!
 	if l_bOkayToContinue == false then
@@ -5360,7 +5242,7 @@ function Rebuild1PuzzleForManyRuns() -- was DRW()
 		g_RunCycle = 0
     
     -- Not! what you are looking for! See below...
-		Rebuild1RunWithManySegmentRangeSets("drw") -- was DRcall()
+		Step2_Rebuild1Run("drw") -- was DRcall()
     
 		g_UserSelected_NumberOfSegmentRangesToSkip = 0
 		g_UserSelected_MaxNumberOf_SegmentRanges_ToRebuild_ThisRunCycle = l_RememberThisValue
@@ -5385,16 +5267,16 @@ function Rebuild1PuzzleForManyRuns() -- was DRW()
     -- Important!!!
     -- Important!!!
     -- Important!!!
-		Rebuild1RunWithManySegmentRangeSets("drw") -- below; was DRcall()
+		Step2_Rebuild1Run("drw") -- below; was DRcall()
     -- Important!!!
     -- Important!!!
     -- Important!!!
 		
 		-- Uncomment the methods you want to use...
-		-- Rebuild1RunWithManySegmentRangeSets("all")
-		-- Rebuild1RunWithManySegmentRangeSets("areas")
-		-- Rebuild1RunWithManySegmentRangeSets("fj")
-		-- Rebuild1RunWithManySegmentRangeSets("simple")
+		-- Step2_Rebuild1Run("all")
+		-- Step2_Rebuild1Run("areas")
+		-- Step2_Rebuild1Run("fj")
+		-- Step2_Rebuild1Run("simple")
     
     DisplayEndOfRunStatistics()    
     
@@ -5406,10 +5288,10 @@ function Rebuild1PuzzleForManyRuns() -- was DRW()
 
 	CleanUp()
 
-end -- Rebuild1PuzzleForManyRuns() -- was DRW()
-function Rebuild1RunWithManySegmentRangeSets(l_How) -- was DRcall()
-  -- Called from Rebuild1PuzzleForManyRuns() above; was DRW()
-  -- Calls Rebuild1SegmentRangeSetWithManySegmentRanges() below; was DeepRebuild()
+end -- Step1_Rebuild1Puzzle() -- was DRW()
+function Step2_Rebuild1Run(l_How) -- was DRcall()
+  -- Called from Step1_Rebuild1Puzzle() above; was DRW()
+  -- Calls Step3_Rebuild1SegmentRangeSet() below; was DeepRebuild()
  
  -- In the grand scheme of things, see below --->>>We Are Here Now<<<---
   -- Start of Script...
@@ -5472,7 +5354,7 @@ function Rebuild1RunWithManySegmentRangeSets(l_How) -- was DRcall()
       -- Important!!!
       -- Important!!!
       -- Important!!!
-			Rebuild1SegmentRangeSetWithManySegmentRanges() -- below; was DeepRebuild()
+			Step3_Rebuild1SegmentRangeSet() -- below; was DeepRebuild()
       -- Important!!!
       -- Important!!!
       -- Important!!!
@@ -5515,7 +5397,7 @@ function Rebuild1RunWithManySegmentRangeSets(l_How) -- was DRcall()
       
 		end
 		g_XLowestScoringSegmentRangesTable = l_XLowestScoringSegmentRangesTable
-		Rebuild1SegmentRangeSetWithManySegmentRanges()
+		Step3_Rebuild1SegmentRangeSet()
     
 	elseif l_How == "all" then
     
@@ -5545,25 +5427,25 @@ function Rebuild1RunWithManySegmentRangeSets(l_How) -- was DRcall()
         
 			end
 		end
-		Rebuild1SegmentRangeSetWithManySegmentRanges()
+		Step3_Rebuild1SegmentRangeSet()
     
 	elseif l_How == "simple" then
     
 		Populate_g_XLowestScoringSegmentRangesTable()
-		Rebuild1SegmentRangeSetWithManySegmentRanges()
+		Step3_Rebuild1SegmentRangeSet()
     
 	elseif l_How=="segments" then
     
 		g_XLowestScoringSegmentRangesTable = {} -- {StartSegment=1, EndSegment=2}
 		Add_Loop_Helix_And_Sheet_Segments_To_SegmentRangesTable()
-		Rebuild1SegmentRangeSetWithManySegmentRanges()
+		Step3_Rebuild1SegmentRangeSet()
     
 	end
   
-end -- Rebuild1RunWithManySegmentRangeSets(l_How) -- was DRcall()
-function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
-  -- Called from Rebuild1RunWithManySegmentRangeSets() above; was DRcall()
-  -- Calls Rebuild1SegmentRangeForManyRounds() below; was ReBuild()
+end -- Step2_Rebuild1Run(l_How) -- was DRcall()
+function Step3_Rebuild1SegmentRangeSet() -- was DeepRebuild()
+  -- Called from Step2_Rebuild1Run() above; was DRcall()
+  -- Calls Step4_Rebuild1SegmentRange() below; was ReBuild()
   
   -- In the grand scheme of things, see below --->>>We Are Here Now<<<---  
   -- Start of Script...
@@ -5640,8 +5522,7 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
     -- Important!!!
     -- Important!!!
     -- Important!!!
-    l_NumberOfTimesStructureChanged = Rebuild1SegmentRangeForManyRounds(l_StartSegment, l_EndSegment)
-                                                                                            --was ReBuild()
+    l_NumberOfTimesStructureChanged = Step4_Rebuild1SegmentRange(l_StartSegment, l_EndSegment)--was ReBuild()
     -- Important!!!
     -- Important!!!
     -- Important!!!
@@ -5717,14 +5598,13 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
           -- Important!!!
           -- Important!!!
           -- Important!!!
-          -- See Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields() way above 
-          -- for the corresponding save.Quicksave(l_ScorePart_Number) -- "Save"
+          -- See Step9_CheckForScorePartImprovements() below save.Quicksave(l_ScorePart_Number) -- "Save"
           
           -- Note 1: ScorePart_Number is being used as a Slot number here.
           -- Note 2: Some of these poses will have lower PoseTotalScores than g_ScoreScriptBest.
           -- That's okay because after we perform some mutates, shakes and wiggles, they might just
           -- become our new best scoring pose!
-          -- See Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields()
+          -- See Step9_CheckForScorePartImprovements()
           -- for the corresponding save.Quicksave(), "Save"
           
           -- Prepare to StabilizePosesOfSelectedScoreParts...
@@ -5741,7 +5621,7 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
             -- Important!!!
             -- Important!!!
             -- Important!!!
-            StabilizeOnePoseOfSelectedScoreParts(l_StartSegment, l_EndSegment) -- below; was qStab()
+            Step10_Stabilize1PoseOfSelectedScoreParts(l_StartSegment, l_EndSegment) -- below; was qStab()
             -- Important!!!
             -- Important!!!
             -- Important!!!
@@ -5755,8 +5635,8 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
             -- Important!!!
             -- Important!!!
             -- Important!!!
-            ShakeSelected("SimpleS&W")  -- FromWhere; below
-            WiggleSelected(1, false, true, "SimpleS&W") -- Iterations,bWBackbone,bWSideChains,FromWhere
+            Step6_ShakeSelected("SimpleS&W")  -- FromWhere; below
+            Step7_WiggleSelected(1, false, true, "SimpleS&W") --Iterations,bWBackbone,bWSideChains,FromWhere
             -- Important!!!
             -- Important!!!
             -- Important!!!
@@ -5768,8 +5648,7 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
             -- Important!!!
             -- Important!!!
             -- Important!!!
-            MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment,
-              "AfterStabilize")
+            Step8_MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, "AfterStabilize")
               --"AfterStabilizePosesOfSelectedScoreParts")
             -- Important!!!
             -- Important!!!
@@ -5788,8 +5667,8 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
           
           l_Current_ImprovedScorePart_PoseTotalScore = GetPoseTotalScore()
           
-          if l_Current_ImprovedScorePart_PoseTotalScore > 
-                l_Best_ImprovedScorePart_PoseTotalScore then
+          if tonumber(l_Current_ImprovedScorePart_PoseTotalScore) > 
+                tonumber(l_Best_ImprovedScorePart_PoseTotalScore) then
             
             -- We will reload the one best improved score part pose after,
             -- we finish checking every ScorePart for an improvement...
@@ -5829,7 +5708,7 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
             -- Mutate: 61, 6, 11, 14
             -- Fuse best score part pose: .001, .002
             --print("Stabilized score: " .. 
-            --  PaddedNumber(l_Current_ImprovedScorePart_PoseTotalScore, 1,3) ..
+            --  l_Current_ImprovedScorePart_PoseTotalScore ..
             --  " from slot: " .. l_ScorePart_Number)
             l_Best_ImprovedScorePart_Number = l_ScorePart_Number
             l_Best_ImprovedScorePart_Text = g_ScorePartText
@@ -5869,8 +5748,8 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
 
       local l_Score_After_SeveralChangesToSegmentRange = GetPoseTotalScore()
       
-      local l_PotentialPointLoss = l_Score_Before_SeveralChangesToSegmentRange - 
-                                   l_Score_After_SeveralChangesToSegmentRange
+      local l_PotentialPointLoss = tonumber(l_Score_Before_SeveralChangesToSegmentRange) -
+                                   tonumber(l_Score_After_SeveralChangesToSegmentRange)
                                     
       local l_MaxLossAllowed = g_UserSelected_RejectEachRebuildWithAPotentialLossExceedingXPoints * 
                               (l_EndSegment - l_StartSegment + 1) / 3
@@ -5896,8 +5775,7 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
               -- Important!!!
               -- Important!!!
               -- Important!!!
-              MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment,
-                "BeforeFuse") -- below
+              Step8_MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, "BeforeFuse") -- below
                 --"BeforeFuseBestScorePartPose") -- below
               -- Important!!!
               -- Important!!!
@@ -5929,7 +5807,7 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
           -- Important!!!
           -- Important!!!
           -- Important!!!
-          FuseBestScorePartPose() -- below; was Fuze()
+          Step12_FuseBestScorePartPose() -- below; was Fuze()
           -- Important!!!
           -- Important!!!
           -- Important!!!
@@ -5941,8 +5819,7 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
             -- Important!!!
             -- Important!!!
             -- Important!!!
-            MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment,
-              "AfterFuse") -- below
+            Step8_MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, "AfterFuse") -- below
               --"AfterFuseBestScorePartPose") -- below
             -- Important!!!
             -- Important!!!
@@ -5985,8 +5862,8 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
     
     local l_Score_After_SeveralMoreChangesToSegmentRange = GetPoseTotalScore()
     
-		g_CurrentRebuildPointsGained = l_Score_After_SeveralMoreChangesToSegmentRange -
-                                   l_Score_Before_SeveralChangesToSegmentRange
+		g_CurrentRebuildPointsGained = tonumber(l_Score_After_SeveralMoreChangesToSegmentRange) -
+                                   tonumber(l_Score_Before_SeveralChangesToSegmentRange)
     -- g_CurrentRebuildPointsGained is checked in bSegmentIsAllowedToBeRebuilt().
     
     l_RemainingSegmentRanges = #g_XLowestScoringSegmentRangesTable - l_SegmentRangeIndex
@@ -6038,14 +5915,15 @@ function Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
     
 	end
   
-end -- Rebuild1SegmentRangeSetWithManySegmentRanges() -- was DeepRebuild()
-function Rebuild1SegmentRangeForManyRounds(l_StartSegment, l_EndSegment) -- was ReBuild()
-  -- Called from Rebuild1SegmentRangeSetWithManySegmentRanges() above; was DeepRebuild()
-  -- Calls RebuildSelectedSegmentsForMax3Attempts() below; was localRebuild()
-  -- Calls ShakeSelected() below
-  -- Calls WiggleSelected() below
-  -- Calls MutateSideChainsOfSelectedSegments() below
-  -- Calls Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields() way above
+end -- Step3_Rebuild1SegmentRangeSet() -- was DeepRebuild()
+function Step4_Rebuild1SegmentRange(l_StartSegment, l_EndSegment) -- was ReBuild()
+  -- Called from: Step3_Rebuild1SegmentRangeSet() above; was DeepRebuild()
+  
+  -- Calls: Step5_RebuildSelectedSegments() below; was localRebuild()
+  --        Step6_ShakeSelected() below
+  --        Step7_WiggleSelected() below
+  --        Step8_MutateSideChainsOfSelectedSegments() below
+  --        Step9_CheckForScorePartImprovements() way below
   
 	Reset_g_ScorePart_Scores_Table() -- was ClearScores()
 
@@ -6077,8 +5955,7 @@ function Rebuild1SegmentRangeForManyRounds(l_StartSegment, l_EndSegment) -- was 
     -- Important!!!
     -- Important!!!
     -- Important!!!
-		l_bStructureChanged = 
-      RebuildSelectedSegmentsForMax3Attempts(l_StartSegment, l_EndSegment) -- localRebuild()
+		l_bStructureChanged = Step5_RebuildSelectedSegments(l_StartSegment, l_EndSegment) -- localRebuild()
     -- Important!!!
     -- Important!!!
     -- Important!!!
@@ -6097,7 +5974,7 @@ function Rebuild1SegmentRangeForManyRounds(l_StartSegment, l_EndSegment) -- was 
       -- Important!!!
       -- Important!!!
       -- Important!!!
-      ShakeSelected("AfterRebuild1") -- FromWhere; below
+      Step6_ShakeSelected("AfterRebuild1") -- FromWhere; below
       -- Important!!!
       -- Important!!!
       -- Important!!!
@@ -6115,8 +5992,8 @@ function Rebuild1SegmentRangeForManyRounds(l_StartSegment, l_EndSegment) -- was 
       -- Important!!!
       -- Important!!!
       -- Important!!!
-        ShakeSelected("AfterRebuild2") -- FromWhere; below
-        WiggleSelected(2, false, true, "AfterRebuild2") -- Iterations,w/Bb,w/SC,FromWhere; below
+        Step6_ShakeSelected("AfterRebuild2") -- FromWhere; below
+        Step7_WiggleSelected(2, false, true, "AfterRebuild2") -- Iterations,w/Bb,w/SC,FromWhere; below
       -- Important!!!
       -- Important!!!
       -- Important!!!
@@ -6128,8 +6005,8 @@ function Rebuild1SegmentRangeForManyRounds(l_StartSegment, l_EndSegment) -- was 
       -- Important!!!
       -- Important!!!
       -- Important!!!
-        ShakeSelected("AfterRebuild4") -- FromWhere; below
-        WiggleSelected(4, true, false, "AfterRebuild3") -- Iterations, bWBackbone, bWSideChains, FromWhere
+        Step6_ShakeSelected("AfterRebuild4") -- FromWhere; below
+        Step7_WiggleSelected(4, true, false, "AfterRebuild3") --Iterations,bWBackbone,bWSideChains,FromWhere
       -- Important!!!
       -- Important!!!
       -- Important!!!
@@ -6141,42 +6018,49 @@ function Rebuild1SegmentRangeForManyRounds(l_StartSegment, l_EndSegment) -- was 
         -- Important!!!
         -- Important!!!
         -- Important!!!
-        MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, "AfterRebuild") -- below
+        Step8_MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, "AfterRebuild") -- below
         -- Important!!!
         -- Important!!!
         -- Important!!!
         
-      end -- if g_bUserSelected_MutateAfterRebuild == true then
-        
-      -- We have just rebuilt (and optionally, mutated, shaked and wiggled) only one segment
-      -- range and only one attempt. Next, we are going to check for ScorePart improvements
-      -- for this one specific rebuild attempt. For each ScorePart that improves, associate
-      -- the current pose (and PoseTotalScore) of the protein to that ScorePart. Later, after
-      -- all these rebuild attempts, in Rebuild1SegmentRangeSetWithManySegmentRanges() above,
-      -- we will step through each of these best saved score part poses and mutate, shake and
-      -- wiggle them some more to see if we can further improve their scores...
+      end -- if g_bUserSelected_MutateAfterRebuild == true then        
+      
+      -- We have just rebuilt (and optionally, mutated, shaked and wiggled) a single segment range
+      -- for the n-th time, where n is a number from 1 to l_MaxRounds. 
+      
+      -- Next, let's check for ScorePart improvements by calling Step9_CheckForScorePartImprovements():
+      -- In that function, for each score part that improved during this rebuild round we will do
+      -- the following:
+      -- 1) Update the corresponding ScorePart row of the g_ScorePartScoresTable with the improved
+      --    ScorePart_Score and the Current_PoseTotalScore (which may or may not have improved)
+      -- 2) Update the corresponding ScorePart FoldIt Quicksave slot with the current pose (which
+      --    may or may not have improved. Usually not.)
+      -- After all of the rebuild rounds have completed for this specific SegmentRange we will shake
+      -- and wiggle each of the saved ScorePart-improved poses to hopefully find more points.
           
       -- Important!!!
       -- Important!!!
-      -- Important!!!
-      Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields(l_StartSegment,
-                                                                                l_EndSegment) -- SaveScores
+      -- Important!!!      
+      Step9_CheckForScorePartImprovements(l_StartSegment, l_EndSegment) -- was SaveScores()
       -- Important!!!
       -- Important!!!
       -- Important!!!
           
-    end -- if l_bStructureChanged == true then
+    else -- if l_bStructureChanged == true then
+      
+      -- At this point l_bStructureChanged equals false...
     
-    -- If there was no favorable (i.e.; increase in points or very small decrease in points) change to 
-    -- the structure then stop processing this segment range and move on to the next one...
-    if l_bStructureChanged == false then
-      -- This section is unlikely now that we allow large negative scores to continue on to stabilize...
+    -- There was no change to the structure. At this point we stop processing this segment 
+    -- range and move on to the next one...
+    
+    -- We will rarely enter this section anymore, now that we allow large negative scores
+    -- to continue on to stabilize...
       
       -- new!!!
       recentbest.Restore()
       
       if l_Round < l_MaxRounds then
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
+        print(g_Score_ScriptBest ..
               "                    " ..
               "Rebuilding round" ..
               g_round_x_of_y ..
@@ -6201,9 +6085,9 @@ function Rebuild1SegmentRangeForManyRounds(l_StartSegment, l_EndSegment) -- was 
   --print("l_NumberOfTimesStructureChanged = " .. l_NumberOfTimesStructureChanged)
 	return l_NumberOfTimesStructureChanged
 
-end -- Rebuild1SegmentRangeForManyRounds() -- was ReBuild()
-function RebuildSelectedSegmentsForMax3Attempts(l_StartSegment, l_EndSegment) -- was localRebuild()
-  -- Called from Rebuild1SegmentRangeForManyRounds() above; was Rebuild()
+end -- Step4_Rebuild1SegmentRange() -- was ReBuild()
+function Step5_RebuildSelectedSegments(l_StartSegment, l_EndSegment) -- was localRebuild()
+  -- Called from Step4_Rebuild1SegmentRange() above; was Rebuild()
   -- Calls structure.RebuildSelected() foldit code
   
   -- For round X of Y, rebuild the selected segments a maximum of 3 attempts...
@@ -6245,13 +6129,13 @@ function RebuildSelectedSegmentsForMax3Attempts(l_StartSegment, l_EndSegment) --
     local l_TimeAfter = os.clock()
     local l_SecondsUsed = l_TimeAfter - l_TimeBefore
     l_Score_After_Rebuild = GetPoseTotalScore()
-    l_ScoreImprovement = l_Score_After_Rebuild - g_Score_ScriptBest
+    l_ScoreImprovement = tonumber(l_Score_After_Rebuild) - tonumber(g_Score_ScriptBest)
     
     if l_Score_After_Rebuild ~= g_Score_ScriptBest then
       l_bStructureChanged = true
     end      
     
-    if l_Score_After_Rebuild > g_Score_ScriptBest then      
+    if l_ScoreImprovement >= .001 then      
       print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" .. 
             PaddedNumber(l_ScoreImprovement, 8, 3) .. " " .. 
             PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
@@ -6273,8 +6157,8 @@ function RebuildSelectedSegmentsForMax3Attempts(l_StartSegment, l_EndSegment) --
             g_round_x_of_y ..
             g_with_segments_x_thru_y ..
             " No Score Change")
-        
-    elseif l_Score_After_Rebuild < g_Score_ScriptBest then      
+       
+    else
       -- We allow any loss of points here...
       print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " .. 
             "         " .. 
@@ -6304,8 +6188,8 @@ function RebuildSelectedSegmentsForMax3Attempts(l_StartSegment, l_EndSegment) --
 	end
   return l_bStructureChanged
 
-end -- RebuildSelectedSegmentsForMax3Attempts() -- was localRebuild()
-function ShakeSelected(l_FromWhere) -- was Wiggle()
+end -- Step5_RebuildSelectedSegments() -- was localRebuild()
+function Step6_ShakeSelected(l_FromWhere) -- was Wiggle()
   -- Called from 5 functions above and below
       
   local l_TimeBefore = os.clock()
@@ -6314,7 +6198,7 @@ function ShakeSelected(l_FromWhere) -- was Wiggle()
   local l_ClashImportanceText = " ClashImp:" .. PaddedNumber(l_ClashImportance, 0 , 2)
 
 	-- Shake is not considered to do much in second or more 
-  -- rounds; therefore, we always set Iterations = 1...
+  -- iterations; therefore, we always set iterations = 1...
     
   DisulfideBonds_RememberSolutionWithThemIntact()
   
@@ -6332,9 +6216,9 @@ function ShakeSelected(l_FromWhere) -- was Wiggle()
   local l_SecondsUsed = l_TimeAfter - l_TimeBefore
   
   local l_Score_After_Shake = GetPoseTotalScore()
-  local l_ScoreImprovement = l_Score_After_Shake - g_Score_ScriptBest
+  local l_ScoreImprovement = tonumber(l_Score_After_Shake) - tonumber(g_Score_ScriptBest)
   
-  if l_Score_After_Shake > g_Score_ScriptBest then
+  if l_ScoreImprovement >= .001 then      
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
           PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
           PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
@@ -6360,7 +6244,7 @@ function ShakeSelected(l_FromWhere) -- was Wiggle()
       l_ClashImportanceText ..
       " No score change")
         
-  elseif l_Score_After_Shake < g_Score_ScriptBest then
+  else
     -- Undo this Shake because it decreased our score...(not yet!)
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
           "         " ..
@@ -6381,8 +6265,8 @@ function ShakeSelected(l_FromWhere) -- was Wiggle()
   g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected =
   g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected + 1 
    
-end -- ShakeSelected(l_FromWhere)
-function WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_FromWhere) -- was Wiggle()
+end -- Step6_ShakeSelected(l_FromWhere)
+function Step7_WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_FromWhere) -- was Wiggle()
   -- Called from 5 functions above
   
   local l_TimeBefore = os.clock()
@@ -6413,8 +6297,8 @@ function WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_FromWhere)
   local l_SecondsUsed = l_TimeAfter - l_TimeBefore
   
   local l_Score_After_Wiggle = GetPoseTotalScore()
-  local l_ScoreImprovement = l_Score_After_Wiggle - g_Score_ScriptBest
-  if l_Score_After_Wiggle > g_Score_ScriptBest then
+  local l_ScoreImprovement = tonumber(l_Score_After_Wiggle) - tonumber(g_Score_ScriptBest)
+  if l_ScoreImprovement >= .001 then      
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
           PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
           PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
@@ -6447,7 +6331,7 @@ function WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_FromWhere)
           l_ClashImportanceText ..
           " No score change")
         
-  elseif l_Score_After_Wiggle < g_Score_ScriptBest then
+  else
     -- Undo this WiggleSelected because it decreased our score...(not yet!)
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
           "         " ..
@@ -6469,8 +6353,312 @@ function WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_FromWhere)
   g_Stats_Run_NumberOfAttempts_WiggleSelected =
   g_Stats_Run_NumberOfAttempts_WiggleSelected + 1
     
-end -- WiggleSelected(l_ClashImportance, l_FromWhere)
-function WiggleAll(l_Iterations, l_FromWhere) -- was Wiggle()
+end -- Step7_WiggleSelected(l_ClashImportance, l_FromWhere)
+function Step8_MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, l_FromWhere)--doMutate+Mutat
+  -- Called from 3 functions above and below
+
+	if g_NumberOfMutableSegments < 1 then
+		return
+	end
+ 
+ 	if g_bUserSelected_MutateOnlySelectedSegments == false and
+     g_bUserSelected_MutateSelectedAndNearbySegments == false then
+    -- User unchecked both "OnlySelected" and "SelectedAndNearby",
+    -- so we will mutate all segments...
+    return Step8b_MutateSideChainsAll(l_FromWhere)
+  end  
+  
+  local l_TimeBefore = os.clock()
+  
+	-- Mutate what user selected to do...
+	if g_bUserSelected_MutateOnlySelectedSegments == true then
+    
+		selection.DeselectAll()
+		selection.SelectRange(l_StartSegment, l_EndSegment)
+    g_with_segments_x_thru_y = " Segments:" .. l_StartSegment .. "-" .. l_EndSegment          
+  
+  else -- if g_bUserSelected_MutateSelectedAndNearbySegments == true then
+    
+    local l_SphereRadius = g_UserSelected_MutateSphereRadius
+ 		SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
+    g_with_segments_x_thru_y = " Within " .. l_SphereRadius .. " angstroms of" ..    
+                               " segments:" .. l_StartSegment .. "-" .. l_EndSegment
+  end
+    
+	SetClashImportance(g_UserSelected_MutateClashImportance) -- default is 0.9 (close to 1)
+  local l_MaxIterations = 2  
+
+  DisulfideBonds_RememberSolutionWithThemIntact()
+  
+  -- Important!!!
+  -- Important!!!
+  -- Important!!!
+	structure.MutateSidechainsSelected(l_MaxIterations) -- foldit code
+  -- Important!!!
+  -- Important!!!
+  -- Important!!!
+  
+  DisulfideBonds_CheckIfWeNeedToRestoreSolutionWithThemIntact()
+  
+  local l_TimeAfter = os.clock()
+  local l_SecondsUsed = l_TimeAfter - l_TimeBefore
+  
+  l_Score_After_Mutate = GetPoseTotalScore()
+  local l_ScoreImprovement = tonumber(l_Score_After_Mutate) - tonumber(g_Score_ScriptBest)
+  if l_ScoreImprovement >= .001 then      
+    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
+          PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
+          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+          l_FromWhere .. ":2xMutateSidechainsSelected" ..
+          g_round_x_of_y ..
+          g_with_segments_x_thru_y ..
+          g_ScorePartText)
+    
+    g_Stats_Run_TotalPointsGained_MutateSidechainsSelected =
+    g_Stats_Run_TotalPointsGained_MutateSidechainsSelected + l_ScoreImprovement
+    g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected =
+      g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected + 1
+    SaveBest() -- <-- Updates g_Score_ScriptBest
+    
+  elseif l_Score_After_Mutate == g_Score_ScriptBest then
+    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
+          "         " ..
+          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+          l_FromWhere .. ":2xMutateSidechainsSelected" ..
+          g_round_x_of_y ..
+          g_with_segments_x_thru_y ..
+          g_ScorePartText ..
+          " No Score Change")
+    
+  else
+    -- Undo this Mutate because it decreased our score...(not yet!)
+    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
+          "         " ..
+          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+          l_FromWhere .. ":2xMutateSidechainsSelected" ..
+          g_round_x_of_y ..
+          g_with_segments_x_thru_y ..
+          g_ScorePartText ..
+          " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
+          --" Rejected:" .. PaddedNumber(l_ScoreImprovement, 1, 3))
+    -- argh! recentbest.Restore()
+  end
+  g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected =
+  g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected + l_SecondsUsed
+  g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected =
+  g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected + 1
+
+end -- Step8_MutateSideChainsOfSelectedSegments()
+function Step8b_MutateSideChainsAll(l_FromWhere) -- was doMutate() + MutateAll()
+  -- Called from Step8_MutateSideChainsOfSelectedSegments() above
+ 
+	if g_NumberOfMutableSegments < 1 then
+		return
+	end
+
+  local l_TimeBefore = os.clock()
+  
+  selection.SelectAll() -- is this needed, when calling structure.MutateSideChainsAll? Probably!
+	SetClashImportance(g_UserSelected_MutateClashImportance) -- default is 0.9 (close to 1)
+	local l_MaxIterations = 2  
+  
+  DisulfideBonds_RememberSolutionWithThemIntact()
+  
+  -- Important!!!
+  -- Important!!!
+  -- Important!!!
+  structure.MutateSidechainsAll(l_MaxIterations) --- foldit code
+  -- Important!!!
+  -- Important!!!
+  -- Important!!!
+  
+  DisulfideBonds_CheckIfWeNeedToRestoreSolutionWithThemIntact()
+  
+  local l_TimeAfter = os.clock()
+  local l_SecondsUsed = l_TimeAfter - l_TimeBefore
+  
+  l_Score_After_Mutate = GetPoseTotalScore()
+  local l_ScoreImprovement = tonumber(l_Score_After_Mutate) - tonumber(g_Score_ScriptBest)
+  if l_ScoreImprovement >= .001 then      
+    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
+          PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
+          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+          l_FromWhere .. ":2xMutateSidechainsAll" ..
+          g_round_x_of_y ..
+          g_ScorePartText)
+    
+    g_Stats_Run_TotalPointsGained_MutateSidechainsAll =
+    g_Stats_Run_TotalPointsGained_MutateSidechainsAll + l_ScoreImprovement
+    g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll =
+    g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll + 1
+    SaveBest() -- <-- Updates g_Score_ScriptBest
+    
+  elseif l_Score_After_Mutate == g_Score_ScriptBest then
+    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
+          "         " ..
+          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+          l_FromWhere .. ":2xMutateSidechainsAll" ..
+          g_round_x_of_y ..
+          g_ScorePartText ..
+          " No score change")
+  
+  else
+    -- Undo this Mutate because it decreased our score...(not yet!)
+    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
+          "         " ..
+          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+          l_FromWhere .. ":2xMutateSidechainsAll" ..
+          g_round_x_of_y ..
+          g_ScorePartText ..
+          " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
+          --" Rejected:" .. PaddedNumber(l_ScoreImprovement, 1, 3))
+    -- argh! recentbest.Restore()
+  end
+  g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll =
+  g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll + l_SecondsUsed
+  g_Stats_Run_NumberOfAttempts_MutateSidechainsAll =
+  g_Stats_Run_NumberOfAttempts_MutateSidechainsAll + 1    
+  
+end -- Step8b_MutateSideChainsAll(l_FromWhere)
+function Step9_CheckForScorePartImprovements(l_StartSegment, l_EndSegment) -- was SaveScores()
+  -- Called from 2 functions
+  
+  -- We have just rebuilt (and optionally, shaked, wiggled and mutated, only one segment
+  -- range and only one attempt. Next, we are going to check for ScorePart improvements
+  -- for this one specific rebuild attempt. For each ScorePart that improves, associate
+  -- the current pose and PoseTotalScore of the protein to that ScorePart. Later, after
+  -- all these rebuild attempts, in Step3_Rebuild1SegmentRangeSet() above we will step
+  -- through each of these best saved score part poses and shake, wiggle and mutate them
+  -- some more to see if we can further improve their scores...
+  
+  -- Example g_ScorePartsTable{} entries...
+  --   ScorePart_Number=1, ScorePart_Name=2, l_bScorePart_IsActive=3, LongName=4
+	-- {{4, "total",      true, "4 (total)"},     {5, "loctotal",  true, "5 (loctotal)"},
+  --  {6, "ligand",     true, "6 (ligand)"},    {7, "Clashing",  true, "7 (Clashing)"},
+  --  {8, "Pairwise",   true, "8 (Pairwise)"},  {9, "Packing",   true, "9 (Packing)"},
+  --  {10, "Hiding",    true, "10 (Hiding)"},   {11, "Bonding",  true, "11 (Bonding)"},
+  --  {12, "Ideality",  true, "12 (Ideality)"}, {13, "Backbone", true, "13 (Backbone)"},
+  --  {14, "Sidechain", true, "14 (Sidechain)"}}
+    
+	-- Example l_ActiveScorePartsScoreTable{} entries...
+		local aspst_ScorePart_Number = 1
+		local aspst_ScorePart_Score = 2
+  -- {{ 4,-6977.228}, {5, -12.456},
+  --  { 6,   32.926}, {7,   0.781},
+  --  { 8,    0.851}, {9,  -0.013},
+  --  {10,    1.485}, {11,  0.548},
+  --  {12,    0.089}, {13, -0.595}}
+  
+  -- Example g_ScorePartScoresTable{} entries (before updating fields 4 and 5)...
+  --   ScorePart_Number=1, ScorePart_Score=2, PoseTotalScore=3, 
+  --   StringOfScorePartNumbersWithSamePoseTotalScore=4,
+  --   bFirstInStringOfScorePartNumbersWithSamePoseTotalScore=5
+  --{{ 4,-2070.481,-2070.481,"",false},{ 5,4.297,-8544.629,"",false},
+  -- { 6,   41.990,-5500.114,"",false},{ 7,0.456,-4424.680,"",false},
+  -- { 8,    1.309,-5500.114,"",false},{ 9,0.390,-8544.629,"",false},
+  -- {10,    1.322,-4424.680,"",false},{11,0.385,-4424.680,"",false},
+  -- {12,    1.375,-5500.114,"",false},{13,1.206,-4424.680,"",false},
+  -- {14,    0.209,-5500.114,"",false}}
+  
+	-- Create a new list of active ScoreParts, then call Calculate_ScorePart_Score() to get each
+  -- ScorePart's score...
+	local l_ActiveScorePartsScoreTable = {} -- {1=ScorePart_Number, 2=ScorePart_Score}
+	local l_ScorePart_Number, l_ScoreType, l_bScorePart_IsActive, l_ScorePart_Score
+  
+	-- g_ScorePartsTable={ScorePart_Number=1, ScorePart_Name=2, l_bScorePart_IsActive=3, LongName=4}
+	for l_ScorePartsTableIndex = 1, #g_ScorePartsTable do
+		l_ScorePart_Number    = g_ScorePartsTable[l_ScorePartsTableIndex][spt_ScorePart_Number]
+		l_ScorePart_Name      = g_ScorePartsTable[l_ScorePartsTableIndex][spt_ScorePart_Name]
+		l_bScorePart_IsActive = g_ScorePartsTable[l_ScorePartsTableIndex][spt_bScorePartIsActive]
+    
+		if l_bScorePart_IsActive == true then
+      
+			-- Here is where we are getting the actual score to save...
+			l_ScorePart_Score = Calculate_ScorePart_Score(l_ScorePart_Name, l_StartSegment, l_EndSegment)
+			l_ActiveScorePartsScoreTable[#l_ActiveScorePartsScoreTable + 1] = 
+                                                                    {l_ScorePart_Number, l_ScorePart_Score}
+		end
+    
+	end
+
+	local l_NewScorePart_Score, l_OldScorePart_Score
+  
+	local l_Current_PoseTotalScore = GetPoseTotalScore()
+  
+  -- note: each SegmentRange has several rebuild rounds.
+  
+  -- For each score part that improved during this rebuild round do the following:
+  -- 1) Update the corresponding ScorePart row of the g_ScorePartScoresTable with the improved
+  --    ScorePart_Score and the Current_PoseTotalScore (which may or may not have improved)
+  -- 2) Update the corresponding ScorePart FoldIt Quicksave slot with the current pose (which
+  --    may or may not have improved. Usually not.)
+  -- After all of the rebuild rounds have completed for this specific SegmentRange we will shake
+  -- and wiggle each of the saved ScorePart-improved poses to hopefully find more points.
+  
+  -- note: several g_ScorePartScoresTable rows can have the same l_Current_PoseTotalScore.
+
+	-- g_ScorePartScoresTable={ScorePart_Number=1, ScorePart_Score=2, PoseTotalScore=3,
+  --                           StringOfScorePartNumbersWithSamePoseTotalScore=4,
+  --                           bFirstInStringOfScorePartNumbersWithSamePoseTotalScore=5}
+	for l_TableIndex = 1, #g_ScorePartScoresTable do
+		l_NewScorePart_Score = l_ActiveScorePartsScoreTable[l_TableIndex][aspst_ScorePart_Score]
+		l_OldScorePart_Score = g_ScorePartScoresTable[l_TableIndex][spst_ScorePart_Score]
+    
+		if tonumber(l_NewScorePart_Score) > tonumber(l_OldScorePart_Score) then
+      
+        -- Update the corresponding ScorePart row of the g_ScorePartScoresTable with the improved
+        -- ScorePart_Score and the Current_PoseTotalScore (which may or may not have improved)
+			g_ScorePartScoresTable[l_TableIndex][spst_ScorePart_Score] = l_NewScorePart_Score
+			g_ScorePartScoresTable[l_TableIndex][spst_PoseTotalScore] = l_Current_PoseTotalScore      
+			
+      -- Update the corresponding ScorePart FoldIt Quicksave slot with the current pose (which
+      -- may or may not have improved. Usually not.
+			l_ScorePart_Number = l_ActiveScorePartsScoreTable[l_TableIndex][aspst_ScorePart_Number]
+      -- Important!!!
+      -- Important!!!
+      -- Important!!!
+			save.Quicksave(l_ScorePart_Number) -- "Save"
+      -- Important!!!
+      -- Important!!!
+      -- Important!!!
+      -- See Step3_Rebuild1SegmentRangeSet() for the corresponding save.Quickload()
+      
+		end
+	end
+  local DebugMe = 1
+
+end -- Step9_CheckForScorePartImprovements()
+function Step10_Stabilize1PoseOfSelectedScoreParts(l_StartSegment, l_EndSegment) -- was qStab()
+  -- Called from Step3_Rebuild1SegmentRangeSet() above
+
+	SetClashImportance(0.1)
+  Step6_ShakeSelected("Stabilize") -- "StabilizeScorePartPose"
+	
+	if g_bUserSelected_MutateDuringStabilizePosesOfSelectedScoreParts == true then
+		SetClashImportance(1)
+    Step8_MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, "Stabilize")
+    -- "StabilizePosesOfSelectedScoreParts")
+	end
+	
+	if g_bUserSelected_ExtraStabilizePosesOfSelectedScoreParts == true then -- default is false
+    
+    SetClashImportance(0.4)
+    --Step11_WiggleAll(1, "ExtraStabilizePosesOfSelectedScoreParts") -- Iterations, FromWhere
+    Step11_WiggleAll(1, "ExtraStabilize") -- Iterations, FromWhere
+    
+		-- Note the third parameter uses the global value instead of the local value here...
+    SetClashImportance(1)
+    Step6_ShakeSelected("ExtraStabilize") -- "ExtraStabilizePosesOfSelectedScoreParts"
+
+	end
+	
+	SetClashImportance(1)
+  --Step11_WiggleAll(3, "StabilizePosesOfSelectedScoreParts") -- Iterations, FromWhere
+  Step11_WiggleAll(3, "Stabilize") -- Iterations, FromWhere
+  recentbest.Restore() -- will keep current if best
+
+end -- function Step10_Stabilize1PoseOfSelectedScoreParts(l_StartSegment, l_EndSegment)
+function Step11_WiggleAll(l_Iterations, l_FromWhere) -- was Wiggle()
   -- Called from 5 functions above and below
   
   local l_TimeBefore = os.clock()
@@ -6513,8 +6701,8 @@ function WiggleAll(l_Iterations, l_FromWhere) -- was Wiggle()
   local l_SecondsUsed = l_TimeAfter - l_TimeBefore
   
   local l_Score_After_Wiggle = GetPoseTotalScore()
-  local l_ScoreImprovement = l_Score_After_Wiggle - g_Score_ScriptBest
-  if l_Score_After_Wiggle > g_Score_ScriptBest then
+  local l_ScoreImprovement = tonumber(l_Score_After_Wiggle) - tonumber(g_Score_ScriptBest)
+  if l_ScoreImprovement >= .001 then      
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
           PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
           PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
@@ -6542,7 +6730,7 @@ function WiggleAll(l_Iterations, l_FromWhere) -- was Wiggle()
           l_ClashImportanceText ..
           " No score change")
   
-  elseif l_Score_After_Wiggle < g_Score_ScriptBest then
+  else
     -- Undo this WiggleAll because it decreased our score... (not here!)
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
           "         " ..
@@ -6572,207 +6760,9 @@ function WiggleAll(l_Iterations, l_FromWhere) -- was Wiggle()
   --                         1 from this function, is where most of the lines in the log file come
   --                         from. Huh. Do most of our points come from WiggleAll? I wonder.
 
-end -- function WiggleAll(l_ClashImportance, l_FromWhere)
-function MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, l_FromWhere) -- doMutate+MutateSel
-  -- Called from 3 functions above and below
-
-	if g_NumberOfMutableSegments < 1 then
-		return
-	end
- 
- 	if g_bUserSelected_MutateOnlySelectedSegments == false and
-     g_bUserSelected_MutateSelectedAndNearbySegments == false then
-    -- User unchecked both "OnlySelected" and "SelectedAndNearby",
-    -- so we will mutate all segments...
-    return MutateSideChainsAll(l_FromWhere)
-  end  
-  
-  local l_TimeBefore = os.clock()
-  
-	-- Mutate what user selected to do...
-	if g_bUserSelected_MutateOnlySelectedSegments == true then
-    
-		selection.DeselectAll()
-		selection.SelectRange(l_StartSegment, l_EndSegment)
-    g_with_segments_x_thru_y = " Segments:" .. l_StartSegment .. "-" .. l_EndSegment          
-  
-  else -- if g_bUserSelected_MutateSelectedAndNearbySegments == true then
-    
-    local l_SphereRadius = g_UserSelected_MutateSphereRadius
- 		SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
-    g_with_segments_x_thru_y = " Within " .. l_SphereRadius .. " angstroms of" ..    
-                               " segments:" .. l_StartSegment .. "-" .. l_EndSegment
-  end
-    
-	SetClashImportance(g_UserSelected_MutateClashImportance) -- default is 0.9 (close to 1)
-  local l_MaxIterations = 2  
-
-  DisulfideBonds_RememberSolutionWithThemIntact()
-  
-  -- Important!!!
-  -- Important!!!
-  -- Important!!!
-	structure.MutateSidechainsSelected(l_MaxIterations) -- foldit code
-  -- Important!!!
-  -- Important!!!
-  -- Important!!!
-  
-  DisulfideBonds_CheckIfWeNeedToRestoreSolutionWithThemIntact()
-  
-  local l_TimeAfter = os.clock()
-  local l_SecondsUsed = l_TimeAfter - l_TimeBefore
-  
-  l_Score_After_Mutate = GetPoseTotalScore()
-  local l_ScoreImprovement = l_Score_After_Mutate - g_Score_ScriptBest
-  if l_Score_After_Mutate > g_Score_ScriptBest then
-    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
-          PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
-          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-          l_FromWhere .. ":2xMutateSidechainsSelected" ..
-          g_round_x_of_y ..
-          g_with_segments_x_thru_y ..
-          g_ScorePartText)
-    
-    g_Stats_Run_TotalPointsGained_MutateSidechainsSelected =
-    g_Stats_Run_TotalPointsGained_MutateSidechainsSelected + l_ScoreImprovement
-    g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected =
-      g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected + 1
-    SaveBest() -- <-- Updates g_Score_ScriptBest
-    
-  elseif l_Score_After_Mutate == g_Score_ScriptBest then
-    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
-          "         " ..
-          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-          l_FromWhere .. ":2xMutateSidechainsSelected" ..
-          g_round_x_of_y ..
-          g_with_segments_x_thru_y ..
-          g_ScorePartText ..
-          " No Score Change")
-    
-  elseif l_Score_After_Mutate < g_Score_ScriptBest then
-    -- Undo this Mutate because it decreased our score...(not yet!)
-    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
-          "         " ..
-          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-          l_FromWhere .. ":2xMutateSidechainsSelected" ..
-          g_round_x_of_y ..
-          g_with_segments_x_thru_y ..
-          g_ScorePartText ..
-          " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
-          --" Rejected:" .. PaddedNumber(l_ScoreImprovement, 1, 3))
-    -- argh! recentbest.Restore()
-  end
-  g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected =
-  g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected + l_SecondsUsed
-  g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected =
-  g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected + 1
-
-end -- MutateSideChainsOfSelectedSegments()
-function MutateSideChainsAll(l_FromWhere) -- was doMutate() + MutateAll()
-  -- Called from MutateSideChainsOfSelectedSegments() above
- 
-	if g_NumberOfMutableSegments < 1 then
-		return
-	end
-
-  local l_TimeBefore = os.clock()
-  
-  selection.SelectAll() -- is this needed, when calling structure.MutateSideChainsAll? Probably!
-	SetClashImportance(g_UserSelected_MutateClashImportance) -- default is 0.9 (close to 1)
-	local l_MaxIterations = 2  
-  
-  DisulfideBonds_RememberSolutionWithThemIntact()
-  
-  -- Important!!!
-  -- Important!!!
-  -- Important!!!
-  structure.MutateSidechainsAll(l_MaxIterations) --- foldit code
-  -- Important!!!
-  -- Important!!!
-  -- Important!!!
-  
-  DisulfideBonds_CheckIfWeNeedToRestoreSolutionWithThemIntact()
-  
-  local l_TimeAfter = os.clock()
-  local l_SecondsUsed = l_TimeAfter - l_TimeBefore
-  
-  l_Score_After_Mutate = GetPoseTotalScore()
-  local l_ScoreImprovement = l_Score_After_Mutate - g_Score_ScriptBest
-  if l_Score_After_Mutate > g_Score_ScriptBest then
-    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
-          PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
-          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-          l_FromWhere .. ":2xMutateSidechainsAll" ..
-          g_round_x_of_y ..
-          g_ScorePartText)
-    
-    g_Stats_Run_TotalPointsGained_MutateSidechainsAll =
-    g_Stats_Run_TotalPointsGained_MutateSidechainsAll + l_ScoreImprovement
-    g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll =
-    g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll + 1
-    SaveBest() -- <-- Updates g_Score_ScriptBest
-    
-  elseif l_Score_After_Mutate == g_Score_ScriptBest then
-    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
-          "         " ..
-          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-          l_FromWhere .. ":2xMutateSidechainsAll" ..
-          g_round_x_of_y ..
-          g_ScorePartText ..
-          " No score change")
-  
-  elseif l_Score_After_Mutate < g_Score_ScriptBest then
-    -- Undo this Mutate because it decreased our score...(not yet!)
-    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
-          "         " ..
-          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-          l_FromWhere .. ":2xMutateSidechainsAll" ..
-          g_round_x_of_y ..
-          g_ScorePartText ..
-          " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
-          --" Rejected:" .. PaddedNumber(l_ScoreImprovement, 1, 3))
-    -- argh! recentbest.Restore()
-  end
-  g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll =
-  g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll + l_SecondsUsed
-  g_Stats_Run_NumberOfAttempts_MutateSidechainsAll =
-  g_Stats_Run_NumberOfAttempts_MutateSidechainsAll + 1    
-  
-end -- MutateSideChainsAll(l_FromWhere)
-function StabilizeOnePoseOfSelectedScoreParts(l_StartSegment, l_EndSegment) -- was qStab()
-  -- Called from Rebuild1SegmentRangeSetWithManySegmentRanges() above
-
-	SetClashImportance(0.1)
-	--ShakeSelected("StabilizeScorePartPose")
-  ShakeSelected("Stabilize")
-	
-	if g_bUserSelected_MutateDuringStabilizePosesOfSelectedScoreParts == true then
-		SetClashImportance(1)
-		--MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, "StabilizePosesOfSelectedScoreParts")
-    MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, "Stabilize")
-	end
-	
-	if g_bUserSelected_ExtraStabilizePosesOfSelectedScoreParts == true then -- default is false
-    
-    SetClashImportance(0.4)
-    --WiggleAll(1, "ExtraStabilizePosesOfSelectedScoreParts") -- Iterations, FromWhere
-    WiggleAll(1, "ExtraStabilize") -- Iterations, FromWhere
-    
-		-- Note the third parameter uses the global value instead of the local value here...
-    SetClashImportance(1)
-		--ShakeSelected("ExtraStabilizePosesOfSelectedScoreParts")
-    ShakeSelected("ExtraStabilize")
-
-	end
-	
-	SetClashImportance(1)
-  --WiggleAll(3, "StabilizePosesOfSelectedScoreParts") -- Iterations, FromWhere
-  WiggleAll(3, "Stabilize") -- Iterations, FromWhere
-  recentbest.Restore() -- will keep current if best
-
-end -- function StabilizeOnePoseOfSelectedScoreParts(l_StartSegment, l_EndSegment)
-function FuseBestScorePartPose() -- was Fuze()
-  -- Called from Rebuild1SegmentRangeSetWithManySegmentRanges() above
+end -- function Step11_WiggleAll(l_ClashImportance, l_FromWhere)
+function Step12_FuseBestScorePartPose() -- was Fuze()
+  -- Called from Step3_Rebuild1SegmentRangeSet() above
 
 	Fuse1(0.3, 0.6) -- ClashImp_Before, ClashImp_After
   Fuse3()
@@ -6783,40 +6773,40 @@ function FuseBestScorePartPose() -- was Fuze()
 	Fuse2(0.7, 0.5) -- ClashImportance_Before, ClashImportance_After
   Fuse3()
 	Fuse1(0.07, 1) -- ClashImp_Before, ClashImp_After
-	
-end -- function FuseBestScorePartPose()
+  
+end -- function Step12_FuseBestScorePartPose()
 function Fuse1(l_ClashImportanceBefore, l_ClashImportanceAfter)
-  -- Called from FuseBestScorePartPose() above
+  -- Called from Step12_FuseBestScorePartPose() above
 
 	SetClashImportance(l_ClashImportanceBefore)
-	ShakeSelected("Fuse1")
+	Step6_ShakeSelected("Fuse1")
 	
   SetClashImportance(l_ClashImportanceAfter)
-  WiggleAll(1, "Fuse1") -- Iterations, FromWhere
+  Step11_WiggleAll(1, "Fuse1") -- Iterations, FromWhere
   
   recentbest.Restore() -- will keep current if best
 	
 end -- function Fuse1(l_ClashImportanceBefore, l_ClashImportanceAfter)
 function Fuse2(l_ClashImportance_Before, l_ClashImportance_After)
-  -- Called from FuseBestScorePartPose() above
+  -- Called from Step12_FuseBestScorePartPose() above
 
 	SetClashImportance(l_ClashImportance_Before)
-  WiggleAll(1, "Fuse2") -- Iterations, FromWhere
+  Step11_WiggleAll(1, "Fuse2") -- Iterations, FromWhere
 	
   SetClashImportance(1)
-  WiggleAll(1, "Fuse2") -- Iterations, FromWhere
+  Step11_WiggleAll(1, "Fuse2") -- Iterations, FromWhere
 	
   SetClashImportance(l_ClashImportance_After)
-  WiggleAll(1, "Fuse2") -- Iterations, FromWhere
+  Step11_WiggleAll(1, "Fuse2") -- Iterations, FromWhere
   
   recentbest.Restore() -- will keep current if best
 
 end -- function Fuse2(l_ClashImportanceBefore, l_ClashImportanceAfter)
 function Fuse3()
-  -- Called from FuseBestScorePartPose() above
+  -- Called from Step12_FuseBestScorePartPose() above
 
   SetClashImportance(1)
-  WiggleAll(3, "Fuse3") -- Iterations, FromWhere
+  Step11_WiggleAll(3, "Fuse3") -- Iterations, FromWhere
 
   recentbest.Restore() -- will keep current if best
 
@@ -6825,7 +6815,7 @@ end -- function Fuse2(l_ClashImportanceBefore, l_ClashImportanceAfter)
 -- ...end of My Favorite Functions.
 -- Start of Clean Up functions...
 function CleanUp(l_ErrorMessage)
-  -- Called from Rebuild1PuzzleForManyRuns() above or xpcall() below
+  -- Called from Step1_Rebuild1Puzzle() above or xpcall() below
 	
 	print("Cleaning up: Restoring Clash Importance, Initial Selection, Best Result and Secondary Structures.")
 	SetClashImportance(1)
@@ -6838,12 +6828,8 @@ function CleanUp(l_ErrorMessage)
 		save.LoadSecondaryStructure()
 	end
 
-	-- Reset the Selected Segments back to the way they were before we started this program...
-	selection.DeselectAll()
-	if g_OrigSelectedSegmentRanges ~= nil then
-		-- g_OrigSelectedSegmentRanges is populated before we call Rebuild1PuzzleForManyRuns()...
-		CleanUpSelectedSegmentRanges(g_OrigSelectedSegmentRanges)
-	end
+	CleanUpSelectedSegmentRanges()
+  
 	if l_ErrorMessage ~= nil then
 		print(l_ErrorMessage)
 	end
@@ -6851,7 +6837,7 @@ function CleanUp(l_ErrorMessage)
   DisplayEndOfScriptStatistics()
     
 end -- function CleanUp(l_ErrorMessage)
-function CleanUpSelectedSegmentRanges(l_SegmentRangesTable) -- was SetSelection()
+function CleanUpSelectedSegmentRanges() -- was SetSelection()
   -- Called from CleanUp() above
   -- Reset the Selected Segments back to the way they were before we started this program...
 
@@ -6861,12 +6847,13 @@ function CleanUpSelectedSegmentRanges(l_SegmentRangesTable) -- was SetSelection(
 	-- }
 	selection.DeselectAll()
 
-	if l_SegmentRangesTable ~= nil then
+  -- g_OriginallySelectedSegmentRanges is populated in DisplayDetailsOfIncludedSegments() way above
+	if g_OriginallySelectedSegmentRanges ~= nil then
     
-		for l_SetIndex = 1, #l_SegmentRangesTable do
+		for l_SetIndex = 1, #g_OriginallySelectedSegmentRanges do
       
-			local l_StartSegment = l_SegmentRangesTable[l_SetIndex][sst_StartSegment]
-			local l_EndSegment = l_SegmentRangesTable[l_SetIndex][sst_EndSegment]
+			local l_StartSegment = g_OriginallySelectedSegmentRanges[l_SetIndex][sst_StartSegment]
+			local l_EndSegment = g_OriginallySelectedSegmentRanges[l_SetIndex][sst_EndSegment]
 			selection.SelectRange(l_StartSegment, l_EndSegment)
       
 		end
@@ -6930,7 +6917,7 @@ function ScriptDocumentation()
 	1. Can be used in design puzzles, has mutate options for that.
 	2. For each selected segment range, the script will only "recompute the next" (attempt another?) rebuild if there has been enough gain. Is this true? What exactly does this mean?
 	3. It will not atttempt to rebuild the exact same selected segments a second time. Really?
-	4. It will not try a FuseBestScorePartPose if the loss is too great depending on the size of the rebuild.
+	4. It will not try a Step12_FuseBestScorePartPose if the loss is too great depending on the size of the rebuild.
 	5. It will not attempt to rebuild frozen or locked segments.
 	6. User can specify what segments of the protein to work on.
 	7. User can select to keep intact or ignore disulfide bonds (thanks Brow42).
@@ -6939,7 +6926,7 @@ function ScriptDocumentation()
 	10. User can skip X number of worst scoring segment ranges (handy after a crash).
 	11. It breaks off rebuild attempts if no chance of success.
 	12. It works on puzzles even if the score is < -1000000 (but will be slower).
-	13. FuseBestScorePartPose and StabilizePosesOfSelectedScoreParts can be suppressed (this is the default, if the score is negative from the start)
+	13. Step12_FuseBestScorePartPose and StabilizePosesOfSelectedScoreParts can be suppressed (this is the default, if the score is negative from the start)
 	14. User can specify to disable bands when rebuilding and enable them afterwards.
 	NEW in version 2
 	15. User can choose which ScoreParts will be stabilized.
@@ -6964,7 +6951,7 @@ function ScriptDocumentation()
 	2.7.0 Added option to disable slow filters on design puzzles.
 	2.8.0 Added more general way to disable slow filters on design puzzles.
 	2.8.1 Fixed filter problem when high bonus.
-	2.8.2 Add call to CleanUp after Rebuild1PuzzleForManyRuns stops normally.
+	2.8.2 Add call to CleanUp after Step1_Rebuild1Puzzle stops normally.
 	3.0.0 Made a Remix version in the same source.  Really? A search in this file for "remix" turns up nada.
 	3.0.1 Fixed density weight computation if filters are active.
 
@@ -6973,8 +6960,8 @@ function ScriptDocumentation()
 end -- function ScriptDocumentation()
 -- ...end of Clean Up functions.
 
-xpcall(Rebuild1PuzzleForManyRuns, CleanUp) -- run in protected mode, so we can fail gracefully, by calling CleanUp()...
---Rebuild1PuzzleForManyRuns() -- Call Rebuild1PuzzleForManyRuns() directly when debugging to more
+xpcall(Step1_Rebuild1Puzzle, CleanUp) -- run in protected mode, so we can fail gracefully, by calling CleanUp()...
+--Step1_Rebuild1Puzzle() -- Call Step1_Rebuild1Puzzle() directly when debugging to more
 --                                  easily find the program line that caused an exception / program abort.
 --                                  It makes it more obvious where the error occured.
 --CleanUp()
