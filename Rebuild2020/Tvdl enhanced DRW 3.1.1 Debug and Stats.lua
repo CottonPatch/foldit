@@ -162,6 +162,7 @@ function DefineGlobalVariables()
 	if g_UserSelected_ClashImportanceFactor < 0.99 then
 		CheckCI() -- now AskUserToCheckClashImportance()
 	end
+	g_UserSelected_EndRunAfterRebuildingWithThisManyConsecutiveSegments = 4 -- was maxLen
 	g_UserSelected_MaxNumberOf_SegmentRanges_ToRebuild_ThisRunCycle = 0 -- was reBuild
 	g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan =
 		(g_SegmentCount_WithoutLigands - (g_SegmentCount_WithoutLigands % 4)) / 4
@@ -171,7 +172,7 @@ function DefineGlobalVariables()
 	g_UserSelected_Mutate_ClashImportance = 0.9
 	g_UserSelected_Mutate_SphereRadius = 8 -- Angstroms
 	g_UserSelected_NumberOfSegmentRangesToSkip = 0 -- set to any value other than 0, to debug related code
-	g_UserSelected_NumberOfRunCycles = 5 -- 10 is plenty, 5 is usually enough for most tests
+	g_UserSelected_NumberOfRunCycles = 10 -- 10 is plenty, 5 is usually enough for most tests
   if g_bDebugMode == true then
     g_UserSelected_NumberOfRunCycles = 5 -- is high enough for debug mode
   end
@@ -182,7 +183,6 @@ function DefineGlobalVariables()
     500 then
 		g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan = 500
 	end
-	g_UserSelected_ResetToStartValueAfterRebuildingWithThisManyConsecutiveSegments = 4 -- was maxLen
  	g_UserSelected_SketchBookPuzzle_MinimumGainForSave = 0
 	g_UserSelected_SkipFuseBestScorePartPose_IfCurrentRebuild_LosesMoreThan = 
 		(g_SegmentCount_WithoutLigands - (g_SegmentCount_WithoutLigands % 4)) / 4
@@ -190,7 +190,7 @@ function DefineGlobalVariables()
 		g_UserSelected_SkipFuseBestScorePartPose_IfCurrentRebuild_LosesMoreThan = 30
 	end
 	g_UserSelected_StartingNumberOf_SegmentRanges_ToRebuild_PerRunCycle = 4
-	g_UserSelected_StartRebuildingWithThisManyConsecutiveSegments = 2 -- was minLen
+	g_UserSelected_StartRunRebuildingWithThisManyConsecutiveSegments = 2 -- was minLen
 	g_UserSelected_WiggleFactor = 1
   g_with_segments_x_thru_y = "" -- For log file reporting; Example: " w/segments 1-3"
 
@@ -212,7 +212,7 @@ function DefineGlobalVariables()
     g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan = 50
   end  
 	g_RequiredNumberOfConsecutiveSegments = 
-    g_UserSelected_StartRebuildingWithThisManyConsecutiveSegments
+    g_UserSelected_StartRunRebuildingWithThisManyConsecutiveSegments
 	g_UserSelected_SegmentRangesAllowedToBeRebuiltTable = {{1, g_SegmentCount_WithoutLigands}}
   
   ------------------------------------------------------------
@@ -546,7 +546,7 @@ function SetupLocalDebugFuntions()
     end
     return l_bIsMutable
   end 
-	structure.MutateSidechainsAll = function(l_Iterations) 
+	structure.MutateSideChainsAll = function(l_Iterations) 
     current.RandomlyChange_g_Debug_CurrentEnergyScore()
   end
 	structure.MutateSidechainsSelected = function(l_Iterations) 
@@ -604,8 +604,8 @@ end -- function RoundTo(l_DirtyFloat, l_RoundTo)
 function PrettyNumber(l_DirtyFloat)
   -- Called from DefineGlobalVariables(), 
   --             DisplayPuzzleProperties(),
-  --             RebuildSelectedSegmentsForMax3Attempts() and 
-  --             2 places in Rebuild1SegmentRangeSetWithManySegmentRanges()...
+  --             Step5_RebuildSelectedSegments() and 
+  --             2 places in Step3_Rebuild1SegmentRangeSet()...
   
   -- This is the new version of RoundToThirdDecimal()...
   
@@ -619,7 +619,7 @@ function GetPoseTotalScore()
   return(Score())
 end
 function DisplayEndOfRunStatistics()
-  -- Called from Rebuild1PuzzleForManyRuns()
+  -- Called from Step1_Rebuild1Puzzle()
   
   local l_Stats_Run_EndTime = os.clock()
   local l_Stats_Run_ElaspedMinutes = (l_Stats_Run_EndTime - g_Stats_Run_StartTime) / 60
@@ -807,7 +807,7 @@ function DisplayEndOfRunStatistics()
     PaddedString(" (" ..
     PaddedNumber(g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected /
                  g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected * 100, 4, 2) .. "%)", 9))
-  print("MutateSidechainsAll      " .. 
+  print("MutateSideChainsAll      " .. 
     PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsAll, 9, 3) .. "" ..
     PaddedString("(" ..
     PaddedNumber(g_Stats_Run_TotalPointsGained_MutateSidechainsAll /
@@ -1130,7 +1130,7 @@ function DisplayEndOfScriptStatistics()
     PaddedString(" (" ..
     PaddedNumber(g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected /
                  g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected * 100, 4, 2) .. "%)", 9))
-  print("MutateSidechainsAll      " .. 
+  print("MutateSideChainsAll      " .. 
     PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsAll, 9, 3) .. "" ..
     PaddedString("(" ..
     PaddedNumber(g_Stats_Script_TotalPointsGained_MutateSidechainsAll /
@@ -1311,7 +1311,8 @@ function SaveBest()
   end
 end
 WF=1 -- New WiggleFactor
-function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now ShakeSelected, WiggleAll, WiggleSelected
+function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeSelected, Step12_WiggleAll,
+  --                                                                Step7_WiggleSelected
   
   if how==nil then how="wa" end
   if iters==nil then iters=3 end
@@ -1912,7 +1913,7 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now ShakeSelecte
    
   end -- if onlyselected then
   
-end -- function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now ShakeSelected, WiggleAll, WiggleS
+end -- function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeSelected, Step12_WiggleAll, WiggleS
 function SegmentListToSet(list)
     local result={}
     local f=0
@@ -2147,7 +2148,7 @@ end
 Stackmin=60
 StackMarks={}
 StackPos=60
-function PushPosition()
+function PushPosition() -- now QuickSaveStack_SaveCurrentSolution()
     if StackPos==100 then
         print("Position stack overflow, exiting")
         exit()
@@ -2155,7 +2156,7 @@ function PushPosition()
     save.Quicksave(StackPos)
     StackPos=StackPos+1
 end
-function PopPosition()
+function PopPosition() -- now QuickSaveStack_LoadLastSavedSolution()
     if StackPos==60 then
         print("Position stack underflow, exiting")
         exit()
@@ -2163,11 +2164,11 @@ function PopPosition()
     StackPos=StackPos-1
     save.Quickload(StackPos)
 end
-function PushMarkPosition()
+function PushMarkPosition() -- now not used
     StackMarks[#StackMarks+1]=StackPos
     PushPosition()
 end
-function PopMarkPosition()
+function PopMarkPosition() -- now not used
     if #StackMarks == 0 then
         print("No marked position found, just popping")
     else
@@ -2176,14 +2177,14 @@ function PopMarkPosition()
     end
     PopPosition()
 end
-function GetTopPosition()
+function GetTopPosition() -- now not used
     if StackPos==60 then
         print("No top position on the stack, exiting")
         exit()
     end
     save.Quickload(StackPos-1)
 end
-function ClrTopPosition()
+function ClrTopPosition() -- now QuickSaveStack_RemoveLastSavedSolution()
     if StackPos > 60 then StackPos=StackPos-1 end
 end
 -- Start of module for bridgechecking
@@ -2324,7 +2325,7 @@ function reFuze(scr,slot)
     end
     return scr
 end
-function Fuze(slot,prefun,postfun,globshake) -- now FuseBestScorePartPose()
+function Fuze(slot,prefun,postfun,globshake) -- now Step14_FuseBestScorePartPose()
     local scr=Score()
     if slot == nil then slot=4 save.Quicksave(slot) end
 
@@ -2402,29 +2403,42 @@ function AllLoop() -- now ConvertAllSegmentsToLoops()
         structure.SetSecondaryStructureSelected("L")
     end
 end
-function qStab() -- now StabilizeOnePoseOfSelectedScoreParts()  
-    -- called from DeepRebuild() -- now Rebuild1SegmentRangeSetWithManySegmentRanges() way below
+function qStab() -- now Step11_Stabilize1PoseOfSelectedScoreParts()  
+    -- called from DeepRebuild() -- now Step3_Rebuild1SegmentRangeSet() way below
     
     -- Do not accept qstab losses
-    local curscore=Score()
-    PushPosition()
+    local curscore = Score() -- now GetPoseTotalScore()
+    
+    PushPosition() -- now QuickSaveStack_SaveCurrentSolution()
+    
     CI(0.1)
     Wiggle("s",1,nil,true,"qStab1") --shake only selected part
+    
     if InQstab then
         CI(1)
-        doMutate("During qStab") -- now MutateSideChainsOfSelectedSegments() and MutateSideChainsAll()
+        doMutate("During qStab") -- now Step8_MutateSideChainsOfSelectedSegments() and
+        --                              Step8b_MutateSideChainsAll()
     end
+    
     if fastQstab==false then
         CI(0.4)
         Wiggle("wa",1,nil,nil,"qStab2")
         CI(1)
         Wiggle("s",1,nil,localshakes,"qStab3")
     end
+    
     CI(1)
-    recentbest.Save()
+    
+    recentbest.Save() -- Why?!!!
     Wiggle(nil,nil,nil,nil,"qStab4")
-    recentbest.Restore() -- will keep current if best
-    if Score() < curscore then PopPosition() else ClrTopPosition() end
+    recentbest.Restore() -- Why?!!!
+    
+    if Score() < curscore then
+      PopPosition() -- now QuickSaveStack_LoadLastSavedSolution()
+    else 
+      ClrTopPosition() -- now QuickSaveStack_RemoveLastSavedSolution()
+    end
+    
 end -- function qStab() 
 function Cleanup(err)
         
@@ -2701,8 +2715,8 @@ function FindWorst(firsttime) -- now Populate_g_XLowestScoringSegmentRangesTable
     end
 end -- FindWorst()
 -- Rebuild section
-function localRebuild(maxiters) -- now RebuildSelectedSegmentsForMax3Attempts()
-  -- Called from ReBuild() now Rebuild1SegmentRangeForManyRounds() below
+function localRebuild(maxiters) -- now Step5_RebuildSelectedSegments()
+  -- Called from ReBuild() now Step4_Rebuild1SegmentRange() below
   -- Calls structure.RebuildSelected() foldit code
   
   local l_TimeBefore = os.clock()
@@ -2789,10 +2803,11 @@ function localRebuild(maxiters) -- now RebuildSelectedSegmentsForMax3Attempts()
     return false
   end
     
-end -- function localRebuild(maxiters); now RebuildSelectedSegmentsForMax3Attempts()
-function ReBuild(ss,se,tries) -- now Rebuild1SegmentRangeForManyRounds()
-  -- Called from DeepRebuild() now Rebuild1SegmentRangeSetWithManySegmentRanges() way below
-  -- Calls localRebuild() now RebuildSelectedSegmentsForMax3Attempts() above
+end -- function localRebuild(maxiters); now Step5_RebuildSelectedSegments()
+function ReBuild(ss,se,tries) -- now Step4_Rebuild1SegmentRange()
+  -- Called from DeepRebuild() now Step3_Rebuild1SegmentRangeSet() way below
+  -- Calls localRebuild() now Step5_RebuildSelectedSegments() above
+  
   l_StartSegment = ss
   l_EndSegment = se
   
@@ -2824,7 +2839,7 @@ function ReBuild(ss,se,tries) -- now Rebuild1SegmentRangeForManyRounds()
     -- Important!!!
     -- Important!!!
     -- Important!!!      
-    done = localRebuild(try) -- above; now RebuildSelectedSegmentsForMax3Attempts()
+    done = localRebuild(try) -- above; now Step5_RebuildSelectedSegments()
     -- Important!!!
     -- Important!!!
     -- Important!!!      
@@ -2878,13 +2893,14 @@ function ReBuild(ss,se,tries) -- now Rebuild1SegmentRangeForManyRounds()
       
       if AfterRB then -- if mutate after rebuild...
         PushPosition() --save the current position for next round
-        doMutate("AfterRebuild") -- now MutateSideChainsOfSelectedSegments() and MutateSideChainsAll()
+        doMutate("AfterRebuild") -- now Step8_MutateSideChainsOfSelectedSegments() and
+        --                              Step8b_MutateSideChainsAll()
       end
       
       -- Important!!!
       -- Important!!!
       -- Important!!!
-      SaveScores(ss,se,try) -- now Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields
+      SaveScores(ss,se,try) -- now Step9_CheckForScorePartImprovements
       -- Important!!!
       -- Important!!!
       -- Important!!!
@@ -2910,7 +2926,7 @@ function ReBuild(ss,se,tries) -- now Rebuild1SegmentRangeForManyRounds()
 	  
   return Foundone
   
-end -- function ReBuild(ss,se,tries); now Rebuild1SegmentRangeForManyRounds()
+end -- function ReBuild(ss,se,tries); now Step4_Rebuild1SegmentRange()
 -- end rebuild section
 -- section to compute segmentscore(part)s
 function getPartscore(ss,se,attr) -- now Get_ScorePart_Score()
@@ -2930,9 +2946,9 @@ function getPartscore(ss,se,attr) -- now Get_ScorePart_Score()
     end
     return s
 end
-function InitWORKONbool() -- now see Rebuild1PuzzleForManyRuns()
+function InitWORKONbool() -- now see Step1_Rebuild1Puzzle()
     WORKONbool= -- now g_bSegmentsToRebuildBooleanTable[]
-      SegmentSetToBool( -- see Rebuild1PuzzleForManyRuns()
+      SegmentSetToBool( -- see Step1_Rebuild1Puzzle()
         WORKON) -- now 
 
   -- Differences between the "WORKON/WORKONbool" tables and the "areas" table:
@@ -3014,7 +3030,7 @@ function ClearScores() -- now Populate_g_ScorePart_Scores_Table()
     end
     slotScr={}
 end
-function SaveScores(ss,se,RBnr) -- Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields
+function SaveScores(ss,se,RBnr) -- Step9_CheckForScorePartImprovements
     local scr={} -- now l_ActiveScorePartsScoreTable[]
     for i=1,#ScoreParts do -- now g_ScorePartsTable[]
         if ScoreParts[i][3] then
@@ -3035,8 +3051,8 @@ function SaveScores(ss,se,RBnr) -- Update_g_ScorePart_Scores_Table_ScorePart_Sco
     end
     SaveBest()
 end
-function ListSlots()--Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTotalScore_And_...
-  -- was Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTotalScore_And_FirstInString()
+function ListSlots() -- now FindUniqueScorePartPoses()
+  -- was FindUniqueScorePartPoses()
   --Give overview of slot occupation
   --And sets which slots to process
     local Donelist={} -- now l_ScorePartScoresDoneStatusTable[]
@@ -3151,7 +3167,7 @@ function FindAreas() -- now Add_Loop_Helix_And_Sheet_Segments_To_SegmentRangesTa
 end
 firstRBseg=0
 lastRBseg=0
-function MutateSel(maxitter, l_FromWhere) -- now MutateSideChainsOfSelectedSegments()
+function MutateSel(maxitter, l_FromWhere) -- now Step8_MutateSideChainsOfSelectedSegments()
   if maxitter == nil then maxitter=2 end
   local l_TimeBefore = os.clock()
     
@@ -3212,33 +3228,41 @@ function MutateSel(maxitter, l_FromWhere) -- now MutateSideChainsOfSelectedSegme
   g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected + 1    
     
 end
-function MutateAll(l_FromWhere) -- now MutateSideChainsAll()
+function MutateAll(l_FromWhere) -- now Step8b_MutateSideChainsAll()
     selection.SelectAll()
     MutateSel(maxitter, l_FromWhere)
 end
-function doMutate(l_FromWhere) -- now MutateSideChainsOfSelectedSegments() and MutateSideChainsAll()
+function doMutate(l_FromWhere) -- now Step8_MutateSideChainsOfSelectedSegments() and
+  --                                  Step8b_MutateSideChainsAll()
     if not HASMUTABLE then return end
+    
     -- Do not accept loss if mutating
     local curscore=Score()
     PushPosition()
+    
     CI(MutateCI)
     Bridgesave()
     if MUTRB then
         selection.DeselectAll()
         selection.SelectRange(firstRBseg,lastRBseg)
-        MutateSel(nil, l_FromWhere) -- now MutateSideChainsOfSelectedSegments()
+        MutateSel(nil, l_FromWhere) -- now Step8_MutateSideChainsOfSelectedSegments()
     elseif MUTSur then
         SelectAround(firstRBseg,lastRBseg,MutSphere)
-        MutateSel(nil, l_FromWhere) -- now MutateSideChainsOfSelectedSegments()
+        MutateSel(nil, l_FromWhere) -- now Step8_MutateSideChainsOfSelectedSegments()
     else
-        MutateAll(l_FromWhere) -- now MutateSideChainsAll()
+        MutateAll(l_FromWhere) -- now Step8b_MutateSideChainsAll()
     end
     Bridgerestore()
-    if Score() < curscore then PopPosition() else ClrTopPosition() end
+    
+    if Score() < curscore then 
+      PopPosition() 
+    else 
+      ClrTopPosition()
+    end
 end
-function DeepRebuild() -- now Rebuild1SegmentRangeSetWithManySegmentRanges()
-  -- Called from DRcall() now Rebuild1RunWithManySegmentRangeSets() below
-  -- Calls ReBuild() now Rebuild1SegmentRangeForManyRounds() way above
+function DeepRebuild() -- now Step3_Rebuild1SegmentRangeSet()
+  -- Called from DRcall() now Step2_Rebuild1Run() below
+  -- Calls ReBuild() now Step4_Rebuild1SegmentRange() way above
   
   local ss=Score()
   print("Deep"..action.." started at score: "..round3(ss))
@@ -3276,7 +3300,7 @@ function DeepRebuild() -- now Rebuild1SegmentRangeSetWithManySegmentRanges()
       -- Important!!!
       -- Important!!!
       -- Important!!!      
-      if ReBuild(s,e,rebuilds) == true then -- way above; now Rebuild1SegmentRangeForManyRounds()        
+      if ReBuild(s,e,rebuilds) == true then -- way above; now Step4_Rebuild1SegmentRange()        
       -- Important!!!
       -- Important!!!
       -- Important!!!        
@@ -3294,9 +3318,7 @@ function DeepRebuild() -- now Rebuild1SegmentRangeSetWithManySegmentRanges()
           end
         end
         
-        ListSlots() -- now Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTotalScore_An
-        -- now
-        -- Update_g_ScorePart_Scores_Table_StringOfScorePartNumbersWithSamePoseTotalScore_And_FirstInString
+        ListSlots() -- now FindUniqueScorePartPoses()
         
         for r = 1, #Scores do -- now g_ScorePartScoresTable[]
           
@@ -3320,7 +3342,7 @@ function DeepRebuild() -- now Rebuild1SegmentRangeSetWithManySegmentRanges()
             -- Important!!!
             -- Important!!!
             -- Important!!!
-            -- See Update_g_ScorePart_Scores_Table_ScorePart_Score_And_PoseTotalScore_Fields() way above 
+            -- See Step9_CheckForScorePartImprovements() way above 
             -- for the corresponding save.Quicksave(l_ScorePart_Number) -- "Save"
                 
             local l_SphereRadius = 12
@@ -3335,7 +3357,7 @@ function DeepRebuild() -- now Rebuild1SegmentRangeSetWithManySegmentRanges()
               -- Important!!!
               -- Important!!!
               -- Important!!!
-              qStab() -- now StabilizeOnePoseOfSelectedScoreParts() way above
+              qStab() -- now Step11_Stabilize1PoseOfSelectedScoreParts() way above
               -- Important!!!
               -- Important!!!
               -- Important!!!
@@ -3362,7 +3384,8 @@ function DeepRebuild() -- now Rebuild1SegmentRangeSetWithManySegmentRanges()
             -- Important!!!
             -- Important!!!
             -- Important!!!
-              doMutate("AfterQstab") -- now MutateSideChainsOfSelectedSegments() and MutateSideChainsAll
+              doMutate("AfterQstab") -- now Step8_MutateSideChainsOfSelectedSegments() and
+              --                            Step8b_MutateSideChainsAll
             -- Important!!!
             -- Important!!!
             -- Important!!!
@@ -3419,17 +3442,19 @@ function DeepRebuild() -- now Rebuild1SegmentRangeSetWithManySegmentRanges()
         if not skipfuze and ss1-Score() < maxlossbeforefuze*(e-s+1)/3 then
             print("Fuzing best position.")
             if not AfterQstab and BeFuze then
-              doMutate("BeforeFuze") -- now MutateSideChainsOfSelectedSegments() and MutateSideChainsAll()
+              doMutate("BeforeFuze") -- now Step8_MutateSideChainsOfSelectedSegments() and
+              --                            Step8b_MutateSideChainsAll()
             end
             save.Quicksave(4)
             
             if savebridges then              
-              Fuze(4,Bridgesave,Bridgerestore,localshakes)
+              Fuze(4,Bridgesave,Bridgerestore,localshakes) -- now Step14_FuseBestScorePartPose()
             else
-              Fuze(4,nil,nil,localshakes)
+              Fuze(4,nil,nil,localshakes) -- now Step14_FuseBestScorePartPose()
             end
             if AfterFuze then
-              doMutate("AfterFuze") -- now MutateSideChainsOfSelectedSegments() and MutateSideChainsAll()
+              doMutate("AfterFuze") -- now Step8_MutateSideChainsOfSelectedSegments() and
+              --                           Step8b_MutateSideChainsAll()
             end
         end -- if not skipfuze and ss1-Score() < maxlossbeforefuze*(e-s+1)/3 then
         
@@ -3488,10 +3513,10 @@ function DeepRebuild() -- now Rebuild1SegmentRangeSetWithManySegmentRanges()
     save.LoadSecondaryStructure()
   end
   
-end -- function DeepRebuild(); now Rebuild1SegmentRangeSetWithManySegmentRanges()
-function DRcall(how) -- now Rebuild1RunWithManySegmentRangeSets()
-  -- Called from DRW() way below; now Rebuild1PuzzleForManyRuns()
-  -- Calls DeepRebuild() above; now Rebuild1SegmentRangeSetWithManySegmentRanges()
+end -- function DeepRebuild(); now Step3_Rebuild1SegmentRangeSet()
+function DRcall(how) -- now Step2_Rebuild1Run()
+  -- Called from DRW() way below; now Step1_Rebuild1Puzzle()
+  -- Calls DeepRebuild() above; now Step3_Rebuild1SegmentRangeSet()
   
   if how=="drw" then
     
@@ -3507,7 +3532,7 @@ function DRcall(how) -- now Rebuild1RunWithManySegmentRangeSets()
       -- Important!!!
       -- Important!!!
       -- Important!!!      
-      DeepRebuild() -- see above; now Rebuild1SegmentRangeSetWithManySegmentRanges()
+      DeepRebuild() -- see above; now Step3_Rebuild1SegmentRangeSet()
       -- Important!!!
       -- Important!!!
       -- Important!!!      
@@ -3843,8 +3868,8 @@ reBuildmore=1 --increased by every main cycle
 rebuilds=15 --how many rebuilds to try, set at least 10!
 rebuildCI=0 --clash importance while rebuild
 len=6 --find worst segments part
-minLen=2 --or specify minimum len -- now g_UserSelected_StartRebuildingWithThisManyConsecutiveSegments
-maxLen=4 --and maximim len -- now g_UserSelected_ResetToStartValueAfterRebuildingWithThisManyConsecutiveSegm
+minLen=2 -- now g_UserSelected_StartRunRebuildingWithThisManyConsecutiveSegments
+maxLen=4 -- now g_UserSelected_EndRunAfterRebuildingWithThisManyConsecutiveSegments
 -- New options
 maxnrofRuns=5 -- 40 -- Set it very high if you want to run forever
 Runnr=0
@@ -3897,9 +3922,9 @@ end
 -- MAIN PROGRAM
 firstDRWcall=true
 DRWstartscore=0
-function DRW() -- now Rebuild1PuzzleForManyRuns()
+function DRW() -- now Step1_Rebuild1Puzzle()
   -- Called from global code at bottom of script.
-  -- Calls DRcall() now Rebuild1RunWithManySegmentRangeSets() way above
+  -- Calls DRcall() now Step2_Rebuild1Run() way above
   
   DefineGlobalVariables()
 
@@ -3907,7 +3932,7 @@ function DRW() -- now Rebuild1PuzzleForManyRuns()
       printOptions("Tvdl enhanced "..progname..DRWVersion) -- now DisplayUserSelectedOptions()
       firstDRWcall=false
   end
-  InitWORKONbool() -- now see Rebuild1PuzzleForManyRuns()
+  InitWORKONbool() -- now see Step1_Rebuild1Puzzle()
   DRWstartscore=Score()
   if nrskip > 0 then
       local sreBuild=reBuild
@@ -3938,7 +3963,7 @@ function DRW() -- now Rebuild1PuzzleForManyRuns()
     -- Important!!!
     -- Important!!!
     -- Important!!!      
-    DRcall("drw") -- way above; now Rebuild1RunWithManySegmentRangeSets()
+    DRcall("drw") -- way above; now Step2_Rebuild1Run()
     -- Important!!!
     -- Important!!!
     -- Important!!!      
@@ -3961,7 +3986,7 @@ function DRW() -- now Rebuild1PuzzleForManyRuns()
 
   Cleanup()
 
-end -- function DRW() -- now Rebuild1PuzzleForManyRuns()
+end -- function DRW() -- now Step1_Rebuild1Puzzle()
 if Score() < 4000 then
     local adjust=true
     if HASDENSITY then
@@ -3987,7 +4012,7 @@ if AskDRWOptions() then -- now AskUserToSelectRebuildOptions()
     -- Important!!!
     -- Important!!!
     -- Important!!!
-    --DRW() -- above; now Rebuild1PuzzleForManyRuns()
+    --DRW() -- above; now Step1_Rebuild1Puzzle()
     -- Important!!!
     -- Important!!!
     -- Important!!!
