@@ -582,18 +582,18 @@ function DefineGlobalVariables()
     --  1805b Coronavirus, 
 		print("\nCurrent score including bonus points, because some" ..
            " or all of the bonus conditions have already been met: " ..
-             l_ScoreWithPotentialBonusPoints ..
+             PaddedNumber(l_ScoreWithPotentialBonusPoints, 1, 3) ..
           "\n - Score without bonus points: " ..
-             l_ScoreWithoutPotentialBonusPoints ..
+             PaddedNumber(l_ScoreWithoutPotentialBonusPoints, 1, 3) ..
           "\n = Bonus points earned already: " ..
              g_UserSelected_MaximumPotentialBonusPoints)
   elseif g_UserSelected_MaximumPotentialBonusPoints < 0 then
     -- I don't know what to display here...
 		print("\nPotential score, including bonus points," ..
            " when and if bonus conditions are met: " ..
-             l_ScoreWithPotentialBonusPoints ..
+             PaddedNumber(l_ScoreWithPotentialBonusPoints, 1, 3) ..
           "\n - Score without potential bonus points: " ..
-             l_ScoreWithoutPotentialBonusPoints ..
+             PaddedNumber(l_ScoreWithoutPotentialBonusPoints, 1, 3) ..
           "\n = Potential bonus points to gain," ..
            " when and if bonus conditions are met: " ..
              g_UserSelected_MaximumPotentialBonusPoints)
@@ -2310,8 +2310,8 @@ function DisplayPuzzleProperties()
       math.abs(tonumber(l_Current_PoseTotalScore)
              - tonumber(l_Score_TotalOfAllSegmentsIncludingLigands)
              - 8000) -- why 8000?
-		-- print("PoseTotalScore " .. l_Current_PoseTotalScore .. 
-    --      " ComputedScore " .. l_ComputedScore .. "")
+		-- print("PoseTotalScore " .. PaddedNumber(l_Current_PoseTotalScore, 1, 3) .. 
+    --      " ComputedScore " .. PaddedNumber(l_ComputedScore, 1, 3) .. "")
 		g_bProbableSymmetryPuzzle = l_ComputedScore > 2
 		if g_bProbableSymmetryPuzzle == true then
 			print("  Puzzle is a symmetry puzzle or has bonuses")
@@ -2323,7 +2323,7 @@ function DisplayPuzzleProperties()
            " Ligand scoring is active in ScorePart (slot) 6.")
   end 
   
-  print("  Starting score " .. l_Current_PoseTotalScore)
+  print("  Starting score " .. PaddedNumber(l_Current_PoseTotalScore, 1, 3))
 
 end -- DisplayPuzzleProperties()
 function DisplayUserSelectedMutateOptions()
@@ -2997,7 +2997,7 @@ function CheckForLowStartingScore()
 		return -- score is high enough for now...
   end
 
-	print("\n  Since the starting score of " .. l_Current_PoseTotalScore ..
+	print("\n  Since the starting score of " .. PaddedNumber(l_Current_PoseTotalScore, 1, 3) ..
          " is less than " .. l_LowScore .. " points, to speed things up, we will temporarily")
   print("  skip stabilizing all score part poses and fusing best score part pose" ..
          " until the score increases above " .. l_LowScore .. " points.")
@@ -3904,7 +3904,7 @@ function DisplayEndOfScriptStatistics()
   print("------------------------ ------------------  ----------------  -------  ------------------")
     
   local l_Score_AtEndOf_Script = g_Score_ScriptBest
-	print("\nStarting Score: " .. g_Score_AtStartOf_Script ..
+	print("\nStarting Score: " .. PaddedNumber(g_Score_AtStartOf_Script, 1, 3) ..
         "\nPoints Gained: " .. PaddedNumber((l_Score_AtEndOf_Script - g_Score_AtStartOf_Script), 1, 3) ..
         "\nFinal Score: " .. PaddedNumber(l_Score_AtEndOf_Script, 1, 3) ..
         "\nElapsed Time " .. PaddedNumber(l_Stats_Script_ElaspedMinutes, 5, 3) .. " minutes or " ..
@@ -5708,7 +5708,7 @@ function Step3_Rebuild1SegmentRangeSet() -- was DeepRebuild()
             -- Mutate: 61, 6, 11, 14
             -- Fuse best score part pose: .001, .002
             --print("Stabilized score: " .. 
-            --  l_Current_ImprovedScorePart_PoseTotalScore ..
+            --  PaddedNumber(l_Current_ImprovedScorePart_PoseTotalScore, 1, 3) ..
             --  " from slot: " .. l_ScorePart_Number)
             l_Best_ImprovedScorePart_Number = l_ScorePart_Number
             l_Best_ImprovedScorePart_Text = g_ScorePartText
@@ -6135,7 +6135,15 @@ function Step5_RebuildSelectedSegments(l_StartSegment, l_EndSegment) -- was loca
       l_bStructureChanged = true
     end      
     
-    if l_ScoreImprovement >= .001 then      
+    if l_ScoreImprovement > 0 then
+      SaveBest() -- <-- Updates g_Score_ScriptBest
+      g_Stats_Run_TotalPointsGained_RebuildSelected =
+      g_Stats_Run_TotalPointsGained_RebuildSelected + l_ScoreImprovement
+      g_Stats_Run_SuccessfulAttempts_RebuildSelected = 
+      g_Stats_Run_SuccessfulAttempts_RebuildSelected + 1
+    end
+  
+    if l_ScoreImprovement >= .001 then
       print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" .. 
             PaddedNumber(l_ScoreImprovement, 8, 3) .. " " .. 
             PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
@@ -6143,11 +6151,6 @@ function Step5_RebuildSelectedSegments(l_StartSegment, l_EndSegment) -- was loca
             g_round_x_of_y ..
             g_with_segments_x_thru_y ..
             " Structure changed: move to next round")
-      g_Stats_Run_TotalPointsGained_RebuildSelected =
-      g_Stats_Run_TotalPointsGained_RebuildSelected + l_ScoreImprovement
-      g_Stats_Run_SuccessfulAttempts_RebuildSelected = 
-      g_Stats_Run_SuccessfulAttempts_RebuildSelected + 1
-      SaveBest() -- <-- Updates g_Score_ScriptBest
           
     elseif l_Score_After_Rebuild == g_Score_ScriptBest then        
       print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " .. 
@@ -6218,6 +6221,14 @@ function Step6_ShakeSelected(l_FromWhere) -- was Wiggle()
   local l_Score_After_Shake = GetPoseTotalScore()
   local l_ScoreImprovement = tonumber(l_Score_After_Shake) - tonumber(g_Score_ScriptBest)
   
+  if l_ScoreImprovement > 0 then
+    SaveBest() -- <-- Updates g_Score_ScriptBest
+    g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected =
+    g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected + l_ScoreImprovement
+    g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected =
+    g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected + 1
+  end
+  
   if l_ScoreImprovement >= .001 then      
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
           PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
@@ -6227,11 +6238,6 @@ function Step6_ShakeSelected(l_FromWhere) -- was Wiggle()
           g_with_segments_x_thru_y ..
           g_ScorePartText ..
           l_ClashImportanceText)        
-    g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected =
-    g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected + l_ScoreImprovement
-    g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected =
-    g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected + 1
-    SaveBest() -- <-- Updates g_Score_ScriptBest
     
   elseif l_Score_After_Shake == g_Score_ScriptBest then    
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
@@ -6298,6 +6304,15 @@ function Step7_WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_From
   
   local l_Score_After_Wiggle = GetPoseTotalScore()
   local l_ScoreImprovement = tonumber(l_Score_After_Wiggle) - tonumber(g_Score_ScriptBest)
+  
+  if l_ScoreImprovement > 0 then
+    SaveBest() -- <-- Updates g_Score_ScriptBest
+    g_Stats_Run_TotalPointsGained_WiggleSelected =
+    g_Stats_Run_TotalPointsGained_WiggleSelected + l_ScoreImprovement
+    g_Stats_Run_SuccessfulAttempts_WiggleSelected =
+    g_Stats_Run_SuccessfulAttempts_WiggleSelected + 1
+  end
+
   if l_ScoreImprovement >= .001 then      
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
           PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
@@ -6311,12 +6326,6 @@ function Step7_WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_From
           g_ScorePartText ..
           l_ClashImportanceText)
         
-    g_Stats_Run_TotalPointsGained_WiggleSelected =
-    g_Stats_Run_TotalPointsGained_WiggleSelected + l_ScoreImprovement
-    g_Stats_Run_SuccessfulAttempts_WiggleSelected =
-    g_Stats_Run_SuccessfulAttempts_WiggleSelected + 1
-    SaveBest() -- <-- Updates g_Score_ScriptBest
-    
   elseif l_Score_After_Wiggle == g_Score_ScriptBest then
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
           "         " ..
@@ -6405,6 +6414,15 @@ function Step8_MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, 
   
   l_Score_After_Mutate = GetPoseTotalScore()
   local l_ScoreImprovement = tonumber(l_Score_After_Mutate) - tonumber(g_Score_ScriptBest)
+  
+  if l_ScoreImprovement > 0 then
+    SaveBest() -- <-- Updates g_Score_ScriptBest
+    g_Stats_Run_TotalPointsGained_MutateSidechainsSelected =
+    g_Stats_Run_TotalPointsGained_MutateSidechainsSelected + l_ScoreImprovement
+    g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected =
+    g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected + 1
+  end
+  
   if l_ScoreImprovement >= .001 then      
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
           PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
@@ -6413,13 +6431,7 @@ function Step8_MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, 
           g_round_x_of_y ..
           g_with_segments_x_thru_y ..
           g_ScorePartText)
-    
-    g_Stats_Run_TotalPointsGained_MutateSidechainsSelected =
-    g_Stats_Run_TotalPointsGained_MutateSidechainsSelected + l_ScoreImprovement
-    g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected =
-      g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected + 1
-    SaveBest() -- <-- Updates g_Score_ScriptBest
-    
+        
   elseif l_Score_After_Mutate == g_Score_ScriptBest then
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
           "         " ..
@@ -6479,6 +6491,15 @@ function Step8b_MutateSideChainsAll(l_FromWhere) -- was doMutate() + MutateAll()
   
   l_Score_After_Mutate = GetPoseTotalScore()
   local l_ScoreImprovement = tonumber(l_Score_After_Mutate) - tonumber(g_Score_ScriptBest)
+  
+  if l_ScoreImprovement > 0 then
+    SaveBest() -- <-- Updates g_Score_ScriptBest
+    g_Stats_Run_TotalPointsGained_MutateSidechainsAll =
+    g_Stats_Run_TotalPointsGained_MutateSidechainsAll + l_ScoreImprovement
+    g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll =
+    g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll + 1
+  end
+  
   if l_ScoreImprovement >= .001 then      
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
           PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
@@ -6486,13 +6507,7 @@ function Step8b_MutateSideChainsAll(l_FromWhere) -- was doMutate() + MutateAll()
           l_FromWhere .. ":2xMutateSidechainsAll" ..
           g_round_x_of_y ..
           g_ScorePartText)
-    
-    g_Stats_Run_TotalPointsGained_MutateSidechainsAll =
-    g_Stats_Run_TotalPointsGained_MutateSidechainsAll + l_ScoreImprovement
-    g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll =
-    g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll + 1
-    SaveBest() -- <-- Updates g_Score_ScriptBest
-    
+        
   elseif l_Score_After_Mutate == g_Score_ScriptBest then
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
           "         " ..
@@ -6702,6 +6717,15 @@ function Step11_WiggleAll(l_Iterations, l_FromWhere) -- was Wiggle()
   
   local l_Score_After_Wiggle = GetPoseTotalScore()
   local l_ScoreImprovement = tonumber(l_Score_After_Wiggle) - tonumber(g_Score_ScriptBest)
+  
+  if l_ScoreImprovement > 0 then
+    SaveBest() -- <-- Updates g_Score_ScriptBest
+    g_Stats_Run_TotalPointsGained_WiggleAll =
+    g_Stats_Run_TotalPointsGained_WiggleAll + l_ScoreImprovement
+    g_Stats_Run_SuccessfulAttempts_WiggleAll =
+    g_Stats_Run_SuccessfulAttempts_WiggleAll + 1
+  end
+  
   if l_ScoreImprovement >= .001 then      
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
           PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
@@ -6712,13 +6736,6 @@ function Step11_WiggleAll(l_Iterations, l_FromWhere) -- was Wiggle()
           g_ScorePartText ..
           l_ClashImportanceText)
        
-    local l_SecondsUsed = 0
-    g_Stats_Run_TotalPointsGained_WiggleAll =
-    g_Stats_Run_TotalPointsGained_WiggleAll + l_ScoreImprovement
-    g_Stats_Run_SuccessfulAttempts_WiggleAll =
-    g_Stats_Run_SuccessfulAttempts_WiggleAll + 1
-    SaveBest() -- <-- Updates g_Score_ScriptBest
-    
   elseif l_Score_After_Wiggle == g_Score_ScriptBest then
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
           "         " ..
