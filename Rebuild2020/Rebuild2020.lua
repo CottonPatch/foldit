@@ -3986,7 +3986,7 @@ function DisplayXLowestScoringSegmentRanges() -- was PrintAreas()
 	print(l_ListOfSegmentRanges)
 
 end -- DisplayXLowestScoringSegmentRanges()
-function DisulfideBonds_CheckIfWeNeedToRestoreSolutionWithThemIntact()
+function DisulfideBonds_CheckIfWeNeedToRestoreSolutionWithThemIntact() -- was Bridgerestore()
   -- Called from 4 functions...
 	if g_bUserSelected_KeepDisulfideBondsIntact == false then
 		-- User does not care if disulfide bonds break, so...
@@ -4035,7 +4035,7 @@ function DisulfideBonds_GetCount()
 	return l_Count
   
 end -- function DisulfideBonds_GetCount()
-function DisulfideBonds_RememberSolutionWithThemIntact()
+function DisulfideBonds_RememberSolutionWithThemIntact() -- was Bridgesave()
   -- Called from 4 functions...
   
 	if g_bUserSelected_KeepDisulfideBondsIntact == false then
@@ -5980,7 +5980,6 @@ function Step5_RebuildSelectedSegments(l_StartSegment, l_EndSegment) -- was loca
             g_round_x_of_y ..
             g_with_segments_x_thru_y ..
             " No change")
-      
     else
       -- We allow any loss of points here...
       local l_Sign = "+"
@@ -6057,20 +6056,20 @@ function Step6_ShakeSelected(l_FromWhere) -- was Wiggle()
           PaddedString("+" .. PaddedNumber(l_ScoreImprovement, 1, 3), 10) ..
           PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
           l_FromWhere .. ":1xShakeSidechainsSelected" ..
+          l_ClashImportanceText ..
           g_round_x_of_y ..
           g_with_segments_x_thru_y ..
-          g_ScorePartText ..
-          l_ClashImportanceText)
+          g_ScorePartText)
     
   elseif l_Score_After_Shake == g_Score_ScriptBest then    
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
       "          " ..
       PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
       l_FromWhere .. ":1xShakeSidechainsSelected" ..
+      l_ClashImportanceText ..
       g_round_x_of_y ..
       g_with_segments_x_thru_y ..
       g_ScorePartText ..
-      l_ClashImportanceText ..
       " No change")
         
   else
@@ -6078,10 +6077,10 @@ function Step6_ShakeSelected(l_FromWhere) -- was Wiggle()
           "          " ..
           PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
           l_FromWhere .. ":1xShakeSidechainsSelected" ..
+          l_ClashImportanceText ..
           g_round_x_of_y ..
           g_with_segments_x_thru_y ..
-          g_ScorePartText ..
-          l_ClashImportanceText .. " " ..
+          g_ScorePartText .. " " ..
           PaddedNumber(l_Score_After_Shake, 1, 3))    
   end
   
@@ -6139,10 +6138,10 @@ function Step7_WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_From
           l_WF_Iterations .. "xWiggleSelected(" ..
           "Bb=" .. tostring(l_bWBackbone) .. "," ..
           "SC=" .. tostring(l_bWSideChains) .. ")" ..
+          l_ClashImportanceText ..
           g_round_x_of_y ..
           g_with_segments_x_thru_y ..
-          g_ScorePartText ..
-          l_ClashImportanceText)
+          g_ScorePartText)
         
   elseif l_Score_After_Wiggle == g_Score_ScriptBest then
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
@@ -6152,10 +6151,10 @@ function Step7_WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_From
           l_WF_Iterations .. "xWiggleSelected(" ..
           "Bb=" .. tostring(l_bWBackbone) .. "," ..
           "SC=" .. tostring(l_bWSideChains) .. ")" ..
+          l_ClashImportanceText ..
           g_round_x_of_y ..
           g_with_segments_x_thru_y ..
           g_ScorePartText ..
-          l_ClashImportanceText ..
           " No change")
         
   else
@@ -6166,10 +6165,10 @@ function Step7_WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_From
           l_WF_Iterations .. "xWiggleSelected(" ..
           "Bb=" .. tostring(l_bWBackbone) .. "," ..
           "SC=" .. tostring(l_bWSideChains) .. ")" ..
+          l_ClashImportanceText ..
           g_round_x_of_y ..
           g_with_segments_x_thru_y ..
-          g_ScorePartText ..
-          l_ClashImportanceText .. " " ..
+          g_ScorePartText .. " " ..
           PaddedNumber(l_Score_After_Wiggle, 1, 3))
   end
   
@@ -6463,7 +6462,7 @@ function Step9_CheckForScorePartImprovements(l_StartSegment, l_EndSegment) -- wa
   local l_DebugMe = 1
 
 end -- Step9_CheckForScorePartImprovements()
-function Step10_WorkMoreOnImprovedScorePartPoses(l_StartSegment, l_EndSegment)
+function Step10_WorkMoreOnImprovedScorePartPoses(l_StartSegment, l_EndSegment) -- was in DeepRebuild()
   -- Called from Step3_Rebuild1SegmentRangeSet above
   -- Calls Step11_Stabilize1PoseOfSelectedScoreParts below
   --       Step6_ShakeSelected above
@@ -6856,10 +6855,10 @@ function Step12_WiggleAll(l_Iterations, l_FromWhere) -- was Wiggle()
           PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
           l_FromWhere .. ":" ..
           l_Iterations .. "xWiggleAll(Bb,SC)" ..
+          l_ClashImportanceText ..
           g_round_x_of_y ..
           g_with_segments_x_thru_y ..
-          g_ScorePartText ..
-          l_ClashImportanceText)
+          g_ScorePartText)
        
   elseif l_Score_After_Wiggle == g_Score_ScriptBest then
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
@@ -6867,10 +6866,10 @@ function Step12_WiggleAll(l_Iterations, l_FromWhere) -- was Wiggle()
           PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
           l_FromWhere .. ":" .. 
           l_Iterations .. "xWiggleAll(Bb,SC)" ..
+          l_ClashImportanceText ..
           g_round_x_of_y ..
           g_with_segments_x_thru_y ..
           g_ScorePartText ..
-          l_ClashImportanceText ..
           " No change")
   
   else
@@ -6879,10 +6878,10 @@ function Step12_WiggleAll(l_Iterations, l_FromWhere) -- was Wiggle()
           PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
           l_FromWhere .. ":" .. 
           l_Iterations .. "xWiggleAll(Bb,SC)" ..
+          l_ClashImportanceText ..
           g_round_x_of_y ..
           g_with_segments_x_thru_y ..
-          g_ScorePartText ..
-          l_ClashImportanceText .. " " ..
+          g_ScorePartText .. " " ..
           PaddedNumber(l_Score_After_Wiggle, 1, 3))
   end
   
