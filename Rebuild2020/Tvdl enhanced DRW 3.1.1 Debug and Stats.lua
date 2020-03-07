@@ -1175,6 +1175,7 @@ function DisplayEndOfScriptStatistics()
 end -- function DisplayEndOfScriptStatistics()
 g_bDebugMode = false
 if _G ~= nil then
+  print("Warning: Running in debug mode!")
   g_bDebugMode = true
   SetupLocalDebugFuntions()
 end  
@@ -1449,7 +1450,6 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
               " No score change")
             
       elseif l_Score_After_Wiggle < g_Score_ScriptBest then
-        -- Undo this WiggleSelected because it decreased our score...(not yet!)
         print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
               "         " ..
               PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
@@ -1462,8 +1462,6 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
               g_ScorePartText ..
               l_ClashImportanceText .. 
               " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
-              --" Rejected:" .. PaddedNumber(l_ScoreImprovement, 1, 3))
-        -- argh! recentbest.Restore()
       end
       g_Stats_Run_TotalSecondsUsed_WiggleSelected =
       g_Stats_Run_TotalSecondsUsed_WiggleSelected + l_SecondsUsed
@@ -1525,7 +1523,6 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
               " No score change")
             
       elseif l_Score_After_Wiggle < g_Score_ScriptBest then
-        -- Undo this WiggleSelected because it decreased our score...(not yet!)
         print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
               "         " ..
               PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
@@ -1538,8 +1535,6 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
               g_ScorePartText ..
               l_ClashImportanceText .. 
               " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
-              --" Rejected:" .. PaddedNumber(l_ScoreImprovement, 1, 3))
-        -- argh! recentbest.Restore()
       end
       g_Stats_Run_TotalSecondsUsed_WiggleSelected =
       g_Stats_Run_TotalSecondsUsed_WiggleSelected + l_SecondsUsed
@@ -1601,7 +1596,6 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
               " No score change")
             
       elseif l_Score_After_Wiggle < g_Score_ScriptBest then
-        -- Undo this WiggleSelected because it decreased our score...(not yet!)
         print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
               "         " ..
               PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
@@ -1614,8 +1608,6 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
               g_ScorePartText ..
               l_ClashImportanceText .. 
               " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
-              --" Rejected:" .. PaddedNumber(l_ScoreImprovement, 1, 3))
-        -- argh! recentbest.Restore()
       end
       g_Stats_Run_TotalSecondsUsed_WiggleSelected =
       g_Stats_Run_TotalSecondsUsed_WiggleSelected + l_SecondsUsed
@@ -1744,7 +1736,6 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
               " No score change")
       
       elseif l_Score_After_Wiggle < g_Score_ScriptBest then
-        -- Undo this WiggleAll because it decreased our score... (not here!)
         print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
               "         " ..
               PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
@@ -1753,8 +1744,6 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
               g_ScorePartText ..
               l_ClashImportanceText ..
               " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
-              --" Rejected:" .. PaddedNumber(l_ScoreImprovement, 1, 3))
-        -- argh! recentbest.Restore()
       end
       g_Stats_Run_TotalSecondsUsed_WiggleAll =
       g_Stats_Run_TotalSecondsUsed_WiggleAll + l_SecondsUsed
@@ -1815,7 +1804,6 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
               " No score change")
       
       elseif l_Score_After_Wiggle < g_Score_ScriptBest then
-        -- Undo this WiggleAll because it decreased our score... (not here!)
         print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
               "         " ..
               PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
@@ -1828,7 +1816,6 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
               l_ClashImportanceText ..
               " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
               --" Rejected:" .. PaddedNumber(l_ScoreImprovement, 1, 3))
-        -- argh! recentbest.Restore()
       end
       g_Stats_Run_TotalSecondsUsed_WiggleAll =
       g_Stats_Run_TotalSecondsUsed_WiggleAll + l_SecondsUsed
@@ -1889,7 +1876,6 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
               " No score change")
       
       elseif l_Score_After_Wiggle < g_Score_ScriptBest then
-        -- Undo this WiggleAll because it decreased our score... (not here!)
         print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
               "         " ..
               PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
@@ -1901,8 +1887,6 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
               g_ScorePartText ..
               l_ClashImportanceText ..
               " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
-              --" Rejected:" .. PaddedNumber(l_ScoreImprovement, 1, 3))
-        -- argh! recentbest.Restore()
       end
       g_Stats_Run_TotalSecondsUsed_WiggleAll =
       g_Stats_Run_TotalSecondsUsed_WiggleAll + l_SecondsUsed
@@ -2273,7 +2257,7 @@ SetPuzzleProperties()
 -- Picks up all gains by using recentbest
 function GetRB(prefun,postfun) -- get recent best pose
   
-  if RBScore() > Score() then
+  if RBScore() > Score() then -- I don't think you have to check the score, calling recentbest.Restore() will do this for us.
     
     if prefun ~= nil then prefun() end
     
@@ -2284,12 +2268,12 @@ function GetRB(prefun,postfun) -- get recent best pose
   end
     
 end
-function FuzeEnd(prefun,postfun)
+function Fuze3(prefun,postfun) -- was FuzeEnd()
     if prefun ~= nil then prefun() end
     CI(1)
-  -- Wiggle("wa",1,nil,nil,"FuzeEnd")
-  -- Wiggle("s",1,nil,nil,"FuzeEnd")
-    Wiggle(nil,nil,nil,nil,"FuzeEnd")
+  -- Wiggle("wa",1,nil,nil,"Fuze3")
+  -- Wiggle("s",1,nil,nil,"Fuze3")
+    Wiggle(nil,nil,nil,nil,"Fuze3")
     
     GetRB(prefun,postfun) -- <<<---
     
@@ -2315,7 +2299,7 @@ function Fuze2(ci1,ci2,prefun,postfun)
     Wiggle("wa",1,nil,nil,"Fuze2b")
     if postfun ~= nil then postfun() end
 end
-function reFuze(scr,slot)
+function reFuze(scr,slot) -- now FuseUpdateSlot4()
     local s=Score()
     if s<scr then
         save.Quickload(slot) -- <<<---
@@ -2326,42 +2310,39 @@ function reFuze(scr,slot)
     return scr
 end
 function Fuze(slot,prefun,postfun,globshake) -- now Step14_FuseBestScorePartPose()
-    local scr=Score()
-    if slot == nil then slot=4 save.Quicksave(slot) end
 
+    local scr=Score()
+    if slot == nil then
+      slot=4
+      save.Quicksave(slot)
+    end
     recentbest.Save()
-    Fuze1(0.3,0.6,prefun,postfun,globshake)
     
-    FuzeEnd(prefun,postfun) -- <<<---
-    
+    Fuze1(0.3,0.6,prefun,postfun,globshake)    
+    Fuze3(prefun,postfun) -- <<<---    
     scr=reFuze(scr,slot)
-    Fuze2(0.3,1,prefun,postfun)
     
-    GetRB(prefun,postfun) -- <<<---
-    
+    Fuze2(0.3,1,prefun,postfun)    
+    GetRB(prefun,postfun) -- <<<---    
     SaveBest()
     scr=reFuze(scr,slot)
-    Fuze1(0.05,1,prefun,postfun,globshake)
     
-    GetRB(prefun,postfun) -- <<<---
-    
+    Fuze1(0.05,1,prefun,postfun,globshake)    
+    GetRB(prefun,postfun) -- <<<---    
     SaveBest()
     scr=reFuze(scr,slot)
-    Fuze2(0.7,0.5,prefun,postfun) 
     
-    FuzeEnd() -- <<<---
-    
+    Fuze2(0.7,0.5,prefun,postfun)     
+    Fuze3() -- <<<---    
     scr=reFuze(scr,slot)
-    Fuze1(0.07,1,prefun,postfun,globshake)
     
-    GetRB(prefun,postfun) -- <<<---
-    
+    Fuze1(0.07,1,prefun,postfun,globshake)    
+    GetRB(prefun,postfun) -- <<<---    
     SaveBest()
-    reFuze(scr,slot) -- <<<---
-    
-    GetRB(prefun,postfun) -- <<<---
-        
+    reFuze(scr,slot) -- <<<---    
+    GetRB(prefun,postfun) -- <<<---        
     SaveBest()
+    
 end
 -- end standard Fuze module
 -- Module setsegmentset
@@ -2429,9 +2410,9 @@ function qStab() -- now Step11_Stabilize1PoseOfSelectedScoreParts()
     
     CI(1)
     
-    recentbest.Save() -- Why?!!!
+    recentbest.Save()
     Wiggle(nil,nil,nil,nil,"qStab4")
-    recentbest.Restore() -- Why?!!!
+    recentbest.Restore()
     
     if Score() < curscore then
       PopPosition() -- now QuickSaveStack_LoadLastSavedSolution()
@@ -2781,7 +2762,6 @@ function localRebuild(maxiters) -- now Step5_RebuildSelectedSegments()
           " No Score Change")
       
   elseif l_Score_After_Rebuild < g_Score_ScriptBest then      
-    -- We allow any loss of points here...
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " .. 
           "         " .. 
           PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
@@ -2790,7 +2770,6 @@ function localRebuild(maxiters) -- now Step5_RebuildSelectedSegments()
           g_with_segments_x_thru_y ..
           " Structure changed: move to next round" ..
           " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
-    -- argh! recentbest.Restore()    
   end
   g_Stats_Run_TotalSecondsUsed_RebuildSelected = 
   g_Stats_Run_TotalSecondsUsed_RebuildSelected + l_SecondsUsed
@@ -2848,7 +2827,7 @@ function ReBuild(ss,se,tries) -- now Step4_Rebuild1SegmentRange()
     -- until done or extra_rebuilds == 0
     SaveBest() -- way above; updates g_Score_ScriptBest (bestScore) and save.Quicksave(3), but note we
                -- have never called recentbest.Restore() or save.Quickload(3) yet!!!
-               -- Well, if this was a SketchbookPuzzle, we would have called save.Quickload(3) above
+               -- Well, if this was a SketchbookPuzzle, we would have called save.Quickload(3)
                -- at the beginning of each round. Grr.
     
     if done==true then
@@ -3210,7 +3189,6 @@ function MutateSel(maxitter, l_FromWhere) -- now Step8_MutateSideChainsOfSelecte
           " No Score Change")
     
   elseif l_Score_After_Mutate < g_Score_ScriptBest then
-    -- Undo this Mutate because it decreased our score...(not yet!)
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
           "         " ..
           PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
@@ -3219,8 +3197,6 @@ function MutateSel(maxitter, l_FromWhere) -- now Step8_MutateSideChainsOfSelecte
           g_with_segments_x_thru_y ..
           g_ScorePartText ..
           " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
-          --" Rejected:" .. PaddedNumber(l_ScoreImprovement, 1, 3))
-    -- argh! recentbest.Restore()
   end
   g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected =
   g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected + l_SecondsUsed
@@ -3305,15 +3281,15 @@ function DeepRebuild() -- now Step3_Rebuild1SegmentRangeSet()
       -- Important!!!
       -- Important!!!        
      
-        if SKETCHBOOKPUZZLE == false then
+        if SKETCHBOOKPUZZLE == false then -- now g_bSketchBookPuzzle
           -- Make sure we do not miss an improvement during rebuild
-          if RBScore() > bestScore then
-              Bridgesave()
+          if RBScore() > bestScore then -- now if GetPoseTotalScore(recentbest) > g_Score_ScriptBest 
+              Bridgesave() -- now DisulfideBonds_RememberSolutionWithThemIntact()
               recentbest.Restore()
-              Bridgerestore()
-              if Score() > bestScore+0.00001 then
+              Bridgerestore() -- now DisulfideBonds_CheckIfWeNeedToRestoreSolutionWithThemIntact()
+              if Score() > bestScore+0.00001 then -- now -- if l_Score_After_Restore > g_Score_ScriptBest + 0.00001
                   print("Found a missed gain!!!")
-                  SaveScores(s,e,0)
+                  SaveScores(s, e, 0) -- now Step9_CheckForScorePartImprovements()
               end
           end
         end
@@ -3487,7 +3463,7 @@ function DeepRebuild() -- now Step3_Rebuild1SegmentRangeSet()
       --print("Gain from slots ",CurrentAll)
     end
     
-    AddDone(s,e)
+    AddDone(s,e) -- now SetSegmentsAlreadyRebuilt()
     ChkDoneList()
     
     if Score()-ss > minGain then
@@ -3871,7 +3847,7 @@ len=6 --find worst segments part
 minLen=2 -- now g_UserSelected_StartRunRebuildingWithThisManyConsecutiveSegments
 maxLen=4 -- now g_UserSelected_EndRunAfterRebuildingWithThisManyConsecutiveSegments
 -- New options
-maxnrofRuns=5 -- 40 -- Set it very high if you want to run forever
+maxnrofRuns=10 -- 40 -- Set it very high if you want to run forever
 Runnr=0
 minGain=(segCnt2-segCnt2%4)/4 -- If less gain then try the next one, else recompute
 if minGain < 40 then minGain=40 end
