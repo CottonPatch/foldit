@@ -624,7 +624,7 @@ function DefineGlobalVariables()
                     -- out the xpcall() method of calling main().
                     -- Nah, again, restoring a previous best score after resetting a puzzle would make it
                     -- difficult to test some aspects of a single puzzle many times.
-  save.Quicksave(3) -- Save
+  save.Quicksave(3) -- Save -- I doubt this is used, but whatever
   
   -----------------------------------------------------------
 	-- ...end of Temporarily Disable Condition Checking module.
@@ -655,6 +655,7 @@ function SetupLocalDebugFuntions()
  --   WiggleAll and Step7_WiggleSelected...
 	g_Debug_CurrentEnergyScore = -999999
   g_Debug_ScriptBestEnergyScore = g_Debug_CurrentEnergyScore
+  g_Debug_RecentBest = g_Debug_CurrentEnergyScore
   g_Debug_QuickSaveEnergyScore = {}
 	
 	current = {}
@@ -684,11 +685,18 @@ function SetupLocalDebugFuntions()
 				end
 			end
       
+      -- Update Scipt Best...
       g_Debug_ScriptBestEnergyScore = l_EnergyScore
       
     end
       
+    -- Update Current...
 		g_Debug_CurrentEnergyScore = l_EnergyScore
+    
+    -- Update Recent Best
+    if g_Debug_CurrentEnergyScore > g_Debug_RecentBest then
+      g_Debug_RecentBest = g_Debug_CurrentEnergyScore
+    end
     
   end
   
@@ -703,10 +711,7 @@ function SetupLocalDebugFuntions()
 		return g_Debug_CurrentEnergyScore
 	end
   recentbest.GetEnergyScore = function()
-    -- g_Debug_ScriptBestEnergyScore is always the best (although not
-    -- necessarily the most recent. Well, it's close enough for debugging.)
-    g_Debug_CurrentEnergyScore = g_Debug_ScriptBestEnergyScore
-    return g_Debug_CurrentEnergyScore
+    return g_Debug_RecentBest
   end
   
 	current.GetSegmentEnergyScore = function(l_SegmentIndex)    
@@ -736,26 +741,35 @@ function SetupLocalDebugFuntions()
 	end
 	
 	recentbest.Restore = function()
-    if g_Debug_RecentBest ~= nil then
-      local l_GetPoseTotalScore = GetPoseTotalScore()
-      if tonumber(l_GetPoseTotalScore) > tonumber(g_Debug_RecentBest) then
-        g_Debug_CurrentEnergyScore = l_GetPoseTotalScore
-      else
+    --if g_Debug_RecentBest ~= nil then -- should never be nil!
+      --local l_GetPoseTotalScore = GetPoseTotalScore()
+      --if tonumber(l_GetPoseTotalScore) > tonumber(g_Debug_RecentBest) then
+        --g_Debug_CurrentEnergyScore = l_GetPoseTotalScore
+      --else
         g_Debug_CurrentEnergyScore = g_Debug_RecentBest
-      end      
-      g_Debug_RecentBest = nil
-    else
-      -- g_Debug_ScriptBestEnergyScore is always the best (although not
-      -- necessarily the most recent. Well, it's close enough for debugging.)
-      g_Debug_CurrentEnergyScore = g_Debug_ScriptBestEnergyScore
-    end
+      --end      
+      --No!! g_Debug_RecentBest = nil
+    --else
+      -- g_Debug_ScriptBestEnergyScore is always the script
+      -- best, but not necessarily the saved recentbest.
+      --g_Debug_CurrentEnergyScore = g_Debug_ScriptBestEnergyScore
+    --end
 	end
 	recentbest.Save = function()
     -- If you say so...
-    g_Debug_RecentBest = GetPoseTotalScore()
+    g_Debug_RecentBest = tonumber(GetPoseTotalScore())
+    --no!! g_Debug_ScriptBestEnergyScore = g_Debug_RecentBest   
     
-    -- We already save the recent best as g_Debug_ScriptBestEnergyScore. Well, recent enough.
-	end
+    -- Don't we already save the recent best as g_Debug_ScriptBestEnergyScore?
+    -- Well, g_Debug_ScriptBestEnergyScore is always the *script* best, but g_Debug_RecentBest
+    -- can be less than the best pose. While working on improved ScorePart poses, we go back to
+    -- less than best poses to try to improve them. Saving a current pose to recentbest, allows
+    -- us to work on the less than best pose while its score goes up and down, whithout having
+    -- to go all the way back to the best pose if one foldit action lowers our score.
+    -- It should be noted that, if we save the current pose as recentbest and we improve the
+    -- recent best, then the recentbest will be updated with the improvements. See
+    -- RandomlyChange_g_Debug_CurrentEnergyScore() where we update recentbest if it improves.
+  end
   
 
 
@@ -768,6 +782,7 @@ function SetupLocalDebugFuntions()
     
     if g_Debug_bAllowMaxRandomness == true then
       current.RandomlyChange_g_Debug_CurrentEnergyScore()
+      return
     end
     
     -- To make things more realistic...
@@ -795,6 +810,7 @@ function SetupLocalDebugFuntions()
     
     if g_Debug_bAllowMaxRandomness == true then
       current.RandomlyChange_g_Debug_CurrentEnergyScore()
+      return
     end
 
     -- To make things more realistic...
@@ -821,12 +837,14 @@ function SetupLocalDebugFuntions()
   g_Debug_NumberOfTimesWeCalled_RebuildSelected = 0
 	structure.RebuildSelected = function(l_Iterations)
     current.RandomlyChange_g_Debug_CurrentEnergyScore()
-	end
+    return
+  end
 	g_Debug_NumberOfTimesWeCalled_ShakeSidechainsAll = 0
   structure.ShakeSidechainsAll = function(l_Iterations)
     
     if g_Debug_bAllowMaxRandomness == true then
       current.RandomlyChange_g_Debug_CurrentEnergyScore()
+      return
     end
     
     -- To make things more realistic...
@@ -854,6 +872,7 @@ function SetupLocalDebugFuntions()
     
     if g_Debug_bAllowMaxRandomness == true then
       current.RandomlyChange_g_Debug_CurrentEnergyScore()
+      return
     end
     
     -- To make things more realistic...
@@ -882,6 +901,7 @@ function SetupLocalDebugFuntions()
     
     if g_Debug_bAllowMaxRandomness == true then
       current.RandomlyChange_g_Debug_CurrentEnergyScore()
+      return
     end
     
     -- To make things more realistic...
@@ -909,6 +929,7 @@ function SetupLocalDebugFuntions()
     
     if g_Debug_bAllowMaxRandomness == true then
       current.RandomlyChange_g_Debug_CurrentEnergyScore()
+      return
     end
     
     -- To make things more realistic...
@@ -4861,7 +4882,10 @@ function QuickSaveStack_LoadLastSavedSolution() -- was PopPosition()
   
 	if g_QuickSaveStackPosition <= 60 then
 		print("Quicksave stack underflow, exiting script")
-		exit()
+    
+		--exit()
+    -- temp workaround...
+    g_QuickSaveStackPosition = 61
 	end
   
 	g_QuickSaveStackPosition = g_QuickSaveStackPosition - 1
@@ -5531,11 +5555,13 @@ function Step3_Rebuild1SegmentRangeSet() -- was DeepRebuild()
 		ConvertAllSegmentsToLoops() -- why do we do this for every range set? why not just once at top of script
     -- Remember loops are not helices. Loops are just plain swiggly lines...
 	end
-
+  save.Quicksave(3) -- I doubt this used, but whatever
+  recentbest.Save() -- Probably not needed, but whatever
+  
 	-- This is the real meat of this script...
 	-- After laboriously determining which segment ranges to work on, 
   -- we finally get to rebuild, shake and wiggle them...
-   
+  
 	-- g_XLowestScoringSegmentRangesTable={StartSegment=1, EndSegment=2}
 	-- g_ScorePartsTable={ScorePart_Number=1, ScorePart_Name=2, l_bScorePart_IsActive=3, LongName=4}
 	-- g_ScorePartScoresTable={ScorePart_Number=1, ScorePart_Score=2, PoseTotalScore=3,
@@ -5564,10 +5590,8 @@ function Step3_Rebuild1SegmentRangeSet() -- was DeepRebuild()
     -- Important!!!
     -- Important!!!
     
-    local l_Score_After_RebuildOneSegmentRangeManyTimes = GetPoseTotalScore()
-    
     if l_NumberOfTimesStructureChanged > 0 then
-    
+      
       -- Important!!!
       -- Important!!!
       -- Important!!!
@@ -5575,27 +5599,9 @@ function Step3_Rebuild1SegmentRangeSet() -- was DeepRebuild()
       -- Important!!!
       -- Important!!!
       -- Important!!!
-      
-      local l_Score_After_SeveralChangesToSegmentRange = GetPoseTotalScore()
-       
-      local l_PotentialPointLoss = tonumber(l_Score_Before_SeveralChangesToSegmentRange) -
-                                   tonumber(l_Score_After_SeveralChangesToSegmentRange)
-                                    
-      local l_MaxLossAllowed = g_UserSelected_RejectEachRebuildWithAPotentialLossExceedingXPoints * 
-                              (l_EndSegment - l_StartSegment + 1) / 3
-                              
+     
       if g_bUserSelected_FuseBestScorePartPose == true then
-        
-        if l_PotentialPointLoss > l_MaxLossAllowed then
-          
-          print("The most improved score part pose's potential loss of " .. 
-              l_PotentialPointLoss .. " points is " ..
-              "greater than Max Loss Allowed of " .. PaddedNumber(l_MaxLossAllowed, 1, 1) .. "." ..
-              " Restoring resent best pose for Fuse..." )
-          recentbest.Restore()
-          
-        end
-          
+                  
         -- The following checks if g_bUserSelected_MutateAfterStabilizePosesOfSelectedScoreParts ==
         -- false because if it were true, then we would have already performed the mutate above, after
         -- the StabilizePosesOfSelectedScoreParts.
@@ -5613,36 +5619,13 @@ function Step3_Rebuild1SegmentRangeSet() -- was DeepRebuild()
           
         end -- if g_bUserSelected_MutateBeforeFuseBestScorePartPose == true and g_bUserSelected_Mut...
         
-        -- Continue preparing to Fuse the best score part pose...
-        
-        save.Quicksave(4) -- "Save"; Well, I don't think slot 4 means the same as it used to. 
-        --                         I need to check the original code to see if it is still needed.
-        --                         The name for ScorePart/Slot 4 is "Total", which is the total of 
-        --                         all score part scores.
-        if g_bUserSelected_DuringFuse_ShakeAndWiggleSelectedAndNearbySegments == true then
-          
-          local l_SphereRadius = 12
-          SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
-          g_with_segments_x_thru_y = " Wthn" .. l_SphereRadius .. "AngstrmsOf" ..
-                                     "Segs:" .. l_StartSegment .. "-" .. l_EndSegment              
-          
-        else
-          
-          selection.DeselectAll()
-          selection.SelectRange(l_StartSegment, l_EndSegment)            
-          g_with_segments_x_thru_y = " Segments:" .. l_StartSegment .. "-" .. l_EndSegment
-          
-        end
-        
         -- Important!!!
         -- Important!!!
         -- Important!!!
-        Step14_FuseBestScorePartPose() -- below; was Fuze()
+        Step14_FuseBestScorePartPose(l_StartSegment, l_EndSegment) -- below; was Fuze()
         -- Important!!!
         -- Important!!!
         -- Important!!!
-        
-        save.Quicksave(4) -- Save fused and hopefully improved pose in ScorePart/Slot 4; why?
         
         if g_bUserSelected_MutateAfterFuseBestScorePartPose == true then
           
@@ -5650,7 +5633,6 @@ function Step3_Rebuild1SegmentRangeSet() -- was DeepRebuild()
           -- Important!!!
           -- Important!!!
           Step8_MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, "AfterFuse") -- below
-            --"AfterFuseBestScorePartPose") -- below
           -- Important!!!
           -- Important!!!
           -- Important!!!
@@ -5659,7 +5641,10 @@ function Step3_Rebuild1SegmentRangeSet() -- was DeepRebuild()
       end -- if g_bUserSelected_FuseBestScorePartPose == true then
       
     end -- if l_bStructureChanged == true then
-      
+    
+    --SaveBest() -- SaveBest() would have already been called from Shake, Wiggle or Mutate above.
+    save.Quickload(3) -- Why not call recentbest.Restore() here instead of save.Quickload(3)? Whatev.
+    
     local l_bBondsBroke = DisulfideBonds_DidAnyOfThemBreak()
     
 		if g_bUserSelected_KeepDisulfideBondsIntact == true and l_bBondsBroke == true then
@@ -5680,7 +5665,7 @@ function Step3_Rebuild1SegmentRangeSet() -- was DeepRebuild()
     -- Important!!!
     -- Important!!!
     -- Important!!!
-		SetSegmentsAlreadyRebuilt(l_StartSegment, l_EndSegment) -- was
+		SetSegmentsAlreadyRebuilt(l_StartSegment, l_EndSegment) -- was AddDone()
     -- Important!!!
     -- Important!!!
     -- Important!!!
@@ -5769,7 +5754,7 @@ function Step4_Rebuild1SegmentRange(l_StartSegment, l_EndSegment) -- was ReBuild
 	local l_MaxRounds = 
 		g_UserSelected_MaxNumberOfRoundsToRebuildEachSegmentRangePerRunCycle -- default is 15
     
-  recentbest.Restore() -- can't hurt.
+  recentbest.Restore() -- can't hurt. just note though, this is not in the original code.
   
 	for l_Round = 1, l_MaxRounds do
    
@@ -5851,11 +5836,7 @@ function Step4_Rebuild1SegmentRange(l_StartSegment, l_EndSegment) -- was ReBuild
         -- Important!!!
         -- Important!!!
         
-      end -- if g_bUserSelected_MutateAfterRebuild == true then        
-      
-      -- new!!!
-      --recentbest.Restore() -- Don't let one of the above Shake, Wiggle or Mutate, to hide a previous
-      --                   -- score improvement.
+      end -- if g_bUserSelected_MutateAfterRebuild == true then
       
       -- We have just rebuilt (and optionally, mutated, shaked and wiggled) a single segment range
       -- for the n-th time, where n is a number from 1 to l_MaxRounds. 
@@ -5878,18 +5859,15 @@ function Step4_Rebuild1SegmentRange(l_StartSegment, l_EndSegment) -- was ReBuild
       -- Important!!!
       -- Important!!!
       
-    else -- if l_bStructureChanged == true then
+    else 
       
-      -- At this point l_bStructureChanged equals false...
+      -- l_bStructureChanged == false here!
      
       -- There was no change to the structure. At this point we stop processing this segment 
       -- range and move on to the next one...
      
       -- We will rarely enter this section anymore, now that we allow large negative scores
       -- to continue on to stabilize...
-      
-      -- new!!!
-      recentbest.Restore()
       
       if l_Round < l_MaxRounds then
         print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
@@ -5904,6 +5882,25 @@ function Step4_Rebuild1SegmentRange(l_StartSegment, l_EndSegment) -- was ReBuild
     end
    
 	end -- for l_Round = 1, l_MaxRounds do
+  
+  -- After all the rounds are done for this segment range, let's
+  -- make sure we are still working with the best pose...
+  if g_bSketchBookPuzzle == false then -- was SKETCHBOOKPUZZLE
+    -- Make sure we do not miss an improvement during rebuild
+    local Score_RecentBest = GetPoseTotalScore(recentbest)
+    local Score_PoseTotal = GetPoseTotalScore()
+    if  tonumber(Score_RecentBest) > tonumber(Score_PoseTotal) then -- was if RBScore() > bestScore
+        DisulfideBonds_RememberSolutionWithThemIntact() -- was Bridgesave()
+        recentbest.Restore()
+        DisulfideBonds_CheckIfWeNeedToRestoreSolutionWithThemIntact() -- was Bridgerestore()
+        local l_Score_After_Restore = GetPoseTotalScore()
+        if tonumber(l_Score_After_Restore) > g_Score_ScriptBest + 0.00001 then
+            -- I can't imagine this ever happening, because nothing ever gets 
+            -- past g_Score_ScriptBest!!!
+            print("Found a missed gain!!!")
+        end
+    end
+  end
   
   g_round_x_of_y = "" --<-- This will help clean up the log file, by not showing round x of y 
   --                        during parts of code, like stabilize and fuse, when we are not in
@@ -5986,15 +5983,18 @@ function Step5_RebuildSelectedSegments(l_StartSegment, l_EndSegment) -- was loca
       
     else
       -- We allow any loss of points here...
+      local l_Sign = "+"
+      if l_ScoreImprovement < 0 then
+        l_Sign = ""
+      end
       print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
             "          " .. 
             PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
             l_RebuildIterations .. "xRebuildSelected" ..
             g_round_x_of_y ..
             g_with_segments_x_thru_y ..
-            " Structure changed: move to next round" ..
-            " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
-      -- argh! recentbest.Restore()    
+            " Structure changed: move to next round " ..
+            PaddedNumber(l_Score_After_Rebuild, 1, 3))
     end
    
     if l_ScoreImprovement > 0 then
@@ -6074,7 +6074,6 @@ function Step6_ShakeSelected(l_FromWhere) -- was Wiggle()
       " No change")
         
   else
-    -- Undo this Shake because it decreased our score...(not yet!)
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
           "          " ..
           PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
@@ -6082,12 +6081,8 @@ function Step6_ShakeSelected(l_FromWhere) -- was Wiggle()
           g_round_x_of_y ..
           g_with_segments_x_thru_y ..
           g_ScorePartText ..
-          l_ClashImportanceText ..
-          " " .. PaddedNumber(l_Score_After_Shake, 1, 3))
-          --" Accepted:" .. PaddedNumber(l_ScoreImprovement, 1, 3))
-          --" Rejected:" .. PaddedNumber(l_ScoreImprovement, 1, 3))
-    -- argh! recentbest.Restore()
-    
+          l_ClashImportanceText .. " " ..
+          PaddedNumber(l_Score_After_Shake, 1, 3))    
   end
   
   if l_ScoreImprovement > 0 then
@@ -6164,7 +6159,6 @@ function Step7_WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_From
           " No change")
         
   else
-    -- Undo this WiggleSelected because it decreased our score...(not yet!)
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
           "          " ..
           PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
@@ -6175,10 +6169,8 @@ function Step7_WiggleSelected(l_Iterations, l_bWBackbone, l_bWSideChains, l_From
           g_round_x_of_y ..
           g_with_segments_x_thru_y ..
           g_ScorePartText ..
-          l_ClashImportanceText .. 
-          " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
-          --" Rejected:" .. PaddedNumber(l_ScoreImprovement, 1, 3))
-    -- argh! recentbest.Restore()
+          l_ClashImportanceText .. " " ..
+          PaddedNumber(l_Score_After_Wiggle, 1, 3))
   end
   
   if l_ScoreImprovement > 0 then
@@ -6266,17 +6258,14 @@ function Step8_MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, 
           " No change")
     
   else
-    -- Undo this Mutate because it decreased our score...(not yet!)
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
           "          " ..
           PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
           l_FromWhere .. ":2xMutateSidechainsSelected" ..
           g_round_x_of_y ..
           g_with_segments_x_thru_y ..
-          g_ScorePartText ..
-          " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
-          --" Rejected:" .. PaddedNumber(l_ScoreImprovement, 1, 3))
-    -- argh! recentbest.Restore()
+          g_ScorePartText .. " " ..
+          PaddedNumber(l_Score_After_Mutate, 1, 3))
   end
   
   if l_ScoreImprovement > 0 then
@@ -6329,6 +6318,7 @@ function Step8b_MutateSideChainsAll(l_FromWhere) -- was doMutate() + MutateAll()
           PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..      
           l_FromWhere .. ":2xMutateSidechainsAll" ..
           g_round_x_of_y ..
+          g_with_segments_x_thru_y ..
           g_ScorePartText)
         
   elseif l_Score_After_Mutate == g_Score_ScriptBest then
@@ -6337,20 +6327,19 @@ function Step8b_MutateSideChainsAll(l_FromWhere) -- was doMutate() + MutateAll()
           PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
           l_FromWhere .. ":2xMutateSidechainsAll" ..
           g_round_x_of_y ..
+          g_with_segments_x_thru_y ..
           g_ScorePartText ..
           " No change")
   
   else
-    -- Undo this Mutate because it decreased our score...(not yet!)
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
           "          " ..
           PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
           l_FromWhere .. ":2xMutateSidechainsAll" ..
           g_round_x_of_y ..
-          g_ScorePartText ..
-          " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
-          --" Rejected:" .. PaddedNumber(l_ScoreImprovement, 1, 3))
-    -- argh! recentbest.Restore()
+          g_with_segments_x_thru_y ..
+          g_ScorePartText .. " " ..
+          PaddedNumber(l_Score_After_Mutate, 1, 3))
   end
   
   if l_ScoreImprovement > 0 then
@@ -6457,8 +6446,8 @@ function Step9_CheckForScorePartImprovements(l_StartSegment, l_EndSegment) -- wa
 			g_ScorePartScoresTable[l_TableIndex][spst_ScorePart_Score] = l_NewScorePart_Score
 			g_ScorePartScoresTable[l_TableIndex][spst_PoseTotalScore] = l_Current_PoseTotalScore      
 			
-      -- Update the corresponding ScorePart FoldIt Quicksave slot with the current pose (which
-      -- may or may not have improved. Usually not.
+      -- Update the corresponding ScorePart FoldIt Quicksave slot with 
+      -- the current pose (which may or may not have improved. Usually not.
 			l_ScorePart_Number = l_ActiveScorePartsScoreTable[l_TableIndex][aspst_ScorePart_Number]
       -- Important!!!
       -- Important!!!
@@ -6498,6 +6487,8 @@ function Step10_WorkMoreOnImprovedScorePartPoses(l_StartSegment, l_EndSegment)
   -- FindUniqueScorePartPoses() to identify which ScorePart quicksave slots have the same
   -- pose. This way we don't attempt to improve the exact same pose more than once.      
   
+  local l_Score_Before_SeveralChangesToSegmentRange = g_Score_ScriptBest
+
   print("                     " ..
         "Preparing to work more on the following improved score part poses...")
   FindUniqueScorePartPoses() -- was ListSlots()     
@@ -6507,7 +6498,13 @@ function Step10_WorkMoreOnImprovedScorePartPoses(l_StartSegment, l_EndSegment)
   
   local l_bFirstInASet = false
   local l_NumberOfFirstInASets = 0
+  local l_Score_After_Quickload = 0
+  local l_Score_After_Stabilize = 0
+  local l_Score_After_Shake = 0
+  local l_Score_After_Wiggle = 0
+  local l_Score_After_Mutate = 0
   local l_Current_ImprovedScorePart_PoseTotalScore = 0
+  local l_Score_After = 0
   local l_Best_ImprovedScorePart_PoseTotalScore = -999999
   local l_Best_ImprovedScorePart_Number = 3 -- set to 3 just in case something goes horribly wrong
   local l_Best_ImprovedScorePart_Text = ""
@@ -6570,7 +6567,14 @@ function Step10_WorkMoreOnImprovedScorePartPoses(l_StartSegment, l_EndSegment)
       -- for the corresponding save.Quicksave(), "Save"
       
       -- Prepare to StabilizePosesOfSelectedScoreParts...
-      
+      l_Score_After_Quickload = 0
+      l_Score_After_Stabilize = 0
+      l_Score_After_Shake = 0
+      l_Score_After_Wiggle = 0
+      l_Score_After_Mutate = 0
+      l_Score_After_Quickload = tonumber(GetPoseTotalScore())
+      l_Current_ImprovedScorePart_PoseTotalScore = l_Score_After_Quickload
+
       local l_SphereRadius = 12
       SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
       g_with_segments_x_thru_y = " Wthn" .. l_SphereRadius .. "AngstrmsOf" ..
@@ -6588,6 +6592,11 @@ function Step10_WorkMoreOnImprovedScorePartPoses(l_StartSegment, l_EndSegment)
         -- Important!!!
         -- Important!!!
         
+        l_Score_After_Stabilize = tonumber(GetPoseTotalScore())
+        if l_Score_After_Stabilize > l_Current_ImprovedScorePart_PoseTotalScore then
+          l_Current_ImprovedScorePart_PoseTotalScore = l_Score_After_Stabilize
+        end
+        
       else
         
         -- User selected ShakeAndWiggle instead...
@@ -6598,10 +6607,27 @@ function Step10_WorkMoreOnImprovedScorePartPoses(l_StartSegment, l_EndSegment)
         -- Important!!!
         -- Important!!!
         Step6_ShakeSelected("SimpleS&W")  -- FromWhere; below
+        -- Important!!!
+        -- Important!!!
+        -- Important!!!
+        
+        l_Score_After_Shake = tonumber(GetPoseTotalScore())
+        if l_Score_After_Shake > l_Current_ImprovedScorePart_PoseTotalScore then
+          l_Current_ImprovedScorePart_PoseTotalScore = l_Score_After_Shake
+        end
+        
+        -- Important!!!
+        -- Important!!!
+        -- Important!!!
         Step7_WiggleSelected(1, false, true, "SimpleS&W") --Iterations,bWBackbone,bWSideChains,FromWhere
         -- Important!!!
         -- Important!!!
         -- Important!!!
+        
+        l_Score_After_Wiggle = tonumber(GetPoseTotalScore())
+        if l_Score_After_Wiggle > l_Current_ImprovedScorePart_PoseTotalScore then
+          l_Current_ImprovedScorePart_PoseTotalScore = l_Score_After_Wiggle
+        end
         
       end -- if g_bUserSelected_StabilizePosesOfSelectedScoreParts == true then          
       
@@ -6611,10 +6637,14 @@ function Step10_WorkMoreOnImprovedScorePartPoses(l_StartSegment, l_EndSegment)
         -- Important!!!
         -- Important!!!
         Step8_MutateSideChainsOfSelectedSegments(l_StartSegment, l_EndSegment, "AfterStabilize")
-          --"AfterStabilizePosesOfSelectedScoreParts")
         -- Important!!!
         -- Important!!!
         -- Important!!!
+        
+        l_Score_After_Mutate = tonumber(GetPoseTotalScore())
+        if l_Score_After_Mutate > l_Current_ImprovedScorePart_PoseTotalScore then
+          l_Current_ImprovedScorePart_PoseTotalScore = l_Score_After_Mutate
+        end
         
       end -- if g_bUserSelected_MutateAfterStabilizePosesOfSelectedScoreParts == true then
       
@@ -6627,7 +6657,7 @@ function Step10_WorkMoreOnImprovedScorePartPoses(l_StartSegment, l_EndSegment)
       -- Important!!!
       -- See just below in this function for the corresponding save.Quickload() "Load"
       
-      l_Current_ImprovedScorePart_PoseTotalScore = GetPoseTotalScore()
+      --No!!! l_Current_ImprovedScorePart_PoseTotalScore = GetPoseTotalScore()
       
       if tonumber(l_Current_ImprovedScorePart_PoseTotalScore) > 
             tonumber(l_Best_ImprovedScorePart_PoseTotalScore) then
@@ -6654,7 +6684,7 @@ function Step10_WorkMoreOnImprovedScorePartPoses(l_StartSegment, l_EndSegment)
       if string.len(l_StringOfScorePartNumbersWithSamePoseTotalScore) <= 2 then
         l_s = "  "
       end
-        
+      
 			l_Combined_StringOfScorePartNumbersWithSamePoseTotalScore =
       l_Combined_StringOfScorePartNumbersWithSamePoseTotalScore ..
 				l_NewLine .. PaddedNumber(l_Current_ImprovedScorePart_PoseTotalScore, 9, 3) ..
@@ -6690,14 +6720,30 @@ function Step10_WorkMoreOnImprovedScorePartPoses(l_StartSegment, l_EndSegment)
         "Found the most improved pose from score part" .. l_Plural .. 
          l_Best_ImprovedScorePart_StringOfScorePartNumbersWithSamePoseTotalScore ..
        " with a score of " .. PaddedNumber(l_Best_ImprovedScorePart_PoseTotalScore, 1, 3))         
-     
+
+  --no!local l_Score_After_SeveralChangesToSegmentRange = GetPoseTotalScore()
+  local l_Score_After_SeveralChangesToSegmentRange = l_Best_ImprovedScorePart_PoseTotalScore
+   
+  local l_PotentialPointLoss = tonumber(l_Score_Before_SeveralChangesToSegmentRange) -
+                               tonumber(l_Score_After_SeveralChangesToSegmentRange)
+  
+  local l_MaxLossAllowed = g_UserSelected_RejectEachRebuildWithAPotentialLossExceedingXPoints * 
+                          (l_EndSegment - l_StartSegment + 1) / 3
+  if l_PotentialPointLoss > l_MaxLossAllowed then
+    
+    print("The most improved score part pose's potential loss of " .. 
+        l_PotentialPointLoss .. " points is " ..
+        "greater than Max Loss Allowed of " .. PaddedNumber(l_MaxLossAllowed, 1, 1) .. "." ..
+        " Restoring resent best pose for Fuse..." )
+    recentbest.Restore()
+    
+  end
+
   local l_DebugMe = 1
   
 end -- function Step10_WorkMoreOnImprovedScorePartPoses()
 function Step11_Stabilize1PoseOfSelectedScoreParts(l_StartSegment, l_EndSegment) -- was qStab()
   -- Called from Step3_Rebuild1SegmentRangeSet() above
-
-  local l_Score_Before_Stabilize = GetPoseTotalScore()
 
   -- The following assumes that 80 to 90% of the time the pose at the beginning
   -- of this function is not the script's best pose. This is because we are
@@ -6715,6 +6761,9 @@ function Step11_Stabilize1PoseOfSelectedScoreParts(l_StartSegment, l_EndSegment)
   -- logic. In this function recentbest.Restore() will either keep the better
   -- pose from WiggleAll, or go back to the pose just before the call to WiggleAll.
   -- Still, it does not go back to the script best pose.
+  
+  local l_Score_Before_Stabilize = GetPoseTotalScore()
+  
   QuickSaveStack_SaveCurrentSolution() -- now PushPosition()
 
 	SetClashImportance(0.1)
@@ -6741,12 +6790,13 @@ function Step11_Stabilize1PoseOfSelectedScoreParts(l_StartSegment, l_EndSegment)
 	SetClashImportance(1)
   Step12_WiggleAll(3, "Stabilize") -- Iterations, FromWhere
   local l_Score_After_Wiggle = GetPoseTotalScore()
-  recentbest.Restore() -- If the WiggleAll reduced our score, go back to the post just before WiggleAll was called.
+  recentbest.Restore() -- if WiggleAll reduced our score, go back to the pose just before WiggleAll  
   
-  local l_Score_After_Stabilize = GetPoseTotalScore()
+  local l_Score_After_Restore = GetPoseTotalScore()
+
   -- If the above actions did not improve our pose, then go back to the pose 
   -- from the beginning of this function...
-  if tonumber(l_Score_After_Stabilize) < tonumber(l_Score_Before_Stabilize) then
+  if tonumber(l_Score_After_Restore) < tonumber(l_Score_Before_Stabilize) then
     QuickSaveStack_LoadLastSavedSolution() -- now PopPosition()
   else 
     QuickSaveStack_RemoveLastSavedSolution() -- now ClrTopPosition()
@@ -6807,6 +6857,7 @@ function Step12_WiggleAll(l_Iterations, l_FromWhere) -- was Wiggle()
           l_FromWhere .. ":" ..
           l_Iterations .. "xWiggleAll(Bb,SC)" ..
           g_round_x_of_y ..
+          g_with_segments_x_thru_y ..
           g_ScorePartText ..
           l_ClashImportanceText)
        
@@ -6817,23 +6868,22 @@ function Step12_WiggleAll(l_Iterations, l_FromWhere) -- was Wiggle()
           l_FromWhere .. ":" .. 
           l_Iterations .. "xWiggleAll(Bb,SC)" ..
           g_round_x_of_y ..
+          g_with_segments_x_thru_y ..
           g_ScorePartText ..
           l_ClashImportanceText ..
           " No change")
   
   else
-    -- Undo this WiggleAll because it decreased our score... (not here!)
     print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
           "          " ..
           PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
           l_FromWhere .. ":" .. 
           l_Iterations .. "xWiggleAll(Bb,SC)" ..
           g_round_x_of_y ..
+          g_with_segments_x_thru_y ..
           g_ScorePartText ..
-          l_ClashImportanceText ..
-          " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
-          --" Rejected:" .. PaddedNumber(l_ScoreImprovement, 1, 3))
-    -- argh! recentbest.Restore()
+          l_ClashImportanceText .. " " ..
+          PaddedNumber(l_Score_After_Wiggle, 1, 3))
   end
   
   if l_ScoreImprovement > 0 then
@@ -6849,46 +6899,85 @@ function Step12_WiggleAll(l_Iterations, l_FromWhere) -- was Wiggle()
   g_Stats_Run_NumberOfAttempts_WiggleAll + 1
 
 end -- function Step12_WiggleAll(l_ClashImportance, l_FromWhere)
-function Step14_FuseBestScorePartPose() -- was Fuze()
+function Step14_FuseBestScorePartPose(l_StartSegment, l_EndSegment) -- was Fuze()
   -- Called from Step3_Rebuild1SegmentRangeSet() above
+
+  -- The following assumes that 80 to 90% of the time the pose at the beginning of this function is not 
+  -- the script's best pose. See also notes at the top of Step11_Stabilize1PoseOfSelectedScoreParts().
+  
+  -- I don't know why this function uses Quicksave slot 4 and Stabilize uses the QuickSaveStack
+  -- slots 60 and above, but whatever...
+  
+  -- I also don't know why we use a combination of Quicksave slot 4 and recentbest.Save/Restore instead
+  -- of just using one or two Quicksave slots or even better, just use the QuickSaveStack instead...
+        
+  if g_bUserSelected_DuringFuse_ShakeAndWiggleSelectedAndNearbySegments == true then
+    
+    local l_SphereRadius = 12
+    SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_SphereRadius)
+    g_with_segments_x_thru_y = " Wthn" .. l_SphereRadius .. "AngstrmsOf" ..
+                               "Segs:" .. l_StartSegment .. "-" .. l_EndSegment              
+    
+  else
+    
+    selection.DeselectAll()
+    selection.SelectRange(l_StartSegment, l_EndSegment)            
+    g_with_segments_x_thru_y = " Segments:" .. l_StartSegment .. "-" .. l_EndSegment
+    
+  end
+          
+  local l_Score_During_Fuse = GetPoseTotalScore()
+  save.Quicksave(4)
+  recentbest.Save()
 
 	Fuse1(0.3, 0.6) -- ClashImp_Before, ClashImp_After
   Fuse3()
+  l_Score_During_Fuse = FuseUpdateSlot4(l_Score_During_Fuse)
+  
 	Fuse2(0.3, 1) -- ClashImportance_Before, ClashImportance_After
+  recentbest.Restore() -- Will keep current if better. Will only go back to the beginning of Fuse if worse
+  --SaveBest() -- would already have been called from ShakeSelected() or WiggleAll()
+  l_Score_During_Fuse = FuseUpdateSlot4(l_Score_During_Fuse)
   
 	Fuse1(0.05, 1) -- ClashImp_Before, ClashImp_After
+  recentbest.Restore() -- Will keep current if better. Will only go back to the beginning of Fuse if worse
+  --SaveBest() -- would already have been called from ShakeSelected() or WiggleAll()
+  l_Score_During_Fuse = FuseUpdateSlot4(l_Score_During_Fuse)
   
 	Fuse2(0.7, 0.5) -- ClashImportance_Before, ClashImportance_After
   Fuse3()
+  l_Score_During_Fuse = FuseUpdateSlot4(l_Score_During_Fuse)
+  
 	Fuse1(0.07, 1) -- ClashImp_Before, ClashImp_After
+  recentbest.Restore() -- Will keep current if better. Will only go back to the beginning of Fuse if worse
+  --SaveBest() -- would already have been called from ShakeSelected() or WiggleAll()
+  FuseUpdateSlot4(l_Score_During_Fuse) -- we don't care about the return value on this last call to update
+  recentbest.Restore() -- Will keep current if better. Will only go back to the beginning of Fuse if worse
+  --SaveBest() -- would already have been called from ShakeSelected() or WiggleAll()
   
 end -- function Step14_FuseBestScorePartPose()
 function Fuse1(l_ClashImportanceBefore, l_ClashImportanceAfter)
   -- Called from Step14_FuseBestScorePartPose() above
 
 	SetClashImportance(l_ClashImportanceBefore)
-	Step6_ShakeSelected("Fuse1")
+	Step6_ShakeSelected("Fuse1a")
 	
   SetClashImportance(l_ClashImportanceAfter)
-  Step12_WiggleAll(1, "Fuse1") -- Iterations, FromWhere
+  Step12_WiggleAll(1, "Fuse1b") -- Iterations, FromWhere
   
-  recentbest.Restore() -- will keep current if best
-	
 end -- function Fuse1(l_ClashImportanceBefore, l_ClashImportanceAfter)
 function Fuse2(l_ClashImportance_Before, l_ClashImportance_After)
   -- Called from Step14_FuseBestScorePartPose() above
 
 	SetClashImportance(l_ClashImportance_Before)
-  Step12_WiggleAll(1, "Fuse2") -- Iterations, FromWhere
+  Step12_WiggleAll(1, "Fuse2a") -- Iterations, FromWhere
 	
   SetClashImportance(1)
-  Step12_WiggleAll(1, "Fuse2") -- Iterations, FromWhere
+  Step12_WiggleAll(1, "Fuse2b") -- Iterations, FromWhere
 	
   SetClashImportance(l_ClashImportance_After)
-  Step12_WiggleAll(1, "Fuse2") -- Iterations, FromWhere
+  Step12_WiggleAll(1, "Fuse2c") -- Iterations, FromWhere
   
-  recentbest.Restore() -- will keep current if best
-
 end -- function Fuse2(l_ClashImportanceBefore, l_ClashImportanceAfter)
 function Fuse3()
   -- Called from Step14_FuseBestScorePartPose() above
@@ -6896,10 +6985,23 @@ function Fuse3()
   SetClashImportance(1)
   Step12_WiggleAll(3, "Fuse3") -- Iterations, FromWhere
 
-  recentbest.Restore() -- will keep current if best
+  recentbest.Restore() -- Will keep current if better. Will only go back to the beginning of Fuse if worse
+  --SaveBest() -- would already have been called from ShakeSelected() or WiggleAll()
 
 end -- function Fuse2(l_ClashImportanceBefore, l_ClashImportanceAfter)
 
+function FuseUpdateSlot4(l_Score_Before) -- was reFuze()
+  
+  local l_Score_After = GetPoseTotalScore()
+  if l_Score_After > l_Score_Before then
+    save.Quicksave(4)
+    return l_Score_After
+  end
+  
+  save.Quickload(4) -- it's probably already loaded, but whatever
+  return l_Score_Before
+  
+end
 -- ...end of My Favorite Functions.
 -- Start of Clean Up functions...
 function CleanUp(l_ErrorMessage)
