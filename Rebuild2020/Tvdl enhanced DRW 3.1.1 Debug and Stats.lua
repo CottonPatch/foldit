@@ -1330,7 +1330,7 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
   if onlyselected == true then
     
     -- onlyselect == true, which means only include selected segments...
-
+   
     if how == "s" then
       
       -- Shake is not considered to do much in second or more rounds
@@ -1348,50 +1348,52 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
       local l_SecondsUsed = l_TimeAfter - l_TimeBefore
       
       local l_Score_After_Shake = GetPoseTotalScore()
-      local l_ScoreImprovement = l_Score_After_Shake - g_Score_ScriptBest
-      
-      if l_Score_After_Shake > g_Score_ScriptBest then
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
-              PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
-              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+      local l_ScoreImprovement = tonumber(l_Score_After_Shake) - tonumber(g_Score_ScriptBest)
+
+      if l_ScoreImprovement >= .001 then      
+        print(PaddedNumber(l_Score_After_Shake, 9, 3) ..
+              PaddedString("+" .. PaddedNumber(l_ScoreImprovement, 1, 3), 10) ..
+              PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
               l_FromWhere .. ":1xShakeSidechainsSelected" ..
               g_round_x_of_y ..
               g_with_segments_x_thru_y ..
-              g_ScorePartText ..
-              l_ClashImportanceText)        
+              l_ClashImportanceText ..
+              g_ScorePartText)
+        
+      elseif l_Score_After_Shake == g_Score_ScriptBest then    
+        print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
+          "          " ..
+          PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+          l_FromWhere .. ":1xShakeSidechainsSelected" ..
+          l_ClashImportanceText ..
+          g_round_x_of_y ..
+          g_with_segments_x_thru_y ..
+          g_ScorePartText ..
+          " No change")
+            
+      else
+        print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
+              "          " ..
+              PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+              l_FromWhere .. ":1xShakeSidechainsSelected" ..
+              l_ClashImportanceText ..
+              g_round_x_of_y ..
+              g_with_segments_x_thru_y ..
+              g_ScorePartText .. " " ..
+              PaddedNumber(l_Score_After_Shake, 1, 3))    
+      end
+      
+      if l_ScoreImprovement > 0 then
+        SaveBest() -- <-- Updates g_Score_ScriptBest
         g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected =
         g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected + l_ScoreImprovement
         g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected =
         g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected + 1
-        SaveBest() -- <-- Updates g_Score_ScriptBest
-        
-      elseif l_Score_After_Shake == g_Score_ScriptBest then    
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
-          "         " ..
-          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-          l_FromWhere .. ":1xShakeSidechainsSelected" ..
-          g_round_x_of_y ..
-          g_with_segments_x_thru_y ..
-          g_ScorePartText ..
-          l_ClashImportanceText ..
-          " No score change")
-            
-      elseif l_Score_After_Shake < g_Score_ScriptBest then
-        -- Undo this Shake because it decreased our score...(not yet!)
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
-              "         " ..
-              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-              l_FromWhere .. ":1xShakeSidechainsSelected" ..
-              g_round_x_of_y ..
-              g_with_segments_x_thru_y ..
-              g_ScorePartText ..
-              l_ClashImportanceText ..
-              " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
       end
       g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected =
       g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected + l_SecondsUsed
       g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected =
-      g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected + 1                
+      g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected + 1            
       
       return
       
@@ -1416,57 +1418,60 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
       l_WF_Iterations = 2*wf*iters
       l_bWBackbone = true
       l_bWSideChains = false
-      if l_Score_After_Wiggle > g_Score_ScriptBest then
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
-              PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
-              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+      if l_ScoreImprovement >= .001 then      
+        print(PaddedNumber(l_Score_After_Wiggle, 9, 3) ..
+              PaddedString("+" .. PaddedNumber(l_ScoreImprovement, 1, 3), 10) ..
+              PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
               l_FromWhere .. ":" ..
               l_WF_Iterations .. "xWiggleSelected(" ..
               "Bb=" .. tostring(l_bWBackbone) .. "," ..
               "SC=" .. tostring(l_bWSideChains) .. ")" ..
+              l_ClashImportanceText ..
+              g_round_x_of_y ..
+              g_with_segments_x_thru_y ..
+              g_ScorePartText)
+            
+      elseif l_Score_After_Wiggle == g_Score_ScriptBest then
+        print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
+              "          " ..
+              PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+              l_FromWhere .. ":" ..
+              l_WF_Iterations .. "xWiggleSelected(" ..
+              "Bb=" .. tostring(l_bWBackbone) .. "," ..
+              "SC=" .. tostring(l_bWSideChains) .. ")" ..
+              l_ClashImportanceText ..
               g_round_x_of_y ..
               g_with_segments_x_thru_y ..
               g_ScorePartText ..
-              l_ClashImportanceText)
+              " No change")
             
+      else
+        print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
+              "          " ..
+              PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+              l_FromWhere .. ":" ..
+              l_WF_Iterations .. "xWiggleSelected(" ..
+              "Bb=" .. tostring(l_bWBackbone) .. "," ..
+              "SC=" .. tostring(l_bWSideChains) .. ")" ..
+              l_ClashImportanceText ..
+              g_round_x_of_y ..
+              g_with_segments_x_thru_y ..
+              g_ScorePartText .. " " ..
+              PaddedNumber(l_Score_After_Wiggle, 1, 3))
+      end
+      
+      if l_ScoreImprovement > 0 then
+        SaveBest() -- <-- Updates g_Score_ScriptBest
         g_Stats_Run_TotalPointsGained_WiggleSelected =
         g_Stats_Run_TotalPointsGained_WiggleSelected + l_ScoreImprovement
         g_Stats_Run_SuccessfulAttempts_WiggleSelected =
         g_Stats_Run_SuccessfulAttempts_WiggleSelected + 1
-        SaveBest() -- <-- Updates g_Score_ScriptBest
-        
-      elseif l_Score_After_Wiggle == g_Score_ScriptBest then
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
-              "         " ..
-              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-              l_FromWhere .. ":" ..
-              l_WF_Iterations .. "xWiggleSelected(" ..
-              "Bb=" .. tostring(l_bWBackbone) .. "," ..
-              "SC=" .. tostring(l_bWSideChains) .. ")" ..
-              g_round_x_of_y ..
-              g_with_segments_x_thru_y ..
-              g_ScorePartText ..
-              l_ClashImportanceText ..
-              " No score change")
-            
-      elseif l_Score_After_Wiggle < g_Score_ScriptBest then
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
-              "         " ..
-              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-              l_FromWhere .. ":" ..
-              l_WF_Iterations .. "xWiggleSelected(" ..
-              "Bb=" .. tostring(l_bWBackbone) .. "," ..
-              "SC=" .. tostring(l_bWSideChains) .. ")" ..
-              g_round_x_of_y ..
-              g_with_segments_x_thru_y ..
-              g_ScorePartText ..
-              l_ClashImportanceText .. 
-              " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
       end
       g_Stats_Run_TotalSecondsUsed_WiggleSelected =
       g_Stats_Run_TotalSecondsUsed_WiggleSelected + l_SecondsUsed
       g_Stats_Run_NumberOfAttempts_WiggleSelected =
       g_Stats_Run_NumberOfAttempts_WiggleSelected + 1
+        
      
     elseif how == "ws" then 
      
@@ -1489,52 +1494,53 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
       l_WF_Iterations = 2*wf*iters
       l_bWBackbone = false
       l_bWSideChains = true
-      if l_Score_After_Wiggle > g_Score_ScriptBest then
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
-              PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
-              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+      if l_ScoreImprovement >= .001 then      
+        print(PaddedNumber(l_Score_After_Wiggle, 9, 3) ..
+              PaddedString("+" .. PaddedNumber(l_ScoreImprovement, 1, 3), 10) ..
+              PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
               l_FromWhere .. ":" ..
               l_WF_Iterations .. "xWiggleSelected(" ..
               "Bb=" .. tostring(l_bWBackbone) .. "," ..
               "SC=" .. tostring(l_bWSideChains) .. ")" ..
+              l_ClashImportanceText ..
+              g_round_x_of_y ..
+              g_with_segments_x_thru_y ..
+              g_ScorePartText)
+            
+      elseif l_Score_After_Wiggle == g_Score_ScriptBest then
+        print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
+              "          " ..
+              PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+              l_FromWhere .. ":" ..
+              l_WF_Iterations .. "xWiggleSelected(" ..
+              "Bb=" .. tostring(l_bWBackbone) .. "," ..
+              "SC=" .. tostring(l_bWSideChains) .. ")" ..
+              l_ClashImportanceText ..
               g_round_x_of_y ..
               g_with_segments_x_thru_y ..
               g_ScorePartText ..
-              l_ClashImportanceText)
-            
+              " No change")
+      else
+        print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
+              "          " ..
+              PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+              l_FromWhere .. ":" ..
+              l_WF_Iterations .. "xWiggleSelected(" ..
+              "Bb=" .. tostring(l_bWBackbone) .. "," ..
+              "SC=" .. tostring(l_bWSideChains) .. ")" ..
+              l_ClashImportanceText .. " " ..
+              g_round_x_of_y ..
+              g_with_segments_x_thru_y ..
+              g_ScorePartText ..
+              PaddedNumber(l_Score_After_Wiggle, 1, 3))
+      end
+      
+      if l_ScoreImprovement > 0 then
+        SaveBest() -- <-- Updates g_Score_ScriptBest
         g_Stats_Run_TotalPointsGained_WiggleSelected =
         g_Stats_Run_TotalPointsGained_WiggleSelected + l_ScoreImprovement
         g_Stats_Run_SuccessfulAttempts_WiggleSelected =
         g_Stats_Run_SuccessfulAttempts_WiggleSelected + 1
-        SaveBest() -- <-- Updates g_Score_ScriptBest
-        
-      elseif l_Score_After_Wiggle == g_Score_ScriptBest then
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
-              "         " ..
-              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-              l_FromWhere .. ":" ..
-              l_WF_Iterations .. "xWiggleSelected(" ..
-              "Bb=" .. tostring(l_bWBackbone) .. "," ..
-              "SC=" .. tostring(l_bWSideChains) .. ")" ..
-              g_round_x_of_y ..
-              g_with_segments_x_thru_y ..
-              g_ScorePartText ..
-              l_ClashImportanceText ..
-              " No score change")
-            
-      elseif l_Score_After_Wiggle < g_Score_ScriptBest then
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
-              "         " ..
-              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-              l_FromWhere .. ":" ..
-              l_WF_Iterations .. "xWiggleSelected(" ..
-              "Bb=" .. tostring(l_bWBackbone) .. "," ..
-              "SC=" .. tostring(l_bWSideChains) .. ")" ..
-              g_round_x_of_y ..
-              g_with_segments_x_thru_y ..
-              g_ScorePartText ..
-              l_ClashImportanceText .. 
-              " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
       end
       g_Stats_Run_TotalSecondsUsed_WiggleSelected =
       g_Stats_Run_TotalSecondsUsed_WiggleSelected + l_SecondsUsed
@@ -1562,57 +1568,58 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
       l_WF_Iterations = 2*wf*iters
       l_bWBackbone = true
       l_bWSideChains = true
-      if l_Score_After_Wiggle > g_Score_ScriptBest then
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
-              PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
-              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+      if l_ScoreImprovement >= .001 then      
+        print(PaddedNumber(l_Score_After_Wiggle, 9, 3) ..
+              PaddedString("+" .. PaddedNumber(l_ScoreImprovement, 1, 3), 10) ..
+              PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
               l_FromWhere .. ":" ..
               l_WF_Iterations .. "xWiggleSelected(" ..
               "Bb=" .. tostring(l_bWBackbone) .. "," ..
               "SC=" .. tostring(l_bWSideChains) .. ")" ..
+              l_ClashImportanceText ..
+              g_round_x_of_y ..
+              g_with_segments_x_thru_y ..
+              g_ScorePartText)
+            
+      elseif l_Score_After_Wiggle == g_Score_ScriptBest then
+        print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
+              "          " ..
+              PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+              l_FromWhere .. ":" ..
+              l_WF_Iterations .. "xWiggleSelected(" ..
+              "Bb=" .. tostring(l_bWBackbone) .. "," ..
+              "SC=" .. tostring(l_bWSideChains) .. ")" ..
+              l_ClashImportanceText ..
               g_round_x_of_y ..
               g_with_segments_x_thru_y ..
               g_ScorePartText ..
-              l_ClashImportanceText)
-            
+              " No change")
+      else
+        print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
+              "          " ..
+              PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+              l_FromWhere .. ":" ..
+              l_WF_Iterations .. "xWiggleSelected(" ..
+              "Bb=" .. tostring(l_bWBackbone) .. "," ..
+              "SC=" .. tostring(l_bWSideChains) .. ")" ..
+              l_ClashImportanceText ..
+              g_round_x_of_y ..
+              g_with_segments_x_thru_y ..
+              g_ScorePartText .. " " ..
+              PaddedNumber(l_Score_After_Wiggle, 1, 3))
+      end
+      
+      if l_ScoreImprovement > 0 then
+        SaveBest() -- <-- Updates g_Score_ScriptBest
         g_Stats_Run_TotalPointsGained_WiggleSelected =
         g_Stats_Run_TotalPointsGained_WiggleSelected + l_ScoreImprovement
         g_Stats_Run_SuccessfulAttempts_WiggleSelected =
         g_Stats_Run_SuccessfulAttempts_WiggleSelected + 1
-        SaveBest() -- <-- Updates g_Score_ScriptBest
-        
-      elseif l_Score_After_Wiggle == g_Score_ScriptBest then
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
-              "         " ..
-              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-              l_FromWhere .. ":" ..
-              l_WF_Iterations .. "xWiggleSelected(" ..
-              "Bb=" .. tostring(l_bWBackbone) .. "," ..
-              "SC=" .. tostring(l_bWSideChains) .. ")" ..
-              g_round_x_of_y ..
-              g_with_segments_x_thru_y ..
-              g_ScorePartText ..
-              l_ClashImportanceText ..
-              " No score change")
-            
-      elseif l_Score_After_Wiggle < g_Score_ScriptBest then
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
-              "         " ..
-              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-              l_FromWhere .. ":" ..
-              l_WF_Iterations .. "xWiggleSelected(" ..
-              "Bb=" .. tostring(l_bWBackbone) .. "," ..
-              "SC=" .. tostring(l_bWSideChains) .. ")" ..
-              g_round_x_of_y ..
-              g_with_segments_x_thru_y ..
-              g_ScorePartText ..
-              l_ClashImportanceText .. 
-              " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
       end
       g_Stats_Run_TotalSecondsUsed_WiggleSelected =
       g_Stats_Run_TotalSecondsUsed_WiggleSelected + l_SecondsUsed
       g_Stats_Run_NumberOfAttempts_WiggleSelected =
-      g_Stats_Run_NumberOfAttempts_WiggleSelected + 1              
+      g_Stats_Run_NumberOfAttempts_WiggleSelected + 1
       
     end
       
@@ -1639,49 +1646,51 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
       local l_Score_After_Shake = GetPoseTotalScore()
       local l_ScoreImprovement = l_Score_After_Shake - g_Score_ScriptBest
       
-      if l_Score_After_Shake > g_Score_ScriptBest then
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
-              PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
-              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+      if l_ScoreImprovement >= .001 then      
+        print(PaddedNumber(l_Score_After_Shake, 9, 3) ..
+              PaddedString("+" .. PaddedNumber(l_ScoreImprovement, 1, 3), 10) ..
+              PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
               l_FromWhere .. ":1xShakeSidechainsAll" ..
+              l_ClashImportanceText ..
+              g_round_x_of_y ..
+              g_with_segments_x_thru_y ..
+              g_ScorePartText)
+        
+      elseif l_Score_After_Shake == g_Score_ScriptBest then    
+        print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
+          "          " ..
+          PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+          l_FromWhere .. ":1xShakeSidechainsAll" ..
+          l_ClashImportanceText ..
+          g_round_x_of_y ..
+          g_with_segments_x_thru_y ..
+          g_ScorePartText ..
+          " No change")
+            
+      else
+        print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
+              "          " ..
+              PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+              l_FromWhere .. ":1xShakeSidechainsAll" ..
+              l_ClashImportanceText .. " " ..
               g_round_x_of_y ..
               g_with_segments_x_thru_y ..
               g_ScorePartText ..
-              l_ClashImportanceText)        
+              PaddedNumber(l_Score_After_Shake, 1, 3))    
+      end
+      
+      if l_ScoreImprovement > 0 then
+        SaveBest() -- <-- Updates g_Score_ScriptBest
         g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected =
         g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected + l_ScoreImprovement
         g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected =
         g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected + 1
-        SaveBest() -- <-- Updates g_Score_ScriptBest
-        
-      elseif l_Score_After_Shake == g_Score_ScriptBest then    
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
-          "         " ..
-          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-          l_FromWhere .. ":1xShakeSidechainsSelected" ..
-          g_round_x_of_y ..
-          g_with_segments_x_thru_y ..
-          g_ScorePartText ..
-          l_ClashImportanceText ..
-          " No score change")
-            
-      elseif l_Score_After_Shake < g_Score_ScriptBest then
-        -- Undo this Shake because it decreased our score...(not yet!)
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
-              "         " ..
-              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-              l_FromWhere .. ":1xShakeSidechainsSelected" ..
-              g_round_x_of_y ..
-              g_with_segments_x_thru_y ..
-              g_ScorePartText ..
-              l_ClashImportanceText ..
-              " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
       end
       g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected =
       g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected + l_SecondsUsed
       g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected =
-      g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected + 1    
-      
+      g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected + 1  
+          
       return
      
     elseif how == "wb" then
@@ -1705,50 +1714,53 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
       l_Iterations = 2*wf*iters
       l_bWBackbone = true
       l_bWSideChains = true
-      if l_Score_After_Wiggle > g_Score_ScriptBest then
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
-              PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
-              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-              --l_FromWhere .. ":" .. 
+      if l_ScoreImprovement >= .001 then      
+        print(PaddedNumber(l_Score_After_Wiggle, 9, 3) ..
+              PaddedString("+" .. PaddedNumber(l_ScoreImprovement, 1, 3), 10) ..
+              PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+              l_FromWhere .. ":" ..
               l_Iterations .. "xWiggleAll(Bb,SC)" ..
+              l_ClashImportanceText ..
               g_round_x_of_y ..
-              g_ScorePartText ..
-              l_ClashImportanceText)
+              g_with_segments_x_thru_y ..
+              g_ScorePartText)
            
-        local l_SecondsUsed = 0
+      elseif l_Score_After_Wiggle == g_Score_ScriptBest then
+        print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
+              "          " ..
+              PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+              l_FromWhere .. ":" .. 
+              l_Iterations .. "xWiggleAll(Bb,SC)" ..
+              l_ClashImportanceText ..
+              g_round_x_of_y ..
+              g_with_segments_x_thru_y ..
+              g_ScorePartText ..
+              " No change")
+      
+      else
+        print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
+              "          " ..
+              PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+              l_FromWhere .. ":" .. 
+              l_Iterations .. "xWiggleAll(Bb,SC)" ..
+              l_ClashImportanceText .. " " ..
+              g_round_x_of_y ..
+              g_with_segments_x_thru_y ..
+              g_ScorePartText ..
+              PaddedNumber(l_Score_After_Wiggle, 1, 3))
+      end
+      
+      if l_ScoreImprovement > 0 then
+        SaveBest() -- <-- Updates g_Score_ScriptBest
         g_Stats_Run_TotalPointsGained_WiggleAll =
         g_Stats_Run_TotalPointsGained_WiggleAll + l_ScoreImprovement
         g_Stats_Run_SuccessfulAttempts_WiggleAll =
         g_Stats_Run_SuccessfulAttempts_WiggleAll + 1
-        SaveBest() -- <-- Updates g_Score_ScriptBest
-        
-      elseif l_Score_After_Wiggle == g_Score_ScriptBest then
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
-              "         " ..
-              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-              l_FromWhere .. ":" .. 
-              l_Iterations .. "xWiggleAll(" ..
-              "Bb=" .. tostring(l_bWBackbone) .. "," ..
-              "SC=" .. tostring(l_bWSideChains) .. ")" ..
-              g_round_x_of_y ..
-              g_ScorePartText ..
-              l_ClashImportanceText ..
-              " No score change")
-      
-      elseif l_Score_After_Wiggle < g_Score_ScriptBest then
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
-              "         " ..
-              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-              l_FromWhere .. ":" .. l_Iterations .. "xWiggleAll(Bb,SC)" ..
-              g_round_x_of_y ..
-              g_ScorePartText ..
-              l_ClashImportanceText ..
-              " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
       end
       g_Stats_Run_TotalSecondsUsed_WiggleAll =
       g_Stats_Run_TotalSecondsUsed_WiggleAll + l_SecondsUsed
       g_Stats_Run_NumberOfAttempts_WiggleAll =
-      g_Stats_Run_NumberOfAttempts_WiggleAll + 1    
+      g_Stats_Run_NumberOfAttempts_WiggleAll + 1   
       
     elseif how == "ws" then
       
@@ -1771,56 +1783,52 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
       l_Iterations = 2*wf*iters
       l_bWBackbone = true
       l_bWSideChains = true
-      if l_Score_After_Wiggle > g_Score_ScriptBest then
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
-              PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
-              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-              l_FromWhere .. ":" .. 
-              l_Iterations .. "xWiggleAll(" ..
-              "Bb=" .. tostring(l_bWBackbone) .. "," ..
-              "SC=" .. tostring(l_bWSideChains) .. ")" ..
+      if l_ScoreImprovement >= .001 then      
+        print(PaddedNumber(l_Score_After_Wiggle, 9, 3) ..
+              PaddedString("+" .. PaddedNumber(l_ScoreImprovement, 1, 3), 10) ..
+              PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+              l_FromWhere .. ":" ..
+              l_Iterations .. "xWiggleAll(Bb,SC)" ..
+              l_ClashImportanceText ..
               g_round_x_of_y ..
-              g_ScorePartText ..
-              l_ClashImportanceText)
+              g_with_segments_x_thru_y ..
+              g_ScorePartText)
            
-        local l_SecondsUsed = 0
+      elseif l_Score_After_Wiggle == g_Score_ScriptBest then
+        print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
+              "          " ..
+              PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+              l_FromWhere .. ":" .. 
+              l_Iterations .. "xWiggleAll(Bb,SC)" ..
+              l_ClashImportanceText ..
+              g_round_x_of_y ..
+              g_with_segments_x_thru_y ..
+              g_ScorePartText ..
+              " No change")
+      else
+        print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
+              "          " ..
+              PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+              l_FromWhere .. ":" .. 
+              l_Iterations .. "xWiggleAll(Bb,SC)" ..
+              l_ClashImportanceText .. " " ..
+              g_round_x_of_y ..
+              g_with_segments_x_thru_y ..
+              g_ScorePartText ..
+              PaddedNumber(l_Score_After_Wiggle, 1, 3))
+      end
+      
+      if l_ScoreImprovement > 0 then
+        SaveBest() -- <-- Updates g_Score_ScriptBest
         g_Stats_Run_TotalPointsGained_WiggleAll =
         g_Stats_Run_TotalPointsGained_WiggleAll + l_ScoreImprovement
         g_Stats_Run_SuccessfulAttempts_WiggleAll =
         g_Stats_Run_SuccessfulAttempts_WiggleAll + 1
-        SaveBest() -- <-- Updates g_Score_ScriptBest
-        
-      elseif l_Score_After_Wiggle == g_Score_ScriptBest then
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
-              "         " ..
-              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-              l_FromWhere .. ":" .. 
-              l_Iterations .. "xWiggleAll(" ..
-              "Bb=" .. tostring(l_bWBackbone) .. "," ..
-              "SC=" .. tostring(l_bWSideChains) .. ")" ..
-              g_round_x_of_y ..
-              g_ScorePartText ..
-              l_ClashImportanceText ..
-              " No score change")
-      
-      elseif l_Score_After_Wiggle < g_Score_ScriptBest then
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
-              "         " ..
-              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-              l_FromWhere .. ":" .. 
-              l_Iterations .. "xWiggleAll(" ..
-              "Bb=" .. tostring(l_bWBackbone) .. "," ..
-              "SC=" .. tostring(l_bWSideChains) .. ")" ..
-              g_round_x_of_y ..
-              g_ScorePartText ..
-              l_ClashImportanceText ..
-              " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
-              --" Rejected:" .. PaddedNumber(l_ScoreImprovement, 1, 3))
       end
       g_Stats_Run_TotalSecondsUsed_WiggleAll =
       g_Stats_Run_TotalSecondsUsed_WiggleAll + l_SecondsUsed
       g_Stats_Run_NumberOfAttempts_WiggleAll =
-      g_Stats_Run_NumberOfAttempts_WiggleAll + 1    
+      g_Stats_Run_NumberOfAttempts_WiggleAll + 1      
      
     elseif how == "wa" then
       
@@ -1843,55 +1851,52 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
       l_Iterations = 2*wf*iters
       l_bWBackbone = true
       l_bWSideChains = true
-      if l_Score_After_Wiggle > g_Score_ScriptBest then
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
-              PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
-              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-              l_FromWhere .. ":" .. 
-              l_Iterations .. "xWiggleAll(" ..
-              "Bb=" .. tostring(l_bWBackbone) .. "," ..
-              "SC=" .. tostring(l_bWSideChains) .. ")" ..
+      if l_ScoreImprovement >= .001 then      
+        print(PaddedNumber(l_Score_After_Wiggle, 9, 3) ..
+              PaddedString("+" .. PaddedNumber(l_ScoreImprovement, 1, 3), 10) ..
+              PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+              l_FromWhere .. ":" ..
+              l_Iterations .. "xWiggleAll(Bb,SC)" ..
+              l_ClashImportanceText ..
               g_round_x_of_y ..
-              g_ScorePartText ..
-              l_ClashImportanceText)
+              g_with_segments_x_thru_y ..
+              g_ScorePartText)
            
-        local l_SecondsUsed = 0
+      elseif l_Score_After_Wiggle == g_Score_ScriptBest then
+        print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
+              "          " ..
+              PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+              l_FromWhere .. ":" .. 
+              l_Iterations .. "xWiggleAll(Bb,SC)" ..
+              l_ClashImportanceText ..
+              g_round_x_of_y ..
+              g_with_segments_x_thru_y ..
+              g_ScorePartText ..
+              " No change")
+      else
+        print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
+              "          " ..
+              PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+              l_FromWhere .. ":" .. 
+              l_Iterations .. "xWiggleAll(Bb,SC)" ..
+              l_ClashImportanceText ..
+              g_round_x_of_y ..
+              g_with_segments_x_thru_y ..
+              g_ScorePartText .. " " ..
+              PaddedNumber(l_Score_After_Wiggle, 1, 3))
+      end
+      
+      if l_ScoreImprovement > 0 then
+        SaveBest() -- <-- Updates g_Score_ScriptBest
         g_Stats_Run_TotalPointsGained_WiggleAll =
         g_Stats_Run_TotalPointsGained_WiggleAll + l_ScoreImprovement
         g_Stats_Run_SuccessfulAttempts_WiggleAll =
         g_Stats_Run_SuccessfulAttempts_WiggleAll + 1
-        SaveBest() -- <-- Updates g_Score_ScriptBest
-        
-      elseif l_Score_After_Wiggle == g_Score_ScriptBest then
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
-              "         " ..
-              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-              l_FromWhere .. ":" .. 
-              l_Iterations .. "xWiggleAll(" ..
-              "Bb=" .. tostring(l_bWBackbone) .. "," ..
-              "SC=" .. tostring(l_bWSideChains) .. ")" ..
-              g_round_x_of_y ..
-              g_ScorePartText ..
-              l_ClashImportanceText ..
-              " No score change")
-      
-      elseif l_Score_After_Wiggle < g_Score_ScriptBest then
-        print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
-              "         " ..
-              PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-              l_FromWhere .. ":" .. 
-              l_Iterations .. "xWiggleAll(" ..
-              "Bb=" .. tostring(l_bWBackbone) .. "," ..
-              "SC=" .. tostring(l_bWSideChains) .. ")" ..
-              g_round_x_of_y ..
-              g_ScorePartText ..
-              l_ClashImportanceText ..
-              " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
       end
       g_Stats_Run_TotalSecondsUsed_WiggleAll =
       g_Stats_Run_TotalSecondsUsed_WiggleAll + l_SecondsUsed
       g_Stats_Run_NumberOfAttempts_WiggleAll =
-      g_Stats_Run_NumberOfAttempts_WiggleAll + 1    
+      g_Stats_Run_NumberOfAttempts_WiggleAll + 1 
       
     end -- if how == "s" then
    
@@ -2193,10 +2198,10 @@ end
 function BridgesBroken()
     return savebridges == true and CountBridges() < nrofbridges
 end
-function Bridgesave()
+function Bridgesave() -- now DisulfideBonds_RememberSolutionWithThemIntact()
     if savebridges then PushPosition() end
 end
-function Bridgerestore()
+function Bridgerestore() -- now DisulfideBonds_CheckIfWeNeedToRestoreSolutionWithThemIntact()
     if savebridges then
         if BridgesBroken() then PopPosition() else ClrTopPosition() end
     end
@@ -2733,49 +2738,57 @@ function localRebuild(maxiters) -- now Step5_RebuildSelectedSegments()
     band.EnableAll()
   end
   Bridgerestore()
-  
+
   local l_TimeAfter = os.clock()
   local l_SecondsUsed = l_TimeAfter - l_TimeBefore
   l_Score_After_Rebuild = GetPoseTotalScore()
   local l_ScoreImprovement = l_Score_After_Rebuild - g_Score_ScriptBest
-  
-  if l_Score_After_Rebuild > g_Score_ScriptBest then      
-    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" .. 
-          PaddedNumber(l_ScoreImprovement, 8, 3) .. " " .. 
-          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+
+  if l_ScoreImprovement >= .001 then
+    print(PaddedNumber(l_Score_After_Rebuild, 9, 3) ..
+          PaddedString("+" .. PaddedNumber(l_ScoreImprovement, 1, 3), 10) ..
+          PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
           l_RebuildIterations .. "xRebuildSelected" ..
           g_round_x_of_y ..
           g_with_segments_x_thru_y ..
           " Structure changed: move to next round")
+    
+  elseif l_Score_After_Rebuild == g_Score_ScriptBest then        
+    print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
+          "          " .. 
+          PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+          l_RebuildIterations .. "xRebuildSelected" ..
+          g_round_x_of_y ..
+          g_with_segments_x_thru_y ..
+          " No change")
+  else
+    -- We allow any loss of points here...
+    local l_Sign = "+"
+    if l_ScoreImprovement < 0 then
+      l_Sign = ""
+    end
+    print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
+          "          " .. 
+          PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+          l_RebuildIterations .. "xRebuildSelected" ..
+          g_round_x_of_y ..
+          g_with_segments_x_thru_y ..
+          " Structure changed: move to next round " ..
+          PaddedNumber(l_Score_After_Rebuild, 1, 3))
+  end
+ 
+  if l_ScoreImprovement > 0 then
+    SaveBest() -- <-- Updates g_Score_ScriptBest
     g_Stats_Run_TotalPointsGained_RebuildSelected =
     g_Stats_Run_TotalPointsGained_RebuildSelected + l_ScoreImprovement
     g_Stats_Run_SuccessfulAttempts_RebuildSelected = 
     g_Stats_Run_SuccessfulAttempts_RebuildSelected + 1
-    
-  elseif l_Score_After_Rebuild == g_Score_ScriptBest then        
-    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " .. 
-          "         " .. 
-          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-          l_RebuildIterations .. "xRebuildSelected" ..
-          g_round_x_of_y ..
-          g_with_segments_x_thru_y ..
-          " No Score Change")
-      
-  elseif l_Score_After_Rebuild < g_Score_ScriptBest then      
-    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " .. 
-          "         " .. 
-          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-          l_RebuildIterations .. "xRebuildSelected" ..
-          g_round_x_of_y ..
-          g_with_segments_x_thru_y ..
-          " Structure changed: move to next round" ..
-          " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
   end
   g_Stats_Run_TotalSecondsUsed_RebuildSelected = 
   g_Stats_Run_TotalSecondsUsed_RebuildSelected + l_SecondsUsed
   g_Stats_Run_NumberOfAttempts_RebuildSelected = 
   g_Stats_Run_NumberOfAttempts_RebuildSelected + 1
-  
+
   if Score() ~= s then 
     return true 
   else 
@@ -3032,29 +3045,77 @@ function SaveScores(ss,se,RBnr) -- Step9_CheckForScorePartImprovements
 end
 function ListSlots() -- now FindUniqueScorePartPoses()
   -- was FindUniqueScorePartPoses()
+  
   --Give overview of slot occupation
   --And sets which slots to process
-    local Donelist={} -- now l_ScorePartScoresDoneStatusTable[]
-    for i=1,#Scores do -- now g_ScorePart_Scores_Table[]
-      Donelist[i]=false end -- now l_ScorePartScoresDoneStatusTable[]
-    local Report=""
-    for i=1,#Scores do -- now g_ScorePart_Scores_Table[] 
-      if not Donelist[i] then -- now l_ScorePartScoresDoneStatusTable[]
-        local Curlist=" "..
-          Scores[i][1] -- now g_ScorePart_Scores_Table[]
-        Scores[i][5]=true --This one we have to process
-        -- Now find identical filled slots
-        for j=i+1,#Scores do if Scores[j][3] == Scores[i][3] then -- now g_ScorePart_Scores_Table[]
-            Curlist=Curlist.."="..
-              Scores[j][1] -- now g_ScorePart_Scores_Table[]
-            Donelist[j]=true -- now l_ScorePartScoresDoneStatusTable[]
-        end end
-        Scores[i][4]= -- now g_ScorePart_Scores_Table[]
-          Curlist -- now g_ScorePart_Scores_Table[]
-        Report=Report.." "..Curlist
-    end end
-    print("Slotlist:"..Report)
-end
+  local Donelist={} -- now l_ScorePartScoresDoneStatusTable[]
+  for i = 1, #Scores do -- now g_ScorePart_Scores_Table[]
+    Donelist[i] = false -- now l_ScorePartScoresDoneStatusTable[]
+  end
+  
+  local Report = ""
+  local l_Combined_StringOfScorePartNumbersWithSamePoseTotalScore = ""  
+  
+  for i = 1, #Scores do -- now g_ScorePart_Scores_Table[] 
+    
+    if not Donelist[i] then -- now l_ScorePartScoresDoneStatusTable[]
+      
+      local l_OuterLoop_ScorePart_Number = Scores[i][1]
+      local l_OuterLoop_PoseTotalScore = Scores[i][3]
+      local l_StringOfScorePartNumbersWithSamePoseTotalScore = l_OuterLoop_ScorePart_Number
+      local l_NumberOfScorePartsIncluded = 1
+      
+      local Curlist = " " .. Scores[i][1] -- now g_ScorePart_Scores_Table[]      
+      Scores[i][5] = true -- This one we have to process
+      
+      -- Now find identical filled slots
+      for j = i + 1, #Scores do
+        
+ 				local l_InnerLoop_ScorePart_Number = Scores[j][1]
+        
+        if Scores[j][3] == Scores[i][3] then -- now g_ScorePart_Scores_Table[]
+          
+          l_NumberOfScorePartsIncluded = l_NumberOfScorePartsIncluded + 1
+ 					l_StringOfScorePartNumbersWithSamePoseTotalScore =
+						l_StringOfScorePartNumbersWithSamePoseTotalScore .. "=" .. l_InnerLoop_ScorePart_Number
+
+          
+          Curlist = Curlist .. "=" .. Scores[j][1] -- now g_ScorePart_Scores_Table[]
+          Donelist[j]=true -- now l_ScorePartScoresDoneStatusTable[]
+          
+        end
+        
+      end
+      
+      Scores[i][4] = Curlist -- now g_ScorePart_Scores_Table[]
+
+      
+      -- The rest of this is just for reporting our results to the log file...
+      Report = Report .. " " .. Curlist
+      
+      l_NewLine = "\n                    "
+      if l_Combined_StringOfScorePartNumbersWithSamePoseTotalScore == "" then
+        l_NewLine = "                    "
+      end
+      l_s = "s "
+      if string.len(l_StringOfScorePartNumbersWithSamePoseTotalScore) <= 2 then
+        l_s = "  "
+      end
+        
+      l_Combined_StringOfScorePartNumbersWithSamePoseTotalScore =
+      l_Combined_StringOfScorePartNumbersWithSamePoseTotalScore ..
+        l_NewLine .. PaddedNumber(l_OuterLoop_PoseTotalScore, 9, 3) ..
+        " = ScorePart" .. l_s .. l_StringOfScorePartNumbersWithSamePoseTotalScore
+      
+    end -- if not Donelist[i] then -- now l_ScorePartScoresDoneStatusTable[]
+    
+  end -- for i = 1, #Scores do -- now g_ScorePart_Scores_Table[] 
+  
+  --print("Slotlist:" .. Report)
+	print(l_Combined_StringOfScorePartNumbersWithSamePoseTotalScore)
+  local l_DebugMe = 1
+  
+end -- function ListSlots() -- now FindUniqueScorePartPoses()
 -- end of administration of slots and scores
 function PrintAreas() -- now DisplaySegmentRanges()
     if #areas<19 then -- now g_XLowestScoringSegmentRangesTable[]
@@ -3163,45 +3224,48 @@ function MutateSel(maxitter, l_FromWhere) -- now Step8_MutateSideChainsOfSelecte
   
   l_Score_After_Mutate = GetPoseTotalScore()
   local l_ScoreImprovement = l_Score_After_Mutate - g_Score_ScriptBest
-  if l_Score_After_Mutate > g_Score_ScriptBest then
-    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. " +" ..
-          PaddedNumber(l_ScoreImprovement, 8, 3) .. " " ..
-          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
+  
+  if l_ScoreImprovement >= .001 then      
+    print(PaddedNumber(l_Score_After_Mutate, 9, 3) ..
+          PaddedString("+" .. PaddedNumber(l_ScoreImprovement, 1, 3), 10) ..
+          PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
           l_FromWhere .. ":2xMutateSidechainsSelected" ..
           g_round_x_of_y ..
           g_with_segments_x_thru_y ..
           g_ScorePartText)
+        
+  elseif l_Score_After_Mutate == g_Score_ScriptBest then
+    print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
+          "          " ..
+          PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+          l_FromWhere .. ":2xMutateSidechainsSelected" ..
+          g_round_x_of_y ..
+          g_with_segments_x_thru_y ..
+          g_ScorePartText ..
+          " No change")
     
+  else
+    print(PaddedNumber(g_Score_ScriptBest, 9, 3) ..
+          "          " ..
+          PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
+          l_FromWhere .. ":2xMutateSidechainsSelected" ..
+          g_round_x_of_y ..
+          g_with_segments_x_thru_y ..
+          g_ScorePartText .. " " ..
+          PaddedNumber(l_Score_After_Mutate, 1, 3))
+  end
+  
+  if l_ScoreImprovement > 0 then
+    SaveBest() -- <-- Updates g_Score_ScriptBest
     g_Stats_Run_TotalPointsGained_MutateSidechainsSelected =
     g_Stats_Run_TotalPointsGained_MutateSidechainsSelected + l_ScoreImprovement
     g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected =
-      g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected + 1
-    SaveBest() -- <-- Updates g_Score_ScriptBest
-    
-  elseif l_Score_After_Mutate == g_Score_ScriptBest then
-    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
-          "         " ..
-          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-          l_FromWhere .. ":2xMutateSidechainsSelected" ..
-          g_round_x_of_y ..
-          g_with_segments_x_thru_y ..
-          g_ScorePartText ..
-          " No Score Change")
-    
-  elseif l_Score_After_Mutate < g_Score_ScriptBest then
-    print(PaddedNumber(g_Score_ScriptBest, 9, 3) .. "  " ..
-          "         " ..
-          PaddedNumber(l_SecondsUsed, 6, 3) .. "s " ..
-          l_FromWhere .. ":2xMutateSidechainsSelected" ..
-          g_round_x_of_y ..
-          g_with_segments_x_thru_y ..
-          g_ScorePartText ..
-          " " .. PaddedNumber(l_ScoreImprovement, 1, 3))
+    g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected + 1
   end
   g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected =
   g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected + l_SecondsUsed
   g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected =
-  g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected + 1    
+  g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected + 1   
     
 end
 function MutateAll(l_FromWhere) -- now Step8b_MutateSideChainsAll()
@@ -3254,13 +3318,23 @@ function DeepRebuild() -- now Step3_Rebuild1SegmentRangeSet()
     l_StartSegment = s
     l_EndSegment = e
     
-    local CurrentHigh=0
-    local CurrentAll="" -- to report where gains came from
-    local CurrentHighScore= -99999999
+    local CurrentHigh = 0
+    local CurrentAll = "" -- to report where gains came from
+    local CurrentHighScore = -99999999
+    
+    local l_Score_After_Quickload = 0
+    local l_Score_After_Stabilize = 0
+    local l_Score_After_Shake = 0
+    local l_Score_After_Wiggle = 0
+    local l_Score_After_Mutate = 0
+    local l_Current_ImprovedScorePart_PoseTotalScore = 0
+  
     local l_Best_ImprovedScorePart_Text = ""
     local l_Best_ImprovedScorePart_StringOfScorePartNumbersWithSamePoseTotalScore = ""
-    local l_StringOfScorePartNumbersWithSamePoseTotalScore = ""
     local l_Best_ImprovedScorePart_PoseTotalScore = CurrentHighScore
+    
+    local l_StringOfScorePartNumbersWithSamePoseTotalScore = ""
+    local l_Combined_StringOfScorePartNumbersWithSamePoseTotalScore = ""
     firstRBseg=s
     lastRBseg=e
     Bridgesave()
@@ -3287,18 +3361,21 @@ function DeepRebuild() -- now Step3_Rebuild1SegmentRangeSet()
               Bridgesave() -- now DisulfideBonds_RememberSolutionWithThemIntact()
               recentbest.Restore()
               Bridgerestore() -- now DisulfideBonds_CheckIfWeNeedToRestoreSolutionWithThemIntact()
-              if Score() > bestScore+0.00001 then -- now -- if l_Score_After_Restore > g_Score_ScriptBest + 0.00001
+              if Score() > bestScore+0.00001 then -- now -- if l_Score_After_Restore > g_Score_ScriptBest +
                   print("Found a missed gain!!!")
                   SaveScores(s, e, 0) -- now Step9_CheckForScorePartImprovements()
               end
           end
         end
         
+        print("                     " ..
+              "Preparing to work more on the following improved score part poses...")
+        
         ListSlots() -- now FindUniqueScorePartPoses()
         
         for r = 1, #Scores do -- now g_ScorePartScoresTable[]
           
-          if Scores[r][5] then
+          if Scores[r][5] == true then
             
             local slot = Scores[r][1]
             
@@ -3320,6 +3397,14 @@ function DeepRebuild() -- now Step3_Rebuild1SegmentRangeSet()
             -- Important!!!
             -- See Step9_CheckForScorePartImprovements() way above 
             -- for the corresponding save.Quicksave(l_ScorePart_Number) -- "Save"
+            
+            l_Score_After_Quickload = 0
+            l_Score_After_Stabilize = 0
+            l_Score_After_Shake = 0
+            l_Score_After_Wiggle = 0
+            l_Score_After_Mutate = 0
+            l_Score_After_Quickload = tonumber(GetPoseTotalScore())
+            l_Current_ImprovedScorePart_PoseTotalScore = l_Score_After_Quickload
                 
             local l_SphereRadius = 12
             g_with_segments_x_thru_y = " Wthn" .. l_SphereRadius .. "AngstrmsOf" ..
@@ -3337,37 +3422,64 @@ function DeepRebuild() -- now Step3_Rebuild1SegmentRangeSet()
               -- Important!!!
               -- Important!!!
               -- Important!!!
-            
-            else
-            
+             
+              l_Score_After_Stabilize = tonumber(GetPoseTotalScore())
+              if l_Score_After_Stabilize > l_Current_ImprovedScorePart_PoseTotalScore then
+                l_Current_ImprovedScorePart_PoseTotalScore = l_Score_After_Stabilize
+              end
+             
+             else
+             
               CI(1)
-                
+              
               -- Important!!!
               -- Important!!!
               -- Important!!!
               Wiggle("s",1,nil,true,"DeepBuild1")
+              -- Important!!!
+              -- Important!!!
+              -- Important!!!
+              
+              l_Score_After_Shake = tonumber(GetPoseTotalScore())
+              if l_Score_After_Shake > l_Current_ImprovedScorePart_PoseTotalScore then
+                l_Current_ImprovedScorePart_PoseTotalScore = l_Score_After_Shake
+              end              
+              
+              -- Important!!!
+              -- Important!!!
+              -- Important!!!
               Wiggle("ws",1,nil,true,"DeepBuild1")
               -- Important!!!
               -- Important!!!
               -- Important!!!
              
+              l_Score_After_Wiggle = tonumber(GetPoseTotalScore())
+              if l_Score_After_Wiggle > l_Current_ImprovedScorePart_PoseTotalScore then
+                l_Current_ImprovedScorePart_PoseTotalScore = l_Score_After_Wiggle
+              end             
+             
             end
-          
+           
             Bridgerestore()
             
             if AfterQstab then
               
-            -- Important!!!
-            -- Important!!!
-            -- Important!!!
+              -- Important!!!
+              -- Important!!!
+              -- Important!!!
               doMutate("AfterQstab") -- now Step8_MutateSideChainsOfSelectedSegments() and
-              --                            Step8b_MutateSideChainsAll
-            -- Important!!!
-            -- Important!!!
-            -- Important!!!
-            
-          end
-          
+                --                            Step8b_MutateSideChainsAll
+              -- Important!!!
+              -- Important!!!
+              -- Important!!!
+              
+              l_Score_After_Mutate = tonumber(GetPoseTotalScore())
+              if l_Score_After_Mutate > l_Current_ImprovedScorePart_PoseTotalScore then
+                l_Current_ImprovedScorePart_PoseTotalScore = l_Score_After_Mutate
+              end              
+              
+            end
+           
             -- Important!!!
             -- Important!!!
             -- Important!!!
@@ -3375,25 +3487,54 @@ function DeepRebuild() -- now Step3_Rebuild1SegmentRangeSet()
             -- Important!!!
             -- Important!!!
             -- Important!!!            
-            
+                          
             if Score() > CurrentHighScore then
               
               CurrentHigh = slot
               CurrentAll = Scores[r][4].."(RB"..Scores[r][6]..")"
               CurrentHighScore = Score()                 
+            end
               
+            if tonumber(l_Current_ImprovedScorePart_PoseTotalScore) > 
+                  tonumber(l_Best_ImprovedScorePart_PoseTotalScore) then
+                    
+              l_Best_ImprovedScorePart_Number = l_ScorePart_Number
               l_Best_ImprovedScorePart_Text = g_ScorePartText
               l_Best_ImprovedScorePart_StringOfScorePartNumbersWithSamePoseTotalScore =
                 l_StringOfScorePartNumbersWithSamePoseTotalScore    
               l_Best_ImprovedScorePart_PoseTotalScore = CurrentHighScore
-                 
+              
             end
             
             SaveBest()
-            print("Stabilized score: "..round3(Score()).." from slot "..ScoreParts[slot-3][4])
-          end
-        end
-                
+            
+            -- The rest of this is just for reporting our results to the log file...
+            
+            --print("Stabilized score: "..round3(Score()).." from slot "..ScoreParts[slot-3][4])   
+            
+            l_NewLine = "\n                    "
+            if l_Combined_StringOfScorePartNumbersWithSamePoseTotalScore == "" then
+              l_NewLine = "                    "
+            end
+            l_s = "s "
+            if string.len(l_StringOfScorePartNumbersWithSamePoseTotalScore) <= 2 then
+              l_s = "  "
+            end
+            
+            l_Combined_StringOfScorePartNumbersWithSamePoseTotalScore =
+            l_Combined_StringOfScorePartNumbersWithSamePoseTotalScore ..
+              l_NewLine .. PaddedNumber(l_Current_ImprovedScorePart_PoseTotalScore, 9, 3) ..
+              " = ScorePart" .. l_s .. ScoreParts[slot-3][4]    
+            
+          end -- if Scores[r][5] == true then
+          
+        end -- for r = 1, #Scores do -- now g_ScorePartScoresTable[]
+        
+        
+        print("                     " ..
+              "Results from working more on the improved score part poses...")
+        print(l_Combined_StringOfScorePartNumbersWithSamePoseTotalScore)
+        
         -- Load the best score part pose...
         -- Important!!!
         -- Important!!!
@@ -3411,9 +3552,10 @@ function DeepRebuild() -- now Step3_Rebuild1SegmentRangeSet()
         if string.len(l_Best_ImprovedScorePart_StringOfScorePartNumbersWithSamePoseTotalScore) <= 2 then
           l_Plural = " "
         end
-        print("Found best scoring score part" .. l_Plural .. 
+        print("                     " ..
+              "Found the most improved pose from score part" .. l_Plural .. 
                l_Best_ImprovedScorePart_StringOfScorePartNumbersWithSamePoseTotalScore ..
-             " with score of " .. PaddedNumber(l_Best_ImprovedScorePart_PoseTotalScore, 1, 3))        
+             " with a score of " .. PaddedNumber(l_Best_ImprovedScorePart_PoseTotalScore, 1, 3))         
         
         if not skipfuze and ss1-Score() < maxlossbeforefuze*(e-s+1)/3 then
             print("Fuzing best position.")
@@ -3811,7 +3953,7 @@ end
         end
         if askresult==2 then AskMoreOptions() end
     end
-until askresult < 2
+  until askresult < 2
     return askresult > 0
 end
 for i=3,12 do save.Quicksave(i) end -- ...quick fix for failing first rebuild.
@@ -3994,4 +4136,3 @@ if AskDRWOptions() then -- now AskUserToSelectRebuildOptions()
     -- Important!!!
     
 end -- if AskDRWOptions() then
-
