@@ -615,7 +615,7 @@ function PrettyNumber(l_DirtyFloat)
   return l_PrettyString
   
 end -- function PrettyNumber(l_DirtyFloat)
-function GetPoseTotalScore()
+function GetPoseTotalScore() -- was Score()
   return(Score())
 end
 function DisplayEndOfRunStatistics()
@@ -1185,9 +1185,13 @@ segCnt2=segCnt
 while structure.GetSecondaryStructure(segCnt2)=="M" do segCnt2=segCnt2-1 end
 CIfactor=1 
 maxCI=true
-function CI(CInr)
-    if CInr > 0.99 then maxCI=true else maxCI=false end
-    behavior.SetClashImportance(CInr*CIfactor)
+function CI(CInr) -- now SetClashImportance()
+  if CInr > 0.99 then
+    maxCI=true
+  else
+    maxCI=false
+  end
+  behavior.SetClashImportance(CInr * CIfactor)
 end
 function CheckCI() -- now AskUserToCheckClashImportance()
    local ask=dialog.CreateDialog("Clash importance is not 1")
@@ -1196,35 +1200,46 @@ function CheckCI() -- now AskUserToCheckClashImportance()
    ask.continue=dialog.AddButton("Continue",1)
    dialog.Show(ask)
 end
-if behavior.GetClashImportance() < 0.99 then CheckCI() end
+if behavior.GetClashImportance() < 0.99 then
+  CheckCI()
+end
 CIfactor=behavior.GetClashImportance()
 -- Score functions
-function Score(pose)
-    if pose==nil then pose=current end
-    local total= pose.GetEnergyScore()
-    -- FIX for big negatives
+function Score(pose) -- now GetPoseTotalScore(l_pose)
 
-        if total < -999999 and total > -1000001 then total=SegScore(pose) end
+  if pose == nil then
+    pose = current
+  end
+  local total = pose.GetEnergyScore()
+  
+  -- FIX for big negatives
+  if total < -999999 and total > -1000001 then
+    total = SegScore(pose)
+  end
 
-    if normal then
-        return total
-    else
-        return total*pose.GetExplorationMultiplier()
-    end
+  if normal == true then
+      return total
+  else
+      return total * pose.GetExplorationMultiplier()
+  end
+  
+end -- function Score(pose) -- now GetPoseTotalScore(l_pose)
+function SegScore(pose) -- now merged into Calculate_SegmentRange_Score() which was GetSubScore()
+
+  if pose == nil then
+    pose = current
+  end
+  local total = 8000
+  for i = 1, segCnt2 do
+      total = total + pose.GetSegmentEnergyScore(i)
+  end
+  return total
 end
-function SegScore(pose)
-    if pose==nil then pose=current end
-    local total=8000
-    for i=1,segCnt2 do
-        total=total+pose.GetSegmentEnergyScore(i)
-    end
-    return total
-end
-function RBScore()
+function RBScore() -- now obsolete()
     return Score(recentbest)
 end
-function round3(x)--cut all afer 3-rd place
-    return x-x%0.001
+function round3(x) --  now PaddedNumber()
+    return x - x % 0.001 -- more like truncate?
 end
 -- Module Filteractive
 SKETCHBOOKPUZZLE=false
@@ -1240,10 +1255,10 @@ FilterOffscore=Score()
 if SKETCHBOOKPUZZLE == false then behavior.SetSlowFiltersDisabled(false) end
 print("Filterscore3: " .. Filterscore)
 print("FilterOffscore3: " .. FilterOffscore)
-maxbonus=0+Filterscore-FilterOffscore
+maxbonus = 0 + Filterscore - FilterOffscore
 print("maxbonus: " .. maxbonus)
 CURBONUS=maxbonus
-function Filter()
+function Filter() -- now AskUserToSelectConditionCheckingOptions()
    local ask=dialog.CreateDialog("Slow filters seem to be active")
    ask.disable=dialog.AddCheckbox("Run with disabled slow filters",Filteractive)
    ask.l1=dialog.AddLabel("Current bonus is: "..maxbonus)
@@ -1259,7 +1274,7 @@ if maxbonus=="" then maxbonus=0 end
    Filteractive=ask.disable.value
 end
 BetterRecentBest=false
-function FilterOff()
+function FilterOff() -- now NormalConditionChecking_DisableForThisEntireScriptRun()
     -- Filters off but restore a better recentbest with filter off
     behavior.SetSlowFiltersDisabled(true)
     if BetterRecentBest then
@@ -1269,9 +1284,9 @@ function FilterOff()
         save.Quickload(99)
     end
 end
-function FilterOn()
+function FilterOn() -- now NormalConditionChecking_TemporarilyReEnableToCheckScore()
     -- Filter on but remember recent best if better than current
-    BetterRecentBest= Score(recentbest) > Score()
+    BetterRecentBest = Score(recentbest) > Score()
     if BetterRecentBest then
         save.Quicksave(99)
         recentbest.Restore()
@@ -1293,23 +1308,37 @@ foundahighgain=true
 bestScore=Score() -- now g_Score_ScriptBest = GetPoseTotalScore()
 if Filteractive then FilterOff() end
 function SaveBest()
-  if (not Filteractive) or -- now if g_bUserSelected_NormalConditionChecking_TemporarilyDisable == true then
-    (Score()+maxbonus>bestScore) then
-    if Filteractive then  -- now if g_bUserSelected_NormalConditionChecking_TemporarilyDisable == true then
-      FilterOn() -- now NormalConditionChecking_ReEnable()
-    end
-    local g = Score() - bestScore
-    if g > MINGAIN or (g > 0 and foundahighgain) then
-      if g > 0.01 then
-        --print("Gained another "..round3(g).." pts.")
-      end
-      bestScore=Score() -- bestScore is now g_Score_ScriptBest
-      g_Score_ScriptBest = bestScore -- added for stats reporting
-      save.Quicksave(3)
-      foundahighgain=true
-   end
-   if Filteractive then FilterOff() end
+
+  if (Filteractive == true) and -- now if g_bUserSelected_NormalConditionChecking_DisableForThisEntireScriptRun == true then
+    (Score() + maxbonus <= bestScore) then
+    return
+    
   end
+  
+  if Filteractive == true then  -- now if g_bUserSelected_NormalConditionChecking_DisableForThisEntireScriptRun == true then
+    FilterOn() -- now NormalConditionChecking_TemporarilyReEnableToCheckScore()
+  end
+  
+  local g = Score() - bestScore
+  
+  if g > MINGAIN or (g > 0 and foundahighgain) then
+  
+    if g > 0.01 then
+      --print("Gained another "..round3(g).." pts.")
+    end    
+  
+    bestScore=Score() -- bestScore is now g_Score_ScriptBest
+    g_Score_ScriptBest = bestScore -- added for stats reporting
+    
+    save.Quicksave(3)
+    foundahighgain=true
+    
+  end -- if g > MINGAIN or (g > 0 and foundahighgain) then
+
+ if Filteractive == true then 
+  FilterOff()
+ end
+
 end
 WF=1 -- New WiggleFactor
 function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeSelected, Step12_WiggleAll,
@@ -1903,7 +1932,7 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
   end -- if onlyselected then
   
 end -- function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeSelected, Step12_WiggleAll, WiggleS
-function SegmentListToSet(list)
+function SegmentListToSet(list) -- now ConvertSegmentsTableToSegmentRangesTable()
     local result={}
     local f=0
     local l=-1
@@ -1921,7 +1950,7 @@ function SegmentListToSet(list)
     --SegmentPrintSet(result)
     return result
 end
-function SegmentSetToList(set)
+function SegmentSetToList(set) -- now ConvertSegmentRangesTableToSegmentsTable()
     local result={}
     for i=1,#set do
         --print(set[i][1],set[i][2])
@@ -1931,11 +1960,11 @@ function SegmentSetToList(set)
     end
     return result
 end
-function SegmentCleanSet(set)
+function SegmentCleanSet(set) -- now CleanUpSegmentRangesTable()
 -- Makes it well formed
     return SegmentListToSet(SegmentSetToList(set))
 end
-function SegmentInvertSet(set,maxseg)
+function SegmentInvertSet(set,maxseg) --  now InvertSegmentRangesTable()
 -- Gives back all segments not in the set
 -- maxseg is added for ligand
     local result={}
@@ -1948,7 +1977,7 @@ function SegmentInvertSet(set,maxseg)
     if set[#set][2] ~= maxseg then result[#result+1]={set[#set][2]+1,maxseg} end
     return result
 end
-function SegmentInvertList(list)
+function SegmentInvertList(list) -- not used
     table.sort(list)
     local result={}
     for i=1,#list-1 do
@@ -1957,7 +1986,7 @@ function SegmentInvertList(list)
     for j=list[#list]+1,segCnt2 do result[#result+1]=j end
     return result
 end
-function SegmentInList(s,list)
+function SegmentInList(s,list) -- not used
     table.sort(list)
     for i=1,#list do
         if list[i]==s then return true
@@ -1966,7 +1995,7 @@ function SegmentInList(s,list)
     end
     return false
 end
-function SegmentInSet(set,s)
+function SegmentInSet(set,s) -- now bIsSegmentIndexInSegmentRangesTable()
     for i=1,#set do
         if s>=set[i][1] and s<=set[i][2] then return true
         elseif s<set[i][1] then return false
@@ -1974,17 +2003,17 @@ function SegmentInSet(set,s)
     end
     return false
 end
-function SegmentJoinList(list1,list2)
+function SegmentJoinList(list1,list2) -- not used
     local result=list1
     if result == nil then return list2 end
     for i=1,#list2 do result[#result+1]=list2[i] end
     table.sort(result)
     return result
 end
-function SegmentJoinSet(set1,set2)
+function SegmentJoinSet(set1,set2) -- not used
     return SegmentListToSet(SegmentJoinList(SegmentSetToList(set1),SegmentSetToList(set2)))
 end
-function SegmentCommList(list1,list2)
+function SegmentCommList(list1,list2) -- now FindCommonSegmentsInBothTables()
     local result={}
     table.sort(list1)
     table.sort(list2)
@@ -1999,16 +2028,16 @@ function SegmentCommList(list1,list2)
     end
     return result
 end
-function SegmentCommSet(set1,set2)
+function SegmentCommSet(set1,set2) -- now GetCommonSegmentRangesInBothTables()
     return SegmentListToSet(SegmentCommList(SegmentSetToList(set1),SegmentSetToList(set2)))
 end
-function SegmentSetMinus(set1,set2)
+function SegmentSetMinus(set1,set2) -- now SegmentRangesMinus()
     return SegmentCommSet(set1,SegmentInvertSet(set2))
 end
-function SegmentPrintSet(set)
+function SegmentPrintSet(set) -- not used
     print(SegmentSetToString(set))
 end
-function SegmentSetToString(set)
+function SegmentSetToString(set) -- now ConvertSegmentRangesTableToListOfSegmentRanges()
     local line = ""
     for i=1,#set do
         if i~=1 then line=line..", " end
@@ -2016,7 +2045,7 @@ function SegmentSetToString(set)
     end
     return line
 end
-function SegmentSetInSet(set,sub)
+function SegmentSetInSet(set,sub) -- not used
     if sub==nil then return true end
     -- Checks if sub is a proper subset of set
     for i=1,#sub do
@@ -2024,7 +2053,7 @@ function SegmentSetInSet(set,sub)
     end
     return true
 end
-function SegmentRangeInSet(set,range)
+function SegmentRangeInSet(set,range) -- not used
     if range==nil or #range==0 then return true end
     local b=range[1]
     local e=range[2]
@@ -2035,7 +2064,7 @@ function SegmentRangeInSet(set,range)
     end
     return false
 end
-function SegmentSetToBool(set)
+function SegmentSetToBool(set) -- now ConvertSegmentRangesTableToSegmentsBooleanTable()
     local result={}
     for i=1,structure.GetCount() do
         result[i]=SegmentInSet(set,i)
@@ -2086,7 +2115,7 @@ end
 function FindAAtype(aa)
     return SegmentListToSet(FindAAtypeList(aa))
 end
-function FindAminotype(at) --NOTE: only this one gives a list not a set
+function FindAminotype(at) -- now FindSegmentsWithAminoAcidType()
     local result={}
     for i=1,segCnt2 do
         if structure.GetAminoAcid(i) == at then result[#result+1]=i end
@@ -2180,22 +2209,22 @@ end
 Cyslist={}
 savebridges=false -- default no bridgechecking
 nrofbridges=0
-function setCyslist()
+function setCyslist() -- now Populate_g_CysteineSegmentsTable()
     Cyslist=FindAminotype("c")
     nrofbridges=CountBridges()
 end
-function IsBridge(i)
+function IsBridge(i) -- now bIsADisulfideBondSegment()
     if structure.IsLocked(i) then return false end
     return ''..current.GetSegmentEnergySubscore(i,'disulfides') ~= '-0'
 end
-function CountBridges()
+function CountBridges() -- now DisulfideBonds_GetCount()
     local count = 0
     for i = 1,#Cyslist do
         if IsBridge(Cyslist[i]) then count = count + 1 end
     end
     return count
 end
-function BridgesBroken()
+function BridgesBroken() -- now DisulfideBonds_DidAnyOfThemBreak()
     return savebridges == true and CountBridges() < nrofbridges
 end
 function Bridgesave() -- now DisulfideBonds_RememberSolutionWithThemIntact()
@@ -2215,7 +2244,7 @@ DENSITYWEIGHT=0
 PROBABLESYM=false
 FREEDESIGN=false
 SKETCHBOOKPUZZLE=false
-function SetPuzzleProperties()
+function SetPuzzleProperties() -- now DisplayPuzzleProperties()
     print("Computing puzzle properties")
     -- Find out if the puzzle has mutables
     local MutList=FindMutablesList()
@@ -2285,7 +2314,7 @@ function Fuze3(prefun,postfun) -- was FuzeEnd()
     if postfun ~= nil then postfun() end
     SaveBest()
 end
-function Fuze1(ci1,ci2,prefun,postfun,globshake)
+function Fuze1(ci1,ci2,prefun,postfun,globshake) -- now Fise1()
     if prefun ~=nil then prefun() end
     if globshake==nil then globshake=true end
     CI(ci1)
@@ -2294,7 +2323,7 @@ function Fuze1(ci1,ci2,prefun,postfun,globshake)
     Wiggle("wa",1,nil,nil,"Fuze1b")
     if postfun ~= nil then postfun() end
 end
-function Fuze2(ci1,ci2,prefun,postfun)
+function Fuze2(ci1,ci2,prefun,postfun) -- now Fuse2()
     if prefun ~= nil then prefun() end
     CI(ci1)
     Wiggle("wa",1,nil,nil,"Fuze2a")
@@ -2548,45 +2577,56 @@ function AskForSelections(title,mode) -- now AskUserToSelectSegmentsRangesToRebu
         end
         if mode.askranges and ask.ranges.value ~= "" then
             local rangetext=ask.ranges.value
-            local function Checknums(nums)
-                -- Now checking
-                if #nums%2 ~= 0 then
-                    print("Not an even number of segments found")
-                    return false
+            
+            local function Checknums(nums) -- now bCheckIfValidSegmentNumbers()
+            
+              if #nums%2 ~= 0 then
+                print("Not an even number of segments found")
+                return false
+              end
+              for i=1,#nums do
+                if nums[i]==0 or nums[i]>structure.GetCount() then
+                  print("Number "..nums[i].." is not a segment")
+                  return false
                 end
-                for i=1,#nums do
-                    if nums[i]==0 or nums[i]>structure.GetCount() then
-                        print("Number "..nums[i].." is not a segment")
-                        return false
-                    end
-                end
-                return true
-            end
+              end
+              return true
+                
+            end -- local function Checknums(nums)
 
-            local function ReadSegmentSet(data)
-                local nums = {}
-                local NoNegatives='%d+' -- - is not part of a number
-                local result={}
-                for v in string.gfind(data,NoNegatives) do
-                    table.insert(nums, tonumber(v))
+            local function ReadSegmentSet(data) -- now Convert_ListOfSegmentRanges_To_SegmentRangesTable()
+              local nums = {}
+              local NoNegatives='%d+' -- - is not part of a number
+              local result={}
+              
+              for v in string.gfind(data,NoNegatives) do
+                table.insert(nums, tonumber(v))
+              end
+              
+              if Checknums(nums) then
+              
+                for i=1,#nums/2 do
+                    result[i]={nums[2*i-1],nums[2*i]}
                 end
-                if Checknums(nums) then
-                    for i=1,#nums/2 do
-                        result[i]={nums[2*i-1],nums[2*i]}
-                    end
-                    result=SegmentCleanSet(result)
-                else Errfound=true result={} end
-                return result
+                
+                result = SegmentCleanSet(result) -- now CleanUpSegmentRangesTable()
+                
+              else Errfound=true result={} end
+              
+              return result
+              
             end
-            local rangelist=ReadSegmentSet(rangetext)
+            
+            local rangelist = ReadSegmentSet(rangetext) -- recursion
+            
             if not Errfound then
-                result=SegmentCommSet(result,rangelist)
+                result = SegmentCommSet(result,rangelist) -- now GetCommonSegmentRangesInBothTables()
             end
         end
     end
   until not Errfound
     return result
-end
+end -- function AskForSelections(title,mode) -- now AskUserToSelectSegmentsRangesToRebuild()
 -- end of module AskSelections
 progname="DRW "
 action="rebuild"
@@ -2938,10 +2978,10 @@ function getPartscore(ss,se,attr) -- now Get_ScorePart_Score()
     end
     return s
 end
-function InitWORKONbool() -- now see Step1_Rebuild1Puzzle()
-    WORKONbool= -- now g_bSegmentsToRebuildBooleanTable[]
-      SegmentSetToBool( -- see Step1_Rebuild1Puzzle()
-        WORKON) -- now 
+function InitWORKONbool() -- now in DisplayDetailsOfIncludedSegments()
+    WORKONbool= -- now g_bUserSelectd_SegmentsAllowedToBeRebuiltTable[]
+      SegmentSetToBool( -- now ConvertSegmentRangesTableToSegmentsBooleanTable()
+        WORKON) -- now g_UserSelected_SegmentRangesAllowedToBeRebuiltTable()
 
   -- Differences between the "WORKON/WORKONbool" tables and the "areas" table:
 
@@ -2965,7 +3005,7 @@ function InitWORKONbool() -- now see Step1_Rebuild1Puzzle()
 end
 function MustWorkon(i,j) -- now bSegmentRangeIsAllowedToBeRebuilt() + bSegmentIsAllowedToBeRebuilt()
     for k=i,j do if not 
-      WORKONbool[k] -- now g_bSegmentsToRebuildBooleanTable[]
+      WORKONbool[k] -- now g_bUserSelectd_SegmentsAllowedToBeRebuiltTable[]
       then return false end end
     return true
 end
@@ -2973,7 +3013,7 @@ function GetSegmentScores() -- now Populate_g_SegmentScoresTable_BasedOnUserSele
     if lastSegScores~=Score() then
         lastSegScores=Score()
         for i=1,segCnt2 do
-            if WORKONbool[i] then -- now g_bSegmentsToRebuildBooleanTable[]
+            if WORKONbool[i] then -- now g_bUserSelectd_SegmentsAllowedToBeRebuiltTable[]
                 if #scrPart==0 then
                     -- if nothing specified by user default is
                     -- segmentenergy - reference + extra Density score
@@ -3697,7 +3737,7 @@ function DRcall(how) -- now Step2_Rebuild1Run()
     DeepRebuild()
   end
 end
-function AskMoreOptions()
+function AskMoreOptions() -- now AskUserToSelectMoreOptions()
     local ask=dialog.CreateDialog("More "..progname.." options")
     ask.fastQstab=dialog.AddCheckbox("Do a fast qStab",fastQstab)
     ask.ll3 = dialog.AddLabel("Force next round if gain is more")
@@ -3737,7 +3777,7 @@ function AskMoreOptions()
     donotrevisit=ask.donotrevisit.value
     skipfuze=ask.skipfuze.value
 end
-function AskMutateOptions()
+function AskMutateOptions() -- now AskUserToSelectMutateOptions()
     local ask = dialog.CreateDialog("Mutate Options")
     ask.AfterRB = dialog.AddCheckbox("Mutate after "..action,AfterRB)
     ask.InQstab = dialog.AddCheckbox("Mutate during Qstab",InQstab)
@@ -4026,7 +4066,7 @@ donotrevisit=true
 clrdonelistgain=segCnt
 if clrdonelistgain > 500 then clrdonelistgain=500 end
 curclrscore=Score()
-WORKONbool={} -- now g_bSegmentsToRebuildBooleanTable[]
+WORKONbool={} -- now g_bUserSelectd_SegmentsAllowedToBeRebuiltTable[]
 SegmentScores={} --Optimalisation for fast worst search
 lastSegScores=0
 DRWVersion="3.1.1"
