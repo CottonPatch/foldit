@@ -578,7 +578,7 @@ function PaddedNumber(l_DirtyFloat, l_PadWidth, l_AfterDecimal)
   local l_PrettyString = string.format("%" .. l_PadWidth .. "." .. l_AfterDecimal .. "f", l_DirtyFloat)  
   return l_PrettyString
   
-end -- function PrettyNumber(l_DirtyFloat)
+end -- function PaddedNumber(l_DirtyFloat)
 function PaddedString(l_String, l_PadWidth)
   -- Called from ()...
   
@@ -587,37 +587,15 @@ function PaddedString(l_String, l_PadWidth)
   return l_PrettyString
   
 end -- function PaddedString(l_String, l_PadWidth)
-function RoundTo(l_DirtyFloat, l_RoundTo)
-  -- Called from PrettyNumber()..
-  
-  local x = .5
-  if l_DirtyFloat * l_RoundTo < 0 then
-    x = -.5 
-  end
-  
-  Integer, Decimal = math.modf(l_DirtyFloat * l_RoundTo + x)
-  l_MaybeDirtyFloat = Integer / l_RoundTo -- any division can accidentally introduce 0.000000000000001
-  
-  return l_MaybeDirtyFloat
-  
-end -- function RoundTo(l_DirtyFloat, l_RoundTo)
-function PrettyNumber(l_DirtyFloat)
-  -- Called from DefineGlobalVariables(), 
-  --             DisplayPuzzleProperties(),
-  --             Step5_RebuildSelectedSegments() and 
-  --             2 places in Step3_Rebuild1SegmentRangeSet()...
-  
-  -- This is the new version of RoundToThirdDecimal()...
-  
-  local l_MaybeDirtyFloat = RoundTo(l_DirtyFloat, 1000)  
-  local l_PrettyString = string.format("%.3f", l_MaybeDirtyFloat)  
-  
-  return l_PrettyString
-  
-end -- function PrettyNumber(l_DirtyFloat)
 function GetPoseTotalScore() -- was Score()
   return(Score())
 end
+g_bDebugMode = false
+if _G ~= nil then
+  print("Warning: Running in debug mode!")
+  g_bDebugMode = true
+  SetupLocalDebugFuntions()
+end  
 function DisplayEndOfRunStatistics()
   -- Called from Step1_Rebuild1Puzzle()
   
@@ -1165,20 +1143,13 @@ function DisplayEndOfScriptStatistics()
   print("------------------------ ------------------  ----------------  -------  ------------------")
     
   local l_Score_AtEndOf_Script = g_Score_ScriptBest
-	print("\nStarting Score: " .. PrettyNumber(g_Score_AtStartOf_Script) ..
-        "\nPoints Gained: " .. PrettyNumber(l_Score_AtEndOf_Script - g_Score_AtStartOf_Script) ..
-        "\nFinal Score: " .. PrettyNumber(l_Score_AtEndOf_Script) ..
+	print("\nStarting Score: " .. PaddedNumber(g_Score_AtStartOf_Script, 1, 3) ..
+        "\nPoints Gained: " .. PaddedNumber((l_Score_AtEndOf_Script - g_Score_AtStartOf_Script), 1, 3) ..
+        "\nFinal Score: " .. PaddedNumber(l_Score_AtEndOf_Script, 1, 3) ..
         "\nElapsed Time " .. PaddedNumber(l_Stats_Script_ElaspedMinutes, 5, 3) .. " minutes or " ..
         PaddedNumber(l_Stats_Script_ElaspedMinutes / 60, 5, 3) .. " hours" ..
         "\n")
-
 end -- function DisplayEndOfScriptStatistics()
-g_bDebugMode = false
-if _G ~= nil then
-  print("Warning: Running in debug mode!")
-  g_bDebugMode = true
-  SetupLocalDebugFuntions()
-end  
 normal= 1 -- (current.GetExplorationMultiplier() == 0)
 segCnt=structure.GetCount()
 segCnt2=segCnt
@@ -1217,11 +1188,11 @@ function Score(pose) -- now GetPoseTotalScore(l_pose)
     total = SegScore(pose)
   end
 
-  if normal == true then
-      return total
-  else
-      return total * pose.GetExplorationMultiplier()
-  end
+  --if normal == true then
+    return total
+  --else
+  --return total * pose.GetExplorationMultiplier()
+  --end
   
 end -- function Score(pose) -- now GetPoseTotalScore(l_pose)
 function SegScore(pose) -- now merged into Calculate_SegmentRange_Score() which was GetSubScore()
@@ -1557,7 +1528,7 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
               l_WF_Iterations .. "xWiggleSelected(" ..
               "Bb=" .. tostring(l_bWBackbone) .. "," ..
               "SC=" .. tostring(l_bWSideChains) .. ")" ..
-              l_ClashImportanceText .. " " ..
+              l_ClashImportanceText ..
               g_round_x_of_y ..
               g_with_segments_x_thru_y ..
               g_ScorePartText ..
@@ -1772,7 +1743,7 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
               PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
               l_FromWhere .. ":" .. 
               l_Iterations .. "xWiggleAll(Bb,SC)" ..
-              l_ClashImportanceText .. " " ..
+              l_ClashImportanceText ..
               g_round_x_of_y ..
               g_with_segments_x_thru_y ..
               g_ScorePartText ..
@@ -1840,7 +1811,7 @@ function Wiggle(how, iters, minppi,onlyselected,l_FromWhere) -- now Step6_ShakeS
               PaddedNumber(l_SecondsUsed, 7, 3) .. "s " ..
               l_FromWhere .. ":" .. 
               l_Iterations .. "xWiggleAll(Bb,SC)" ..
-              l_ClashImportanceText .. " " ..
+              l_ClashImportanceText ..
               g_round_x_of_y ..
               g_with_segments_x_thru_y ..
               g_ScorePartText ..
@@ -2182,11 +2153,11 @@ function PopPosition() -- now QuickSaveStack_LoadLastSavedSolution()
     StackPos=StackPos-1
     save.Quickload(StackPos)
 end
-function PushMarkPosition() -- now not used
+function PushMarkPosition() -- not used
     StackMarks[#StackMarks+1]=StackPos
     PushPosition()
 end
-function PopMarkPosition() -- now not used
+function PopMarkPosition() -- not used
     if #StackMarks == 0 then
         print("No marked position found, just popping")
     else
@@ -2195,7 +2166,7 @@ function PopMarkPosition() -- now not used
     end
     PopPosition()
 end
-function GetTopPosition() -- now not used
+function GetTopPosition() -- not used
     if StackPos==60 then
         print("No top position on the stack, exiting")
         exit()
@@ -3649,7 +3620,7 @@ function DeepRebuild() -- now Step3_Rebuild1SegmentRangeSet()
     ChkDoneList()
     
     if Score()-ss > minGain then
-      print("The current rebuild gain of " .. PrettyNumber(Score()-ss) ..
+      print("The current rebuild gain of " .. PaddedNumber((Score()-ss), 1, 3) ..
            " is greater than the 'Move on to more consecutive segments per range if" ..
            " current rebuild points gained is more than' value of " ..
             minGain .. 
