@@ -1,3 +1,615 @@
+
+function DefineGlobalVariables()
+  -- Called from main()...
+  
+	g_bDebugMode = false
+	if _G ~= nil then
+		g_bDebugMode = true
+		--SetupLocalDebugFuntions()
+	end  
+  ---------------------------------------------------------
+	-- *** Start of Table Declarations...***
+  ---------------------------------------------------------
+  g_ActiveScorePartsTable = {} -- was ActiveSub[]
+	g_bSegmentsAlreadyRebuiltTable = {} -- was disj[]
+	g_bUserSelectd_SegmentsAllowedToBeRebuiltTable = {} -- was WORKONbool[]
+	g_CysteineSegmentsTable = {}
+	g_ScorePart_Scores_Table = {} -- was Scores[]
+		spst_ScorePart_Number = 1
+		spst_ScorePart_Score = 2
+		spst_PoseTotalScore = 3
+		spst_StringOfScorePartNumbersWithSamePoseTotalScore = 4 -- examples: "4", "5=7=12", "6=9", "8=11=13"
+		spst_bFirstInStringOfScorePartNumbersWithSamePoseTotalScore = 5 -- 'true' means the first in a
+	g_ScorePartsTable = {} -- was ScoreParts[]
+		spt_ScorePart_Number = 1
+		spt_ScorePart_Name = 2 -- could have been called "SlotName", but since
+		spt_bScorePartIsActive = 3  -- User can change this to false
+		spt_LongName = 4
+	g_SegmentScoresTable = {}
+	g_UserSelected_ScorePartsForCalculatingLowestScoringSegmentsTable = {} -- was scrPart[]
+  g_UserSelected_SegmentRangesAllowedToBeRebuiltTable = {} -- was WORKON[]
+	g_XLowestScoringSegmentRangesTable = {} -- was areas[]
+		srtrt_StartSegment = 1
+		srtrt_EndSegment = 2
+  ---------------------------------------------------------
+	-- ***...end of Table Declarations.***
+  ---------------------------------------------------------
+	g_SegmentCount_WithLigands = structure.GetCount()
+	g_SegmentCount_WithoutLigands = g_SegmentCount_WithLigands
+	local l_SegmentIndex
+	for l_SegmentIndex = g_SegmentCount_WithLigands, 1, -1 do
+		l_GetSecondaryStructureType = structure.GetSecondaryStructure(l_SegmentIndex)
+		if l_GetSecondaryStructureType == "M" then
+		-- Subtract the ligand segment...
+			g_SegmentCount_WithoutLigands = g_SegmentCount_WithoutLigands - 1
+		end
+	end
+  ---------------------------------------------------------
+  -- The following variables are sorted
+  -- alphabetically as much as possible...
+  ---------------------------------------------------------
+	g_bBetterRecentBest = false	
+	g_bFoundAHighGain = true
+	g_bFreeDesignPuzzle = false		
+	g_bHasDensity = false
+	g_bHasLigand = (g_SegmentCount_WithoutLigands < g_SegmentCount_WithLigands)
+	g_bMaxClashImportance = true
+	g_bProbableSymmetryPuzzle = false
+	g_NumberOfMutableSegments = 0
+	g_bRebuildHelicesAndLoops = true 
+  g_bRebuildSheetsAndLoops = false
+	g_bSavedSecondaryStructure = false
+	g_bSketchBookPuzzle = false
+  local l_PuzzleName = puzzle.GetName()  
+  if string.find(l_PuzzleName, "Sketchbook") then
+    g_bSketchBookPuzzle = true
+	end
+	g_bUserSelected_AlwaysAllowRebuildingAlreadyRebuilt_Segments = true
+	g_bUserSelected_ConvertAllSegmentsToLoops = true
+	local l_NumberOfBands = band.GetCount()
+	g_bUserSelected_DisableBandsDuringRebuild = l_NumberOfBands > 0
+	g_bUserSelected_DuringFuseAndStabilizeShakeAndWiggleSelectedAndNearbySegments = false
+	g_bUserSelected_ExtraShakeAndWiggles_AfterRebuild = false
+  g_bUserSelected_FuseBestScorePartPose = true
+	g_bUserSelected_KeepDisulfideBondsIntact = false
+	g_bUserSelected_Mutate_After_FuseBestScorePartPose = false
+	g_bUserSelected_Mutate_After_Rebuild = false
+	g_bUserSelected_Mutate_After_Stabilize = false
+	g_bUserSelected_Mutate_Before_FuseBestScorePartPose = false
+	g_bUserSelected_Mutate_During_Stabilize = false
+	g_bUserSelected_Mutate_OnlySelected_Segments = false
+	g_bUserSelected_Mutate_SelectedAndNearby_Segments = false
+  g_bUserSelected_NormalStabilize = true
+	g_bUserSelected_PerformExtraStabilize = false
+	g_bUserSelected_SelectAllScorePartsForStabilize = true
+	g_bUserSelected_SelectMain4ScorePartsForStabilize = false
+  g_bUserSelected_SelectScorePartsForStabilize = false
+	g_DensityWeight = 0
+	g_LastSegmentScore = 0
+  g_OriginalNumberOfDisulfideBonds = 0
+	g_CurrentRebuildPointsGained = 0
+	g_QuickSaveStackPosition = 60 -- Uses slot 60 and higher...
+	g_RebuildClashImportance = 0
+  g_round_x_of_y = "" -- For log file reporting; Example: " round 1 of 10"
+  g_RunCycle = 0
+	g_Score_AtStartOf_Script = Score()
+  g_Score_ScriptBest = Score()
+  g_ScorePartText = "" -- Example: " ScorePart 4 (total)", " ScorePart 6 (ligand) 6=7=11" 
+  g_ScriptStartTime = os.clock()
+  
+  g_Stats_Run_StartTime = os.clock()
+  g_Stats_Run_EndTime = os.clock()
+  
+  g_Stats_Run_TotalSecondsUsed_RebuildSelected = 0.0001 -- prevent divide by zero error
+  g_Stats_Run_TotalSecondsUsed_ShakeSidechainsSelected = 0.0001
+  g_Stats_Run_TotalSecondsUsed_WiggleSelected = 0.0001
+  g_Stats_Run_TotalSecondsUsed_WiggleAll = 0.0001
+  g_Stats_Run_TotalSecondsUsed_MutateSidechainsSelected = 0.0001
+  g_Stats_Run_TotalSecondsUsed_MutateSidechainsAll = 0.0001
+
+  g_Stats_Script_TotalSecondsUsed_RebuildSelected = 0
+  g_Stats_Script_TotalSecondsUsed_ShakeSidechainsSelected = 0
+  g_Stats_Script_TotalSecondsUsed_WiggleSelected = 0
+  g_Stats_Script_TotalSecondsUsed_WiggleAll = 0
+  g_Stats_Script_TotalSecondsUsed_MutateSidechainsSelected = 0
+  g_Stats_Script_TotalSecondsUsed_MutateSidechainsAll = 0
+  
+  g_Stats_Run_TotalPointsGained_RebuildSelected = 0
+  g_Stats_Run_TotalPointsGained_ShakeSidechainsSelected = 0
+  g_Stats_Run_TotalPointsGained_WiggleSelected = 0
+  g_Stats_Run_TotalPointsGained_WiggleAll = 0
+  g_Stats_Run_TotalPointsGained_MutateSidechainsSelected = 0
+  g_Stats_Run_TotalPointsGained_MutateSidechainsAll = 0
+  
+  g_Stats_Script_TotalPointsGained_RebuildSelected = 0
+  g_Stats_Script_TotalPointsGained_ShakeSidechainsSelected = 0
+  g_Stats_Script_TotalPointsGained_WiggleSelected = 0
+  g_Stats_Script_TotalPointsGained_WiggleAll = 0
+  g_Stats_Script_TotalPointsGained_MutateSidechainsSelected = 0
+  g_Stats_Script_TotalPointsGained_MutateSidechainsAll = 0  
+  
+  g_Stats_Run_SuccessfulAttempts_RebuildSelected = 0
+  g_Stats_Run_SuccessfulAttempts_ShakeSidechainsSelected = 0
+  g_Stats_Run_SuccessfulAttempts_WiggleSelected = 0
+  g_Stats_Run_SuccessfulAttempts_WiggleAll = 0
+  g_Stats_Run_SuccessfulAttempts_MutateSidechainsSelected = 0
+  g_Stats_Run_SuccessfulAttempts_MutateSidechainsAll = 0
+  
+  g_Stats_Script_SuccessfulAttempts_RebuildSelected = 0
+  g_Stats_Script_SuccessfulAttempts_ShakeSidechainsSelected = 0
+  g_Stats_Script_SuccessfulAttempts_WiggleSelected = 0
+  g_Stats_Script_SuccessfulAttempts_WiggleAll = 0
+  g_Stats_Script_SuccessfulAttempts_MutateSidechainsSelected = 0
+  g_Stats_Script_SuccessfulAttempts_MutateSidechainsAll = 0
+  
+  g_Stats_Run_NumberOfAttempts_RebuildSelected = 0.1 -- prevent divide by zero error
+  g_Stats_Run_NumberOfAttempts_ShakeSidechainsSelected = 0.1
+  g_Stats_Run_NumberOfAttempts_WiggleSelected = 0.1
+  g_Stats_Run_NumberOfAttempts_WiggleAll = 0.1
+  g_Stats_Run_NumberOfAttempts_MutateSidechainsSelected = 0.1
+  g_Stats_Run_NumberOfAttempts_MutateSidechainsAll = 0.1    
+	
+  g_Stats_Script_NumberOfAttempts_RebuildSelected = 0
+  g_Stats_Script_NumberOfAttempts_ShakeSidechainsSelected = 0
+  g_Stats_Script_NumberOfAttempts_WiggleSelected = 0
+  g_Stats_Script_NumberOfAttempts_WiggleAll = 0
+  g_Stats_Script_NumberOfAttempts_MutateSidechainsSelected = 0
+  g_Stats_Script_NumberOfAttempts_MutateSidechainsAll = 0
+  
+	g_UserSelected_AdditionalNumberOf_SegmentRanges_ToRebuild_PerRunCycle = 1
+	g_UserSelected_AfterRebuild_ShakeSegmentRange_ClashImportance = 0.31
+	g_UserSelected_ClashImportanceFactor = behavior.GetClashImportance()
+	if g_UserSelected_ClashImportanceFactor < 0.99 then
+		CheckCI() -- now AskUserToCheckClashImportance()
+	end
+	g_UserSelected_EndRunAfterRebuildingWithThisManyConsecutiveSegments = 4 -- was maxLen
+	g_UserSelected_MaxNumberOf_SegmentRanges_ToRebuild_ThisRunCycle = 0 -- was reBuild
+	g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan =
+		(g_SegmentCount_WithoutLigands - (g_SegmentCount_WithoutLigands % 4)) / 4
+	if g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan < 10000 then
+		g_UserSelected_MoveOnToMoreSegmentsPerRangeIfCurrentRebuildPointsGainedIsMoreThan = 10000 -- was 40
+	end
+	g_UserSelected_Mutate_ClashImportance = 0.9
+	g_UserSelected_Mutate_SphereRadius = 8 -- Angstroms
+	g_UserSelected_NumberOfSegmentRangesToSkip = 0 -- set to any value other than 0, to debug related code
+	g_UserSelected_NumberOfRunCycles = 10 -- 10 is plenty, 5 is usually enough for most tests
+  if g_bDebugMode == true then
+    g_UserSelected_NumberOfRunCycles = 5 -- is high enough for debug mode
+  end
+	g_UserSelected_NumberOfTimesToRebuildEach_SegmentRange_PerRunCycle = 10 -- set to at least 10
+	g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan = 
+    g_SegmentCount_WithLigands
+	if g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan >
+    500 then
+		g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan = 500
+	end
+ 	g_UserSelected_SketchBookPuzzle_MinimumGainForSave = 0
+	g_UserSelected_SkipFuseBestScorePartPose_IfCurrentRebuild_LosesMoreThan = 
+		(g_SegmentCount_WithoutLigands - (g_SegmentCount_WithoutLigands % 4)) / 4
+	if g_UserSelected_SkipFuseBestScorePartPose_IfCurrentRebuild_LosesMoreThan < 30 then
+		g_UserSelected_SkipFuseBestScorePartPose_IfCurrentRebuild_LosesMoreThan = 30
+	end
+	g_UserSelected_StartingNumberOf_SegmentRanges_ToRebuild_PerRunCycle = 4
+	g_UserSelected_StartRunRebuildingWithThisManyConsecutiveSegments = 2 -- was minLen
+	g_UserSelected_WiggleFactor = 1
+  g_with_segments_x_thru_y = "" -- For log file reporting; Example: " w/segments 1-3"
+
+  ---------------------------------------------------------
+  -- The following are conditional overrides
+  -- or otherwise computed variables...
+  ---------------------------------------------------------
+  g_NumberOfMutableSegments = 1
+	if g_NumberOfMutableSegments > 0 then
+		g_bUserSelected_Mutate_After_FuseBestScorePartPose = true -- was set to false by default above
+		g_bUserSelected_Mutate_After_Stabilize = true -- was set to false by default above
+	end
+	if g_bSketchBookPuzzle == true then
+	   g_bUserSelected_ConvertAllSegmentsToLoops = false -- was set to true by default above
+	   g_bUserSelected_FuseBestScorePartPose = false -- was set to true by default above
+	   g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan = 500
+	end
+  if g_bDebugMode == true then
+    g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildPointsGainedIsMoreThan = 50
+  end  
+	g_RequiredNumberOfConsecutiveSegments = 
+    g_UserSelected_StartRunRebuildingWithThisManyConsecutiveSegments
+	g_UserSelected_SegmentRangesAllowedToBeRebuiltTable = {{1, g_SegmentCount_WithoutLigands}}
+  
+  ------------------------------------------------------------
+  -- The remaining lines of this function are related to 
+  -- Condition Checking, and are not sorted alphabetically...  
+  ------------------------------------------------------------
+  ------------------------------------------------------------
+	-- Start of Temporarily Disable Condition Checking module...
+  ------------------------------------------------------------
+	if g_bSketchBookPuzzle == false then
+  	behavior.SetFiltersDisabled(true) -- Disable condition checking to get current score w/bonus points.
+  end
+	local l_CurrentPoseTotalScoreWithPotentialBonusPoints = Score()
+	if g_bSketchBookPuzzle == false then
+    -- Could probably just call NormalConditionChecking_ReEnable() here...
+		behavior.SetFiltersDisabled(false) -- Disables faster CPU processing, so your score 
+    --                                    improvements will be saved to foldit's undo history.
+	end
+	local l_Score_WithNormalConditionChecking_Enabled = Score()
+	g_ComputedMaximumPotentialBonusPoints = 
+    l_CurrentPoseTotalScoreWithPotentialBonusPoints - l_Score_WithNormalConditionChecking_Enabled 
+  g_UserSelected_MaximumPotentialBonusPoints = g_ComputedMaximumPotentialBonusPoints
+	g_bUserSelected_NormalConditionChecking_TemporarilyDisable = false --i.e.Enable Normal Condition Checking
+  -----------------------------------------------------------
+	-- ...end of Temporarily Disable Condition Checking module.
+  -----------------------------------------------------------
+
+end -- DefineGlobalVariables()
+function SetupLocalDebugFuntions()
+	math.randomseed (os.time ()) -- this must be done or our random numbers will never change...
+	function RandomCharOfString(s)
+		local r = math.random(#s) -- e.g.; math.random (5)  --> an integer number from 1 to 5
+		return s:sub(r, r) -- e.g.; string.sub ("ABCDEF", 2, 2)  --> "B"
+	end
+	function RandomFloat(l_Min, l_Max) -- e.g.; RandomFloat(3, 9) --> 4.30195013275552
+		l_RandomFloat = math.random() * (l_Max - l_Min) + l_Min
+		return l_RandomFloat
+	end
+	g_Debug_CurrentEnergyScore = -999999
+  g_Debug_ScriptBestEnergyScore = g_Debug_CurrentEnergyScore
+  g_Debug_QuickSaveEnergyScore = {}
+	current = {}
+ 	pose = {} -- same structure as "current" above
+ 	recentbest = {} --
+  current.RandomlyChange_g_Debug_CurrentEnergyScore = function()
+		local l_EnergyScore = RandomFloat(-10000, 10000)    
+		if l_EnergyScore > g_Debug_ScriptBestEnergyScore then
+			if g_Debug_ScriptBestEnergyScore ~= -999999 then -- allow the first score to be whatever.
+				if l_EnergyScore - g_Debug_ScriptBestEnergyScore > 100 then
+					l_EnergyScore = g_Debug_ScriptBestEnergyScore + RandomFloat(0, 100)
+				end
+			end
+      g_Debug_ScriptBestEnergyScore = l_EnergyScore
+    end
+		g_Debug_CurrentEnergyScore = l_EnergyScore
+  end
+	current.GetEnergyScore = function()
+		return g_Debug_CurrentEnergyScore      
+	end
+ 	pose.GetEnergyScore = function()
+		return g_Debug_CurrentEnergyScore
+	end
+  recentbest.GetEnergyScore = function()
+    g_Debug_CurrentEnergyScore = g_Debug_ScriptBestEnergyScore
+    return g_Debug_CurrentEnergyScore
+  end
+	current.GetSegmentEnergyScore = function(l_SegmentIndex)    
+		local l_SegmentEnergyScore
+		l_SegmentEnergyScore = RandomFloat(-10, 10) -- was (-200, 200)
+		return l_SegmentEnergyScore
+	end
+	pose.GetSegmentEnergyScore = function(l_SegmentIndex)
+    return current.GetSegmentEnergyScore(l_SegmentIndex) -- same as above
+	end
+	current.GetSegmentEnergySubscore = function(l_SegmentIndex, l_ScorePart)
+		local l_SegmentEnergySubscore
+		l_ScorePart = string.lower(l_ScorePart)
+		if l_ScorePart == "disulfides" then
+			l_SegmentEnergySubscore = "-0"
+		elseif l_ScorePart == "reference" then
+			l_SegmentEnergySubscore = "0.1"
+		else
+			l_SegmentEnergySubscore = RandomFloat(-1, 1)
+		end
+		return l_SegmentEnergySubscore
+  end
+	pose.GetSegmentEnergySubscore = function(l_SegmentIndex, l_ScorePart)
+    return current.GetSegmentEnergySubscore(l_SegmentIndex, l_ScorePart) -- same as above
+	end
+	recentbest.Restore = function()
+    g_Debug_CurrentEnergyScore = g_Debug_ScriptBestEnergyScore
+	end
+	recentbest.Save = function()
+	end
+	band = {}
+  band.AddBetweenSegments = function(Segment1,Segment2) end
+  band.DeleteAll = function() end
+	band.DisableAll = function() end
+	band.EnableAll = function() end
+	band.GetCount = function()
+		l_BandCount = math.random(20) --> an integer number from 1 to 20
+		return l_BandCount
+	end
+  band.SetGoalLength = function(Length) end
+  band.SetStrength = function(Param1, Strength) end
+	behavior = {}
+  g_Debug_ClashImportance = -1 -- -1 forces it to get a new (positive) value 
+	behavior.GetClashImportance = function()
+    if g_Debug_ClashImportance >=0 then
+      return g_Debug_ClashImportance
+    end
+		g_Debug_ClashImportance = math.random()
+		if g_Debug_ClashImportance > .7 then
+			-- Give 1 a better chance...
+			g_Debug_ClashImportance = 1
+		end
+		return g_Debug_ClashImportance
+	end
+	behavior.SetClashImportance = function(l_ClashImportance)
+    g_Debug_ClashImportance = l_ClashImportance
+    return
+  end
+	behavior.SetFiltersDisabled = function(l_TrueOrFalse) return end
+  behavior.SetSlowFiltersDisabled = function(l_TrueOrFalse) return end
+	dialog = {}
+	local l_bDebugMenus = false
+	dialog.AddButton = function(l_ButtonText, l_ButtonValue)
+		if l_bDebugMenus == true then
+			print("  AddButton:" .. l_ButtonText .. "," .. tostring(l_ButtonValue))
+		end
+		return {value = l_ButtonValue}
+	end
+	dialog.AddCheckbox = function(l_CheckBoxText, l_bCheckBoxTrueFalse)
+		if l_bDebugMenus == true then
+			print("  AddCheckbox:" .. l_CheckBoxText .. "," .. tostring(l_bCheckBoxTrueFalse))
+		end
+		return {value = l_bCheckBoxTrueFalse}
+	end
+	dialog.AddLabel = function(l_LabelText)
+		if l_bDebugMenus == true then
+			print("  AddLabel:" .. l_LabelText)
+		end
+		return 0
+	end
+	dialog.AddSlider =
+		function(l_SliderText, l_NumberValue, l_NumberMinimum, l_NumberMaximum, l_NumberPrecision)
+		if l_bDebugMenus == true then
+			print("  AddSlider:" .. l_SliderText .. "," .. l_NumberValue .. "," .. l_NumberMinimum ..
+				"," .. l_NumberMaximum .. "," .. l_NumberPrecision)
+		end
+		return {value = l_NumberValue}
+	end
+	dialog.AddTextbox = function(l_TextBoxTitle, l_TextBoxValue)
+		if l_bDebugMenus == true then
+			print("  AddTextbox:" .. l_TextBoxTitle .. "," .. l_TextBoxValue)
+		end
+		return {value = l_TextBoxValue}
+	end
+	dialog.CreateDialog = function(l_DialogTitle)
+		if l_bDebugMenus == true then
+			print("\nCreateDialog:" .. l_DialogTitle)
+		end
+		local l_DialogTable = {}
+		return l_DialogTable
+	end
+	dialog.Show = function(l_DialogTable)
+		local l_ButtonClicked = 1
+		return l_ButtonClicked
+	end
+	freeze = {}
+  g_Debug_bBackboneIsFrozen = {}
+  g_Debug_bSideChainIsFrozen = {}
+	freeze.IsFrozen = function(l_SegmentIndex)
+   local l_bBackboneIsFrozen
+    if g_Debug_bBackboneIsFrozen[l_SegmentIndex] == nil then
+      if g_Debug_bIsMutable[l_SegmentIndex] == true or
+         --g_Debug_bIsLocked[l_SegmentIndex] == true or
+         g_Debug_bIsLigand[l_SegmentIndex] == true then
+        -- Since it is already something else, set this one to false...
+        g_Debug_bBackboneIsFrozen[l_SegmentIndex] = false
+      else
+        l_bBackboneIsFrozen = math.random(10) == 1 -- 1 in 10 random chance of being frozen
+        g_Debug_bBackboneIsFrozen[l_SegmentIndex] = l_bBackboneIsFrozen
+      end
+    else
+      l_bBackboneIsFrozen = g_Debug_bBackboneIsFrozen[l_SegmentIndex]
+    end
+   local l_bSideChainIsFrozen
+    if g_Debug_bSideChainIsFrozen[l_SegmentIndex] == nil then
+      if g_Debug_bIsMutable[l_SegmentIndex] == true or
+         --g_Debug_bIsLocked[l_SegmentIndex] == true or
+         g_Debug_bIsLigand[l_SegmentIndex] == true then
+        -- Since it is already something else, set this one to false...
+        g_Debug_bSideChainIsFrozen[l_SegmentIndex] = false
+      else
+        l_bSideChainIsFrozen = math.random(10) == 1 -- 1 in 10 random chance of being frozen
+        g_Debug_bSideChainIsFrozen[l_SegmentIndex] = l_bSideChainIsFrozen
+      end
+    else
+      l_bSideChainIsFrozen = g_Debug_bSideChainIsFrozen[l_SegmentIndex]
+    end
+		return l_bBackboneIsFrozen, l_bSideChainIsFrozen
+	end
+	puzzle = {}
+	puzzle.GetPuzzleSubscoreNames = function() -- "SubscoreName" here really means "ScorePart_Name".
+		l_PuzzleScorePart_Names =
+		{
+			"Clashing",
+			"Pairwise",
+			"Packing",
+			"Hiding",
+			"Bonding",
+			"Ideality",
+			-- 7 = "Other Bonding",
+			"Backbone",
+			"Sidechain",
+			"Disulfides",
+			"Reference"
+		}
+		return l_PuzzleScorePart_Names
+	end
+	puzzle.GetName = function ()
+		l_PuzzleName = "1458: Small Monomer Design"
+		return l_PuzzleName
+	end
+	puzzle.GetDescription = function ()
+		l_PuzzleDescription = "This puzzle challenges players to design a protein with 65-75 residues. "
+		return l_PuzzleDescription
+	end
+	puzzle.GetPuzzleID = function()
+		l_PuzzleID = "2008367"
+		return l_PuzzleID
+	end
+  recipe = {}
+  recipe.SectionStart = function () end -- no good. Does not allow capturing the results, only prints it;
+  recipe.ReportStatus = function () end
+  recipe.SectionEnd = function ()
+    return ""
+  end
+  rotamer = {}
+  rotamer.GetCount = function(segmentNumber) return 1 end
+	save = {}
+	save.Quickload = function(l_IntegerSlot)
+    g_Debug_CurrentEnergyScore = g_Debug_QuickSaveEnergyScore[l_IntegerSlot]
+    return
+  end
+	save.Quicksave = function(l_IntegerSlot)
+    g_Debug_QuickSaveEnergyScore[l_IntegerSlot] = g_Debug_CurrentEnergyScore
+    return
+  end 
+	save.LoadSecondaryStructure = function() return end -- Called from 2 places
+	save.SaveSecondaryStructure = function() return end -- Called from 1 place
+  selection = {}
+	selection.DeselectAll = function() return end
+  g_Debug_bIsSelected = {}
+	selection.IsSelected = function(l_SegmentIndex)
+		local l_bIsSelected
+    if g_Debug_bIsSelected[l_SegmentIndex] == nil then
+      -- if not already set, then set it to a random value...
+      l_bIsSelected = math.random(10) == 1 -- 1 in 10 random chance of being selected
+      g_Debug_bIsSelected[l_SegmentIndex] = l_bIsSelected
+    else
+      l_bIsSelected = g_Debug_bIsSelected[l_SegmentIndex]
+    end
+		return l_bIsSelected
+	end
+	selection.Select = function(l_SegmentIndex) return end
+	selection.SelectAll = function() return end
+	selection.SelectRange = function(l_StartSegment, l_EndSegment) return end
+	structure = {}
+	structure.GetAminoAcid = function(l_SegmentIndex)
+		l_AminoAcids = 'wifpylvmkchardentsqg'  
+		l_RandomAminoAcid = RandomCharOfString(l_AminoAcids)
+		if 1 == 1 then
+			return l_RandomAminoAcid
+		end
+	end
+	structure.GetCount = function()
+		 l_RandomCount = math.random(80, 180)
+		 return l_RandomCount
+	end
+	structure.GetDistance = function(x,i)
+		l_Distance = math.random(80) -- in angstroms
+		return l_Distance
+	end
+  g_Debug_GetSecondaryStructure = {}
+  g_Debug_bIsLigand = {}
+  g_Debug_bGetSecondaryStructureFirstTime = true
+	structure.GetSecondaryStructure = function(l_SegmentIndex)
+    if g_Debug_bGetSecondaryStructureFirstTime == true then
+      g_Debug_bGetSecondaryStructureFirstTime = false
+      local l_RandomishNumber = math.random(0, 30)
+      --g_SegmentCount_WithoutLigands = g_SegmentCount_WithLigands - l_RandomishNumber
+    end
+		local l_bIsLigand = false
+    local l_RandomSecondaryStructure
+    if g_Debug_GetSecondaryStructure[l_SegmentIndex] == nil then
+        l_SecondaryStructures = 'HELLLLLLLL' -- H=Helix, E=Sheet, L=Loop, M=Ligand
+        l_RandomSecondaryStructure = RandomCharOfString(l_SecondaryStructures)
+      g_Debug_GetSecondaryStructure[l_SegmentIndex] = l_RandomSecondaryStructure
+      g_Debug_bIsLigand[l_SegmentIndex] = l_bIsLigand
+    else
+      l_RandomSecondaryStructure = g_Debug_GetSecondaryStructure[l_SegmentIndex]
+    end
+    return l_RandomSecondaryStructure
+	end
+  structure.DeleteCut = function(segsForIdealize) end
+  structure.IdealizeSelected = function() end
+  structure.InsertCut = function(segsForIdealize) end
+  g_Debug_bIsLocked = {}
+ 	structure.IsLocked = function(l_SegmentIndex)
+    local l_bIsLocked
+    if g_Debug_bIsLocked[l_SegmentIndex] == nil then
+      if g_Debug_bIsMutable[l_SegmentIndex] == true or
+         g_Debug_bIsLigand[l_SegmentIndex] == true then
+        g_Debug_bIsLocked[l_SegmentIndex] = false
+      else
+        l_bIsLocked = math.random(10) == 1 -- 1 in 10 random chance of being locked
+        g_Debug_bIsLocked[l_SegmentIndex] = l_bIsLocked
+      end
+    else
+      l_bIsLocked = g_Debug_bIsLocked[l_SegmentIndex]
+    end
+    return l_bIsLocked
+  end 
+  g_Debug_bIsMutable = {}
+	structure.IsMutable = function(l_SegmentIndex)
+    
+    local l_bIsMutable
+    if g_Debug_bIsMutable[l_SegmentIndex] == nil then
+      if g_Debug_bBackboneIsFrozen[l_SegmentIndex] == true or
+         g_Debug_bSideChainIsFrozen[l_SegmentIndex] == true or
+         g_Debug_bIsLocked[l_SegmentIndex] == true or
+         g_Debug_bIsLigand[l_SegmentIndex] == true then
+        -- Since it is already something else, set this one to false...
+        g_Debug_bIsMutable[l_SegmentIndex] = false
+      else
+        l_bIsMutable = math.random(10) == 1 -- 1 in 10 random chance of being mutable
+        g_Debug_bIsMutable[l_SegmentIndex] = l_bIsMutable
+      end
+    else
+      l_bIsMutable = g_Debug_bIsMutable[l_SegmentIndex]
+    end
+    return l_bIsMutable
+  end 
+	structure.LocalWiggleSelected = function(Num) end
+  structure.MutateSidechainsAll = function(l_Iterations) 
+    current.RandomlyChange_g_Debug_CurrentEnergyScore()
+  end
+	structure.MutateSidechainsSelected = function(l_Iterations) 
+    current.RandomlyChange_g_Debug_CurrentEnergyScore()
+  end
+	structure.RebuildSelected = function(l_Iterations)
+    current.RandomlyChange_g_Debug_CurrentEnergyScore()
+	end
+  structure.SetAminoAcid = function(l_SegmentIndex, l_AminoAcid) end
+	structure.SetSecondaryStructureSelected = function(l_StringSecondaryStructure) return end
+	structure.ShakeSidechainsAll = function(l_Iterations)
+    current.RandomlyChange_g_Debug_CurrentEnergyScore()
+	end
+	structure.ShakeSidechainsSelected = function(l_Iterations)
+    current.RandomlyChange_g_Debug_CurrentEnergyScore()
+	end
+	structure.WiggleAll = function(l_Iterations,l_bBackbone,l_bSideChains)
+    current.RandomlyChange_g_Debug_CurrentEnergyScore()
+	end
+	structure.WiggleSelected = function(l_Iterations,l_bBackbone,l_bSideChains)
+    current.RandomlyChange_g_Debug_CurrentEnergyScore()
+	end
+ 	user = {}
+	user.GetPlayerName = function() return "ProteinProgrammingLanguage" end
+  current.RandomlyChange_g_Debug_CurrentEnergyScore()
+end -- function SetupLocalDebugFuntions()
+function PaddedNumber(l_DirtyFloat, l_PadWidth, l_AfterDecimal)
+  -- Called from ()...
+  
+  local l_PrettyString = string.format("%" .. l_PadWidth .. "." .. l_AfterDecimal .. "f", l_DirtyFloat)  
+  return l_PrettyString
+  
+end -- function PaddedNumber(l_DirtyFloat)
+function PaddedString(l_String, l_PadWidth)
+  -- Called from ()...
+  
+  local l_PrettyString = string.format("%" .. l_PadWidth .. "s", l_String)
+  
+  return l_PrettyString
+  
+end -- function PaddedString(l_String, l_PadWidth)
+function GetPoseTotalScore() -- was Score()
+  return(Score())
+end
+g_bDebugMode = false
+if _G ~= nil then
+  print("Warning: Running in debug mode!")
+  g_bDebugMode = true
+  SetupLocalDebugFuntions()
+end
 --[[
 
 Greetings!
@@ -137,18 +749,15 @@ Script example: "MI_3_4.".
 ]]--
 
 -- Predefined Sequences
-
--- Common
+-- Common:
 SequenceStrPredefined1 = "CL.FR.BT_15_87_97.BT_15_103_113.RW_2_1_10.QU_15.BF.RW_1_1_10.LW_12_2.SR.MI_3_10.ST_1." 
--- For Mutable
+-- For Mutable:
 SequenceStrPredefined2 = "CL.FR.BT_10_87_97.MT_3_20.BT_10_103_113.NM.RW_2_1_10.MT_3_20.QU_15.BF.RW_1_1_10.LW_12_2.SR.MI_3_10.ST_1."
--- For Multistart
+-- For Multistart:
 SequenceStrPredefined3 = "WS.BT_2_87_97.FR.CL.BT_10_87_97.BT_10_103_113.RW_2_1_10.QU_15.BF.RW_1_1_10.LW_12_2.SR.MI_3_10.ST_1."
--- For Endgame Death
+-- For Endgame Death:
 SequenceStrPredefined4 = "CL.BF.MI_4_200.LW_15_2.LW_14_2.LW_13_2.LW_12_2.LW_11_2.LW_10_2.SF.CL.BF.MI_3_200.LW_9_2.LW_8_2.LW_7_2.LW_6_2.LW_5_2.SF.CL.BF.MI_2_200.LW_4_2.LW_3_2.LW_2_2.LW_1_2.QU_12."
-
--- Shared functions
-
+-- Shared functions:
 fsl={}
 fsl.aminosLetterIndex=1
 fsl.aminosShortIndex=2
@@ -184,18 +793,13 @@ fsl.aminos = {
    {'y','Tyr','Tyrosine',       'polar','neutral',   -1.3},
 -- {'z','Glx','Glutamine or glutamic acid' } 
 }
-
--- Print time and score
-function p_Time(startTime,ScoreGain)
+function p_Time(startTime,ScoreGain)-- Print time and score
   local ss = (os.time()-startTime)%60
   local mm = (((os.time()-startTime-ss)%3600)/60)
   local hh = (os.time()-startTime-mm*60-ss)/3600
   print("Time: "..hh..":"..mm..":"..ss..". ".."Score: "..current.GetEnergyScore()..", Total: +"..ScoreGain)
 end
-
-
--- Freestyle Starter.
-function freestyle_starter()
+function freestyle_starter() -- Freestyle Starter.
 
   local startScore = current.GetEnergyScore()
   
@@ -215,19 +819,21 @@ function freestyle_starter()
   end
   
 end
-
-
--- Common mutate/shake/wiggle combination.
-function StepC(Clashing,Mutates,Shakes,Wiggles)
-  if Clashing >= 0 and Clashing <= 1 then behavior.SetClashImportance(Clashing) end
-  if Mutates > 0 then structure.MutateSidechainsAll(Mutates) end
-  if Shakes > 0 then structure.ShakeSidechainsAll(Shakes) end
-  if Wiggles > 0 then structure.WiggleAll(Wiggles) end
+function StepC(Clashing,Mutates,Shakes,Wiggles) -- Common mutate/shake/wiggle combination.
+  if Clashing >= 0 and Clashing <= 1 then
+    behavior.SetClashImportance(Clashing)
+  end
+  if Mutates > 0 then 
+    structure.MutateSidechainsAll(Mutates)
+  end
+  if Shakes > 0 then
+    structure.ShakeSidechainsAll(Shakes)
+  end
+  if Wiggles > 0 then
+    structure.WiggleAll(Wiggles)
+  end
 end
-
-
--- Sphere select
-function SphereSelect(start_idx,end_idx,kSphereRadius)
+function SphereSelect(start_idx,end_idx,kSphereRadius) -- Sphere select
 
   local NumSegm = structure.GetCount()
   local sphere = {}
@@ -244,9 +850,7 @@ function SphereSelect(start_idx,end_idx,kSphereRadius)
   end
 
 end
-
--- Center Segment
-function GetCenterSegment()
+function GetCenterSegment() -- Center Segment
 
   local NumSegm = structure.GetCount()
   local SegmentDistance
@@ -269,11 +873,7 @@ end
 
 
 -- Modules Section.
-
-
--- BlueFuze.
-
-function BlueFuze()
+function BlueFuze() -- BlueFuze.
   StepC(0.05,0,1,0)
   StepC(1,0,0,8)
   StepC(0.07,0,1,0)
@@ -283,11 +883,7 @@ function BlueFuze()
   StepC(1,0,0,8)
   recentbest.Restore()
 end
-
-
--- SoftRelax.
-
-function SoftRelaxFull()
+function SoftRelaxFull() -- SoftRelax.
 
   local function SoftRelax()
 
@@ -314,11 +910,7 @@ function SoftRelaxFull()
     Step = Step + 1
   until current.GetEnergyScore() - startScore < minScoreChange
 end
-
-
--- FastRelax.
-
-function FastRelaxFull()
+function FastRelaxFull() -- -- FastRelax.
 
   local function FastRelax()
 
@@ -343,11 +935,7 @@ function FastRelaxFull()
     Step = Step + 1
   until current.GetEnergyScore()-startScore < minScoreChange
 end
-
-
--- Clashing.
-
-function clashing(Repeat)
+function clashing(Repeat) -- -- Clashing.
   local i = 1
   local startScore
   while i < 10 do 
@@ -364,11 +952,7 @@ function clashing(Repeat)
   end
 
 end
-
-
--- Wiggle/Shake or Shake/Wiggle.
-
-function ws_or_sw(params)
+function ws_or_sw(params) -- Wiggle/Shake or Shake/Wiggle.
 
   local function ws_or_sw_1()
     structure.WiggleAll(15)
@@ -406,11 +990,7 @@ function ws_or_sw(params)
   if params[4] == 1 then save.Quickload(100) ws_or_sw_4() end
   recentbest.Restore()
 end
-
-
--- Band Test.
-
-function Band_tests(Start_LengthP,End_LengthP,Clashing,Iteration,TotalIteration)
+function Band_tests(Start_LengthP,End_LengthP,Clashing,Iteration,TotalIteration) -- Band Test.
 
   local function PullPart(Segment1,Segment2,LengthP,Strength)
     band.DeleteAll()
@@ -422,9 +1002,24 @@ function Band_tests(Start_LengthP,End_LengthP,Clashing,Iteration,TotalIteration)
   end
 
   local startSeg = math.random(1,structure.GetCount()-9)
-  while structure.IsLocked(startSeg) do startSeg = math.random(1,structure.GetCount()-9) end
-  local endSeg = math.random(startSeg+8,structure.GetCount())
-  local LengthP = math.random(Start_LengthP,End_LengthP)
+  while structure.IsLocked(startSeg) do
+    startSeg = math.random(1,structure.GetCount()-9)
+  end
+  local l_GetCount = structure.GetCount()
+  if l_GetCount == nil then
+    l_GetCount = 0
+  end
+  if startSeg == nil then
+    startSeg = 1
+  end  
+  local l_LowNumber = startSeg + 8
+  local l_HighNumber = l_GetCount
+  if l_LowNumber >= l_HighNumber then  -- why does this occur? Example found: 106 > 82
+    l_HighNumber = l_LowNumber
+  end 
+  
+  local endSeg = math.random(l_LowNumber, l_HighNumber)
+  local LengthP = math.random(Start_LengthP, End_LengthP)
   local startScore = current.GetEnergyScore()
   if TotalIteration == 0 then TotalIterationStr = "inf" else TotalIterationStr = TotalIteration end
   
@@ -438,11 +1033,7 @@ function Band_tests(Start_LengthP,End_LengthP,Clashing,Iteration,TotalIteration)
   recentbest.Restore()
   print(Iteration .."/".. TotalIterationStr .. "; " .. startSeg .. "-" .. endSeg .. ", score: " ..math.max(startScore,current.GetEnergyScore()) .. ", gain: " .. math.max(0,current.GetEnergyScore()-startScore))
 end
-
-
--- Local Wiggle.
-
-function local_wiggle(Len,Num)
+function local_wiggle(Len,Num) -- Local Wiggle.
   local NumSegm = structure.GetCount()
   local startScore
   local gainScore
@@ -458,11 +1049,7 @@ function local_wiggle(Len,Num)
     recentbest.Restore()
   end
 end
-
-
--- Local Rebuild.
-
-function local_rebuild_all(Length,Clashing)
+function local_rebuild_all(Length,Clashing) -- Local Rebuild.
 
   local function local_rebuild(Start,Len,Clsh)
     local startScore = current.GetEnergyScore()
@@ -471,7 +1058,9 @@ function local_rebuild_all(Length,Clashing)
     selection.DeselectAll()
     selection.SelectRange(Start,Start+Len-1)
     for i=1,3 do
-      if current.GetEnergyScore()-startScore<0.05 and startScore-current.GetEnergyScore()<0.05 then structure.RebuildSelected(i) end
+      if current.GetEnergyScore()-startScore<0.05 and startScore-current.GetEnergyScore()<0.05 then
+        structure.RebuildSelected(i)
+      end
     end
     if current.GetEnergyScore()-startScore>0.05 or startScore-current.GetEnergyScore()>0.05 then
       selection.SelectAll()
@@ -501,11 +1090,7 @@ function local_rebuild_all(Length,Clashing)
     recentbest.Restore()
   end
 end
-
-
--- Rebuild Worst.
-
-function RebuildWorst(Length,RebuildsTries,Clashing,NumSegsForRebuild)
+function RebuildWorst(Length, RebuildsTries, Clashing, NumSegsForRebuild) -- Rebuild Worst.
 
   local function Worst_Segments(Length)
   
@@ -538,10 +1123,17 @@ function RebuildWorst(Length,RebuildsTries,Clashing,NumSegsForRebuild)
   local sOutput = ""
   local startScore
   
-  for i=1,math.min(#WorstSegs,NumSegsForRebuild) do
+  if type(NumSegsForRebuild) == "string" then
+    NumSegsForRebuild = tonumber(NumSegsForRebuild)
+  end  
+  
+  for i = 1, math.min(#WorstSegs, NumSegsForRebuild) do
+    
     segsForRebuild = {}
     selection.DeselectAll()
-    for j = math.max(WorstSegs[i][1]-1,1), math.min(WorstSegs[i][2]+1,NumSegs) do segsForRebuild[#segsForRebuild + 1] = j end
+    for j = math.max(WorstSegs[i][1]-1,1), math.min(WorstSegs[i][2]+1,NumSegs) do
+      segsForRebuild[#segsForRebuild + 1] = j
+    end
     Step = 1
     sOutput = ""
     RebuildsTries = RebuildsTries + 0 -- Type conversion?
@@ -552,17 +1144,21 @@ function RebuildWorst(Length,RebuildsTries,Clashing,NumSegsForRebuild)
         if math.abs(current.GetEnergyScore()-startScore) < 0.05 then structure.RebuildSelected(i) end
       end
       if math.abs(current.GetEnergyScore()-startScore) > 0.05 then
-		StepC(-1,1,0,15)
+        StepC(-1,1,0,15)
         structure.ShakeSidechainsAll(1)
         structure.WiggleSelected(10)
         structure.WiggleAll(10)
         if Clashing < 1 then
-		  StepC(Clashing,0,0,4)
-		  StepC(1,1,0,10)
-		  StepC(1,0,1,5)
+          StepC(Clashing,0,0,4)
+          StepC(1,1,0,10)
+          StepC(1,0,1,5)
         end
       end
-      sOutput = Step .." Try " .. ", " .. segsForRebuild[1] .. "-" .. segsForRebuild[#segsForRebuild] .. ", score: " .. current.GetEnergyScore()
+      if segsForRebuild[1] == nil then
+        segsForRebuild[1] = ""
+      end
+      sOutput = Step .." Try " .. ", " .. segsForRebuild[1] .. "-" .. 
+                segsForRebuild[#segsForRebuild] .. ", score: " .. current.GetEnergyScore()
       if current.GetEnergyScore()-startScore > 0.0001 then 
         sOutput = sOutput .. ", +" .. current.GetEnergyScore()-startScore
         Step = 0
@@ -573,11 +1169,7 @@ function RebuildWorst(Length,RebuildsTries,Clashing,NumSegsForRebuild)
     end
   end
 end
-
-
--- Quake.
-
-function quake(Length,ScoreDelta,Clashing)
+function quake(Length,ScoreDelta,Clashing) -- Quake.
 
   function quake_one(Start,Diff,Delta,Clashing)
   
@@ -627,11 +1219,7 @@ function quake(Length,ScoreDelta,Clashing)
     recentbest.Save()
   end
 end
-
-
--- Sidechain Test.
-
-function sidechain_shock(Seg)
+function sidechain_shock(Seg) -- Sidechain Test.
   local SnapCnt = rotamer.GetCount(Seg)
   local startScore = current.GetEnergyScore()
 
@@ -656,7 +1244,6 @@ function sidechain_shock(Seg)
     print(Seg .. "/" .. structure.GetCount() .. ", " .. i .. "/" .. SnapCnt .. ", score: " ..  current.GetEnergyScore() .. ", gain: " .. current.GetEnergyScore()-startScore)
   end
 end
-
 function sidechain_test_all()
   for j=1, structure.GetCount() do
     recentbest.Save()
@@ -668,39 +1255,34 @@ end
 function sidechain_test_random(numSegments)
   for j=1, numSegments do
     recentbest.Save()
-	segmentNumber = math.random(1,structure.GetCount())
-    if rotamer.GetCount(segmentNumber) > 2 then sidechain_shock(segmentNumber) end
+    segmentNumber = math.random(1,structure.GetCount())
+    if rotamer.GetCount(segmentNumber) > 2 then
+      sidechain_shock(segmentNumber)
+    end
     recentbest.Restore()
   end
 end
-
-
--- Mutate.
-
-function mutate(Shk, Num)
+function mutate(Shk, Num) -- Mutate.
   if Shk==1 then structure.ShakeSidechainsAll(Num) end
   if Shk==2 then structure.MutateSidechainsAll(Num) end
 end
-
-
--- Mutate and Test.
-
-function Mutate_And_Test(RunFunction,NumTries)
+function Mutate_And_Test(RunFunction, NumTries) -- Mutate and Test.
 
   local function mutate_and_test_1(n,Clashing,IsAll,Num)
     local startScore = current.GetEnergyScore()
-    structure.SetAminoAcid(n,fsl.aminos[Num][fsl.aminosLetterIndex])
+    structure.SetAminoAcid(n, fsl.aminos[Num][fsl.aminosLetterIndex])
     structure.ShakeSidechainsAll(1)
-	StepC(Clashing,0,0,10)
+    StepC(Clashing,0,0,10)
     behavior.SetClashImportance(1)
     if math.abs(current.GetEnergyScore()-startScore) > 0.003 then
       if IsAll == 0 then 
         selection.DeselectAll()
         selection.Select(n)
         structure.MutateSidechainsSelected(1)
-      else structure.MutateSidechainsAll(1)
+      else
+        structure.MutateSidechainsAll(1)
       end
-    structure.WiggleAll(10)
+      structure.WiggleAll(10)
     end
   end
 
@@ -712,7 +1294,8 @@ function Mutate_And_Test(RunFunction,NumTries)
         startScore = current.GetEnergyScore()
         sOutput = ""
         mutate_and_test_1(mutable[i],Clashing,0,j)
-        sOutput = mutable[i] .. "_" .. fsl.aminos[j][fsl.aminosLetterIndex] .. ": " .. current.GetEnergyScore()
+        sOutput = mutable[i] .. "_" .. fsl.aminos[j][fsl.aminosLetterIndex] .. ": " ..
+                  current.GetEnergyScore()
         recentbest.Restore()
         if current.GetEnergyScore() > startScore + 0.0001 then 
           sOutput = sOutput .. ", +" .. current.GetEnergyScore() - startScore
@@ -735,7 +1318,8 @@ function Mutate_And_Test(RunFunction,NumTries)
             startScore = current.GetEnergyScore()
             structure.SetAminoAcid(i1,fsl.aminos[j1][fsl.aminosLetterIndex])
             mutate_and_test_1(mutable[i2],Clashing,0,j2)
-            sOutputAdd = mutable[i2] .. "_" .. fsl.aminos[j2][fsl.aminosLetterIndex] .. ": " .. current.GetEnergyScore()
+            sOutputAdd = mutable[i2] .. "_" .. fsl.aminos[j2][fsl.aminosLetterIndex] .. ": " ..
+                         current.GetEnergyScore()
             recentbest.Restore()
             if current.GetEnergyScore() > startScore + 0.0001
             then 
@@ -763,9 +1347,10 @@ function Mutate_And_Test(RunFunction,NumTries)
       sOutput = mutable[i1] .. "_" .. fsl.aminos[j1][fsl.aminosLetterIndex] .. " + "
       i2 = math.random(#mutable)
       j2 = math.random(20)
-      structure.SetAminoAcid(i1,fsl.aminos[j1][fsl.aminosLetterIndex])
+      structure.SetAminoAcid(i1, fsl.aminos[j1][fsl.aminosLetterIndex])
       mutate_and_test_1(mutable[i2],Clashing,Step%2,j2)
-      sOutputAdd = mutable[i2] .. "_" .. fsl.aminos[j2][fsl.aminosLetterIndex] .. ": " .. current.GetEnergyScore()
+      sOutputAdd = mutable[i2] .. "_" .. fsl.aminos[j2][fsl.aminosLetterIndex] .. ": " ..
+                   current.GetEnergyScore()
       recentbest.Restore()
       if current.GetEnergyScore() > startScore + 0.0001
       then 
@@ -790,11 +1375,7 @@ function Mutate_And_Test(RunFunction,NumTries)
   if RunFunction == 3 then random_2_step(Clashing,NumTries) end
   
 end
-
-
--- New Mutate.
-
-function new_mutate(Num)
+function new_mutate(Num) -- New Mutate.
   structure.SetAminoAcid(Num,fsl.aminos[1][1])
   newScore = current.GetEnergyScore()
   bestAcid = fsl.aminos[1][1]
@@ -819,11 +1400,7 @@ function new_mutate_all()
       print(mutable[j].."_"..structure.GetAminoAcid(mutable[j])..", score: "..current.GetEnergyScore())
     end
 end
-
-
--- Rebuilder.
-
-function rebuilder(startSegm,endSegm,Clashing,RebuildTries)
+function rebuilder(startSegm,endSegm,Clashing,RebuildTries) -- Rebuilder.
   local Step = 1
   local sOutput = ""
   local segsForRebuild = {}
@@ -848,19 +1425,17 @@ function rebuilder(startSegm,endSegm,Clashing,RebuildTries)
 		StepC(1,0,1,10)
       end
     end
-    sOutput = Step .." Try " .. ", " .. segsForRebuild[1] .. "-" .. segsForRebuild[#segsForRebuild] .. ", score: " .. current.GetEnergyScore()
-    if current.GetEnergyScore()-startScore > 0.0001 then sOutput = sOutput .. ", +" .. current.GetEnergyScore() - startScore end
+    sOutput = Step .." Try " .. ", " .. segsForRebuild[1] .. "-" ..
+              segsForRebuild[#segsForRebuild] .. ", score: " .. current.GetEnergyScore()
+    if current.GetEnergyScore()-startScore > 0.0001 then
+      sOutput = sOutput .. ", +" .. current.GetEnergyScore() - startScore end
     print(sOutput)
     Step = Step + 1
     recentbest.Restore()
     startScore = current.GetEnergyScore()
   end
 end
-
-
--- Sidechain Flip.
-
-function sidechain_flip_all()
+function sidechain_flip_all() -- Sidechain Flip.
   
   local function sidechain_flip(Seg)
     local SnapCnt = rotamer.GetCount(Seg)
@@ -878,11 +1453,7 @@ function sidechain_flip_all()
     print(j .. "/" .. structure.GetCount() .. " (" .. rotamer.GetCount(j) .. "), score: " ..  current.GetEnergyScore() .. ", gain: " .. current.GetEnergyScore()-startScore)
   end
 end
-
-
--- MicroIdealize.
-
-function micro_idealize(Length,Clashing,NumSegsForIdealize)
+function micro_idealize(Length,Clashing,NumSegsForIdealize) -- MicroIdealize.
 
   local function Worst_Segments(Length)
   
@@ -901,7 +1472,8 @@ function micro_idealize(Length,Clashing,NumSegsForIdealize)
     for i=1, structure.GetCount()-Length+1 do
       segsInfo[i]={i,i+Length-1,current.GetSegmentEnergySubscore(i,"Ideality")}
       for j=2, Length do
-        segsInfo[i]={segsInfo[i][1],segsInfo[i][2],segsInfo[i][3] + current.GetSegmentEnergySubscore(i+j-1,"Ideality")}
+        segsInfo[i]={segsInfo[i][1],segsInfo[i][2],segsInfo[i][3] +
+          current.GetSegmentEnergySubscore(i+j-1,"Ideality")}
       end
     end
     segsInfo = Sort(segsInfo)
@@ -912,52 +1484,73 @@ function micro_idealize(Length,Clashing,NumSegsForIdealize)
   local WorstSegs = Worst_Segments(Length)
   local segsForIdealize = {}
   local startScore = current.GetEnergyScore()
+  
+  NumSegsForIdealize = tonumber(NumSegsForIdealize)
 
-  for i=1,math.min(#WorstSegs,NumSegsForIdealize) do
+  for i=1, math.min(#WorstSegs, NumSegsForIdealize) do
     save.Quicksave(100)
     segsForIdealize = {}
     selection.DeselectAll()
-    for j=math.max(WorstSegs[i][1]-1,1), math.min(WorstSegs[i][2]+1,NumSegs) do segsForIdealize[#segsForIdealize + 1] = j end
+    for j=math.max(WorstSegs[i][1]-1,1), math.min(WorstSegs[i][2]+1,NumSegs) do
+      segsForIdealize[#segsForIdealize + 1] = j
+    end
     startScore = current.GetEnergyScore()
 
-    if segsForIdealize[1] > 1 then structure.InsertCut(segsForIdealize[1]) end
-    if segsForIdealize[#segsForIdealize] < NumSegs then structure.InsertCut(segsForIdealize[#segsForIdealize]) end
+    if segsForIdealize[1] == nil then
+      segsForIdealize[1] = 1
+    end
+
+    if segsForIdealize[1] > 1 then
+      structure.InsertCut(segsForIdealize[1])
+    end
+    if segsForIdealize[#segsForIdealize] < NumSegs then
+      structure.InsertCut(segsForIdealize[#segsForIdealize])
+    end
     selection.DeselectAll()
     selection.SelectRange(segsForIdealize[1],segsForIdealize[#segsForIdealize])
     structure.IdealizeSelected()
-    if segsForIdealize[1] > 1 then structure.DeleteCut(segsForIdealize[1]) end
-    if segsForIdealize[#segsForIdealize] < NumSegs then structure.DeleteCut(segsForIdealize[#segsForIdealize]) end
+    if segsForIdealize[1] > 1 then
+      structure.DeleteCut(segsForIdealize[1])
+    end
+    if segsForIdealize[#segsForIdealize] < NumSegs then
+      structure.DeleteCut(segsForIdealize[#segsForIdealize])
+    end
     
-	SphereSelect(segsForIdealize[1],segsForIdealize[#segsForIdealize],10)
+    SphereSelect(segsForIdealize[1],segsForIdealize[#segsForIdealize],10)
 	
     --structure.ShakeSidechainsAll(1)
     structure.WiggleSelected(12)
-	NumSegsForIdealize = NumSegsForIdealize + 0
+    NumSegsForIdealize = NumSegsForIdealize + 0
 	
     if Clashing < 1 and NumSegsForIdealize < NumSegs/2 then
-	  StepC(Clashing,0,0,4)
-	  StepC(1,1,0,15)
-	  StepC(1,0,1,10)
+      StepC(Clashing,0,0,4)
+      StepC(1,1,0,15)
+      StepC(1,0,1,10)
     end
 
     recentbest.Restore()
     -- Block to check if Recent Best score without cuts:
     local tempScore = current.GetEnergyScore()
     if segsForIdealize[1] > 1 then structure.DeleteCut(segsForIdealize[1]) end
-    if segsForIdealize[#segsForIdealize] < NumSegs then structure.DeleteCut(segsForIdealize[#segsForIdealize]) end
-    if tempScore == current.GetEnergyScore() then recentbest.Restore() else save.Quickload(100) recentbest.Save() end
+    if segsForIdealize[#segsForIdealize] < NumSegs then 
+      structure.DeleteCut(segsForIdealize[#segsForIdealize])
+      end
+    if tempScore == current.GetEnergyScore() then
+      recentbest.Restore()
+    else
+      save.Quickload(100)
+    recentbest.Save() end
     -- End of block
 
     selection.DeselectAll()
-    print(i .."/".. math.min(#WorstSegs,NumSegsForIdealize) .. "; " .. segsForIdealize[1] .. "-" .. segsForIdealize[#segsForIdealize] .. ", score: " ..math.max(startScore,current.GetEnergyScore()) .. ", gain: " .. math.max(0,current.GetEnergyScore()-startScore))
+    print(i .."/".. math.min(#WorstSegs,NumSegsForIdealize) .. "; " .. segsForIdealize[1] ..
+      "-" .. segsForIdealize[#segsForIdealize] .. ", score: " ..
+      math.max(startScore,current.GetEnergyScore()) .. ", gain: " ..
+      math.max(0,current.GetEnergyScore()-startScore))
   end
   
 end
-
-
--- MicroRemix.
-
-function micro_remix(Length,Clashing,NumsegsForRemix)
+function micro_remix(Length,Clashing,NumsegsForRemix) -- MicroRemix.
 
   local function Worst_Segments(Length)
   
@@ -1037,13 +1630,10 @@ end
 ---------------------------------------------------------------
 ---------------------      MAIN PROGRAM     -------------------
 ---------------------------------------------------------------
-
-
 recentbest.Save()
 startScore = current.GetEnergyScore()
 startTime = os.time()
 math.randomseed(startTime)
-
 -- Check if puzzle is mutable.
 puzzleMutable = false
 for i=1, structure.GetCount() do
@@ -1076,17 +1666,15 @@ ask.Script = dialog.AddSlider("Function to run:", 19, 1, 19, 0)
 ask.OK = dialog.AddButton("OK", 1)
 ask.Cancel = dialog.AddButton("Cancel", 0)
 ask.About = dialog.AddButton("About", 2)
-
 DialogResult = dialog.Show(ask)
 ScriptNumber = ask.Script.value
-
 if (DialogResult == 1) then
 
   if (ScriptNumber == 1) then
     print("Start score: "..startScore)
     recipe.SectionStart("BlueFuze")
     BlueFuze()
-    p_Time(startTime,recipe.SectionEnd())
+    p_Time(startTime, recipe.SectionEnd())
 
   elseif (ScriptNumber == 2) then
     ScriptAsk = dialog.CreateDialog("Script Dialog. Clashing.")
@@ -1498,7 +2086,8 @@ if (DialogResult == 1) then
                 print(i..": UNKNOWN")
           end
           
-          print("Score: "..current.GetEnergyScore()..", +"..recipe.SectionEnd())
+          print("Score: "..current.GetEnergyScore()..", +"..
+            recipe.SectionEnd())
           p_Time(startTime,current.GetEnergyScore()-startScore)
         end
         
