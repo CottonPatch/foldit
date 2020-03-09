@@ -40,7 +40,7 @@ function DefineGlobalVariables()
   --         DisplayPuzzleProperties()
 	-- g_CysteineSegmentsTable={SegmentIndex}
   
-  g_FrozenLockedOrLigandSegmentsTable = {} -- was (the inverse of) WORKON/WORKONbool
+  g_FrozenLockedOrLigandSegmentsTable = {}
 
 	g_ScorePartScoresTable = {} -- was Scores[]
 	-- Used in Reset_g_ScorePart_Scores_Table(),
@@ -1354,7 +1354,7 @@ function AskUserToCheckClashImportance() -- was CheckCI()
 	dialog.Show(l_Ask)
   
 end -- function AskUserToCheckClashImportance()
-function AskUserToSelectMoreOptions()
+function AskUserToSelectMoreOptions() -- was AskMoreOptions()
   -- called from AskUserToSelectRebuildOptions()...
 
 	local l_Ask = dialog.CreateDialog("More Options")
@@ -1463,7 +1463,7 @@ function AskUserToSelectMoreOptions()
   l_Ask.g_UserSelected_OnlyAllowRebuildingAlreadyRebuiltSegmentsIfCurrentRebuildGainIsMoreThanXPoints.value
 
 end -- AskUserToSelectMoreOptions()
-function AskUserToSelectMutateOptions()
+function AskUserToSelectMutateOptions() -- was AskMutateOptions()
   -- Called from AskUserToSelectRebuildOptions()...
 
 	local l_Ask = dialog.CreateDialog("Mutate Options")
@@ -2070,9 +2070,10 @@ function AskUserToSelectSegmentsRangesToRebuild() -- was AskForSelections()
 			local l_ListOfSegmentRanges = l_Ask.ListOfSegmentRanges.value
       
 			if l_SelectionOptions.bUserWantsToSelectSegmentRanges == true and
-				l_ListOfSegmentRanges ~= "" then
-          
+        l_ListOfSegmentRanges ~= "" then
+      
 				local function bCheckIfValidSegmentNumbers(l_SegmentsTable)
+          
 					-- l_SegmentsTable = {
 					-- l_SegmentsTable has one field per row...
 					-- PositiveSegmentNumber
@@ -2094,7 +2095,8 @@ function AskUserToSelectSegmentsRangesToRebuild() -- was AskForSelections()
 					end
           
 					return true
-				end
+          
+				end -- function bCheckIfValidSegmentNumbers(l_SegmentsTable)
         
 				local function Convert_ListOfSegmentRanges_To_SegmentRangesTable(l_ListOfSegmentRanges)
           
@@ -2134,11 +2136,11 @@ function AskUserToSelectSegmentsRangesToRebuild() -- was AskForSelections()
 					end
 					return l_SegmentRangesToRebuildTable
           
-        end
+        end -- local function Convert_ListOfSegmentRanges_To_SegmentRangesTable(l_ListOfSegmentRanges)
         
 				-- Convert l_ListOfSegmentRanges to l_SegmentRangesToRebuildTable...
 				local l_ConvertedSegmentRangesTable =
-					Convert_ListOfSegmentRanges_To_SegmentRangesTable(l_ListOfSegmentRanges)
+					Convert_ListOfSegmentRanges_To_SegmentRangesTable(l_ListOfSegmentRanges) -- recursion
           
 				if l_ConvertedSegmentRangesTable ~= "" then
 					l_SegmentRangesToRebuildTable = l_ConvertedSegmentRangesTable
@@ -2224,7 +2226,7 @@ function AskUserToSelectSegmentsRangesToRebuild() -- was AskForSelections()
 	return l_SegmentRangesToRebuildTable
 
 end -- AskUserToSelectSegmentsRangesToRebuild()
-function AskUserToSelectConditionCheckingOptions()
+function AskUserToSelectConditionCheckingOptions() -- was Filter()
   -- Called from DefineGlobalVariables()...
 	local l_Ask = dialog.CreateDialog("Bonus points detected")
 	l_Ask.g_bUserSelected_NormalConditionChecking_DisableForThisEntireScriptRun = 
@@ -2279,7 +2281,7 @@ function AskUserToSelectConditionCheckingOptions()
     l_Ask.g_bUserSelected_NormalConditionChecking_DisableForThisEntireScriptRun.value
     
 end -- function AskUserToSelectConditionCheckingOptions()
-function DisplayPuzzleProperties()
+function DisplayPuzzleProperties() -- was SetPuzzleProperties()
   -- Called from Step1_Rebuild1Puzzle()...
 
   -- Puzzle name and ID...
@@ -2691,7 +2693,7 @@ function Add_Loop_SegmentRange_To_SegmentRangesTable(l_StartSegment) -- was AddL
 	return l_EndSegment
 
 end -- Add_Loop_SegmentRange_To_SegmentRangesTable(l_StartSegment)
-function bIsADisulfideBondSegment(l_SegmentIndex)
+function bIsADisulfideBondSegment(l_SegmentIndex) -- was IsBridge()
   -- Called from DisulfideBonds_GetCount()...
   
 	-- Disulfide bonds in proteins are formed between the thiol groups of cysteine 
@@ -2717,7 +2719,7 @@ function bIsADisulfideBondSegment(l_SegmentIndex)
 	return false
   
 end -- function bIsADisulfideBondSegment(l_SegmentIndex)
-function bIsSegmentIndexInSegmentRangesTable(l_SegmentIndex, l_SegmentRangesTable)
+function bIsSegmentIndexInSegmentRangesTable(l_SegmentIndex, l_SegmentRangesTable) -- was SegmentInSet()
   -- Called from ConvertSegmentRangesTableToSegmentsBooleanTable()...
   
 	-- l_SegmentRangesTable={StartSegment, EndSegment} e.g., {{1,3},{9,11},{134,135}}
@@ -2902,7 +2904,7 @@ function Calculate_ScorePart_Score(l_ScorePart_Name, l_StartSegment, l_EndSegmen
 
 end -- Calculate_ScorePart_Score(l_ScorePart_Name, l_StartSegment, l_EndSegment) -- was getPartscore
 function Calculate_SegmentRange_Score(l_ScorePart_NameOrTable, l_StartSegment, l_EndSegment) -- GetSubScore
-  -- was GetSubscore()
+  -- was GetSubscore() and SegScore()
   -- Called from 1 place recursively in Calculate_SegmentRange_Score(),
   --             2 places inDisplayPuzzleProperties(),
   --             2 places in Calculate_ScorePart_Score(), 
@@ -3117,7 +3119,7 @@ function bCheckIfFrozenLockedOrLigandSegment(l_SegmentIndex)
   end
   
 end -- function bCheckIfFrozenLockedOrLigandSegment(l_SegmentIndex)
-function CleanUpSegmentRangesTable(l_SegmentRangesTable)
+function CleanUpSegmentRangesTable(l_SegmentRangesTable) -- was SegmentCleanSet
   -- Called from AskUserToSelectSegmentsRangesToRebuild()...
   
 	-- l_SegmentRangesTable={StartSegment, EndSegment} e.g., {{1,3},{9,11},{134,135}}
@@ -3165,7 +3167,7 @@ function ConvertAllSegmentsToLoops()
 	end
   
 end -- function ConvertAllSegmentsToLoops()
-function ConvertSegmentRangesTableToListOfSegmentRanges(l_SegmentRangesTable)
+function ConvertSegmentRangesTableToListOfSegmentRanges(l_SegmentRangesTable) -- was SegmentSetToString()
   -- Called from DisplayUserSelectedOptions(), 
   --             AskUserToSelectSegmentsRangesToRebuild() and
   --             AskUserToSelectRebuildOptions()...
@@ -3191,9 +3193,9 @@ function ConvertSegmentRangesTableToListOfSegmentRanges(l_SegmentRangesTable)
 	return l_SegmentString
   
 end -- function ConvertSegmentRangesTableToListOfSegmentRanges(l_SegmentRangesTable)
-function ConvertSegmentRangesTableToSegmentsTable(l_SegmentRangesTable)
+function ConvertSegmentRangesTableToSegmentsTable(l_SegmentRangesTable) -- was SegmentSetToList()
   -- Called from CleanUpSegmentRangesTable() and
-  --             2 places in GetCommonSegmentRangesInBothTables()...
+  --             GetCommonSegmentRangesInBothTables()...
   
 	-- l_SegmentRangesTable={StartSegment, EndSegment} e.g., {{1,3},{9,11},{134,135}}
 	-- l_SegmentsTable={SegmentIndex} e.g., {1,2,3,9,10,11,134,135}
@@ -3219,9 +3221,8 @@ function ConvertSegmentRangesTableToSegmentsTable(l_SegmentRangesTable)
 	return l_SegmentsTable
   
 end -- function ConvertSegmentRangesTableToSegmentsTable(l_SegmentRangesTable)
-function ConvertSegmentRangesTableToSegmentsBooleanTable(l_SegmentRangesToRebuildTable)-- was InitWORKONbool
-  -- ...was InitWORKONbool(), I think.
-  -- Called from Step1_Rebuild1Puzzle() was DRW()
+function ConvertSegmentRangesTableToSegmentsBooleanTable(l_SegmentRangesToRebuildTable)--SegmentSetToBool()
+  -- Called from DisplayDetailsOfIncludedSegments() was in DRW()
   
 	-- l_SegmentRangesToRebuildTable={StartSegment, EndSegment} e.g., {{1,3},{5,7},{9,11}}
 	-- l_bSegmentsToRebuildBooleanTable={bToRebuild} -- e.g., {true,true,true,false,true, ...}
@@ -3238,7 +3239,7 @@ function ConvertSegmentRangesTableToSegmentsBooleanTable(l_SegmentRangesToRebuil
 	return l_bSegmentsToRebuildBooleanTable
   
 end -- function ConvertSegmentRangesTableToSegmentsBooleanTable(l_SegmentRangesToRebuildTable)
-function ConvertSegmentsTableToSegmentRangesTable(l_SegmentsTable)
+function ConvertSegmentsTableToSegmentRangesTable(l_SegmentsTable) -- was SegmentListToSet()
 -- Called from CleanUpSegmentRangesTable(),
   --             GetCommonSegmentRangesInBothTables(),
   --             FindFrozenSegmentRanges(),
@@ -4004,7 +4005,7 @@ function DisulfideBonds_CheckIfWeNeedToRestoreSolutionWithThemIntact() -- was Br
 	end
   
 end -- function DisulfideBonds_CheckIfWeNeedToRestoreSolutionWithThemIntact()
-function DisulfideBonds_DidAnyOfThemBreak()
+function DisulfideBonds_DidAnyOfThemBreak() -- was BridgesBroken()
   -- Called from 3 functions
   
 	if g_bUserSelected_KeepDisulfideBondsIntact == false then
@@ -4022,7 +4023,7 @@ function DisulfideBonds_DidAnyOfThemBreak()
 	return false
   
 end -- function DisulfideBonds_DidAnyOfThemBreak()
-function DisulfideBonds_GetCount()
+function DisulfideBonds_GetCount() -- was CountBridges()
   -- Called from Populate_g_CysteineSegmentsTable() and
   --             DisulfideBonds_DidAnyOfThemBreak()...
   
@@ -4048,7 +4049,7 @@ function DisulfideBonds_RememberSolutionWithThemIntact() -- was Bridgesave()
 	QuickSaveStack_SaveCurrentSolution()
   
 end -- function DisulfideBonds_RememberSolutionWithThemIntact()
-function FindCommonSegmentsInBothTables(l_SegmentsTable1, l_SegmentsTable2)
+function FindCommonSegmentsInBothTables(l_SegmentsTable1, l_SegmentsTable2) -- was SegmentCommList()
   -- Called from GetCommonSegmentRangesInBothTables()...
   
 	-- l_SegmentsTable1={SegmentIndex} e.g., {1,2,3,9,10,11,134,135}
@@ -4214,7 +4215,7 @@ function FindSegmentRangesWithSecondaryStructureType(l_SecondaryStructureType)
 	return ConvertSegmentsTableToSegmentRangesTable(FindSegmentsWithSecondaryStructureType(l_SecondaryStructureType))
   
 end -- function FindSegmentRangesWithSecondaryStructureType(l_SecondaryStructureType)
-function FindSegmentsWithAminoAcidType(In_AminoAcidType)
+function FindSegmentsWithAminoAcidType(In_AminoAcidType) -- was FindAminotype()
   -- Called from Populate_g_CysteineSegmentsTable()...
   
 	-- l_SegmentsTable={SegmentIndex} -- e.g., {1,2,3,9,10,11,134,135}
@@ -4274,7 +4275,7 @@ function FindSelectedSegments()
 	return l_SelectedSegmentsTable
   
 end -- function FindSelectedSegments()
-function GetCommonSegmentRangesInBothTables(l_SegmentRangesTable1, l_SegmentRangesTable2)
+function GetCommonSegmentRangesInBothTables(l_SegmentRangesTable1, l_SegmentRangesTable2) -- SegmentCommSet
   -- Called from SegmentRangesMinus() and 
   --             2 places in AskUserToSelectSegmentsRangesToRebuild()...
   
@@ -4320,7 +4321,7 @@ function GetPoseTotalScore(l_pose) -- was Score()
   -- first. However, SaveBest() does update g_Score_ScriptBest. So you could (and should!) call
   -- SaveBest() after every Rebuild, Shake, Wiggle, etc, then get the best score from 
   -- g_Score_ScriptBest.
-  -- A pose is everything, including the main protein and any ligands.
+  -- A pose includes the main protein's structure and any ligands (adjacent molecules).
 
 	if l_pose == nil then
 		l_pose = current -- the class "current"
@@ -4347,7 +4348,7 @@ function GetXLowestSortedValues(l_Table, l_NumberOfItems) -- was Sort()
 	return l_Table
   
 end -- function GetXLowestSortedValues(l_Table, l_NumberOfItems)
-function InvertSegmentRangesTable(l_SegmentRangesTable, l_MaxSegmentIndex)
+function InvertSegmentRangesTable(l_SegmentRangesTable, l_MaxSegmentIndex) -- was SegmentInvertSet()
   -- Called from SegmentRangesMinus() and 
   --             AskUserToSelectSegmentsRangesToRebuild()...
   
@@ -4388,7 +4389,32 @@ function InvertSegmentRangesTable(l_SegmentRangesTable, l_MaxSegmentIndex)
 	return l_InvertedSegmentRangesTable
   
 end -- function InvertSegmentRangesTable(l_SegmentRangesTable, l_MaxSegmentIndex)
-function NormalConditionChecking_TemporarilyReEnableToCheckScore()
+function NormalConditionChecking_DisableForThisEntireScriptRun() -- was FilterOff()
+  -- Called from SaveBest() and DefineGlobalVariables()...
+  
+	-- Enable faster CPU processing, but your scores will not be counted...
+  -- Important !!!
+  -- Important !!!
+	behavior.SetFiltersDisabled(true) --disable/redisable-normal-condition-checking-for-this-entire-script-run
+  -- Important !!!
+  -- Important !!!
+  
+	if g_bBetterRecentBest == true then --set in NormalConditionChecking_TemporarilyReEnableToCheckScore below
+    
+    -- Set things back the way they were before we prepared to check the score for bonus points.
+    
+		save.Quicksave(99) -- Temporarily save off the current pose in slot 99, we will reload it in a sec.
+		save.Quickload(98) -- Restore the pose from slot 98 and set it back as the "recentbest" pose.
+		recentbest.Save() -- Now things are back to the way they were before we prepared to check for
+                      -- bonus points.
+		save.Quickload(99)  -- Reload the current pose we stored in slot 99, just a second ago.
+    
+    g_bBetterRecentBest = false
+    
+	end
+  
+end -- function NormalConditionChecking_DisableForThisEntireScriptRun()
+function NormalConditionChecking_TemporarilyReEnableToCheckScore() -- was FilterOn()
   -- Called from SaveBest() and CleanUp()...
 
   -- If recent best pose was better, remember it, while we check the score, then restore it again.
@@ -4400,7 +4426,7 @@ function NormalConditionChecking_TemporarilyReEnableToCheckScore()
     -- very soon, right after we check the score (to see if the conditions are met to get the 
     -- bonus points), when we re-disable-normal-condition-checking-for-this-entire-script-run...
     
-    g_bBetterRecentBest = true -- read in NormalConditionChecking_DisableForThisEntireScriptRun below
+    g_bBetterRecentBest = true -- read in NormalConditionChecking_DisableForThisEntireScriptRun() above
     
 		save.Quicksave(99) -- Temporarily save off the current pose in slot 99, we will restore it in a sec.
 		recentbest.Restore() -- Save the recent best pose in slot 98. We will restore this pose "as-recentbest"
@@ -4409,7 +4435,9 @@ function NormalConditionChecking_TemporarilyReEnableToCheckScore()
 		save.Quicksave(98)
 		save.Quickload(99) -- Restore the current pose from slot 99. No harm no foul.
     
-	end
+	else
+    g_bBetterRecentBest = false -- read in NormalConditionChecking_DisableForThisEntireScriptRun() above
+  end
   
 	-- Disable faster CPU processing, so your scores will be counted...
   -- Important !!!
@@ -4419,32 +4447,7 @@ function NormalConditionChecking_TemporarilyReEnableToCheckScore()
   -- Important !!!
   
 end -- function NormalConditionChecking_TemporarilyReEnableToCheckScore()
-function NormalConditionChecking_DisableForThisEntireScriptRun()
-  -- Called from SaveBest() and DefineGlobalVariables()...
-  
-	-- Enable faster CPU processing, but your scores will not be counted...
-  -- Important !!!
-  -- Important !!!
-	behavior.SetFiltersDisabled(true) -- re-disable-normal-condition-checking-for-this-entire-script-run
-  -- Important !!!
-  -- Important !!!
-  
-	if g_bBetterRecentBest == true then --set in NormalConditionChecking_TemporarilyReEnableToCheckScore above
-    
-    -- Set things back the way they were before we prepared to check the score for bonus points.
-    
-		save.Quicksave(99) -- Temporarily save off the current pose in slot 99, we will reload it in a sec.
-		save.Quickload(98) -- Restore the pose from slot 98 and set it back as the "recentbest" pose.
-		recentbest.Save() -- Now things are back to the way they were before we prepared to check for
-                      -- bonus points.
-		save.Quickload(99)  -- Reload the current pose we stored in slot 99, just a second ago.
-    
-    g_bBetterRecentBest = false -- not sure why this line wasn't here earlier.
-    
-	end
-  
-end -- function NormalConditionChecking_DisableForThisEntireScriptRun()
-function PaddedNumber(l_DirtyFloat, l_PadWidth, l_AfterDecimal)
+function PaddedNumber(l_DirtyFloat, l_PadWidth, l_AfterDecimal) -- was round3()
   -- Called 177 times from 17 functions
   
   -- I guess we no longer need the the more complicated function RoundTo() below...
@@ -4530,7 +4533,7 @@ function Populate_g_ActiveScorePartsTable() -- was FindActiveSubscores()
 	end -- for l_ScorePart_NamesTableIndex = 1, #l_ScorePart_NamesTable do
 
 end -- Populate_g_ActiveScorePartsTable()
-function Populate_g_CysteineSegmentsTable()
+function Populate_g_CysteineSegmentsTable() -- was setCyslist()
   -- Called from DisplayPuzzleProperties()...
 
 	--g_CysteineSegmentsTable={SegmentIndex}
@@ -4977,8 +4980,12 @@ function SaveBest() -- <-- Updates g_Score_ScriptBest
       return
     end
     
-    -- Time to turn condition checking back on...
-    g_bUserSelected_NormalConditionChecking_DisableForThisEntireScriptRun = false
+    -- Time to turn condition checking back on...?maybe?
+    -- Maybe not! g_bUserSelected_NormalConditionChecking_DisableForThisEntireScriptRun = false
+    -- Maybe not because otherwise the below calls to:
+    --     NormalConditionChecking_TemporarilyReEnableToCheckScore() and 
+    --     NormalConditionChecking_DisableForThisEntireScriptRun
+    -- would never be called. So, maybe we don't need those calls then! Maybe. I'll think about it.
     
     -- When normal condition checking is disabled, our scores are only potential scores; that is,
     -- only if all conditions are met. We won't know if all conditions are met until we re-enable
@@ -5029,7 +5036,7 @@ function SaveBest() -- <-- Updates g_Score_ScriptBest
   end
 
 end -- SaveBest()
-function SegmentRangesMinus(l_SegmentRangesTable1, l_SegmentRangesTable2)
+function SegmentRangesMinus(l_SegmentRangesTable1, l_SegmentRangesTable2) -- SegmentSetMinus()
   -- Called from 6 places in AskUserToSelectSegmentsRangesToRebuild() and
   --             3 places in AskUserToSelectRebuildOptions()...
   
@@ -5051,7 +5058,7 @@ function SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_Radius) 
 	end
   
 end -- function SelectSegmentsNearSegmentRange(l_StartSegment, l_EndSegment, l_Radius)
-function SetClashImportance(l_ClashImportance)
+function SetClashImportance(l_ClashImportance) -- was CI()
   -- Called from 8 functions...
   
 	if l_ClashImportance > 0.99 then
@@ -6955,7 +6962,7 @@ function Step14_FuseBestScorePartPose(l_StartSegment, l_EndSegment) -- was Fuze(
   --SaveBest() -- would already have been called from ShakeSelected() or WiggleAll()
   
 end -- function Step14_FuseBestScorePartPose()
-function Fuse1(l_ClashImportanceBefore, l_ClashImportanceAfter)
+function Fuse1(l_ClashImportanceBefore, l_ClashImportanceAfter) -- was Fuze1()
   -- Called from Step14_FuseBestScorePartPose() above
 
 	SetClashImportance(l_ClashImportanceBefore)
@@ -6965,7 +6972,7 @@ function Fuse1(l_ClashImportanceBefore, l_ClashImportanceAfter)
   Step12_WiggleAll(1, "Fuse1b") -- Iterations, FromWhere
   
 end -- function Fuse1(l_ClashImportanceBefore, l_ClashImportanceAfter)
-function Fuse2(l_ClashImportance_Before, l_ClashImportance_After)
+function Fuse2(l_ClashImportance_Before, l_ClashImportance_After) -- was Fuze2()
   -- Called from Step14_FuseBestScorePartPose() above
 
 	SetClashImportance(l_ClashImportance_Before)
@@ -6978,7 +6985,7 @@ function Fuse2(l_ClashImportance_Before, l_ClashImportance_After)
   Step12_WiggleAll(1, "Fuse2c") -- Iterations, FromWhere
   
 end -- function Fuse2(l_ClashImportanceBefore, l_ClashImportanceAfter)
-function Fuse3()
+function Fuse3() -- was FuzeEnd()
   -- Called from Step14_FuseBestScorePartPose() above
 
   SetClashImportance(1)
