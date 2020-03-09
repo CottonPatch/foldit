@@ -1,4 +1,5 @@
 
+-- Today's Date 2020/03/09 Mon
 -- Start of Setting Things Up...
 function DefineGlobalVariables()
   -- Called from Step1_Rebuild1Puzzle()...
@@ -1077,7 +1078,6 @@ function SetupLocalDebugFuntions()
   end
 	behavior.SetFiltersDisabled = function(l_TrueOrFalse) return end
   
-  
   -- currently not used...
 	--   help
   --   absolutebest = {}
@@ -1255,7 +1255,7 @@ function SetupLocalDebugFuntions()
   recipe.SectionStart = function () end -- no good. Does not allow capturing the results, only prints it;
   --                                       doesn't include time spent on anything!  
   recipe.ReportStatus = function () end
-  recipe.SectionEnd = function () end 
+  recipe.SectionEnd = function () return "" end
 
 	save = {}
    -- Called from 11 places...
