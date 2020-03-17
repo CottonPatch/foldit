@@ -614,148 +614,163 @@ end
 
 Greetings!
 
-It is a script that contains many other scripts and allows you to run any of them. Just choose which one to run after the start.
+This script contains many other scripts and allows you to run any of them.
 Also there is an Autobot script that allows you to predefine the run sequence of basic scripts with given parameters. So you can create your own Score gain algorithm.
 
 How it works:
-1. Each basic script have a code and some of them have a parameters. When you want to include a basic script to sequence, print code and print all the parameters with the underscore. After the each basic script print the dot.
-For example, if you want to use BlueFuze just include "BF." in the sequence. If you want to use Band Test include "BT_15_87_97.", where 15, 87 and 97 - script parameters (see description).
-2. When sequence is completed, write it to text field and start the script.
-3. Script will be sequentially running your predefined scripts. When All scripts completed, it checks how much score is gained. If its exceed the limit (limit can be set to 0), then the sequence runs for one more time. If not, then the Iterations ends and the new Iteration starts (from the structure when the script was started).
+1. Each basic script has a code and some of them have parameters. When you want to add a basic script to the sequence, type in the code and all the parameters with the underscore. Seperate scripts with a period.
+For example, if you want to use BlueFuze just include "BF." in the sequence. If you want to use Band Test include "BT_15_87_97.", where 15, 87 and 97 are the script parameters (see description).
+2. When the sequence is completed, write it to text field and start the script.
+3. Script will sequentially run your predefined scripts. When All scripts have completed, it checks how much score is gained. If its exceed the limit (limit can be set to 0), then the sequence runs for one more time. If not, then the Iterations ends and the new Iteration starts (from the structure when the script was started).
 
-The example of sequence, that I used:
-Default:        "CL.FR.BT_15_87_97.BT_15_103_113.RW_2_1_10.QU_15.BF.RW_1_1_10.LW_12_2.SR."
-For Mutable:    "CL.FR.BT_10_87_97.MT_3_20.BT_10_103_113.NM.RW_2_1_10.MT_3_20.QU_15.BF.RW_1_1_10.LW_12_2.SR."
+Example of sequences I have used:
+Default: "CL.FR.BT_15_87_97.BT_15_103_113.RW_2_1_10.QU_15.BF.RW_1_1_10.LW_12_2.SR."
+For Mutable: "CL.FR.BT_10_87_97.MT_3_20.BT_10_103_113.NM.RW_2_1_10.MT_3_20.QU_15.BF.RW_1_1_10.LW_12_2.SR."
 For Multistart: "WS.BT_2_87_97.FR.CL.BT_10_87_97.BT_10_103_113.RW_2_1_10.QU_15.BF.RW_1_1_10.LW_12_2.SR."
 
 Basic scripts.
 
-1. Clashing.
-Script code: CL
+1. BlueFuze - BF
 Script Parameters: none
-Script Description: Making a sequence of wiggles and shakes with different clashing.
+Script Description: BlueFuze
 
-2. FastRelax.
-Script code: FR
+2. Clashing - CL
 Script Parameters: none
-Script Description: Well known FastRelax script :)
+Script Description: Make a sequence of wiggles and shakes with different clash importance
 
-3. BlueFuze.
-Script code: BF
+3. FastRelax - FR
 Script Parameters: none
-Script Description: BlueFuze.
+Script Description: Well known FastRelax script.
 
-4. WS or SW. 
-Script code: WS
+4. Wiggle/Shake or Shake/Wiggle - WS or SW
 Script Parameters: none
 Script Description: Tries 4 different WS/SW tactics to improve score from destabilized status.
+Note: SW is not presently used in any of the predefined sequences.
 
-5. Band Test.
-Script code: BT
+5. Band Test - BT
 Script Parameters:
-1) Number of iterations.
-2) Lowest length (in % from original).
-3) Highest length (in % from original).
+1) Number of iterations
+2) Lowest length (in % from original)
+3) Highest length (in % from original)
 Script Description: Creates a random band with the length in given boundaries. Wiggle structure with band enabled, then delete band and wiggle out. Repeat given number of Iterations.
-Script example: "BT_15_87_97.".
+Script example: "BT_15_87_97."
 
-6. Local Wiggle.
-Script code: LW
+6. Local Wiggle - LW
 Script Parameters:
 1) Wiggle segment Length
-2) Number of wiggle iterations.
-Script Description: Makes local wiggle.
-Script example: "LW_12_2.".
+2) Number of wiggle iterations
+Script Description: Local wiggle
+Script example: "LW_12_2."
 
-7. Local Rebuild.
-Script code: LR
+7. Local Rebuild - LR
 Script Parameters:
 1) Rebuild segment Length
-Script Description: Makes local rebuildes from the begin to the end of structure.
-Script example: "LW_12_2.".
+2) Number of iterations?
+Script Description: Makes local rebuilds from the begin to the end of structure.
+Script example: "LR_12_2."
+Note: LR is not presently used in any of the predefined sequences.
 
-8. Quake.
-Script code: QU
-Script Parameters:
-1) Distance between segments with bands.
-Script Description: Makes bands with the given length between segments. Wiggle structure with band enabled, then delete band and wiggle out.
-Script example: "QU_15.".
-
-9. Sidechain Test.
-Script code: ST
-Script Parameters:
-1) Number of segments
-Script Description: Test every possible position of sidechain at given number of random segments.
-Script example: "ST_10.".
-
-10. Mutate.
-Script code: MU
-Script Parameters: none
-Script Description: Just do mutate once.
-
-11. Mutate and Test.
-Script code: MT
-Script Parameters: 
-1) Function number.
-2) Number of tries (affects only 3rd function).
-Script Description:
- Depending on the function number it does: 
- 1) Test all posible changes of AA for one segment (very long).
- 2) Test all posible changes of AA for two segment (impossible long).
- 3) Test random change of 2 AAs for given number of times.
-Script example: "MT_3_10.".
-
-12. New Mutate
-Script code: NM
-Script Parameters: none
-Script Description: Sequentially mutate each segment for all possible AAs.
-
-13. Rebuilder
-Script code: RE
-Script Parameters: 
-1) Start segment.
-2) End segment.
-3) Number of tries.
-Script Description: Rebuild the segment and check the structure by wiggles and shake.
-Script example: "RE_10_13_5.".
-
-14. Sidechain Flipper.
-Script code: SF
-Script Parameters: none
-Script Description: Sequentially flips each sidechain.
-
-15. Soft Relax
-Script code: SR
-Script Parameters: none
-Script Description: The variation of FastRelax.
-
-16. Rebuild Worst.
-Script code: RW
+8. Rebuild Worst - RW
 Script Parameters: 
 1) Length of segment to rebuild.
 2) Number of tries for each segment.
 3) Number of segments to rebuild.
 Script Description: Rebuilds the worst scoring segments of given length.
-Script example: "RW_1_1_10.".
+Script example: "RW_2_1_10."
 
-17. MicroIdealize
-Script code: MI
+9. Quake - QU
+Script Parameters:
+1) Distance between segments with bands.
+Script Description: Makes bands with the given length between segments. Wiggle structure with bands enabled, then delete band and wiggle again.
+Script example: "QU_15."
+
+10. Sidechain Test - ST
+Script Parameters:
+1) Number of segments
+Script Description: Test every possible position of sidechain at given number of random segments.
+Script example: "ST_10."
+
+11. Mutate - MU
+Script Parameters: none
+Script Description: Just do mutate once.
+Note: MU is not presently used in any of the predefined sequences.
+
+12. Mutate and Test - MT
 Script Parameters: 
-1) Length of segment to Idealize.
-2) Number of segments to Idealize.
-Script Description: Idealizes the worst scoring segments (idealize score) of given length.
-Script example: "MI_3_4.".
+1) Function number
+2) Number of tries (affects only 3rd function)
+Script Description:
+ Depending on the function number it does:
+ 1) Test all posible changes of AA for one segment (very long).
+ 2) Test all posible changes of AA for two segment (impossibly long).
+ 3) Test random change of 2 AAs for given number of times.
+Script example: "MT_3_10."
 
+13. New Mutate - NM
+Script Parameters: none
+Script Description: Sequentially mutate each segment for all possible AAs.
+
+14. Rebuilder - RE
+Script Parameters: 
+1) Start segment
+2) End segment
+3) Number of tries
+Script Description: Rebuild the segment and check the structure by wiggles and shake.
+Script example: "RE_10_13_5."
+Note: RE is not presently used in any of the predefined sequences.
+
+15. Sidechain Flipper - SF
+Script Parameters: none
+Script Description: Sequentially flips each sidechain.
+
+16. Soft Relax - SR
+Script Parameters: none
+Script Description: A variation of FastRelax.
+
+17. MicroIdealize - MI
+Script Parameters: 
+1) Length of segment to Idealize
+2) Number of segments to Idealize
+Script Description: Idealizes the worst scoring segments (idealize score) of given length.
+Script example: "MI_3_4."
+
+18. MicroRemix - MR
+Script Parameters: ?
+Note: MR is not presently used in any of the predefined sequences.
+
+----------------------------------------------------------------------------------------------
+BF - BlueFuze
+BT - Band Test - BT_15_87_97 - Iterations, LowestLength (% from original), HighestLength (% from original)
+CL - Clashing
+FR - FastRelax
+LR - Local Rebuild
+LW - Local Wiggle - LW_12_2 - NumberOfSegments, Iterations
+MI - MicroIdealize - MI_3_10 - LengthOfSegments, NumberOfSegments
+MR - MicroRemix
+MT - Mutate and Test - MT_3_20 - FunctionNumber, NumberOfTries(only 3rd function)
+ Function 1) Test all posible changes of AA for one segment (very long)
+ Function 2) Test all posible changes of AA for two segments (impossibly long)
+ Function 3) Test random change of 2 AAs for given number of times
+MU - Mutate
+NM - New Mutate
+QU - Quake - QU_15 - DistanceBetweenSegmentsWithBands
+RE - Rebuilder
+RW - Rebuild Worst - RW_2_1_10 - LengthOfSegmentToRebuild, NumberOfTriesPerSegment, NumberOfSegments
+SF - Sidechain Flipper
+SR - Soft Relax
+ST - Sidechain Test - ST_1 - NumberOfSegments
+WS - Wiggle/Shake
+----------------------------------------------------------------------------------------------
 ]]--
 
 -- Predefined Sequences
 -- Common:
-SequenceStrPredefined1 = "CL.FR.BT_15_87_97.BT_15_103_113.RW_2_1_10.QU_15.BF.RW_1_1_10.LW_12_2.SR.MI_3_10.ST_1." 
+SequenceStrPredefined1 = "CL.FR.BT_15_87_97.BT_15_103_113.RW_2_1_10.QU_15.BF.RW_1_1_10.LW_12_2.SR.MI_3_10.ST_1."
 -- For Mutable:
 SequenceStrPredefined2 = "CL.FR.BT_10_87_97.MT_3_20.BT_10_103_113.NM.RW_2_1_10.MT_3_20.QU_15.BF.RW_1_1_10.LW_12_2.SR.MI_3_10.ST_1."
 -- For Multistart:
 SequenceStrPredefined3 = "WS.BT_2_87_97.FR.CL.BT_10_87_97.BT_10_103_113.RW_2_1_10.QU_15.BF.RW_1_1_10.LW_12_2.SR.MI_3_10.ST_1."
--- For Endgame Death:
+-- For Endgame:
 SequenceStrPredefined4 = "CL.BF.MI_4_200.LW_15_2.LW_14_2.LW_13_2.LW_12_2.LW_11_2.LW_10_2.SF.CL.BF.MI_3_200.LW_9_2.LW_8_2.LW_7_2.LW_6_2.LW_5_2.SF.CL.BF.MI_2_200.LW_4_2.LW_3_2.LW_2_2.LW_1_2.QU_12."
 -- Shared functions:
 fsl={}
@@ -814,7 +829,8 @@ function freestyle_starter() -- Freestyle Starter.
   
   for i=1,10 do
     starter_rebuild(10)
-    print("Rebuild: " .. i .. ", score: " .. current.GetEnergyScore() .. ",gain: " .. current.GetEnergyScore() - startScore)
+    print("Rebuild: " .. i .. ", score: " .. current.GetEnergyScore() .. ",gain: " ..
+      current.GetEnergyScore() - startScore)
     recentbest.Restore()
   end
   
@@ -873,7 +889,7 @@ end
 
 
 -- Modules Section.
-function BlueFuze() -- BlueFuze.
+function BlueFuze() -- 1. BlueFuze - BF
   StepC(0.05,0,1,0)
   StepC(1,0,0,8)
   StepC(0.07,0,1,0)
@@ -883,34 +899,24 @@ function BlueFuze() -- BlueFuze.
   StepC(1,0,0,8)
   recentbest.Restore()
 end
-function SoftRelaxFull() -- SoftRelax.
-
-  local function SoftRelax()
-
-    local Mutates = 2 --number of shakes
-	local Shakes = 0 --number of shakes
-    local Wiggles = 3 --number of wiggles
-    StepC(0.55,Mutates,Shakes,Wiggles)
-    StepC(0.25,Mutates,Shakes,Wiggles)
-    StepC(0.05,Mutates,Shakes,Wiggles)
-    StepC(0.25,Mutates,Shakes,Wiggles)
-    StepC(0.55,Mutates,Shakes,Wiggles)
-    StepC(1,Mutates,Shakes,Wiggles)
-
+function clashing(Repeat) -- 2. Clashing - CL
+  local i = 1
+  local startScore
+  while i < 10 do 
+    startScore = current.GetEnergyScore()
+	StepC(i/10,0,0,i)
+	StepC(1,1,0,15)
+	StepC(1,1,0,4)
+    print("Clashing: " .. i/10 .. ", score: " .. current.GetEnergyScore() - startScore)
+    if startScore < current.GetEnergyScore() and Repeat == 1 and i < 8
+      then i = 1
+      else i = i + 1
+    end
+    recentbest.Restore()
   end
 
-  local startScore
-  local minScoreChange = 1
-  local Step = 1
-  repeat
-    startScore = current.GetEnergyScore()
-    SoftRelax()
-    recentbest.Restore()
-    print(Step..". Score: "..math.max(current.GetEnergyScore(),startScore).." gain: "..math.max(current.GetEnergyScore() - startScore,0))
-    Step = Step + 1
-  until current.GetEnergyScore() - startScore < minScoreChange
 end
-function FastRelaxFull() -- -- FastRelax.
+function FastRelaxFull() -- 3. FastRelax - FR
 
   local function FastRelax()
 
@@ -935,24 +941,7 @@ function FastRelaxFull() -- -- FastRelax.
     Step = Step + 1
   until current.GetEnergyScore()-startScore < minScoreChange
 end
-function clashing(Repeat) -- -- Clashing.
-  local i = 1
-  local startScore
-  while i < 10 do 
-    startScore = current.GetEnergyScore()
-	StepC(i/10,0,0,i)
-	StepC(1,1,0,15)
-	StepC(1,1,0,4)
-    print("Clashing: " .. i/10 .. ", score: " .. current.GetEnergyScore() - startScore)
-    if startScore < current.GetEnergyScore() and Repeat == 1 and i < 8
-      then i = 1
-      else i = i + 1
-    end
-    recentbest.Restore()
-  end
-
-end
-function ws_or_sw(params) -- Wiggle/Shake or Shake/Wiggle.
+function ws_or_sw(params) -- 4. Wiggle/Shake or Shake/Wiggle - WS or SW
 
   local function ws_or_sw_1()
     structure.WiggleAll(15)
@@ -990,7 +979,7 @@ function ws_or_sw(params) -- Wiggle/Shake or Shake/Wiggle.
   if params[4] == 1 then save.Quickload(100) ws_or_sw_4() end
   recentbest.Restore()
 end
-function Band_tests(Start_LengthP,End_LengthP,Clashing,Iteration,TotalIteration) -- Band Test.
+function Band_tests(Start_LengthP, End_LengthP, Clashing, Iteration, TotalIteration) -- 5. Band Test - BT
 
   local function PullPart(Segment1,Segment2,LengthP,Strength)
     band.DeleteAll()
@@ -1033,7 +1022,7 @@ function Band_tests(Start_LengthP,End_LengthP,Clashing,Iteration,TotalIteration)
   recentbest.Restore()
   print(Iteration .."/".. TotalIterationStr .. "; " .. startSeg .. "-" .. endSeg .. ", score: " ..math.max(startScore,current.GetEnergyScore()) .. ", gain: " .. math.max(0,current.GetEnergyScore()-startScore))
 end
-function local_wiggle(Len,Num) -- Local Wiggle.
+function local_wiggle(Len, Num) -- 6. Local Wiggle - LW
   local NumSegm = structure.GetCount()
   local startScore
   local gainScore
@@ -1049,7 +1038,7 @@ function local_wiggle(Len,Num) -- Local Wiggle.
     recentbest.Restore()
   end
 end
-function local_rebuild_all(Length,Clashing) -- Local Rebuild.
+function local_rebuild_all(Length, Clashing) -- 7. Local Rebuild
 
   local function local_rebuild(Start,Len,Clsh)
     local startScore = current.GetEnergyScore()
@@ -1090,7 +1079,7 @@ function local_rebuild_all(Length,Clashing) -- Local Rebuild.
     recentbest.Restore()
   end
 end
-function RebuildWorst(Length, RebuildsTries, Clashing, NumSegsForRebuild) -- Rebuild Worst.
+function RebuildWorst(Length, RebuildsTries, Clashing, NumSegsForRebuild) -- 8. Rebuild Worst - RW
 
   local function Worst_Segments(Length)
   
@@ -1169,7 +1158,7 @@ function RebuildWorst(Length, RebuildsTries, Clashing, NumSegsForRebuild) -- Reb
     end
   end
 end
-function quake(Length,ScoreDelta,Clashing) -- Quake.
+function quake(Length, ScoreDelta, Clashing) -- 9. Quake - QU
 
   function quake_one(Start,Diff,Delta,Clashing)
   
@@ -1219,7 +1208,7 @@ function quake(Length,ScoreDelta,Clashing) -- Quake.
     recentbest.Save()
   end
 end
-function sidechain_shock(Seg) -- Sidechain Test.
+function sidechain_shock(Seg) -- 10. Sidechain Test - ST
   local SnapCnt = rotamer.GetCount(Seg)
   local startScore = current.GetEnergyScore()
 
@@ -1262,11 +1251,11 @@ function sidechain_test_random(numSegments)
     recentbest.Restore()
   end
 end
-function mutate(Shk, Num) -- Mutate.
+function mutate(Shk, Num) -- 11. Mutate - MU
   if Shk==1 then structure.ShakeSidechainsAll(Num) end
   if Shk==2 then structure.MutateSidechainsAll(Num) end
 end
-function Mutate_And_Test(RunFunction, NumTries) -- Mutate and Test.
+function Mutate_And_Test(RunFunction, NumTries) -- 12. Mutate and Test - MT
 
   local function mutate_and_test_1(n,Clashing,IsAll,Num)
     local startScore = current.GetEnergyScore()
@@ -1375,7 +1364,7 @@ function Mutate_And_Test(RunFunction, NumTries) -- Mutate and Test.
   if RunFunction == 3 then random_2_step(Clashing,NumTries) end
   
 end
-function new_mutate(Num) -- New Mutate.
+function new_mutate(Num) -- 13. New Mutate - NM
   structure.SetAminoAcid(Num,fsl.aminos[1][1])
   newScore = current.GetEnergyScore()
   bestAcid = fsl.aminos[1][1]
@@ -1400,7 +1389,7 @@ function new_mutate_all()
       print(mutable[j].."_"..structure.GetAminoAcid(mutable[j])..", score: "..current.GetEnergyScore())
     end
 end
-function rebuilder(startSegm,endSegm,Clashing,RebuildTries) -- Rebuilder.
+function rebuilder(startSegm, endSegm, Clashing, RebuildTries) -- 14. Rebuilder - RE
   local Step = 1
   local sOutput = ""
   local segsForRebuild = {}
@@ -1435,7 +1424,7 @@ function rebuilder(startSegm,endSegm,Clashing,RebuildTries) -- Rebuilder.
     startScore = current.GetEnergyScore()
   end
 end
-function sidechain_flip_all() -- Sidechain Flip.
+function sidechain_flip_all() -- 15. Sidechain Flip - SF
   
   local function sidechain_flip(Seg)
     local SnapCnt = rotamer.GetCount(Seg)
@@ -1453,7 +1442,34 @@ function sidechain_flip_all() -- Sidechain Flip.
     print(j .. "/" .. structure.GetCount() .. " (" .. rotamer.GetCount(j) .. "), score: " ..  current.GetEnergyScore() .. ", gain: " .. current.GetEnergyScore()-startScore)
   end
 end
-function micro_idealize(Length,Clashing,NumSegsForIdealize) -- MicroIdealize.
+function SoftRelaxFull() -- 16. SoftRelax - SR
+
+  local function SoftRelax()
+
+    local Mutates = 2 --number of shakes
+	local Shakes = 0 --number of shakes
+    local Wiggles = 3 --number of wiggles
+    StepC(0.55,Mutates,Shakes,Wiggles)
+    StepC(0.25,Mutates,Shakes,Wiggles)
+    StepC(0.05,Mutates,Shakes,Wiggles)
+    StepC(0.25,Mutates,Shakes,Wiggles)
+    StepC(0.55,Mutates,Shakes,Wiggles)
+    StepC(1,Mutates,Shakes,Wiggles)
+
+  end
+
+  local startScore
+  local minScoreChange = 1
+  local Step = 1
+  repeat
+    startScore = current.GetEnergyScore()
+    SoftRelax()
+    recentbest.Restore()
+    print(Step..". Score: "..math.max(current.GetEnergyScore(),startScore).." gain: "..math.max(current.GetEnergyScore() - startScore,0))
+    Step = Step + 1
+  until current.GetEnergyScore() - startScore < minScoreChange
+end
+function micro_idealize(Length, Clashing, NumSegsForIdealize) -- 17. MicroIdealize - MI
 
   local function Worst_Segments(Length)
   
@@ -1550,7 +1566,7 @@ function micro_idealize(Length,Clashing,NumSegsForIdealize) -- MicroIdealize.
   end
   
 end
-function micro_remix(Length,Clashing,NumsegsForRemix) -- MicroRemix.
+function micro_remix(Length, Clashing, NumsegsForRemix) -- 18. MicroRemix - MR
 
   local function Worst_Segments(Length)
   
@@ -1998,14 +2014,16 @@ if (DialogResult == 1) then -- "OK"
     
     for i = 1, #Sequence do
       
-      if Sequence[i][1] == "CL" then print(i..": Clashing")
+      if     Sequence[i][1] == "BF" then print(i..": BlueFuze")
+      elseif Sequence[i][1] == "CL" then print(i..": Clashing")
       elseif Sequence[i][1] == "FR" then print(i..": FastRelax")
-      elseif Sequence[i][1] == "BF" then print(i..": BlueFuze")
       elseif Sequence[i][1] == "WS" then print(i..": WS or SW")
       elseif Sequence[i][1] == "BT" then print(i..": Band Test,"..Sequence[i][2]..","..
         Sequence[i][3]..","..Sequence[i][4])
       elseif Sequence[i][1] == "LW" then print(i..": Local Wiggle,"..Sequence[i][2]..","..Sequence[i][3])
       elseif Sequence[i][1] == "LR" then print(i..": Local Rebuild,"..Sequence[i][2]..","..Sequence[i][3])
+      elseif Sequence[i][1] == "RW" then print(i..": Rebuild Worst,"..Sequence[i][2]..","..
+        Sequence[i][3]..","..Sequence[i][4])
       elseif Sequence[i][1] == "QU" then print(i..": Quake,"..Sequence[i][2])
       elseif Sequence[i][1] == "ST" then print(i..": Sidechain Test,"..Sequence[i][2])
       elseif Sequence[i][1] == "MU" then print(i..": Mutate")
@@ -2015,8 +2033,6 @@ if (DialogResult == 1) then -- "OK"
         Sequence[i][3]..","..Sequence[i][4])
       elseif Sequence[i][1] == "SF" then print(i..": Sidechain Flipper")
       elseif Sequence[i][1] == "SR" then print(i..": Soft Relax")
-      elseif Sequence[i][1] == "RW" then print(i..": Rebuild Worst,"..Sequence[i][2]..","..
-        Sequence[i][3]..","..Sequence[i][4])
       elseif Sequence[i][1] == "MI" then print(i..": MicroIdealize,"..Sequence[i][2]..","..Sequence[i][3])
       elseif Sequence[i][1] == "MR" then print(i..": MicroRemix,"..Sequence[i][2]..","..Sequence[i][3])
       else print(i..": UNKNOWN")
@@ -2056,7 +2072,12 @@ if (DialogResult == 1) then -- "OK"
         
         for i = 1, #Sequence do
           
-          if Sequence[i][1] == "CL" then 
+          if Sequence[i][1] == "BF" then 
+            
+            recipe.SectionStart("BlueFuze")
+            BlueFuze()
+            
+          elseif Sequence[i][1] == "CL" then 
             
             recipe.SectionStart("Clashing")
             clashing(0)
@@ -2065,11 +2086,6 @@ if (DialogResult == 1) then -- "OK"
             
             recipe.SectionStart("FastRelax")
             FastRelaxFull()
-            
-          elseif Sequence[i][1] == "BF" then 
-            
-            recipe.SectionStart("BlueFuze")
-            BlueFuze()
             
           elseif Sequence[i][1] == "WS" then
             
@@ -2093,6 +2109,11 @@ if (DialogResult == 1) then -- "OK"
             
             recipe.SectionStart("Local Rebuild")
             local_rebuild_all(Sequence[i][2], 0.6)
+            
+          elseif Sequence[i][1] == "RW" then
+            
+            recipe.SectionStart("Rebuild Worst")
+            RebuildWorst(Sequence[i][2],Sequence[i][3],0.6,Sequence[i][4])
             
           elseif Sequence[i][1] == "QU" then
             
@@ -2133,11 +2154,6 @@ if (DialogResult == 1) then -- "OK"
             
             recipe.SectionStart("Soft Relax")
             SoftRelaxFull()
-            
-          elseif Sequence[i][1] == "RW" then
-            
-            recipe.SectionStart("Rebuild Worst")
-            RebuildWorst(Sequence[i][2],Sequence[i][3],0.6,Sequence[i][4])
             
           elseif Sequence[i][1] == "MI" then
             
