@@ -1634,81 +1634,94 @@ recentbest.Save()
 startScore = current.GetEnergyScore()
 startTime = os.time()
 math.randomseed(startTime)
+
 -- Check if puzzle is mutable.
 puzzleMutable = false
-for i=1, structure.GetCount() do
+for i = 1, structure.GetCount() do
   if structure.IsMutable(i) then puzzleMutable = true end
 end
 
-
 local ask = dialog.CreateDialog("All in One.")
 ask.LabelRow000 = dialog.AddLabel("Please choose the script to run:")
-ask.LabelRow001 = dialog.AddLabel("1.  BlueFuze.")
-ask.LabelRow002 = dialog.AddLabel("2.  Clashing.")
-ask.LabelRow003 = dialog.AddLabel("3.  FastRelax.")
-ask.LabelRow004 = dialog.AddLabel("4.  WS or SW.")
-ask.LabelRow005 = dialog.AddLabel("5.  Band Test.")
-ask.LabelRow006 = dialog.AddLabel("6.  Local Wiggle.")
-ask.LabelRow007 = dialog.AddLabel("7.  Local Rebuild.")
-ask.LabelRow008 = dialog.AddLabel("8.  Rebuild Worst.")
-ask.LabelRow009 = dialog.AddLabel("9.  Quake.")
-ask.LabelRow010 = dialog.AddLabel("10. Sidechain Test.")
-ask.LabelRow011 = dialog.AddLabel("11. Mutate.")
-ask.LabelRow012 = dialog.AddLabel("12. Mutate and Test.")
-ask.LabelRow013 = dialog.AddLabel("13. New Mutate.")
-ask.LabelRow014 = dialog.AddLabel("14. Rebuilder.")
-ask.LabelRow015 = dialog.AddLabel("15. Sidechain Flipper.")
-ask.LabelRow016 = dialog.AddLabel("16. SoftRelax.")
-ask.LabelRow017 = dialog.AddLabel("17. MicroIdealize.")
-ask.LabelRow018 = dialog.AddLabel("18. MicroRemix.")
-ask.LabelRow019 = dialog.AddLabel("19. Autobot.")
+ask.LabelRow001 = dialog.AddLabel("1.  BlueFuze")
+ask.LabelRow002 = dialog.AddLabel("2.  Clashing")
+ask.LabelRow003 = dialog.AddLabel("3.  FastRelax")
+ask.LabelRow004 = dialog.AddLabel("4.  WS or SW")
+ask.LabelRow005 = dialog.AddLabel("5.  Band Test")
+ask.LabelRow006 = dialog.AddLabel("6.  Local Wiggle")
+ask.LabelRow007 = dialog.AddLabel("7.  Local Rebuild")
+ask.LabelRow008 = dialog.AddLabel("8.  Rebuild Worst")
+ask.LabelRow009 = dialog.AddLabel("9.  Quake")
+ask.LabelRow010 = dialog.AddLabel("10. Sidechain Test")
+ask.LabelRow011 = dialog.AddLabel("11. Mutate")
+ask.LabelRow012 = dialog.AddLabel("12. Mutate and Test")
+ask.LabelRow013 = dialog.AddLabel("13. New Mutate")
+ask.LabelRow014 = dialog.AddLabel("14. Rebuilder")
+ask.LabelRow015 = dialog.AddLabel("15. Sidechain Flipper")
+ask.LabelRow016 = dialog.AddLabel("16. SoftRelax")
+ask.LabelRow017 = dialog.AddLabel("17. MicroIdealize")
+ask.LabelRow018 = dialog.AddLabel("18. MicroRemix")
+ask.LabelRow019 = dialog.AddLabel("19. Autobot")
 ask.Script = dialog.AddSlider("Function to run:", 19, 1, 19, 0)
+
 ask.OK = dialog.AddButton("OK", 1)
 ask.Cancel = dialog.AddButton("Cancel", 0)
 ask.About = dialog.AddButton("About", 2)
 DialogResult = dialog.Show(ask)
 ScriptNumber = ask.Script.value
-if (DialogResult == 1) then
 
-  if (ScriptNumber == 1) then
+if (DialogResult == 1) then -- "OK"
+
+  if (ScriptNumber == 1) then -- "1.  BlueFuze"
+    
     print("Start score: "..startScore)
     recipe.SectionStart("BlueFuze")
     BlueFuze()
     p_Time(startTime, recipe.SectionEnd())
-
-  elseif (ScriptNumber == 2) then
+    
+  elseif (ScriptNumber == 2) then -- "2.  Clashing"
+    
     ScriptAsk = dialog.CreateDialog("Script Dialog. Clashing.")
     ScriptAsk.Repeat = dialog.AddCheckbox("Repeat when gain score", false)
     ScriptAsk.OK = dialog.AddButton("OK", 1)
     ScriptAsk.Cancel = dialog.AddButton("Cancel", 0)
-
+    
     ScriptDialogResult = dialog.Show(ScriptAsk)
-    if ScriptAsk.Repeat.value==true then Repeat=1 else Repeat=0 end
-
+    
+    if ScriptAsk.Repeat.value==true then
+      Repeat = 1
+    else
+      Repeat = 0
+    end
+    
     print("Start score: "..startScore)
     recipe.SectionStart("Clashing")
     clashing(Repeat)
-    p_Time(startTime,recipe.SectionEnd())
-
-  elseif (ScriptNumber == 3) then
+    p_Time(startTime, recipe.SectionEnd())
+    
+  elseif (ScriptNumber == 3) then -- "3.  FastRelax"
+    
     print("Start score: "..startScore)
     recipe.SectionStart("FastRelax")
     FastRelaxFull()
-    p_Time(startTime,recipe.SectionEnd())
-
-  elseif (ScriptNumber == 4) then
+    p_Time(startTime, recipe.SectionEnd())
+    
+  elseif (ScriptNumber == 4) then -- "4.  WS or SW"
+    
     params = {
     1, -- WS
     1, -- SW
     1, -- WS_0.5
     1  -- WS Step
     }
+    
     print("Start score: "..startScore)
     recipe.SectionStart("WS or SW")
     ws_or_sw(params)
     p_Time(startTime,recipe.SectionEnd())
-
-  elseif (ScriptNumber == 5) then
+    
+  elseif (ScriptNumber == 5) then -- "5.  Band Test"
+    
     ScriptAsk = dialog.CreateDialog("Script Dialog. Band Test.")
     ScriptAsk.Start_LengthP = dialog.AddSlider("Start Length (percents):", 90, 10, 300, 0)
     ScriptAsk.End_LengthP = dialog.AddSlider("Start Length (percents):", 110, 10, 300, 0)
@@ -1716,20 +1729,24 @@ if (DialogResult == 1) then
     ScriptAsk.OK = dialog.AddButton("OK", 1)
     ScriptAsk.Cancel = dialog.AddButton("Cancel", 0)
     ScriptDialogResult = dialog.Show(ScriptAsk)
-
+    
     Start_LengthP = ScriptAsk.Start_LengthP.value
     End_LengthP = ScriptAsk.End_LengthP.value
     Clashing = ScriptAsk.Clashing.value
-
+    
     print("Start score: "..startScore)
-
+    
     Iteration = 1
-    while Iteration>0 do
-      Band_tests(Start_LengthP,End_LengthP,Clashing,Iteration,0)
+    
+    while Iteration > 0 do
+      
+      Band_tests(Start_LengthP, End_LengthP, Clashing, Iteration,0)
       Iteration = Iteration + 1
+      
     end
-
-  elseif (ScriptNumber == 6) then
+    
+  elseif (ScriptNumber == 6) then -- "6.  Local Wiggle"
+    
     ScriptAsk = dialog.CreateDialog("Script Dialog. Local Wiggle.")
     ScriptAsk.Length = dialog.AddSlider("Segment Length", 7, 1, structure.GetCount()/2, 0)
     ScriptAsk.Wig_Num = dialog.AddSlider("Number of Wiggles", 2, 1, 30, 0)
@@ -1737,37 +1754,43 @@ if (DialogResult == 1) then
     ScriptAsk.OK = dialog.AddButton("OK", 1)
     ScriptAsk.Cancel = dialog.AddButton("Cancel", 0)
     ScriptDialogResult = dialog.Show(ScriptAsk)
-
+    
     Length = ScriptAsk.Length.value
     Wig_Num = ScriptAsk.Wig_Num.value
     TotalWiggle = ScriptAsk.TotalWiggle.value
-
+    
     print("Start score: "..startScore)
     recipe.SectionStart("Local Wiggle")
-    if TotalWiggle then 
-      Length=15
-      for i=Length,1,-1 do local_wiggle(i,Wig_Num) end
-      else local_wiggle(Length,Wig_Num)
+    
+    if TotalWiggle == true then 
+      Length = 15
+      for i = Length, 1, -1 do 
+        local_wiggle(i, Wig_Num)
+      end
+    else
+      local_wiggle(Length, Wig_Num)
     end
     p_Time(startTime,recipe.SectionEnd())
-
-  elseif (ScriptNumber == 7) then
+   
+  elseif (ScriptNumber == 7) then -- "7.  Local Rebuild"
+    
     ScriptAsk = dialog.CreateDialog("Script Dialog. Local Rebuild.")
     ScriptAsk.Length = dialog.AddSlider("Segment Length", 3, 1, structure.GetCount()/2, 0)
     ScriptAsk.Clashing = dialog.AddSlider("Clashing", 0.6, 0, 1, 1)
     ScriptAsk.OK = dialog.AddButton("OK", 1)
     ScriptAsk.Cancel = dialog.AddButton("Cancel", 0)
     ScriptDialogResult = dialog.Show(ScriptAsk)
-
+    
     Length = ScriptAsk.Length.value
     Clashing = ScriptAsk.Clashing.value
-
-    print("Start score: "..startScore)
+    
+    print("Start score: " .. startScore)
     recipe.SectionStart("Local Rebuild")
-    local_rebuild_all(Length,Clashing)
-    p_Time(startTime,recipe.SectionEnd())
-
-  elseif (ScriptNumber == 8) then
+    local_rebuild_all(Length, Clashing)
+    p_Time(startTime, recipe.SectionEnd())
+    
+  elseif (ScriptNumber == 8) then -- "8.  Rebuild Worst"
+    
     ScriptAsk = dialog.CreateDialog("Script Dialog. Rebuild Worst.")
     ScriptAsk.Length = dialog.AddSlider("Segment Length", 1, 1, structure.GetCount()/2, 0)
     ScriptAsk.Clashing = dialog.AddSlider("Clashing", 0.6, 0, 1, 1)
@@ -1775,17 +1798,18 @@ if (DialogResult == 1) then
     ScriptAsk.OK = dialog.AddButton("OK", 1)
     ScriptAsk.Cancel = dialog.AddButton("Cancel", 0)
     ScriptDialogResult = dialog.Show(ScriptAsk)
-
+    
     Length = ScriptAsk.Length.value
     Clashing = ScriptAsk.Clashing.value
     RebuildsTries = ScriptAsk.Rebuilds.value
-
-    print("Start score: "..startScore)
+    
+    print("Start score: " .. startScore)
     recipe.SectionStart("Rebuild Worst")
-    RebuildWorst(Length,RebuildsTries,Clashing,100)
-    p_Time(startTime,recipe.SectionEnd())
-
-  elseif (ScriptNumber == 9) then
+    RebuildWorst(Length, RebuildsTries, Clashing, 100)
+    p_Time(startTime, recipe.SectionEnd())
+    
+  elseif (ScriptNumber == 9) then -- "9.  Quake"
+    
     ScriptAsk = dialog.CreateDialog("Script Dialog. Quake.")
     ScriptAsk.Length = dialog.AddSlider("Segment Length", 15, 1, structure.GetCount()/2, 0)
     ScriptAsk.Clashing = dialog.AddSlider("Clashing", 0.6, 0, 1, 1)
@@ -1793,53 +1817,57 @@ if (DialogResult == 1) then
     ScriptAsk.OK = dialog.AddButton("OK", 1)
     ScriptAsk.Cancel = dialog.AddButton("Cancel", 0)
     ScriptDialogResult = dialog.Show(ScriptAsk)
-
+    
     Length = ScriptAsk.Length.value
     Clashing = ScriptAsk.Clashing.value
     ScoreDelta = ScriptAsk.ScoreDelta.value
-
-    print("Start score: "..startScore)
+    
+    print("Start score: " .. startScore)
     recipe.SectionStart("Quake")
-    quake(Length,ScoreDelta,Clashing)
-    p_Time(startTime,recipe.SectionEnd())
-
-  elseif (ScriptNumber == 10) then
+    quake(Length, ScoreDelta, Clashing)
+    p_Time(startTime, recipe.SectionEnd())
+    
+  elseif (ScriptNumber == 10) then -- "10. Sidechain Test"
+    
     print("Start score: "..startScore)
     recipe.SectionStart("Sidechain Test")
     sidechain_test_all()
     p_Time(startTime,recipe.SectionEnd())
-
-  elseif (ScriptNumber == 11) then
+    
+  elseif (ScriptNumber == 11) then -- "11. Mutate"
+    
     Shake_Type = 2  -- 1: Shake, 2: Mutate
     Shake_times = 1 -- Number of shake times
-
+    
     print("Start score: "..startScore)
     recipe.SectionStart("Mutate")
     mutate(Shake_Type,Shake_times)
     p_Time(startTime,recipe.SectionEnd())
-
-  elseif (ScriptNumber == 12) then
+    
+  elseif (ScriptNumber == 12) then -- "12. Mutate and Test"
+    
     ScriptAsk = dialog.CreateDialog("Script Dialog. Mutate and Test.")
     ScriptAsk.RunFunction = dialog.AddSlider("Function to run:", 3, 1, 3, 0)
     ScriptAsk.OK = dialog.AddButton("OK", 1)
     ScriptAsk.Cancel = dialog.AddButton("Cancel", 0)
     ScriptDialogResult = dialog.Show(ScriptAsk)
-
+    
     RunFunction = ScriptAsk.RunFunction.value
-
+    
     print("Start score: "..startScore)
     recipe.SectionStart("Mutate and Test")
     Mutate_And_Test(RunFunction,10000)
     p_Time(startTime,recipe.SectionEnd())
-
-  elseif (ScriptNumber == 13) then
+    
+  elseif (ScriptNumber == 13) then -- "13. New Mutate"
+    
     print("Start score: "..startScore)
     recipe.SectionStart("New Mutate")
     new_mutate_all()
     p_Time(startTime,recipe.SectionEnd())
-
-  elseif (ScriptNumber == 14) then
-
+    
+  elseif (ScriptNumber == 14) then -- "14. Rebuilder"
+    
     ScriptAsk = dialog.CreateDialog("Script Dialog. Rebuilder.")
     ScriptAsk.startSegm = dialog.AddSlider("Start segment", 1, 1, structure.GetCount()-1, 0)
     ScriptAsk.endSegm = dialog.AddSlider("End segment", 2, 2, structure.GetCount(), 0)
@@ -1847,34 +1875,40 @@ if (DialogResult == 1) then
     ScriptAsk.OK = dialog.AddButton("OK", 1)
     ScriptAsk.Cancel = dialog.AddButton("Cancel", 0)
     ScriptDialogResult = dialog.Show(ScriptAsk)
-
+    
     startSegm = ScriptAsk.startSegm.value
     endSegm = ScriptAsk.endSegm.value
     Clashing = ScriptAsk.Clashing.value
-
-    if startSegm>endSegm 
-    then 
+    
+    if startSegm > endSegm then 
+      
       print("Start segment should be no more than End segment")
+      
     else
-      print("Start score: "..startScore)
+      
+      print("Start score: " .. startScore)
       recipe.SectionStart("Rebuilder")
-      rebuilder(startSegm,endSegm,Clashing,10000)
-      p_Time(startTime,recipe.SectionEnd())
+      rebuilder(startSegm, endSegm, Clashing, 10000)
+      p_Time(startTime, recipe.SectionEnd())
+      
     end
-
-  elseif (ScriptNumber == 15) then
+    
+  elseif (ScriptNumber == 15) then -- "15. Sidechain Flipper"
+    
     print("Start score: "..startScore)
     recipe.SectionStart("Sidechain Flipper")
     sidechain_flip_all()
     p_Time(startTime,recipe.SectionEnd())
-
-  elseif (ScriptNumber == 16) then
+    
+  elseif (ScriptNumber == 16) then -- "16. SoftRelax"
+    
     print("Start score: "..startScore)
     recipe.SectionStart("SoftRelax")
     SoftRelaxFull()
     p_Time(startTime,recipe.SectionEnd())
-
-  elseif (ScriptNumber == 17) then
+    
+  elseif (ScriptNumber == 17) then -- "17. MicroIdealize"
+    
     ScriptAsk = dialog.CreateDialog("Script Dialog. MicroIdealize.")
     ScriptAsk.lengthSegm = dialog.AddSlider("Segment Length", 3, 1, structure.GetCount()-1, 0)
     ScriptAsk.numSegments = dialog.AddSlider("Number of segments", 5, 1, structure.GetCount(), 0)
@@ -1882,16 +1916,18 @@ if (DialogResult == 1) then
     ScriptAsk.OK = dialog.AddButton("OK", 1)
     ScriptAsk.Cancel = dialog.AddButton("Cancel", 0)
     ScriptDialogResult = dialog.Show(ScriptAsk)
-
+    
     lengthSegm = ScriptAsk.lengthSegm.value
     numSegments = ScriptAsk.numSegments.value
     Clashing = ScriptAsk.Clashing.value
-
+    
     print("Start score: "..startScore)
     recipe.SectionStart("MicroIdealize")
     micro_idealize(lengthSegm,Clashing,numSegments)
     p_Time(startTime,recipe.SectionEnd())
-  elseif (ScriptNumber == 18) then
+    
+  elseif (ScriptNumber == 18) then -- "18. MicroRemix"
+    
     ScriptAsk = dialog.CreateDialog("Script Dialog. MicroRemix.")
     ScriptAsk.lengthSegm = dialog.AddSlider("Segment Length", 4, 4, structure.GetCount()-1, 0)
     ScriptAsk.numSegments = dialog.AddSlider("Number of segments", 5, 1, structure.GetCount(), 0)
@@ -1908,11 +1944,12 @@ if (DialogResult == 1) then
     recipe.SectionStart("MicroRemix")
     micro_remix(lengthSegm,Clashing,numSegments)
     p_Time(startTime,recipe.SectionEnd())
-  elseif (ScriptNumber == 19) then
-
+    
+  elseif (ScriptNumber == 19) then -- "19. Autobot"
+    
     ScriptAsk = dialog.CreateDialog("Script Dialog. Autobot.")
     ScriptAsk.RestartGain = dialog.AddSlider("Score threshold:", 2.0, 0, 100, 1)
-
+    
     if puzzleMutable == true 
       then ScriptAsk.Sequence = dialog.AddTextbox("Sequence:", SequenceStrPredefined2)
       else ScriptAsk.Sequence = dialog.AddTextbox("Sequence:", SequenceStrPredefined1)
@@ -1924,45 +1961,49 @@ if (DialogResult == 1) then
     ScriptAsk.LabelRow001 = dialog.AddLabel("2. Predefined (common).")
     ScriptAsk.LabelRow002 = dialog.AddLabel("3. Predefined (for mutable)")
     ScriptAsk.LabelRow003 = dialog.AddLabel("4. Predefined (for multistart)")
-	ScriptAsk.LabelRow004 = dialog.AddLabel("5. Predefined (for endgame death)")
-
+    ScriptAsk.LabelRow004 = dialog.AddLabel("5. Predefined (for endgame death)")
+   
     ScriptAsk.OK = dialog.AddButton("OK", 1)
     ScriptAsk.Cancel = dialog.AddButton("Cancel", 0)
     ScriptDialogResult = dialog.Show(ScriptAsk)
-
+    
     RestartGain = ScriptAsk.RestartGain.value
     SequenceNumber = ScriptAsk.SequenceNumber.value
-
-          if SequenceNumber == 1 then SequenceStr = ScriptAsk.Sequence.value
-      elseif SequenceNumber == 2 then SequenceStr = SequenceStrPredefined1
-      elseif SequenceNumber == 3 then SequenceStr = SequenceStrPredefined2
-      elseif SequenceNumber == 4 then SequenceStr = SequenceStrPredefined3
+    
+    if     SequenceNumber == 1 then SequenceStr = ScriptAsk.Sequence.value
+    elseif SequenceNumber == 2 then SequenceStr = SequenceStrPredefined1
+    elseif SequenceNumber == 3 then SequenceStr = SequenceStrPredefined2
+    elseif SequenceNumber == 4 then SequenceStr = SequenceStrPredefined3
 	  elseif SequenceNumber == 5 then SequenceStr = SequenceStrPredefined4
     end
-
+    
     local Sequence = {}
     local i=0
-
+    
     for Script in string.gmatch(SequenceStr, "[%w_]+%.") do
-       i=i+1
-       Sequence[i] = {}
-       Sequence[i][1] = string.sub(Script,1,2)
-
-       local j=1
-       for ScriptParam in string.gmatch(string.sub(Script,4), "%w+[_%.]") do
-         j=j+1
-         Sequence[i][j] = string.sub(ScriptParam,1,string.len(ScriptParam)-1)
-       end
-
-     end
-
+      
+      i = i + 1
+      Sequence[i] = {}
+      Sequence[i][1] = string.sub(Script, 1, 2)
+        
+      local j = 1
+      for ScriptParam in string.gmatch(string.sub(Script, 4), "%w+[_%.]") do
+        j = j + 1
+        Sequence[i][j] = string.sub(ScriptParam, 1, string.len(ScriptParam) - 1)
+      end
+      
+    end -- for Script in string.gmatch(SequenceStr, "[%w_]+%.") do
+    
     print("The Sequence.")
-    for i=1,#Sequence do
-          if Sequence[i][1] == "CL" then print(i..": Clashing")
+    
+    for i = 1, #Sequence do
+      
+      if Sequence[i][1] == "CL" then print(i..": Clashing")
       elseif Sequence[i][1] == "FR" then print(i..": FastRelax")
       elseif Sequence[i][1] == "BF" then print(i..": BlueFuze")
       elseif Sequence[i][1] == "WS" then print(i..": WS or SW")
-      elseif Sequence[i][1] == "BT" then print(i..": Band Test,"..Sequence[i][2]..","..Sequence[i][3]..","..Sequence[i][4])
+      elseif Sequence[i][1] == "BT" then print(i..": Band Test,"..Sequence[i][2]..","..
+        Sequence[i][3]..","..Sequence[i][4])
       elseif Sequence[i][1] == "LW" then print(i..": Local Wiggle,"..Sequence[i][2]..","..Sequence[i][3])
       elseif Sequence[i][1] == "LR" then print(i..": Local Rebuild,"..Sequence[i][2]..","..Sequence[i][3])
       elseif Sequence[i][1] == "QU" then print(i..": Quake,"..Sequence[i][2])
@@ -1970,144 +2011,177 @@ if (DialogResult == 1) then
       elseif Sequence[i][1] == "MU" then print(i..": Mutate")
       elseif Sequence[i][1] == "MT" then print(i..": Mutate and Test,"..Sequence[i][2]..","..Sequence[i][3])
       elseif Sequence[i][1] == "NM" then print(i..": New Mutate")
-      elseif Sequence[i][1] == "RE" then print(i..": Rebuilder,"..Sequence[i][2]..","..Sequence[i][3]..","..Sequence[i][4])
+      elseif Sequence[i][1] == "RE" then print(i..": Rebuilder,"..Sequence[i][2]..","..
+        Sequence[i][3]..","..Sequence[i][4])
       elseif Sequence[i][1] == "SF" then print(i..": Sidechain Flipper")
       elseif Sequence[i][1] == "SR" then print(i..": Soft Relax")
-      elseif Sequence[i][1] == "RW" then print(i..": Rebuild Worst,"..Sequence[i][2]..","..Sequence[i][3]..","..Sequence[i][4])
+      elseif Sequence[i][1] == "RW" then print(i..": Rebuild Worst,"..Sequence[i][2]..","..
+        Sequence[i][3]..","..Sequence[i][4])
       elseif Sequence[i][1] == "MI" then print(i..": MicroIdealize,"..Sequence[i][2]..","..Sequence[i][3])
-	  elseif Sequence[i][1] == "MR" then print(i..": MicroRemix,"..Sequence[i][2]..","..Sequence[i][3])
+      elseif Sequence[i][1] == "MR" then print(i..": MicroRemix,"..Sequence[i][2]..","..Sequence[i][3])
       else print(i..": UNKNOWN")
       end
-    end	
-
+     
+    end	-- for i = 1, #Sequence do
+    
     print("Start score: "..startScore)
     p_Time(startTime,0)
-
+    
     save.Quicksave(99)
     Iteration = 1
-
+    
     while Iteration < 99 do
-      print("Start of Iteration: "..Iteration)
-      if (ScriptAsk.IsReset.value) 
-        then
-          puzzle.StartOver()
-		  startScore = current.GetEnergyScore()
-        else save.Quickload(99)
+      
+      print("Start of Iteration: " .. Iteration)
+      
+      if (ScriptAsk.IsReset.value) then
+        puzzle.StartOver()
+        startScore = current.GetEnergyScore()
+      else
+        save.Quickload(99)
       end
+      
       recentbest.Save()
       ScoreGain = RestartGain + 1
       step = 1
-
-      if (ScriptAsk.IsFreeStyle.value) 
-        then freestyle_starter()
+      
+      if (ScriptAsk.IsFreeStyle.value) then 
+        freestyle_starter()
       end
-
+      
       while ScoreGain >= RestartGain do
+        
         startScoreStep = current.GetEnergyScore()
         startTimeStep = os.time()
-        for i=1,#Sequence do
-              if Sequence[i][1] == "CL" 
-              then 
-                recipe.SectionStart("Clashing")
-                clashing(0)
-          elseif Sequence[i][1] == "FR"  
-              then 
-                recipe.SectionStart("FastRelax")
-                FastRelaxFull()
-          elseif Sequence[i][1] == "BF"  
-              then 
-                recipe.SectionStart("BlueFuze")
-                BlueFuze()
-          elseif Sequence[i][1] == "WS" 
-              then 
-                recipe.SectionStart("WS or SW")
-                params = {1,1,1,1}
-                ws_or_sw(params)
-          elseif Sequence[i][1] == "BT" 
-              then 
-                recipe.SectionStart("Band Test")
-                for l=1,Sequence[i][2] do
-                  Band_tests(Sequence[i][3],Sequence[i][4],0.5,l,Sequence[i][2])
-                end
-          elseif Sequence[i][1] == "LW" 
-              then 
-                recipe.SectionStart("Local Wiggle")
-                local_wiggle(Sequence[i][2],Sequence[i][3])
-          elseif Sequence[i][1] == "LR" 
-              then 
-                recipe.SectionStart("Local Rebuild")
-                local_rebuild_all(Sequence[i][2],0.6)
-          elseif Sequence[i][1] == "QU" 
-              then 
-                recipe.SectionStart("Quake")
-                quake(Sequence[i][2],15,1,0.6)
-          elseif Sequence[i][1] == "ST" 
-              then 
-                recipe.SectionStart("Sidechain Test")
-                sidechain_test_random(Sequence[i][2])
-          elseif Sequence[i][1] == "MU" 
-              then 
-                recipe.SectionStart("Mutate")
-                mutate(2,1)
-          elseif Sequence[i][1] == "MT" 
-              then 
-                recipe.SectionStart("Mutate and Test")
-                Mutate_And_Test(Sequence[i][2],Sequence[i][3])
-          elseif Sequence[i][1] == "NM" 
-              then 
-                recipe.SectionStart("New Mutate")
-                new_mutate_all()
-          elseif Sequence[i][1] == "RE" 
-              then 
-                recipe.SectionStart("Rebuilder")
-                rebuilder(Sequence[i][2],Sequence[i][3],0.6,Sequence[i][4])
-          elseif Sequence[i][1] == "SF" 
-              then 
-                recipe.SectionStart("Sidechain Flipper")
-                sidechain_flip_all()
-          elseif Sequence[i][1] == "SR" 
-              then 
-                recipe.SectionStart("Soft Relax")
-                SoftRelaxFull()
-          elseif Sequence[i][1] == "RW" 
-              then 
-                recipe.SectionStart("Rebuild Worst")
-                RebuildWorst(Sequence[i][2],Sequence[i][3],0.6,Sequence[i][4])
-          elseif Sequence[i][1] == "MI" 
-              then 
-                recipe.SectionStart("MicroIdealize")
-                micro_idealize(Sequence[i][2],0.6,Sequence[i][3])
-          elseif Sequence[i][1] == "MR" 
-              then 
-                recipe.SectionStart("MicroRemix")
-                micro_remix(Sequence[i][2],0.6,Sequence[i][3])
-          else 
-                recipe.SectionStart("UNKNOWN")
-                print(i..": UNKNOWN")
-          end
+        
+        for i = 1, #Sequence do
           
-          print("Score: "..current.GetEnergyScore()..", +"..
-            recipe.SectionEnd())
-          p_Time(startTime,current.GetEnergyScore()-startScore)
-        end
+          if Sequence[i][1] == "CL" then 
+            
+            recipe.SectionStart("Clashing")
+            clashing(0)
+            
+          elseif Sequence[i][1] == "FR" then 
+            
+            recipe.SectionStart("FastRelax")
+            FastRelaxFull()
+            
+          elseif Sequence[i][1] == "BF" then 
+            
+            recipe.SectionStart("BlueFuze")
+            BlueFuze()
+            
+          elseif Sequence[i][1] == "WS" then
+            
+            recipe.SectionStart("WS or SW")
+            params = {1, 1 , 1, 1}
+            ws_or_sw(params)
+            
+          elseif Sequence[i][1] == "BT" then 
+            
+            recipe.SectionStart("Band Test")
+            for l = 1, Sequence[i][2] do
+              Band_tests(Sequence[i][3], Sequence[i][4], 0.5, l, Sequence[i][2])
+            end
+            
+          elseif Sequence[i][1] == "LW" then 
+            
+            recipe.SectionStart("Local Wiggle")
+            local_wiggle(Sequence[i][2], Sequence[i][3])
+            
+          elseif Sequence[i][1] == "LR" then 
+            
+            recipe.SectionStart("Local Rebuild")
+            local_rebuild_all(Sequence[i][2], 0.6)
+            
+          elseif Sequence[i][1] == "QU" then
+            
+            recipe.SectionStart("Quake")
+            quake(Sequence[i][2],15,1,0.6)
+            
+          elseif Sequence[i][1] == "ST" then
+            
+            recipe.SectionStart("Sidechain Test")
+            sidechain_test_random(Sequence[i][2])
+            
+          elseif Sequence[i][1] == "MU" then
+            
+            recipe.SectionStart("Mutate")
+            mutate(2,1)
+            
+          elseif Sequence[i][1] == "MT" then
+            
+            recipe.SectionStart("Mutate and Test")
+            Mutate_And_Test(Sequence[i][2], Sequence[i][3])
+            
+          elseif Sequence[i][1] == "NM" then
+            
+            recipe.SectionStart("New Mutate")
+            new_mutate_all()
+            
+          elseif Sequence[i][1] == "RE" then
+            
+            recipe.SectionStart("Rebuilder")
+            rebuilder(Sequence[i][2], Sequence[i][3], 0.6, Sequence[i][4])
+            
+          elseif Sequence[i][1] == "SF" then
+            
+            recipe.SectionStart("Sidechain Flipper")
+            sidechain_flip_all()
+            
+          elseif Sequence[i][1] == "SR" then
+            
+            recipe.SectionStart("Soft Relax")
+            SoftRelaxFull()
+            
+          elseif Sequence[i][1] == "RW" then
+            
+            recipe.SectionStart("Rebuild Worst")
+            RebuildWorst(Sequence[i][2],Sequence[i][3],0.6,Sequence[i][4])
+            
+          elseif Sequence[i][1] == "MI" then
+            
+            recipe.SectionStart("MicroIdealize")
+            micro_idealize(Sequence[i][2],0.6,Sequence[i][3])
+            
+          elseif Sequence[i][1] == "MR" then
+            
+            recipe.SectionStart("MicroRemix")
+            micro_remix(Sequence[i][2],0.6,Sequence[i][3])
+            
+          else 
+            
+            recipe.SectionStart("UNKNOWN")
+            print(i..": UNKNOWN")
+           
+          end -- if Sequence[i][1] == "CL"
+          
+          print("Score: " .. current.GetEnergyScore() .. ", +" .. recipe.SectionEnd())
+          p_Time(startTime, current.GetEnergyScore() - startScore)
+          
+        end -- for i = 1, #Sequence do
         
         ScoreGain = current.GetEnergyScore() - startScoreStep
         print("Iteration: " .. Iteration .. ". Step " .. step .. " ended. gain: " .. ScoreGain)
         p_Time(startTime,current.GetEnergyScore()-startScore)
         step = step + 1
-      end
+        
+      end -- while ScoreGain >= RestartGain do
       
       print("End of Iteration: "..Iteration)
-	  save.Quicksave(Iteration)
+      save.Quicksave(Iteration)
       Iteration = Iteration + 1
       
-    end
-  
-  end
-elseif (DialogResult == 2) then
-  ScriptAsk = dialog.CreateDialog("About.")
-  ScriptAsk.NewLabel = dialog.AddLabel("Made by Grom.")
+    end -- while Iteration < 99 do
+    
+  end -- if (ScriptNumber == 1) then
+
+elseif (DialogResult == 2) then -- "About"
+
+  ScriptAsk = dialog.CreateDialog("About")
+  ScriptAsk.NewLabel = dialog.AddLabel("Made by Grom")
   ScriptAsk.OK = dialog.AddButton("OK", 1)
   ScriptDialogResult = dialog.Show(ScriptAsk)
-end
+  
+end -- if (DialogResult == 1) then
 
